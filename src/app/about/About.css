@@ -1,0 +1,332 @@
+/* Container for the About Page */
+.aboutPage-container {
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+}
+
+/* .aboutPage-container .about-section {
+  position: relative;
+  width: 100%;
+  height: 100vh; 
+  background: url("./assets/images/image1.jpg") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  overflow: hidden;
+}
+
+.aboutPage-container .gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    var(--accent-color) 65%,
+    rgba(40, 167, 69, 0.75) 75%,
+    rgba(40, 167, 69, 0.5) 85%,
+    rgba(40, 167, 69, 0.2) 95%,
+    transparent 100%
+  );
+}
+
+.aboutPage-container .content {
+  position: relative;
+  z-index: 2;
+  color: #fffafa; 
+  padding: 2rem; 
+  max-width: 500px;
+  padding-left: 180px;
+  text-align: justify;
+}
+
+.aboutPage-container .content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.aboutPage-container .content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+} */
+
+
+
+
+
+
+
+
+.aboutPage-container .about-section {
+  position: relative;
+  width: 100%;
+  height: 100vh; 
+  /* background: url("./assets/images/about.png") center/cover no-repeat; */
+   background: center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  overflow: hidden;
+}
+
+.aboutPage-container .about-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: rgba(7, 70, 9, 0.5); 
+  z-index: 1;
+}
+
+.aboutPage-container .gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 1;
+background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-color) 100%, transparent) 65%,
+    color-mix(in srgb, var(--accent-color) 75%, transparent) 75%,
+    color-mix(in srgb, var(--accent-color) 50%, transparent) 85%,
+    color-mix(in srgb, var(--accent-color) 20%, transparent) 95%,
+    transparent 100%
+  );
+}
+
+.aboutPage-container .content {
+  position: relative;
+  z-index: 2;
+  color: #fffafa; 
+  padding: 2rem; 
+  max-width: 500px;
+  padding-left: 180px;
+  text-align: justify;
+}
+
+.about-logo {
+  display: block;
+  margin-left: -20px; /* Align left by default */
+  max-width: 300px;
+  height: auto;
+}
+
+.aboutPage-container .content h1 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.aboutPage-container .content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  text-indent: 40px;
+}
+
+
+
+
+@media (max-width: 1500px) {
+  .about-logo {
+    margin: 0 auto;  /* Center the logo */
+    display: block;  /* Ensure it's a block element to respect centering */
+  }
+
+.aboutPage-container .content p {
+
+  text-indent: 0;
+}
+
+
+  .aboutPage-container .about-section {
+    flex-direction: column-reverse;
+  }
+
+  .aboutPage-container .gradient-overlay {
+    top: 50%;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--accent-color) 100%, transparent) 65%,
+    color-mix(in srgb, var(--accent-color) 75%, transparent) 75%,
+    color-mix(in srgb, var(--accent-color) 50%, transparent) 85%,
+    color-mix(in srgb, var(--accent-color) 20%, transparent) 95%,
+    transparent 100%
+    );
+  }
+
+  .aboutPage-container .content {
+    max-width: 700px;
+    padding: 20px;
+    text-align: center;
+    bottom: 30px;
+  }
+}
+
+
+
+/* @media (max-width: 1370px) {
+  .aboutPage-container .about-section {
+    background: url("./assets/images/about.png") center/contain no-repeat;
+    margin-top: 100px;
+  }
+} */
+
+
+
+
+
+
+
+
+.team-section {
+  padding: 50px;
+  background-color: #fffafa;
+  text-align: center;
+  margin-bottom: 150px;
+}
+
+.team-section h2 {
+    font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 52px;
+  margin-bottom: 100px;
+  color: var(--accent-color);
+}
+
+.team-members {
+  display: flex;
+  flex-direction: column; /* Stack team members vertically */
+  align-items: center;
+  gap: 80px;
+}
+
+.team-member {
+  display: flex;
+  align-items: center; /* Align image and text vertically */
+  gap: 50px; /* Spacing between image and text */
+  width: 100%; /* Take up full width */
+  max-width: 1400px; /* Limit overall section width */
+}
+
+.team-square {
+  background-color: var(--accent-color);
+  width: 350px;
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 10px;
+}
+
+/* .team-square {
+    background-color: #024001;
+    width: 350px;
+    height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    clip-path: polygon(
+      30% 0%, 
+      100% 0%, 
+      100% 70%, 
+      70% 100%, 
+      0% 100%, 
+      0% 30% 
+    );
+  }
+   */
+
+.team-square img {
+  width: 550px; /* Circular image size */
+  height: 570px;
+  object-fit: cover;
+  position: absolute;
+  top: -220px; /* Offset from square */
+  left: -180px;
+}
+
+.team-info {
+  text-align: left; /* Align text to the left */
+  flex: 1; /* Make text container take remaining space */
+}
+
+.team-info h3 {
+  font-size: 48px; /* Larger font for name */
+  color: var(--accent-color);
+  margin: 0;
+}
+
+.team-info .role {
+  font-size: 36px;
+  color: var(--supporting-color);
+  margin: 5px 0;
+}
+
+.team-info .motto {
+  font-size: 32px;
+  font-style: italic;
+  color: var(--accent-color);
+  margin-top: 10px;
+}
+
+/* Adjust for Jane Smith */
+.team-member .right-aligned {
+  flex-direction: row-reverse; /* Reverse the layout: square on the right */
+}
+
+.right-aligned .team-square img {
+  width: 360px; /* Circular image size */
+  height: 360px;
+  object-fit: cover;
+  position: absolute;
+  top: -10px; /* Offset from square */
+  left: 1px;
+}
+
+.right-aligned .team-info {
+  text-align: right; /* Keep the text aligned to the left */
+}
+
+@media screen and (max-width: 830px) {
+  .team-members {
+    flex-direction: column; /* Stack the members vertically */
+    align-items: center;
+  }
+
+  .team-member {
+    flex-direction: column; /* Stack the image and info */
+    align-items: center; /* Center them */
+    width: 90%; /* Adjust width to fit better */
+    gap: 20px;
+  }
+
+  .team-square {
+    margin-bottom: 0px; /* Add space between image and info */
+  }
+
+  .team-info {
+    text-align: center; /* Center text under the image */
+  }
+
+  /* Adjust for right-aligned member: move the role and motto below the image */
+  .team-member.right-aligned {
+    flex-direction: column-reverse; /* Stack the image and info vertically for the right-aligned member */
+  }
+
+  .team-member.right-aligned .team-info {
+    text-align: center; /* Center text under the image */
+  }
+}

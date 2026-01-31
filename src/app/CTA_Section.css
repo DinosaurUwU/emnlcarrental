@@ -1,0 +1,59 @@
+.cta-section {
+  position: relative;
+  background: url("./assets/backdrop.jpg") center/cover no-repeat;
+  background-attachment: fixed;
+  height: 250vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cta-large-text {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cta-word {
+  display: block;
+  color: #2c2c2c;
+  letter-spacing: 5px;
+  text-shadow:
+    -3px 3px 0px #1a1a1a,
+    -6px 6px 0px #181818,
+    -9px 9px 0px #161616,
+    -12px 12px 0px #141414,
+    -15px 15px 0px #121212;
+  opacity: 0;
+  transform: scale(0.5) translateY(100px) rotate(-10deg);
+  transition:
+    transform 0.5s ease-out,
+    opacity 0.5s ease-out;
+}
+
+/* Impact animation */
+.cta-word.show {
+  opacity: 1;
+  transform: scale(1.1) translateY(0) rotate(0);
+}
+
+.cta-ready,
+.cta-road {
+  font-size: 10rem;
+}
+
+.cta-middle {
+  font-size: 3rem;
+  letter-spacing: 3px;
+  display: block;
+  text-align: center;
+}

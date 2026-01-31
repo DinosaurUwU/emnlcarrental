@@ -1,10 +1,19 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { useUser } from "./lib/UserContext";
-import LandingPage from "./LandingPage";
-import BookingPage from "./users/BookingPage";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
+import { useUser } from "../lib/UserContext";
+import BookingPage from "../users/BookingPage";
 
-function Home() {
+const BookingContext = createContext();
+
+export const useBooking = () => useContext(BookingContext);
+
+const BookingProviderInner = ({ children }) => {
   const {
     user,
     isActivatingBooking,
@@ -99,8 +108,8 @@ function Home() {
   const closeBooking = () => setIsBookingOpen(false);
 
   return (
-    <>
-      <LandingPage openBooking={openBooking} />
+    <BookingContext.Provider value={{ openBooking }}>
+      {children}
 
       {/* Booking Overlay */}
       {isBookingOpen && (
@@ -333,8 +342,12 @@ function Home() {
           </div>
         </div>
       )}
-    </>
+    </BookingContext.Provider>
   );
-}
+};
 
-export default Home;
+const BookingProvider = ({ children }) => {
+  return <BookingProviderInner>{children}</BookingProviderInner>;
+};
+
+export default BookingProvider;

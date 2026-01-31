@@ -1,0 +1,213 @@
+.customer-testimonials {
+  padding: 100px 20px 100px;
+  text-align: center;
+  background: linear-gradient(
+    to bottom,
+    rgba(252, 223, 90, 0) 0%,
+    var(--accent-color) 40%
+  );
+}
+
+@keyframes rainbow-text {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.customer-testimonials h2 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: #ffd900;
+
+  text-shadow:
+    0 0 2px #28a745,
+    0 0 4px #28a745,
+    0 0 6px #28a745;
+}
+
+.customer-testimonials p {
+  font-size: 1.2em;
+  color: #fff;
+  margin-bottom: 40px;
+}
+
+.customer-testimonials .testimonials-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  padding: 40px;
+}
+
+.customer-testimonials .testimonials-container.front {
+  padding-bottom: 30px;
+}
+
+.customer-testimonials .testimonials-container.back {
+  padding-top: 100px;
+}
+
+.customer-testimonials .testimonial-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 300px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-height: 250px;
+}
+
+.customer-testimonials .testimonial-image {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin: -50px auto 10px auto;
+  border: 5px solid var(--accent-color);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.5s ease;
+}
+
+/* Highlight image border on hover */
+.customer-testimonials .testimonial-card:hover .testimonial-image {
+  border: 5px solid #28a745;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.customer-testimonials .testimonial-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customer-testimonials h3 {
+  font-size: 1.3em;
+  margin-bottom: 5px;
+  color: var(--accent-color);
+}
+
+.customer-testimonials .date {
+  color: var(--accent-color);
+  font-size: 0.9em;
+  margin: 0px 0px 10px 0px;
+}
+
+.review-wrapper .review {
+  flex-grow: 1;
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 2;
+
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.customer-testimonials .review::-webkit-scrollbar {
+  width: 5px;
+}
+
+.customer-testimonials .review::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 4px;
+}
+
+.customer-testimonials .review::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.review-wrapper {
+  position: relative;
+}
+
+.review-wrapper .quote-icon {
+  font-size: 7em;
+  color: var(--accent-color);
+  opacity: 0.3;
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  transform: translateY(-35%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.scroll-indicator {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: var(--accent-color);
+  opacity: 0.8;
+  z-index: 5;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.scroll-indicator.top {
+  top: -3px !important;
+}
+
+.scroll-indicator.bottom {
+  bottom: -3px !important;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0;
+}
+
+.customer-testimonials .rating {
+  color: #f4c430;
+  font-size: 1.5rem;
+  margin-top: auto;
+}
+
+.customer-testimonials .testimonials-wrapper {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.customer-testimonials .testimonials-container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: nowrap;
+  width: max-content;
+}
+
+.customer-testimonials .pause-button {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: none;
+  color: var(--accent-color);
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.customer-testimonials .pause-button:hover {
+  opacity: 0.9;
+}

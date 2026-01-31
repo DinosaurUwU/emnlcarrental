@@ -1,0 +1,1448 @@
+body.modal-open {
+  position: fixed;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.profile-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.profile-main {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  background: white;
+  padding: 150px 50px 20px 50px;
+  gap: 20px;
+  transition: all 0.5s ease;
+}
+
+.profile-container {
+  flex: 1;
+  min-width: 400px;
+  position: relative;
+}
+
+.welcome-message {
+  font-size: 22px;
+  margin-bottom: 15px;
+  padding: 0 10px 0 10px;
+  color: var(--accent-color);
+  text-align: center;
+}
+
+.profile-settings-container {
+  position: absolute;
+  top: 15px;
+  right: 0px;
+}
+
+.settings-icon {
+  cursor: pointer;
+  font-size: 20px;
+  padding: 5px 0px 5px 5px;
+}
+
+.settings-dropdown {
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 0;
+  top: 30px;
+  z-index: 10;
+  width: 250px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.settings-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.settings-item:hover {
+  background-color: #c2f8c3;
+}
+
+.settings-item.delete {
+  color: red;
+}
+
+.provider-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.provider-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-logo {
+  width: 28px;
+  height: 28px;
+}
+
+.provider-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.provider-status {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.provider-status.link {
+  color: var(--accent-color);
+}
+
+.provider-status.unlink {
+  color: #dc3545;
+}
+
+.profile-section-label-input {
+  margin: 0;
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  transition: 0.3s;
+}
+
+.profile-section-label-input:focus {
+  border-color: var(--supporting-color);
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-60%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: var(--accent-color);
+  z-index: 2;
+}
+
+.password-toggle svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.overlay-revert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-revert .confirm-modal {
+  margin: 10px;
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  text-align: center;
+  color: var(--accent-color);
+  position: relative;
+}
+
+.overlay-revert .confirm-modal p {
+  color: #333;
+}
+
+.overlay-revert .confirm-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.overlay-revert .confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.overlay-revert .confirm-btn.revert {
+  background-color: transparent;
+  border: 2px solid #28a745;
+  color: #28a745;
+  width: 150px;
+}
+
+.overlay-revert .confirm-btn.revert:hover {
+  background-color: #28a745;
+  color: white;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.overlay-revert .confirm-btn.cancel {
+  background-color: transparent;
+  border: 2px solid #dc3545;
+  color: #dc3545;
+  width: 150px;
+}
+
+.overlay-revert .confirm-btn.cancel:hover {
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 0 10px #dc3545;
+}
+
+.overlay-delete {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4000;
+}
+
+.overlay-delete .confirm-modal {
+  margin: 10px;
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  text-align: center;
+  color: var(--accent-color);
+}
+
+.confirm-modal h3 {
+  color: var(--accent-color);
+  margin-top: 10px;
+}
+
+.overlay-delete .confirm-modal p {
+  color: #333;
+}
+
+.overlay-delete .confirm-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.overlay-delete .confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.overlay-delete .confirm-btn.delete {
+  width: 50%;
+  background-color: transparent;
+  border: 2px solid #28a745;
+  color: #28a745;
+}
+
+.overlay-delete .confirm-btn.delete:hover {
+  background-color: #28a745;
+  color: white;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.overlay-delete .confirm-btn.cancel {
+  width: 50%;
+  background-color: transparent;
+  border: 2px solid #dc3545;
+  color: #dc3545;
+}
+
+.overlay-delete .confirm-btn.cancel:hover {
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 0 10px #dc3545;
+}
+
+.profile-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: 20px;
+}
+
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 3px solid var(--accent-color);
+}
+
+.profile-picture-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: left;
+}
+
+.profile-row {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.profile-row-input:focus {
+  outline: none;
+  border-color: var(--supporting-color);
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.profile-row strong {
+  color: var(--accent-color);
+}
+
+.profile-buttons button {
+  margin-top: 10px;
+}
+
+.profile-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.edit-picture-btn,
+.edit-info-btn {
+  font-weight: bold;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  background: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.5s ease;
+}
+
+.edit-picture-btn:hover,
+.edit-info-btn:hover {
+  background: #28a745;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.edit-picture-btn {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-picture-btn.save-mode {
+  font-weight: bold;
+  background-color: var(--accent-color);
+  color: #f8f8f8;
+}
+
+.change-profile-btn {
+  border-radius: 5px;
+  background-color: #f5c6cb;
+  color: #721c24;
+  padding: 8px 12px;
+  font-weight: bold;
+  border: 1px solid #721c24;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.profile-info-section input {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin-left: 10px;
+  border-radius: 4px;
+}
+
+.profile-section-label {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--supporting-color);
+}
+
+.profile-picture-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-picture {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--accent-color);
+}
+
+.change-profile-btn {
+  font-family: "Poppins", sans-serif;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.5s ease;
+}
+
+.change-profile-btn:hover {
+  background: #28a745;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.profile-section-label-input[type="text"],
+.profile-section-label-input[type="email"],
+.profile-section-label-input[type="password"] {
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  background: #fffafa;
+  outline: none;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  box-sizing: border-box;
+  resize: vertical;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  transition: all 0.5s ease;
+}
+
+.profile-section-label-input[type="text"]:focus,
+.profile-section-label-input[type="email"]:focus {
+  border-color: var(--supporting-color) !important;
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+@media (max-width: 480px) {
+  .profile-picture {
+    width: 90px;
+    height: 90px;
+  }
+
+  .confirm-details-btn {
+    width: 100%;
+  }
+
+  input[type="text"],
+  input[type="email"] {
+    max-width: 100%;
+  }
+}
+
+.divider {
+  width: 1px;
+  background: var(--accent-color);
+}
+
+.user-messages-container {
+  flex: 2;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.user-messages-container h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: center;
+}
+
+.user-messages-container .messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+  padding-top: 10px;
+}
+
+.user-messages-container .messages-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.user-messages-container .messages-list::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+.user-message-item {
+  position: relative;
+  background: white;
+  padding: 15px;
+  border-left: 5px solid var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
+  font-size: 14px;
+  margin: 0px 5px 15px 10px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  transition: all 0.5s ease;
+}
+
+.user-message-item:hover {
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+.message-read-toggle .delete-icon,
+.message-read-toggle .mark-read-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.5s;
+}
+
+.message-read-toggle .delete-icon:hover,
+.message-read-toggle .mark-read-icon:hover,
+.overlay-actions .delete-icon:hover {
+  transform: scale(1.1);
+}
+
+.message-checkbox {
+  width: 18px;
+  height: 18px;
+  margin: 0px;
+  appearance: none;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  background-color: transparent;
+  transition: background-color 0.5s ease;
+}
+
+.message-checkbox::after {
+  content: "✔";
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.message-checkbox:hover {
+  background-color: var(--accent-color);
+}
+
+.message-checkbox:hover::after {
+  opacity: 1;
+}
+
+.message-checkbox:checked {
+  background-color: var(--accent-color);
+}
+
+.message-checkbox:checked::after {
+  opacity: 1;
+}
+
+.message-read-toggle {
+  position: absolute;
+  top: 5%;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mark-read-btn {
+  background-color: var(--accent-color);
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mark-read-btn:hover {
+  background-color: var(--supporting-color);
+  color: white;
+}
+
+.user-messages-container .message-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-messages-container .message-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 2px solid var(--accent-color);
+  background: white;
+}
+
+.user-messages-container .message-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-messages-container .message-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+.user-messages-container .message-contact {
+  display: flex;
+  gap: 5px;
+  font-size: 14px;
+  color: var(--supporting-color);
+  font-weight: bold;
+}
+
+.user-messages-container .message-email {
+  font-size: 14px;
+  color: #333;
+}
+
+.user-messages-container .message-phone {
+  font-size: 14px;
+  color: #333;
+}
+
+.user-messages-container .message-phone::before {
+  content: "|";
+  color: #333;
+}
+
+.user-messages-container .message-phone a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.user-messages-container .message-phone a:hover {
+  text-decoration: underline;
+}
+
+.user-message-overlay .message-contact {
+  display: flex;
+  gap: 5px;
+  font-size: 14px;
+  color: var(--supporting-color);
+  font-weight: bold;
+}
+
+.user-message-overlay .message-email {
+  font-size: 14px;
+  color: #333;
+}
+
+.user-message-overlay .message-phone {
+  font-size: 14px;
+  color: #333;
+}
+
+.user-message-overlay .message-phone::before {
+  content: "| ";
+  color: #333;
+}
+
+.user-message-overlay .message-date {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+@media (max-width: 500px) {
+  .message-read-toggle {
+    position: absolute;
+    top: 10px;
+    right: 3px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .user-message-item {
+    padding-left: 10px;
+  }
+
+  .user-messages-container .message-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .user-messages-container .message-phone {
+    margin-left: 0;
+  }
+
+  .user-messages-container .message-phone::before {
+    content: "";
+    margin: 0;
+  }
+
+  .user-message-overlay .message-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .user-message-overlay .message-phone {
+    margin-left: 0;
+  }
+
+  .user-message-overlay .message-phone::before {
+    content: "";
+    margin: 0;
+  }
+
+  .profile-container {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+  }
+}
+
+.user-messages-container .message-date {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+.user-messages-container .message-text {
+  font-size: 14px;
+  color: #333;
+  padding-top: 10px;
+}
+
+.user-messages-container .user-message-item:hover {
+  background: #ddd;
+}
+
+.message-tabs-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0px;
+  padding-right: 0px;
+  margin: 0 0px 0 10px;
+  gap: 5px;
+  border-bottom: 2px solid var(--supporting-color);
+}
+
+.selected-count {
+  margin-right: 10px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.checkbox-dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  transition: all 0.5s ease;
+}
+
+.checkbox-dropdown-wrapper:hover {
+  background-color: #c8e6c9;
+}
+
+.message-tabs-select.hide-text {
+  width: 15px;
+  height: 20px;
+  overflow: hidden;
+  border: none;
+  background-color: transparent;
+  appearance: none;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg fill='green' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.message-action-icons {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 0px;
+}
+
+.message-action-icon {
+  cursor: pointer;
+  height: 24px;
+}
+
+.message-tabs-select.hide-text::after {
+  content: "▼";
+  color: black;
+  position: absolute;
+  pointer-events: none;
+}
+
+.message-tabs-select {
+  padding: 4px 6px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+}
+
+.message-tabs-checkbox {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  background-color: transparent;
+  transition: background-color 0.5s ease;
+}
+
+.message-tabs-checkbox::after {
+  content: "✔";
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.message-tabs-checkbox:hover {
+  background-color: var(--accent-color);
+}
+
+.message-tabs-checkbox:hover::after,
+.message-tabs-checkbox:checked::after {
+  opacity: 1;
+}
+
+.message-tabs-checkbox:checked {
+  background-color: var(--accent-color);
+}
+
+.message-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+
+.message-tabs button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.message-tabs button:hover {
+  background-color: #c8e6c9;
+}
+
+.message-tabs .active-tab {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.message-tabs .active-tab:hover {
+  background-color: var(--supporting-color);
+}
+
+@keyframes fadeInOnly {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.message-overlay-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1002;
+  animation: fadeInOnly 0.3s ease-out;
+}
+
+.message-delete-confirmation {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+.message-confirmation-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.message-cancel-btn,
+.message-confirm-delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.message-cancel-btn {
+  background-color: #ccc;
+}
+
+.message-confirm-delete-btn {
+  background-color: #d9534f;
+  color: white;
+}
+
+@keyframes fadeInUMO {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.user-message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.user-message-overlay.active {
+  animation: fadeInUMO 0.5s forwards;
+  pointer-events: all;
+}
+
+.user-message-overlay.hidden {
+  animation: fadeOut 0.5s forwards;
+  pointer-events: none;
+}
+
+.user-message-overlay .message-overlay-content {
+  position: relative;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px;
+  width: 500px;
+  text-align: left;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.user-message-overlay .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border-radius: 5px;
+  background: red;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+}
+
+.user-message-overlay .overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.user-message-overlay .overlay-header h3 {
+  color: var(--accent-color);
+}
+
+.user-message-overlay .overlay-header h3,
+.user-message-overlay .overlay-header p {
+  text-align: left;
+  margin: 0;
+  margin-bottom: 0px;
+}
+
+.overlay-header a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.overlay-header a:hover {
+  text-decoration: underline;
+}
+
+.user-message-overlay .overlay-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 2px solid var(--accent-color);
+  background: white;
+}
+
+.user-message-overlay .full-message {
+  border-top: 1px solid var(--accent-color);
+  padding-top: 10px;
+  text-align: left;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.user-message-overlay .overlay-actions button {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-message-overlay .overlay-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.user-message-overlay .delete-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.user-message-overlay .button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.user-message-overlay .reply-btn {
+  margin: 0px !important;
+  background: var(--accent-color);
+  color: white;
+}
+
+.user-message-overlay .forward-btn {
+  margin: 0px !important;
+  background: #da5234;
+  color: white;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-message-overlay .reply-textarea {
+  font-family: "Poppins", sans-serif;
+  width: 96%;
+  min-height: 60px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  resize: none;
+  outline: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+.user-message-overlay .reply-textarea:focus {
+  box-shadow: 0 0 10px var(--accent-color);
+  border-color: var(--supporting-color);
+}
+
+.divider-horizontal {
+  width: 100%;
+  height: 1px;
+  background: var(--accent-color);
+}
+
+.booking-history-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rental-panels-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: space-around;
+}
+
+/* Active Rentals (LEFT) */
+.active-rentals-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.active-rentals-scroll {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.active-rentals-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.active-rentals-scroll::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+/* Booking Requests (RIGHT) */
+.booking-requests-container {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  transition: all 0.5s ease;
+  width: 100%;
+}
+
+.booking-requests-container h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.info-block .rejection-reason p {
+  color: #dc3545;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0px;
+}
+
+.booking-requests-scroll {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-requests-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.booking-requests-scroll::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+.empty-bookings {
+  color: #888;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.history-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  transition: all 0.5s ease;
+}
+
+.history-container h3 {
+  text-align: center;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  position: relative;
+  padding: 0px 10px 0px 10px;
+  border-left: 5px solid var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
+  font-size: 14px;
+  border-radius: 5px;
+  margin: 10px;
+  transition: all 0.5s ease;
+}
+
+.history-details-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 3;
+  transition: all 0.5s ease;
+}
+
+.history-details-btn:hover {
+  background-color: #28a745;
+  box-shadow: 0 0 10px #28a745;
+}
+
+.history-car-image {
+  width: 400px;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  left: 0;
+  z-index: 1;
+}
+
+.history-details {
+  width: 56%;
+  max-width: 800px;
+  left: 160px;
+  height: 200px;
+  padding: 10px 30px 10px 230px;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 255) 75%,
+    rgba(255, 255, 255, 0.4) 85%,
+    rgba(255, 255, 255, 0.2) 95%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 5px;
+  color: black;
+  position: relative;
+  text-align: left;
+  z-index: 2;
+}
+
+.history-details span {
+  color: var(--supporting-color);
+}
+
+.car-name {
+  font-weight: bold;
+  font-size: 24px;
+  color: var(--accent-color);
+  margin-bottom: 10px;
+  margin-top: 0px;
+}
+
+.history-item:hover {
+  box-shadow: 0 0 10px #28a745;
+  border-left: 5px solid #28a745;
+}
+
+.empty-message {
+  text-align: center;
+  font-size: 16px;
+  color: gray;
+  margin: auto;
+  font-style: italic;
+}
+
+.empty-history {
+  color: #888;
+  font-style: italic;
+  padding: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .profile-main {
+    flex-direction: column;
+    align-items: center;
+    padding: 150px 50px 20px 50px;
+  }
+
+  .profile-container {
+    width: 100%;
+    flex: none;
+  }
+
+  .user-messages-container {
+    text-align: left;
+    padding: 0px;
+    max-width: 800px;
+    flex: none;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .rental-panels-container {
+    flex-direction: column;
+  }
+
+  .history-container {
+    max-width: 660px;
+    min-width: 300px;
+  }
+
+  .history-item {
+    flex-direction: column;
+    min-height: 440px;
+    display: flex;
+  }
+
+  .history-car-image {
+    width: 100%;
+    height: 50%;
+    border-radius: 0px 5px 0 0;
+    object-fit: cover;
+  }
+
+  .history-details {
+    flex: 1;
+    position: absolute;
+    width: calc(100% - 0px);
+    left: 0;
+    top: 150px;
+    padding: 70px 20px 20px 20px;
+    background: linear-gradient(
+      to top,
+      rgba(255, 255, 255, 1) 75%,
+      rgba(255, 255, 255, 0.4) 85%,
+      rgba(255, 255, 255, 0.2) 95%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 750px) {
+  .profile-main {
+    padding: 150px 10px 20px 10px;
+  }
+}

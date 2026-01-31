@@ -1,0 +1,330 @@
+/* src/NotFound.css */
+.not-found-container {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Arial", sans-serif;
+  padding: 0 10px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* 🖼️ Background image with opacity + blur */
+.not-found-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/images/404-2.webp") center/cover no-repeat;
+  opacity: 0.7; /* transparency level */
+  filter: blur(5px); /* blur effect */
+  z-index: -1; /* behind all content */
+}
+
+.not-found-content {
+  text-align: center;
+  color: white;
+  max-width: 600px;
+}
+
+.road-sign {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+/* -- Poles behind everything but the car/buttons -- */
+.sign-pole {
+  position: absolute;
+  top: 100%; /* start from bottom of sign board */
+  left: 50%;
+  width: 0;
+  height: 480px; /* extend longer to reach buttons */
+  transform: translateX(-50%);
+  z-index: 0; /* behind car and buttons */
+  opacity: 0.8;
+}
+
+.sign-pole::before,
+.sign-pole::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(0deg, #d9d9d9 0%, #a6a6a6 50%, #5c5c5c 100%);
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.25),
+    0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+/* Left pole → aligns near the left button */
+.sign-pole::before {
+  left: -190px;
+}
+
+/* Right pole → aligns near the right button */
+.sign-pole::after {
+  right: -190px;
+}
+
+.sign-board {
+  background-color: #ffd700; /* inner yellow */
+  color: #333;
+  padding: 30px;
+  margin: 0 10px 0 10px;
+  border-radius: 15px;
+  box-shadow: 0 0 0 4px #333, /* inner black border */ 0 0 0 8px #ffd700,
+    /* outer yellow border */ 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.error-code {
+  font-size: 8rem;
+  margin: 0;
+  font-weight: bolder;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.error-message {
+  font-size: 2rem;
+  margin: 10px 0;
+  color: #333;
+}
+
+.error-description {
+  font-size: 1.2rem;
+  margin: 15px 0;
+  color: #555;
+}
+
+.error-subtext {
+  font-size: 1rem;
+  color: #777;
+  font-style: italic;
+}
+
+
+
+
+
+
+
+
+/* 🌀 Full-width tumbleweed area */
+.tumbleweed-container {
+  position: absolute; /* ✅ anchors it to full page width */
+  left: 0;
+  bottom: 0; /* optional – if you want it near the bottom of view */
+  width: 100vw;
+  height: 120px;
+  margin: 0; /* ✅ remove top/bottom spacing */
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* 🎞️ Two tumbleweeds moving continuously */
+.tumbleweed-gif {
+  position: absolute;
+  bottom: 0;
+  left: 0; /* start from true left edge */
+  width: 120px;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  animation: tumbleweed-move 16s linear infinite;
+}
+
+.tumbleweed-gif.second {
+  animation-delay: -10s; /* half duration offset for smooth looping */
+}
+
+/* 🌾 Seamless left-to-right movement */
+@keyframes tumbleweed-move {
+  0% {
+    transform: translateX(-120px); /* start fully offscreen left */
+  }
+  100% {
+    transform: translateX(100vw); /* end fully offscreen right */
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+.navigation-options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 30px 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Base signage buttons */
+.home-button,
+.fleet-button {
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 230px;
+  color: #fff;
+  background-color: #005eb8; /* deep blue sign */
+  border: 3px solid #ffffff; /* thinner white inner border */
+  box-shadow: 0 0 0 6px #005eb8,
+    /* slimmer outer blue ring */ 0 3px 10px rgba(0, 0, 0, 0.3); /* softer drop shadow */
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Hover: steady glowing effect */
+.home-button:hover,
+.fleet-button:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 6px #005eb8,
+    /* keep ring same size */ 0 0 12px 4px #009dffaa,
+    /* soft blue glow */ 0 0 20px 8px #ffffff55,
+    /* subtle white reflective glow */ 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Slightly lighter variant for Fleet */
+.fleet-button {
+  background-color: #0077cc;
+  box-shadow: 0 0 0 6px #0077cc, 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.fleet-button:hover {
+  box-shadow: 0 0 0 6px #0077cc, 0 0 12px 4px #33bbffaa, 0 0 20px 8px #ffffff55,
+    0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.helpful-links {
+  margin-top: 40px;
+  text-align: center;
+  z-index: 20;
+  position: relative; /* creates a stacking context */
+}
+
+.helpful-links p {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: var(--accent-color);
+}
+
+/* Layout for the link buttons */
+.link-buttons {
+  display: flex;
+  gap: 25px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1; /* buttons are on top layer */
+}
+
+/* Red circular sign style */
+.link-buttons button {
+  position: relative;
+  z-index: 2; /* make button content above the pole */
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #d40000;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 6px #d40000, 0 3px 10px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Each button has its own pole BEHIND the button */
+.link-buttons button::after {
+  content: "";
+  position: absolute;
+  top: 111%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 220px;
+  background: linear-gradient(0deg, #d9d9d9 0%, #a6a6a6 50%, #5c5c5c 100%);
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.25),
+    0 0 5px rgba(255, 255, 255, 0.4);
+  z-index: 1; /* slightly lower than button */
+}
+
+/* Hover: steady glow */
+.link-buttons button:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 6px #d40000, 0 0 12px 4px #ff3333aa, 0 0 20px 8px #ffffff55,
+    0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+  .sign-board {
+    padding: 20px;
+  }
+
+  .sign-pole {
+    height: 620px;
+    top: 90%;
+  }
+
+  /* .error-code {
+    font-size: 3rem;
+  }
+
+  .error-message {
+    font-size: 1.5rem;
+  } */
+
+  .navigation-options {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .sign-pole::before {
+    left: -100px;
+  }
+
+  .sign-pole::after {
+    right: -100px;
+  }
+
+  .sign-pole {
+    height: 620px;
+    top: 90%;
+  }
+
+  /* .sign-board {
+    padding: 12px 18px;
+    margin-bottom: 15px;
+    transform: scale(0.9);
+  }
+
+  .error-code {
+    font-size: 2.5rem;
+  }
+
+  .error-message {
+    font-size: 1.2rem;
+  } */
+
+  .car-stuck {
+    margin: 20px 0;
+  }
+}

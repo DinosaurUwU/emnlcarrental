@@ -1,0 +1,11 @@
+/* Reset body and html margin and padding */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.account-dashboard {
+  width: 100%;
+}

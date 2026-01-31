@@ -1,0 +1,746 @@
+/* 
+.Header__main {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+  }
+  
+
+  .Header__left .Header__logo {
+    height: 40px;
+    cursor: pointer;
+  }
+
+  .Header__center {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .Header__nav {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .Header__nav li {
+    position: relative;
+  }
+  
+  .Header__nav a {
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    transition: 0.3s ease;
+  }
+  
+  .Header__nav a:hover {
+    color: var(--accent-color);
+  }
+  
+  .Header__button {
+    background: var(--accent-color);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin: 0 15px;
+  }
+  
+  .Header__button:hover {
+    background: var(--supporting-color);
+  }
+  
+  .Header__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .Header__icon {
+    cursor: pointer;
+  }
+  
+  .Header__icon img {
+    height: 24px;
+    transition: 0.3s ease;
+  }
+  
+  .Header__icon img:hover {
+    transform: scale(1.1);
+  }
+  
+  .Header__search {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    width: 50%;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .Header.expanded .Header__search {
+    display: block;
+  }
+  
+  .menu-icon {
+    display: none;
+  }
+  
+  @media screen and (max-width: 752px) {
+    .menu-icon {
+      display: block;
+    }
+  
+    .Header__center {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 0;
+      background: rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      transition: width 0.3s ease;
+    }
+  
+    .Header.open .Header__center {
+      width: 30%;
+      padding: 15px;
+    }
+  
+    .Header__nav {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .Header__search {
+      width: 80%;
+    }
+  }
+   */
+
+/* .Header__main {
+  position: fixed;
+  top: 20px;
+  left: 10px;
+  right: 10px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.Header__left .Header__logo {
+  height: 50px;
+  cursor: pointer;
+}
+
+.Header__center {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.Header__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+.Header__nav li {
+  position: relative;
+}
+
+.Header__nav a {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  transition: 0.3s ease;
+}
+
+.Header__nav a:hover {
+  color: var(--accent-color);
+}
+
+.Header__button {
+  background: var(--accent-color);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.Header__button:hover {
+  background: var(--supporting-color);
+  transform: scale(1.1);
+}
+
+.Header__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.Header__icon {
+  cursor: pointer;
+}
+
+.Header__icon img {
+  height: 24px;
+  transition: 0.3s ease;
+}
+
+.Header__icon img:hover {
+  transform: scale(1.1);
+}
+
+.Header__search {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  width: 50%;
+  padding: 8px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.Header.expanded .Header__search {
+  display: block;
+}
+
+.menu-icon {
+  display: none;
+}
+
+@media screen and (max-width: 750px) {
+  .Header__bookNow {
+    position: absolute;
+    left: 51.5%;
+    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .Header.open .Header__main {
+    border-bottom-right-radius: 0;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+
+  .Header__center {
+    position: absolute;
+    top: 69.4px;
+    right: 0px;
+    width: 48%;
+    max-height: 0;
+    background: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    border-radius: 0px 0px 10px 10px;
+  }
+
+  .Header.open .Header__center {
+    max-height: 300px;
+  }
+
+  .Header__center.closing {
+    max-height: 0;
+  }
+
+  .Header__nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 20px 0;
+  }
+
+  .Header__search {
+    width: 80%;
+  }
+} */
+
+.Header__main {
+  position: fixed;
+  top: 30px;
+  left: 50px;
+  right: 50px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.Header__main.menu-open {
+  border-radius: 10px 10px 0px 10px;
+}
+
+.Header__main.show-account {
+  border-radius: 10px 10px 0px 10px;
+}
+
+
+
+
+
+
+
+
+.Header__main.expanded {
+  padding-bottom: 50px;
+}
+
+.Header__search {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  transition: max-height 0.3s ease-in-out;
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Header__main.expanded .Header__search {
+  max-height: 50px;
+}
+
+.Header__search input {
+  width: 80%;
+  max-width: 800px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  text-align: left;
+}
+
+.Header__left,
+.Header__right{
+  flex: 0 0 105px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Header__left .Header__logo {
+   width: 130px;
+  height: auto;
+  cursor: pointer;
+  color: var(--accent-color);
+}
+
+.Header__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+.Header__nav li {
+  position: relative;
+}
+
+.Header__nav a {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  transition: 0.3s ease;
+}
+
+.Header__nav a:hover,
+.Header__nav a.active {
+  color: var(--accent-color);
+}
+
+.Header__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background-color: transparent;
+  transform: scaleX(0);
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+/* Show underline on hover or when active */
+.Header__nav a:hover::after,
+.Header__nav a.active::after {
+  border-radius: 5px;
+  background-color: var(--accent-color);
+  transform: scaleX(1);
+}
+
+.Header__button {
+  background: var(--accent-color);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.Header__button:hover {
+  background: #28a745;
+  box-shadow: 0 0 10px #28a745;
+  transform: scale(1.05);
+}
+
+.Header__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.Header__icon {
+  cursor: pointer;
+}
+
+.header-account-icon{
+    height: 28px;
+  width: 28px;
+  cursor: pointer;
+    color: var(--accent-color);
+  transition: all 0.5s ease;
+}
+
+.header-icon {
+  height: 28px;
+  width: 28px;
+  cursor: pointer;
+    fill: var(--accent-color);
+
+  transition: all 0.5s ease;
+}
+
+.Header__icon.account-icon{
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+}
+
+.menu-icon {
+  display: none;
+}
+
+.OverlayMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  backdrop-filter: blur(10px);
+  visibility: hidden;
+  transition: all 0.5s ease-in-out;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.OverlayMenu.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.OverlayMenu__container {
+  background: rgba(255, 255, 255, 0.9);
+  width: 50%;
+  max-width: 250px;
+  padding: 40px 20px 20px 20px;
+  border-radius: 0px 0px 10px 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 10%;
+  right: 10px;
+  z-index: 999;
+  transition: all 0.5s ease;
+}
+
+.OverlayMenu.show .OverlayMenu__container {
+  top: 100px;
+}
+
+.OverlayMenu__nav {
+  text-align: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.OverlayMenu__nav li {
+  margin-bottom: 30px;
+}
+
+.OverlayMenu__nav a {
+  position: relative;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding-bottom: 5px;
+}
+
+.OverlayMenu__nav a.active {
+  color: var(--accent-color);
+}
+
+/* Underline effect in mobile menu */
+.OverlayMenu__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background-color: transparent;
+  transform: scaleX(0);
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+/* Show underline on hover or when active */
+.OverlayMenu__nav a:hover::after,
+.OverlayMenu__nav a.active::after {
+  border-radius: 5px;
+  background-color: var(--accent-color);
+  transform: scaleX(1);
+}
+
+.OverlayMenu__nav a:hover {
+  color: var(--accent-color);
+}
+
+.OverlayAccount {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  backdrop-filter: blur(10px);
+  visibility: hidden;
+  transition: all 0.5s ease;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.OverlayAccount.show-account {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.OverlayAccount__container {
+  background: rgba(255, 255, 255, 0.9);
+  width: 50%;
+  max-width: 250px;
+  padding: 40px 20px 20px 20px;
+  border-radius: 0px 0px 10px 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 10%;
+  right: 50px;
+  z-index: 999;
+  transition: all 0.5s ease;
+}
+
+.OverlayAccount.show-account .OverlayAccount__container {
+  top: 100px;
+}
+
+.OverlayAccount__nav {
+  text-align: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.OverlayAccount__nav li {
+  margin-bottom: 30px;
+}
+
+.OverlayAccount__nav a {
+  font-size: 18px;
+  color: #333;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.OverlayAccount__nav a:hover {
+  color: var(--accent-color);
+}
+
+@media screen and (max-width: 750px) {
+  .Header__main {
+    left: 10px;
+    right: 10px;
+    padding-left: 0;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+
+  .OverlayAccount__container {
+    right: 10px;
+  }
+}
+
+.Header__main .Header__search input {
+  font-family: "Poppins", sans-serif !important;
+  border: 2px solid var(--accent-color) !important;
+  outline: none !important;
+  margin: 10px !important;
+  transition: all 0.5s ease;
+}
+
+.Header__main .Header__search input:focus {
+  box-shadow: 0 0 5px #28a745 !important;
+  border-color: #28a745 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.SearchDropdown {
+  position: fixed;
+  top: 150px;
+  left: 50%; /* ✨ Center horizontally */
+  transform: translateX(-50%); /* ✨ Center correction */
+  background: white;
+  border: 2px solid var(--accent-color);
+  border-radius: 0px 0px 5px 5px;
+    width: 80%;
+  max-width: 800px;
+  z-index: 9999;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Remove bullet points and spacing */
+.SearchDropdown ul {
+  list-style: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+
+.SearchDropdown li a {
+  color: #333;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+}
+
+.SearchDropdown li a:hover {
+  color: var(--accent-color);
+}
+
+.SearchDropdown li {
+  padding: 10px 12px;
+  margin: 5px 0px 5px 0px;
+  cursor: pointer;
+  color: #333 !important;
+  text-decoration: none !important;
+}
+
+/* ✨ Hover effect */
+.SearchDropdown li:hover {
+  background-color: #f0f0f0;
+  color: var(--accent-color);
+}
+
+.highlight {
+  font-weight: bold;
+  color: var(--accent-color);
+  background-color: #e8f5e9;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+

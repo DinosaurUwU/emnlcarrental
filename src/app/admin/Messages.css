@@ -1,0 +1,420 @@
+body.modal-open {
+  position: fixed;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.parent-messages-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-top: 4rem;
+}
+
+.messages-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0px 10px 0px 10px;
+  padding-bottom: 50px;
+}
+
+.messages-container h2 {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  text-transform: uppercase;
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--accent-color);
+}
+
+.messages-container ::-webkit-scrollbar {
+  width: 5px;
+}
+
+.messages-container ::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0px 0 10px;
+  padding: 10px 0px;
+  padding-right: 0px;
+  border-bottom: 2px solid var(--supporting-color);
+}
+
+.tabs-left {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+
+.tabs-right {
+  display: flex;
+  align-items: center;
+  padding-right: 0px;
+}
+
+.tab {
+  background: #e0e0e0;
+  border: none;
+  padding: 10px 20px;
+  margin: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.tab.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+.tab.active:hover {
+  background: var(--supporting-color);
+}
+
+.tab:hover {
+  background: #c8e6c9;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  overflow-y: auto;
+  padding-top: 10px;
+}
+
+.message-actions-topright {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  z-index: 2;
+}
+
+.action-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.5s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.1);
+}
+
+.admin-message-checkbox {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  background-color: transparent;
+  transition: background-color 0.5s ease;
+  margin: 0px;
+}
+
+.admin-message-checkbox::after {
+  content: "✔";
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.admin-message-checkbox:hover {
+  background-color: var(--accent-color);
+}
+
+.admin-message-checkbox:hover::after {
+  opacity: 1;
+}
+
+.admin-message-checkbox:checked {
+  background-color: var(--accent-color);
+}
+
+.admin-message-checkbox:checked::after {
+  opacity: 1;
+}
+
+.message-item {
+  position: relative;
+  background: #f4f4f4;
+  padding: 10px;
+  margin: 0px 5px 15px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border-left: 4px solid var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
+  transition: all 0.5s ease;
+}
+
+.message-item:hover {
+  background: #ddd;
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* Profile Picture */
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 2px solid var(--accent-color);
+  background: white;
+}
+
+/* Header Section */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.message-name {
+  color: var(--accent-color);
+}
+
+/* Header Section */
+.message-overlay.message-header {
+  margin: 20px 0px 10px 0px;
+}
+
+/* Sender Info */
+.admin-message-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-message-info h3 {
+  margin: 5px 0px 0px 0px;
+}
+
+.admin-message-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+/* Meta Info (Date, Time, Contact) */
+.message-meta {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+  line-height: 1.4;
+  margin: 0px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.message-meta .email::after {
+  content: " |";
+  margin-right: 5px;
+}
+
+.admin-empty-message {
+  text-align: center;
+  font-size: 16px;
+  color: gray;
+  font-style: italic;
+  margin: auto;
+}
+
+.load-more-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.5s ease;
+}
+
+.load-more-btn:hover {
+  background-color: #28a745;
+  box-shadow: 0 0 10px #28a745;
+}
+
+@media (max-width: 500px) {
+  .message-actions-topright {
+    flex-direction: column-reverse;
+    gap: 2px;
+  }
+
+  .message-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .message-meta .email::after {
+    content: "";
+  }
+}
+
+.message-timestamp {
+  font-size: 14px;
+  color: #333;
+  margin: 0px;
+  font-weight: bold;
+}
+
+.message-meta .phone a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.message-meta .phone a:hover {
+  text-decoration: underline;
+}
+
+/* Overlay (Backdrop) */
+.admin-message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.admin-message-overlay.fade-in {
+  animation: AdminfadeIn 0.3s ease-out forwards;
+}
+
+.admin-message-overlay.fade-out {
+  animation: AdminfadeOut 0.3s ease-out forwards;
+}
+
+@keyframes AdminfadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes AdminfadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Message Content */
+.admin-message-content {
+  position: relative;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px;
+  width: 500px;
+  text-align: left;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Close Button */
+.admin-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border-radius: 5px;
+  background: red;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Reply Textarea */
+.admin-reply-textarea {
+  font-family: "Poppins", sans-serif;
+  width: 96%;
+  min-height: 60px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  resize: none;
+  outline: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+.admin-reply-textarea:focus {
+  box-shadow: 0 0 10px var(--accent-color);
+  border-color: var(--supporting-color);
+}
+
+.message-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.message-actions-left,
+.message-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Reply and Forward Buttons */
+.reply-btn,
+.forward-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.reply-btn {
+  background: #007bff;
+  color: white;
+}
+
+.reply-btn:hover {
+  background: #0056b3;
+}
+
+.forward-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.forward-btn:hover {
+  background: var(--supporting-color);
+}

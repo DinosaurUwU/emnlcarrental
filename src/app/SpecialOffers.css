@@ -1,0 +1,726 @@
+/* src/SpecialOffers.css */
+/* .special-offers {
+  padding: 100px 20px 50px;
+  text-align: center;
+  position: relative;
+  background-size: 160%;
+  background-position: center;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.special-offers h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #024001;
+}
+
+.special-offers p {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+  color: #024001;
+}
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  color: #024001;
+}
+
+.offer-card {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.5s ease;
+  overflow: hidden;
+}
+
+.offer-card:hover {
+  border-color: #024001;
+}
+
+.img-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.img-container img {
+  scale: 1.1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease;
+}
+
+.offer-card:hover .img-container img {
+  transform: scale(0.95);
+}
+
+.offer-card h3 {
+  margin: 15px 0 0;
+  font-size: 1.5em;
+}
+
+.offer-card p {
+  margin: 15px 0 50px;
+  font-size: 1em;
+  color: #024001;
+}
+
+.get-offer {
+  margin-top: auto;
+  align-self: center;
+  font-weight: bold;
+  padding: 10px 20px;
+  background-color: #024001;
+  color: #fcdf5a;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.get-offer:hover {
+  background-color: #fff;
+  border-color: #024001;
+  color: #024001;
+  transform: scale(1.05);
+} */
+
+
+
+
+
+
+
+
+
+
+/* src/SpecialOffers.css */
+
+/* .special-offers {
+  padding: 100px 20px 50px;
+  text-align: center;
+  position: relative;
+  background-color: transparent;
+  background-size: 160%;
+  background-position: center;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.special-offers .background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(252, 223, 90, 0.7);
+  z-index: 0; 
+}
+
+.special-offers h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #024001;
+}
+
+.special-offers p {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+  color: #024001;
+}
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  color: #024001;
+}
+
+.offer-card {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.5s ease;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.offer-card:hover {
+  border-color: #024001;
+}
+
+.img-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.img-container img {
+  scale: 1.1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease;
+}
+
+.offer-card:hover .img-container img {
+  transform: scale(0.95);
+}
+
+.offer-card h3 {
+  margin: 15px 0 0;
+  font-size: 1.5em;
+}
+
+.offer-card p {
+  margin: 15px 0 50px;
+  font-size: 1em;
+  color: #024001;
+}
+
+.get-offer {
+  margin-top: auto;
+  align-self: center;
+  font-weight: bold;
+  padding: 10px 20px;
+  background-color: #024001;
+  color: #fcdf5a;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.get-offer:hover {
+  background-color: #fff;
+  border-color: #024001;
+  color: #024001;
+  transform: scale(1.05);
+} */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* src/SpecialOffers.css */
+
+/* .special-offers {
+  padding: 100px 20px 50px;
+  text-align: center;
+  position: relative;
+  background-color: transparent;
+  background-size: 160%;
+  background-position: center;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.special-offers .background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(252, 223, 90, 0.7);
+  z-index: 0;
+}
+
+.special-offers h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #024001;
+}
+
+.special-offers p {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+  color: #024001;
+}
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  color: #024001;
+}
+
+.offer-card {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  width: 500px;
+  height: 250px;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  transition: transform 0.2s ease, border-color 0.5s ease;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.offer-card:hover {
+  border-color: #024001;
+}
+
+.img-container {
+  width: 40%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 10px 0 0 10px;
+}
+
+.img-container img {
+  scale: 1.1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease;
+}
+
+.offer-card:hover .img-container img {
+  transform: scale(0.95);
+}
+
+.offer-details {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.offer-card h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.offer-card p {
+  margin: 15px 0;
+  font-size: 1em;
+  color: #024001;
+}
+
+.offer-divider {
+  width: 2px;
+  background: #ddd;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 75%;
+  border-left: 2px dashed #ddd;
+}
+
+.scissor {
+  position: absolute;
+  top: 50%;
+  left: 74%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #999;
+}
+
+.get-offer {
+  font-weight: bold;
+  padding: 10px 20px;
+  background-color: #024001;
+  color: #fcdf5a;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  position: absolute;
+  top: 50%;
+  left: 78%;
+  transform: translateY(-50%);
+}
+
+.get-offer:hover {
+  background-color: #fff;
+  border-color: #024001;
+  color: #024001;
+  transform: scale(1.05);
+} */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.special-offers {
+  padding: 100px 20px 50px;
+  text-align: center;
+  position: relative;
+  background-color: transparent;
+  background-position: center;
+  height: 90vh;
+  overflow: hidden;
+  /* padding-right: 15%; */
+}
+
+.special-offers h2 {
+  user-select: none;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #024001;
+}
+
+.special-offers p {
+  user-select: none;
+  font-size: 1.2em;
+  margin-bottom: 40px;
+  color: #024001;
+}
+
+.offers-carousel {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  margin: 0 auto;
+  perspective: 1500px;
+}
+
+.offer-card {
+  position: absolute;
+  width: 130%;
+  height: 100%;
+  left: -15%;
+  background: #fff;
+  border-radius: 10px;
+  transition: transform 0.5s ease, opacity 0.5s ease, border 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  transform-origin: center bottom;
+  transform-origin: center center;
+  border: 2px solid transparent; /* Initial border state */
+  cursor: pointer;
+  overflow: hidden; /* Ensure contents stay within the card */
+}
+
+.offer-card.active {
+  opacity: 1;
+  transform: translate(0, 0) scale(1) rotateX(0deg);
+  z-index: 3;
+}
+
+.offer-card.active:hover {
+  border-color: #024001; /* Border color on hover */
+}
+
+.offer-card.mid {
+  pointer-events: none;
+  opacity: 0.6; /* Make the mid card more transparent */
+  transform: translate(0px, 60px) scale(1) rotateX(30deg);
+  z-index: 2;
+}
+
+.offer-card.last {
+  pointer-events: none;
+  opacity: 0.3; /* Make the last card even more transparent */
+  transform: translate(0px, 120px) scale(1) rotateX(30deg);
+  z-index: 1;
+}
+
+.offer-card.exiting {
+  transform: translate(500px, 0) scale(1) rotateX(0deg);
+  opacity: 0;
+}
+
+.offer-content {
+  display: flex;
+  height: 100%;
+}
+
+.img-container {
+  width: 30%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 7px 0 0 7px;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offer-details {
+  user-select: none;
+  padding: 20px 0;
+  flex: 0.9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #024001;
+  margin-top: 20px;
+}
+
+.offer-details h3.discount {
+  font-size: 2em; /* Make discount prominent */
+  color: #ff9000; /* Example discount color */
+}
+
+.offer-details h3 {
+  margin: 0;
+  margin-top: 10px;
+  font-size: 2em;
+}
+
+.offer-details p.description {
+  padding: 10px;
+  font-size: 1.2em;
+  color: #024001;
+  font-weight: bold;
+  margin-top: 0;
+}
+
+.offer-extra {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 0;
+  width: 20%;
+}
+
+.divider {
+  width: 100%;
+  height: auto;
+  transform: rotate(0deg);
+  background-size: cover;
+}
+
+.barcode {
+  width: 80%;
+  height: 80%;
+  transform: rotate(0deg);
+  background-size: cover;
+  margin-left: 5px;
+}
+
+.emnl {
+  user-select: none;
+  transform: rotate(-90deg);
+  letter-spacing: 1px;
+  font-size: 0.9em;
+  color: #024001;
+  top: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: bold;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(200%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.prev {
+  left: calc(50% - 150px); /* Centers the button for 344px wide screen */
+}
+
+.next {
+  right: calc(50% - 150px); /* Centers the button for 344px wide screen */
+}
+
+.prev img, .next img {
+  width: 50px;
+  height: 50px;
+}
+
+.special-offers .prev, .special-offers .next{
+  width: 40px; 
+  height: 60px; 
+  background-color: rgba(255, 255, 255, 0.5); 
+  border-radius: 5px;
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  cursor: pointer; 
+  transition: all 0.5s ease;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0); 
+}
+
+.special-offers .prev:hover, .special-offers .next:hover {
+  background-color: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 0, 0, 1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5); 
+}
+
+@media (min-width: 1360px) {
+  .offer-card.mid {
+    transform: translate(200px, 60px) scale(1) rotateX(30deg);
+  }
+  
+  .offer-card.last {
+    transform: translate(300px, 120px) scale(1) rotateX(30deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .offers-carousel {
+    width: 280px;
+    height: 275px;
+  }
+
+  .offer-details h3.discount {
+    font-size: 1.8em; 
+  }
+  
+  .offer-details h3 {
+    font-size: 1.8em;
+  }
+  
+  .offer-details p.description {
+    font-size: 1em;
+  }
+
+  .barcode {
+    margin-left: -10px;
+  }
+
+  .emnl {
+    margin-left: -10px;
+  }  
+
+}
+
+@media (max-width: 430px) {
+  .offers-carousel {
+    width: 215px;
+    height: 275px;
+  }
+
+  .offer-details {
+    padding: 20px 0;
+  }
+
+  .offer-details h3.discount {
+    font-size: 1.7em; 
+  }
+  
+  .offer-details h3 {
+    font-size: 1.7em;
+  }
+  
+  .offer-details p.description {
+    font-size: .9em;
+  }
+
+  .barcode {
+    margin-left: -10px;
+  }
+
+  .img-container {
+    margin-right: 10px;
+  }
+
+  .emnl {
+    font-size: 0.5em;
+  }  
+
+}
+
+/* @media (min-width: 344px) {
+  .prev {
+    left: calc(50% - 150px);
+  }
+  .next {
+    right: calc(50% - 150px);
+  }
+} */
+
+
+
+
+
+/* .offer-overlay h3 {
+  top: 0;
+  margin: 0;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.offer-overlay p {
+  color: #fff;
+  margin: 0;
+  font-size: 1.2em;
+} */

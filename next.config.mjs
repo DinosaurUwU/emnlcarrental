@@ -1,7 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  // Transpile all packages that use modern JavaScript features
+  transpilePackages: ['undici', 'firebase', '@firebase/auth', '@firebase/firestore'],
+  
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Add fallbacks for Node.js modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

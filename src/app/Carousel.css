@@ -1,0 +1,396 @@
+.landing-carousel-container {
+  width: 100%;
+
+  height: clamp(73vh, calc(70vw + 200px), 80vh);
+
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-carousel-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 0;
+}
+
+.landing-carousel-background.active {
+  opacity: 1;
+}
+
+.landing-carousel-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(10px);
+}
+
+.landing-carousel-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(7, 70, 9, 0.5);
+  z-index: 1;
+}
+
+/* Image Slide Wrapper */
+.landing-carousel-container .carousel-slide {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-color: var(--accent-color);
+}
+
+/* Images */
+.landing-carousel-container .carousel-image {
+  position: absolute;
+  cursor: pointer;
+  width: 80%;
+  height: 80vh;
+  object-fit: cover;
+  opacity: 0;
+  border-radius: 0;
+  margin: 0px;
+  transform: translateX(30%);
+  transition:
+    opacity 1s ease-in-out,
+    transform 1.2s ease-in-out;
+}
+
+.landing-carousel-container .carousel-image:not(.active) {
+  pointer-events: none;
+}
+
+.landing-carousel-container .carousel-image.active {
+  opacity: 1;
+  transform: translateX(25%);
+}
+
+.landing-carousel-container .carousel-image.previous {
+  opacity: 0;
+  transform: translateX(25%) !important;
+}
+
+.landing-carousel-container .custom-dots {
+  position: absolute;
+  bottom: 100px;
+  left: 5%;
+  width: 50%;
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  z-index: 10;
+}
+
+.landing-carousel-container .custom-dot {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Number Inside Indicator */
+.landing-carousel-container .dot-number {
+  font-family: "Poppins", sans-serif;
+  position: absolute;
+  z-index: 2;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  opacity: 0.3;
+  transition: opacity 0.5s ease-in-out;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Number fully visible when active */
+.landing-carousel-container .custom-dot.active .dot-number,
+.landing-carousel-container .custom-dot:hover .dot-number {
+  opacity: 1;
+}
+
+/* SVG Circle */
+.landing-carousel-container .progress-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+/* Background Circle */
+.landing-carousel-container .progress-background {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 4;
+  opacity: 0.3;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Fully fade in background when active */
+.landing-carousel-container .custom-dot.active .progress-background,
+.landing-carousel-container .custom-dot:hover .progress-background {
+  opacity: 1;
+}
+
+/* Progress Bar Circle */
+.landing-carousel-container .carousel-progress-bar {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 100, 100;
+  stroke-dashoffset: 100;
+  transition:
+    stroke-dashoffset 3s linear,
+    opacity 0.5s ease-in-out;
+  opacity: 0;
+}
+
+/* Fade In and Animate Progress for Active Dot */
+.landing-carousel-container .custom-dot.active .carousel-progress-bar {
+  animation: fillCircle 3s linear forwards;
+  opacity: 1;
+}
+
+/* Fade Out When Progress Ends */
+@keyframes fillCircle {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* Left Gradient Overlay */
+.left-gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  backdrop-filter: blur(5px);
+
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-color) 100%, transparent) 0%,
+    color-mix(in srgb, var(--accent-color) 100%, transparent) 50%,
+    color-mix(in srgb, var(--accent-color) 80%, transparent) 75%,
+    color-mix(in srgb, var(--accent-color) 60%, transparent) 90%,
+    transparent 100%
+  );
+
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 65%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.carousel-text-container {
+  position: absolute;
+  top: 25%;
+  left: 5%;
+  transform: translateY(-40%);
+  color: white;
+  z-index: 2;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.carousel-text {
+  position: absolute;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition:
+    opacity 0.8s ease-in-out,
+    transform 2s ease-in-out !important;
+}
+
+.carousel-text.hidden {
+  pointer-events: none;
+}
+
+.carousel-header {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0px;
+}
+
+.carousel-subtitle {
+  margin-top: 20px;
+  font-size: 1.5rem;
+}
+
+.carousel-text.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* CTA button */
+.carousel-cta {
+  z-index: 3;
+  margin-top: 20px;
+  padding: 12px 24px;
+  border-radius: 5px;
+  background: #f8aa43;
+  color: #5e3700;
+  font-weight: bolder;
+  border: none;
+  cursor: pointer;
+  position: absolute !important;
+  font-size: 16px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition:
+    background 0.3s ease-in-out,
+    color 0.3s ease-in-out,
+    opacity 0.8s ease-in-out,
+    transform 2s ease-in-out !important;
+}
+
+.carousel-cta:hover {
+  background: #ff9500 !important;
+  color: #fff !important;
+}
+
+.carousel-cta.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.carousel-cta.hidden {
+  opacity: 0;
+  transform: translateX(0px) !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 1280px) {
+  .landing-carousel-container .carousel-image {
+    transform: translateX(0%) !important;
+    transform: translateY(-30%) !important;
+  }
+
+  .landing-carousel-container .carousel-image.active {
+    opacity: 1;
+    transform: translateX(0%) !important;
+    transform: translateY(-25%) !important;
+  }
+
+  .landing-carousel-container .carousel-image.previous {
+    opacity: 0;
+    transform: translateX(0%) !important;
+    transform: translateY(-25%) !important;
+  }
+
+  .landing-carousel-container .carousel-image {
+    width: 100%;
+    height: 100vh;
+    object-fit: contain;
+  }
+
+  .landing-carousel-container .custom-dots {
+    position: absolute;
+    bottom: 30px;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .left-gradient-overlay {
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    height: 73%;
+    backdrop-filter: blur(5px);
+
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--accent-color) 100%, transparent) 0%,
+      color-mix(in srgb, var(--accent-color) 100%, transparent) 50%,
+      color-mix(in srgb, var(--accent-color) 80%, transparent) 75%,
+      color-mix(in srgb, var(--accent-color) 60%, transparent) 90%,
+      transparent 100%
+    );
+
+    mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 65%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  .carousel-text-container {
+    top: auto;
+    bottom: 40%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 90%;
+    height: 10%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .carousel-header {
+    font-size: clamp(3rem, 5vw, 3.5rem);
+  }
+
+  .carousel-subtitle {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    margin-top: 0px;
+  }
+
+  .carousel-text {
+    transform: translateX(0px);
+    transform: translateY(10px);
+  }
+
+  .carousel-text.visible {
+    opacity: 1;
+    transform: translateX(0);
+    transform: translateY(0px);
+  }
+
+  .carousel-text.hidden {
+    opacity: 0;
+    transform: translateX(0);
+    transform: translateY(10px) !important;
+  }
+
+  .carousel-cta {
+    position: relative !important;
+    margin-top: 0px;
+    align-self: center;
+  }
+}

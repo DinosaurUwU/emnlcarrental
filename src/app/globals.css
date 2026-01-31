@@ -1,42 +1,40 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+body,
 html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
+#root {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body {
+  font-family: "Open Sans", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Default */
+:root {
+  --accent-color: #074609;
+  --supporting-color: #133c09;
+  --light-color: #ffffff;
+}
+
+/* Lime */
+:root[data-theme="clover"] {
+  --accent-color: #28a745;
+  --supporting-color: #218838;
+  --light-color: #f1f1f1;
+}
+
+/* November */
+:root[data-theme="november"] {
+  --accent-color: #b3541e;
+  --supporting-color: #8c3a13;
+  --light-color: #fff8f0;
+}
+
+/* December*/
+:root[data-theme="december"] {
+  --accent-color: #b3001b;
+  --supporting-color: #0d4d1a;
+  --light-color: #f9f9f9;
 }

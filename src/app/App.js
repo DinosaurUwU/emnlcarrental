@@ -1,10 +1,26 @@
-"use client";
+// App.js
 import React, { useState, useEffect, useRef } from "react";
-import { useUser } from "./lib/UserContext";
-import LandingPage from "./LandingPage";
-import BookingPage from "./users/BookingPage";
+import { Routes, Route } from "react-router-dom";
+import { UserProvider, useUser } from "./lib/UserContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
-function Home() {
+import LandingPage from "./LandingPage";
+import FleetDetails from "./fleet-details/FleetDetails";
+import About from "./about/page";
+import Contact from "./contact/page";
+import AdminDashboard from "./admin/AdminDashboard";
+import AccountDashboard from "./users/AccountDashboard";
+import Login from "./auth/login/page";
+import BookingPage from "./users/BookingPage";
+import InfoPage from "./users/InfoPage";
+import NotFound from "./NotFound";
+
+import "./styles/theme.css";
+
+// import ImportData from "./admin/importData";
+
+// Inner App (can use useUser)
+function AppContent() {
   const {
     user,
     isActivatingBooking,
@@ -100,7 +116,48 @@ function Home() {
 
   return (
     <>
-      <LandingPage openBooking={openBooking} />
+      <Routes>
+        <Route path="/" element={<LandingPage openBooking={openBooking} />} />
+        <Route
+          path="/fleet-details"
+          element={<FleetDetails openBooking={openBooking} />}
+        />
+        <Route
+          path="/fleet-details/:category"
+          element={<FleetDetails openBooking={openBooking} />}
+        />
+        <Route path="/about" element={<About openBooking={openBooking} />} />
+        <Route
+          path="/contact"
+          element={<Contact openBooking={openBooking} />}
+        />
+        <Route path="/auth/login" element={<Login />} />
+
+        {/* Admin Route - Only for admin */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute onlyAdmin>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* User Route - Only for regular users */}
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute onlyUser>
+              <AccountDashboard openBooking={openBooking} />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Public Booking Page */}
+        <Route path="/booking" element={<BookingPage />} />
+        <Route path="/info" element={<InfoPage />} openBooking={openBooking} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
 
       {/* Booking Overlay */}
       {isBookingOpen && (
@@ -271,8 +328,9 @@ function Home() {
                 className="confirm-proceed-btn"
                 onClick={async () => {
                   const res = await sendVerificationEmail();
+
                   if (res.ok) {
-                    setVerifyTargetEmail(res.email);
+                    setVerifyTargetEmail(res.email); // Store email for overlay
                     setShowVerifyInstructions(true);
                   } else {
                     alert("Failed to send verification email. Try again.");
@@ -337,4 +395,14 @@ function Home() {
   );
 }
 
-export default Home;
+// Outer App
+function App() {
+  return (
+    <UserProvider>
+      {/* <ImportData /> */}
+      <AppContent />
+    </UserProvider>
+  );
+}
+
+export default App;
