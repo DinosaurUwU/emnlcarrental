@@ -125,10 +125,10 @@ function Carousel() {
     setTimeout(() => setIsPaused(false), 6000);
   };
 
-  // Only render if images are loaded
-  if (carouselImages.length === 0) {
-    return <div>Loading carousel...</div>;
-  }
+  // // Only render if images are loaded
+  // if (carouselImages.length === 0) {
+  //   return <div>Loading carousel...</div>;
+  // }
 
   return (
     <div className="landing-carousel-container">
