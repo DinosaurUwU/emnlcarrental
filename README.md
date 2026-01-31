@@ -1,4 +1,13 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EMNL Car Rental
+
+This is a [Next.js](https://nextjs.org) project for EMNL Car Rental Services in Ormoc City, Leyte.
+
+## Features
+
+- Browse available vehicles by category (Sedan, SUV, MPV, Van, Pickup)
+- Online booking system
+- User authentication with Firebase
+- Admin dashboard for managing bookings and fleet
 
 ## Getting Started
 
@@ -16,9 +25,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/` - Next.js App Router pages
+- `src/app/component/` - Reusable components (Header, Footer, etc.)
+- `src/app/users/` - User dashboard pages
+- `src/app/admin/` - Admin dashboard pages
+- `src/app/auth/` - Authentication pages
+- `src/app/lib/` - Firebase and context configuration
 
 ## Learn More
 
@@ -26,8 +40,6 @@ To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
