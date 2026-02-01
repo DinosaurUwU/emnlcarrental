@@ -119,7 +119,7 @@
   object-position: -70% 50%;
 }
 
-/* Full-height overlay with solid-to-transparent gradient */
+
 .step-overlay {
   position: absolute;
   left: 0;
@@ -160,7 +160,7 @@
   flex-grow: 1;
 }
 
-/* Header with icon and h3 */
+
 .step-header {
   display: flex;
   justify-content: space-between;
