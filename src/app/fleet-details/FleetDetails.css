@@ -1430,8 +1430,8 @@ margin-bottom: 0px;
 }
 
 .details-pricing .price-amount {
+  font-family: "Montserrat", sans-serif !important;
   font-size: 1.8rem;
-  font-family: "Montserrat", sans-serif;
   font-weight: 900;
   color: var(--accent-color);
   display: block;

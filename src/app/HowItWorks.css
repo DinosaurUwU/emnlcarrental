@@ -1,67 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .how-it-works {
   padding: 50px 20px 100px;
   text-align: center;
@@ -119,7 +55,6 @@
   object-position: -70% 50%;
 }
 
-
 .step-overlay {
   position: absolute;
   left: 0;
@@ -160,7 +95,6 @@
   flex-grow: 1;
 }
 
-
 .step-header {
   display: flex;
   justify-content: space-between;
@@ -169,7 +103,6 @@
   text-align: right;
 }
 
-/* Left-positioned step icon */
 .step-icon-left {
   height: 56px;
   width: auto;
@@ -190,7 +123,6 @@
   font-size: 1em;
   color: var(--accent-color);
   margin: 0px;
-
 }
 
 @media (max-width: 680px) {
@@ -203,7 +135,7 @@
     padding: 0;
     margin: 0 auto;
   }
-  
+
   .step-container {
     width: calc(33.33% - 20px);
     height: 350px;
@@ -221,24 +153,17 @@
   }
 }
 
-  
-
-
-
-
-
-
 @media (max-width: 680px) {
   .steps {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* Ensures no gaps on the sides */
+    justify-content: center;
     gap: 20px;
     width: 100%;
     padding: 0;
     margin: 0 auto;
   }
-  
+
   .step-container {
     width: calc(33.33% - 20px);
     height: 350px;
@@ -263,9 +188,5 @@
 
   .step-overlay span {
     transform: translate(-35%, -50%);
-  } 
+  }
 }
-
-
-
-

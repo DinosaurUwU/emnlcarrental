@@ -1105,6 +1105,15 @@ const Header = ({
               accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
             }`}
           >
+              <div
+    className="dropdown-item"
+    onClick={() => {
+  setAccountDropdownOpen(false);
+  router.push("/");
+}}
+  >
+    Home
+  </div>
             <div
               className="dropdown-item"
               onClick={() => {
