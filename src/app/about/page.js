@@ -8,16 +8,27 @@ import "./About.css";
 function About({ openBooking }) {
   const { fetchImageFromFirestore } = useUser();
   const [aboutBackground, setAboutBackground] = useState("");
-
+const [isLoading, setIsLoading] = useState(true);
   const aboutSectionRef = useRef(null);
   const contentRef = useRef(null);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const fetchAboutBackground = async () => {
+  //     const result = await fetchImageFromFirestore("AboutPage_0");
+  //     if (result) {
+  //       setAboutBackground(result.base64);
+  //     }
+  //   };
+  //   fetchAboutBackground();
+  // }, [fetchImageFromFirestore]);
+
+   useEffect(() => {
     const fetchAboutBackground = async () => {
       const result = await fetchImageFromFirestore("AboutPage_0");
       if (result) {
         setAboutBackground(result.base64);
       }
+      setIsLoading(false); // Always stop loading
     };
     fetchAboutBackground();
   }, [fetchImageFromFirestore]);
@@ -55,7 +66,7 @@ function About({ openBooking }) {
         style={{
   backgroundImage: aboutBackground
     ? `url(${aboutBackground})`
-    : 'url(/assets/images/avanza.png)',
+    : 'url(/assets/images/about.png)',
 }}
       >
         <div className="gradient-overlay"></div>

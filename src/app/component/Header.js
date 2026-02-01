@@ -321,7 +321,7 @@ function Header() {
               <li>
                 <Link
                   href="/about"
-                  className={pathname === "/about/" ? "active" : ""}
+                  className={pathname === "/about" ? "active" : ""}
                 >
                   About
                 </Link>
@@ -329,7 +329,7 @@ function Header() {
               <li>
                 <Link
                   href="/contact"
-                  className={pathname === "/contact/" ? "active" : ""}
+                  className={pathname === "/contact" ? "active" : ""}
                 >
                   Contact
                 </Link>

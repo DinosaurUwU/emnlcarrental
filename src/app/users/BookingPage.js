@@ -2084,7 +2084,8 @@ onClick={async () => {
     alt="Selected Car"
     className={`booking-image ${imageAnimation}`}
     onClick={() => {
-      document.querySelector(`[data-pswp-index="0"]`)?.click();
+      // document.querySelector(`[data-pswp-index="0"]`)?.click();
+       document.querySelector(`.booking-gallery-hidden [data-pswp-index="0"]`)?.click();
     }}
     onAnimationEnd={() => setImageAnimation("")}
   />
@@ -2539,7 +2540,10 @@ onChange={(e) => {
       </form>
 
 
-<div ref={galleryRef} style={{ display: "none" }}>
+{/* <div ref={galleryRef} style={{ display: "none" }}> */}
+
+<div ref={galleryRef} className="booking-gallery-hidden" style={{ display: "none" }}>
+
   <a
     href={previewImage}
     data-pswp-width={2873}   // actual image width
