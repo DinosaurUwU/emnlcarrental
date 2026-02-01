@@ -12,32 +12,15 @@ function About({ openBooking }) {
   const aboutSectionRef = useRef(null);
   const contentRef = useRef(null);
 
-  // useEffect(() => {
-  //   const fetchAboutBackground = async () => {
-  //     const result = await fetchImageFromFirestore("AboutPage_0");
-  //     if (result) {
-  //       setAboutBackground(result.base64);
-  //     }
-  //   };
-  //   fetchAboutBackground();
-  // }, [fetchImageFromFirestore]);
-
   useEffect(() => {
-  const fetchAboutBackground = async () => {
-    console.log("Fetching AboutPage_0 from Firestore...");
-    const result = await fetchImageFromFirestore("AboutPage_0");
-    console.log("Firestore result:", result);
-    
-    if (result) {
-      setAboutBackground(result.base64);
-      console.log("Image loaded from Firestore");
-    } else {
-      console.log("No image found in Firestore, will use local fallback");
-    }
-  };
-  fetchAboutBackground();
-}, [fetchImageFromFirestore]);
-
+    const fetchAboutBackground = async () => {
+      const result = await fetchImageFromFirestore("AboutPage_0");
+      if (result) {
+        setAboutBackground(result.base64);
+      }
+    };
+    fetchAboutBackground();
+  }, [fetchImageFromFirestore]);
 
   useEffect(() => {
     const handleScroll = () => {
