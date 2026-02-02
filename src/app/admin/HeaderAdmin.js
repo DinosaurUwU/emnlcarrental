@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
+import { FiMenu } from 'react-icons/fi';
+
 const Header = ({
   onNavClick,
   onCollapseChange,
@@ -993,11 +995,10 @@ const Header = ({
       >
         {/* Icons in main content area */}
         <div className="main-icons">
-          <img
-            src="/assets/menu.svg"
-            className="hamburger-icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          />
+          <FiMenu 
+  className="hamburger-icon"
+  onClick={() => setSidebarOpen(!sidebarOpen)}
+/>
           <div
             className="logo"
             style={{ marginLeft: "30px", pointerEvents: "none" }}
