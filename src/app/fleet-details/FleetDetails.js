@@ -134,7 +134,7 @@ const FleetDetails = ({ openBooking }) => {
         } catch {
           return {
             [unit.imageId]: {
-              base64: "/images/default.png",
+              base64: "/assets/images/default.png",
               updatedAt: Date.now(),
             },
           };
@@ -370,8 +370,8 @@ const FleetDetails = ({ openBooking }) => {
     cardRef.current = event.currentTarget;
     setExpandedCard(car);
     setCurrentOverlayImage(
-      fetchedImages[car.imageId]?.base64 || "/images/default.png",
-    ); // Initialize with main image
+      fetchedImages[car.imageId]?.base64 || "/assets/images/default.png",
+    );
 
     setIsOverlayVisible(true);
     document.body.classList.add("no-scroll");
@@ -425,36 +425,50 @@ const FleetDetails = ({ openBooking }) => {
 
       <div className="navbar-overlay" ref={navbarOverlayRef}>
         <div className="navbar">
-          <button
-            className={activeSection === "sedan" ? "active" : ""}
-            onClick={() => scrollToSection(sedanRef)}
-          >
-            SEDAN
-          </button>
-          <button
-            className={activeSection === "suv" ? "active" : ""}
-            onClick={() => scrollToSection(suvRef)}
-          >
-            SUV
-          </button>
-          <button
-            className={activeSection === "mpv" ? "active" : ""}
-            onClick={() => scrollToSection(mpvRef)}
-          >
-            MPV
-          </button>
-          <button
-            className={activeSection === "van" ? "active" : ""}
-            onClick={() => scrollToSection(vanRef)}
-          >
-            VAN
-          </button>
-          <button
-            className={activeSection === "pickup" ? "active" : ""}
-            onClick={() => scrollToSection(pickupRef)}
-          >
-            PICKUP
-          </button>
+          {sedanUnits.length > 0 && (
+            <button
+              className={activeSection === "sedan" ? "active" : ""}
+              onClick={() => scrollToSection(sedanRef)}
+            >
+              SEDAN
+            </button>
+          )}
+
+          {suvUnits.length > 0 && (
+            <button
+              className={activeSection === "suv" ? "active" : ""}
+              onClick={() => scrollToSection(suvRef)}
+            >
+              SUV
+            </button>
+          )}
+
+          {mpvUnits.length > 0 && (
+            <button
+              className={activeSection === "mpv" ? "active" : ""}
+              onClick={() => scrollToSection(mpvRef)}
+            >
+              MPV
+            </button>
+          )}
+
+          {vanUnits.length > 0 && (
+            <button
+              className={activeSection === "van" ? "active" : ""}
+              onClick={() => scrollToSection(vanRef)}
+            >
+              VAN
+            </button>
+          )}
+
+          {pickupUnits.length > 0 && (
+            <button
+              className={activeSection === "pickup" ? "active" : ""}
+              onClick={() => scrollToSection(pickupRef)}
+            >
+              PICKUP
+            </button>
+          )}
         </div>
       </div>
 
@@ -524,388 +538,408 @@ const FleetDetails = ({ openBooking }) => {
         </button>
       </div>
 
-      <section className="sedan-diagonal-section">
-        <div className="sedan-diagonal-strip">
-          <div className="sedan-diagonal-scroll">
-            <div className="diagonal-text">
-              SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN&nbsp;
-            </div>
-            <div className="diagonal-text">
-              SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN&nbsp;
-            </div>
-          </div>
-        </div>
-
-        <div
-          ref={sedanRef}
-          id="sedan-section"
-          className="category-section sedan-section"
-        >
-          <h2>SEDAN</h2>
-
-          <div className="car-list">
-            {sedanUnits.map((car, index) => (
-              <div
-                key={index}
-                className="car-card"
-                onClick={(event) => openOverlay(car, event)}
-              >
-                <div className="car-image-container">
-                  <img
-                    src={
-                      fetchedImages[car.imageId]?.base64 ||
-                      "/images/default.png"
-                    }
-                    alt={car.name}
-                    className="car-image"
-                  />
-                </div>
-
-                {/* Content Overlay */}
-                <div className="car-content-overlay">
-                  <div className="car-content-wrapper">
-                    <h3
-                      style={{
-                        textTransform: "uppercase",
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: "900",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {" "}
-                      <span
-                        style={{
-                          fontSize: "0.6em",
-                          textTransform: "uppercase",
-                          fontFamily: "Arial, sans-serif",
-                          fontWeight: "900",
-                        }}
-                      >
-                        {car.brand}
-                        <br />
-                      </span>
-                      {car.name}
-                    </h3>
-
-                    <p
-                      className={`availability ${
-                        car.hidden ? "rented" : "available"
-                      }`}
-                    >
-                      {car.hidden ? "Ongoing Rent" : "Available"}
-                    </p>
-                  </div>
-                  <button className="view-details">View</button>
-                </div>
+      {sedanUnits.length > 0 && (
+        <section className="sedan-diagonal-section" ref={sedanRef}>
+          <div className="sedan-diagonal-strip">
+            <div className="sedan-diagonal-scroll">
+              <div className="diagonal-text">
+                SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN&nbsp;
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="suv-diagonal-section">
-        <div className="suv-diagonal-strip">
-          <div className="suv-diagonal-scroll">
-            <div className="diagonal-text">SUV SUV SUV SUV SUV SUV&nbsp;</div>
-            <div className="diagonal-text"> SUV SUV SUV SUV SUV SUV&nbsp;</div>
-          </div>
-        </div>
-
-        <div
-          ref={suvRef}
-          id="suv-section"
-          className="category-section suv-section"
-        >
-          <h2>SUV</h2>
-
-          <div className="car-list">
-            {suvUnits.map((car, index) => (
-              <div
-                key={index}
-                className="car-card"
-                onClick={(event) => openOverlay(car, event)}
-              >
-                <div className="car-image-container">
-                  <img
-                    src={
-                      fetchedImages[car.imageId]?.base64 ||
-                      "/images/default.png"
-                    }
-                    alt={car.name}
-                    className="car-image"
-                  />
-                </div>
-
-                {/* Content Overlay */}
-                <div className="car-content-overlay">
-                  <div className="car-content-wrapper">
-                    <h3
-                      style={{
-                        textTransform: "uppercase",
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: "900",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {" "}
-                      <span
-                        style={{
-                          fontSize: "0.6em",
-                          textTransform: "uppercase",
-                          fontFamily: "Arial, sans-serif",
-                          fontWeight: "900",
-                        }}
-                      >
-                        {car.brand}
-                        <br />
-                      </span>
-                      {car.name}
-                    </h3>
-
-                    <p
-                      className={`availability ${
-                        car.hidden ? "rented" : "available"
-                      }`}
-                    >
-                      {car.hidden ? "Ongoing Rent" : "Available"}
-                    </p>
-                  </div>
-                  <button className="view-details">View</button>
-                </div>
+              <div className="diagonal-text">
+                SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN&nbsp;
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mpv-diagonal-section">
-        <div className="mpv-diagonal-strip">
-          <div className="mpv-diagonal-scroll">
-            <div className="diagonal-text">MPV MPV MPV MPV MPV MPV&nbsp;</div>
-            <div className="diagonal-text"> MPV MPV MPV MPV MPV MPV&nbsp;</div>
-          </div>
-        </div>
-
-        <div
-          ref={mpvRef}
-          id="mpv-section"
-          className="category-section mpv-section"
-        >
-          <h2>MPV</h2>
-
-          <div className="car-list">
-            {mpvUnits.map((car, index) => (
-              <div
-                key={index}
-                className="car-card"
-                onClick={(event) => openOverlay(car, event)}
-              >
-                <div className="car-image-container">
-                  <img
-                    src={
-                      fetchedImages[car.imageId]?.base64 ||
-                      "/images/default.png"
-                    }
-                    alt={car.name}
-                    className="car-image"
-                  />
-                </div>
-
-                {/* Content Overlay */}
-                <div className="car-content-overlay">
-                  <div className="car-content-wrapper">
-                    <h3
-                      style={{
-                        textTransform: "uppercase",
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: "900",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {" "}
-                      <span
-                        style={{
-                          fontSize: "0.6em",
-                          textTransform: "uppercase",
-                          fontFamily: "Arial, sans-serif",
-                          fontWeight: "900",
-                        }}
-                      >
-                        {car.brand}
-                        <br />
-                      </span>
-                      {car.name}
-                    </h3>
-
-                    <p
-                      className={`availability ${
-                        car.hidden ? "rented" : "available"
-                      }`}
-                    >
-                      {car.hidden ? "Ongoing Rent" : "Available"}
-                    </p>
-                  </div>
-                  <button className="view-details">View</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="van-diagonal-section">
-        <div className="van-diagonal-strip">
-          <div className="van-diagonal-scroll">
-            <div className="diagonal-text">VAN VAN VAN VAN VAN VAN&nbsp;</div>
-            <div className="diagonal-text"> VAN VAN VAN VAN VAN VAN&nbsp;</div>
-          </div>
-        </div>
-
-        <div
-          ref={vanRef}
-          id="van-section"
-          className="category-section van-section"
-        >
-          <h2>VAN</h2>
-
-          <div className="car-list">
-            {vanUnits.map((car, index) => (
-              <div
-                key={index}
-                className="car-card"
-                onClick={(event) => openOverlay(car, event)}
-              >
-                <div className="car-image-container">
-                  <img
-                    src={
-                      fetchedImages[car.imageId]?.base64 ||
-                      "/images/default.png"
-                    }
-                    alt={car.name}
-                    className="car-image"
-                  />
-                </div>
-
-                {/* Content Overlay */}
-                <div className="car-content-overlay">
-                  <div className="car-content-wrapper">
-                    <h3
-                      style={{
-                        textTransform: "uppercase",
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: "900",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {" "}
-                      <span
-                        style={{
-                          fontSize: "0.6em",
-                          textTransform: "uppercase",
-                          fontFamily: "Arial, sans-serif",
-                          fontWeight: "900",
-                        }}
-                      >
-                        {car.brand}
-                        <br />
-                      </span>
-                      {car.name}
-                    </h3>
-
-                    <p
-                      className={`availability ${
-                        car.hidden ? "rented" : "available"
-                      }`}
-                    >
-                      {car.hidden ? "Ongoing Rent" : "Available"}
-                    </p>
-                  </div>
-                  <button className="view-details">View</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="pickup-diagonal-section">
-        <div className="pickup-diagonal-strip">
-          <div className="pickup-diagonal-scroll">
-            <div className="diagonal-text">
-              PICKUP PICKUP PICKUP PICKUP PICKUP PICKUP&nbsp;
-            </div>
-            <div className="diagonal-text">
-              PICKUP PICKUP PICKUP PICKUP PICKUP PICKUP&nbsp;
             </div>
           </div>
-        </div>
 
-        <div
-          ref={pickupRef}
-          id="pickup-section"
-          className="category-section pickup-section"
-        >
-          <h2>PICKUP</h2>
+          <div
+            ref={sedanRef}
+            id="sedan-section"
+            className="category-section sedan-section"
+          >
+            <h2>SEDAN</h2>
 
-          <div className="car-list">
-            {pickupUnits.map((car, index) => (
-              <div
-                key={index}
-                className="car-card"
-                onClick={(event) => openOverlay(car, event)}
-              >
-                <div className="car-image-container">
-                  <img
-                    src={
-                      fetchedImages[car.imageId]?.base64 ||
-                      "/images/default.png"
-                    }
-                    alt={car.name}
-                    className="car-image"
-                  />
-                </div>
+            <div className="car-list">
+              {sedanUnits.map((car, index) => (
+                <div
+                  key={index}
+                  className="car-card"
+                  onClick={(event) => openOverlay(car, event)}
+                >
+                  <div className="car-image-container">
+                    <img
+  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+  alt={car.name}
+  className="car-image"
+  onLoad={(e) => e.target.style.opacity = 1}
+  onError={(e) => {
+    e.target.src = "/assets/images/default.png";
+  }}
+/>
 
-                {/* Content Overlay */}
-                <div className="car-content-overlay">
-                  <div className="car-content-wrapper">
-                    <h3
-                      style={{
-                        textTransform: "uppercase",
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: "900",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {" "}
-                      <span
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="car-content-overlay">
+                    <div className="car-content-wrapper">
+                      <h3
                         style={{
-                          fontSize: "0.6em",
                           textTransform: "uppercase",
-                          fontFamily: "Arial, sans-serif",
+                          fontFamily: "Montserrat, sans-serif",
                           fontWeight: "900",
+                          lineHeight: "1",
                         }}
                       >
-                        {car.brand}
-                        <br />
-                      </span>
-                      {car.name}
-                    </h3>
-                    <p
-                      className={`availability ${
-                        car.hidden ? "rented" : "available"
-                      }`}
-                    >
-                      {car.hidden ? "Ongoing Rent" : "Available"}
-                    </p>
-                  </div>
-                  <button className="view-details">View</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                        {" "}
+                        <span
+                          style={{
+                            fontSize: "0.6em",
+                            textTransform: "uppercase",
+                            fontFamily: "Arial, sans-serif",
+                            fontWeight: "900",
+                          }}
+                        >
+                          {car.brand}
+                          <br />
+                        </span>
+                        {car.name}
+                      </h3>
 
+                      <p
+                        className={`availability ${
+                          car.hidden ? "rented" : "available"
+                        }`}
+                      >
+                        {car.hidden ? "Ongoing Rent" : "Available"}
+                      </p>
+                    </div>
+                    <button className="view-details">View</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {suvUnits.length > 0 && (
+        <section className="suv-diagonal-section" ref={suvRef}>
+          <div className="suv-diagonal-strip">
+            <div className="suv-diagonal-scroll">
+              <div className="diagonal-text">SUV SUV SUV SUV SUV SUV&nbsp;</div>
+              <div className="diagonal-text">
+                {" "}
+                SUV SUV SUV SUV SUV SUV&nbsp;
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={suvRef}
+            id="suv-section"
+            className="category-section suv-section"
+          >
+            <h2>SUV</h2>
+
+            <div className="car-list">
+              {suvUnits.map((car, index) => (
+                <div
+                  key={index}
+                  className="car-card"
+                  onClick={(event) => openOverlay(car, event)}
+                >
+                  <div className="car-image-container">
+                    <img
+                      src={
+                        fetchedImages[car.imageId]?.base64 ||
+                        "/assets/images/default.png"
+                      }
+                      alt={car.name}
+                      className="car-image"
+                    />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="car-content-overlay">
+                    <div className="car-content-wrapper">
+                      <h3
+                        style={{
+                          textTransform: "uppercase",
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "900",
+                          lineHeight: "1",
+                        }}
+                      >
+                        {" "}
+                        <span
+                          style={{
+                            fontSize: "0.6em",
+                            textTransform: "uppercase",
+                            fontFamily: "Arial, sans-serif",
+                            fontWeight: "900",
+                          }}
+                        >
+                          {car.brand}
+                          <br />
+                        </span>
+                        {car.name}
+                      </h3>
+
+                      <p
+                        className={`availability ${
+                          car.hidden ? "rented" : "available"
+                        }`}
+                      >
+                        {car.hidden ? "Ongoing Rent" : "Available"}
+                      </p>
+                    </div>
+                    <button className="view-details">View</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {mpvUnits.length > 0 && (
+        <section className="mpv-diagonal-section" ref={mpvRef}>
+          <div className="mpv-diagonal-strip">
+            <div className="mpv-diagonal-scroll">
+              <div className="diagonal-text">MPV MPV MPV MPV MPV MPV&nbsp;</div>
+              <div className="diagonal-text">
+                {" "}
+                MPV MPV MPV MPV MPV MPV&nbsp;
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={mpvRef}
+            id="mpv-section"
+            className="category-section mpv-section"
+          >
+            <h2>MPV</h2>
+
+            <div className="car-list">
+              {mpvUnits.map((car, index) => (
+                <div
+                  key={index}
+                  className="car-card"
+                  onClick={(event) => openOverlay(car, event)}
+                >
+                  <div className="car-image-container">
+                    <img
+                      src={
+                        fetchedImages[car.imageId]?.base64 ||
+                        "/assets/images/default.png"
+                      }
+                      alt={car.name}
+                      className="car-image"
+                    />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="car-content-overlay">
+                    <div className="car-content-wrapper">
+                      <h3
+                        style={{
+                          textTransform: "uppercase",
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "900",
+                          lineHeight: "1",
+                        }}
+                      >
+                        {" "}
+                        <span
+                          style={{
+                            fontSize: "0.6em",
+                            textTransform: "uppercase",
+                            fontFamily: "Arial, sans-serif",
+                            fontWeight: "900",
+                          }}
+                        >
+                          {car.brand}
+                          <br />
+                        </span>
+                        {car.name}
+                      </h3>
+
+                      <p
+                        className={`availability ${
+                          car.hidden ? "rented" : "available"
+                        }`}
+                      >
+                        {car.hidden ? "Ongoing Rent" : "Available"}
+                      </p>
+                    </div>
+                    <button className="view-details">View</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {vanUnits.length > 0 && (
+        <section className="van-diagonal-section" ref={vanRef}>
+          <div className="van-diagonal-strip">
+            <div className="van-diagonal-scroll">
+              <div className="diagonal-text">VAN VAN VAN VAN VAN VAN&nbsp;</div>
+              <div className="diagonal-text">
+                {" "}
+                VAN VAN VAN VAN VAN VAN&nbsp;
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={vanRef}
+            id="van-section"
+            className="category-section van-section"
+          >
+            <h2>VAN</h2>
+
+            <div className="car-list">
+              {vanUnits.map((car, index) => (
+                <div
+                  key={index}
+                  className="car-card"
+                  onClick={(event) => openOverlay(car, event)}
+                >
+                  <div className="car-image-container">
+                    <img
+                      src={
+                        fetchedImages[car.imageId]?.base64 ||
+                        "/assets/images/default.png"
+                      }
+                      alt={car.name}
+                      className="car-image"
+                    />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="car-content-overlay">
+                    <div className="car-content-wrapper">
+                      <h3
+                        style={{
+                          textTransform: "uppercase",
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "900",
+                          lineHeight: "1",
+                        }}
+                      >
+                        {" "}
+                        <span
+                          style={{
+                            fontSize: "0.6em",
+                            textTransform: "uppercase",
+                            fontFamily: "Arial, sans-serif",
+                            fontWeight: "900",
+                          }}
+                        >
+                          {car.brand}
+                          <br />
+                        </span>
+                        {car.name}
+                      </h3>
+
+                      <p
+                        className={`availability ${
+                          car.hidden ? "rented" : "available"
+                        }`}
+                      >
+                        {car.hidden ? "Ongoing Rent" : "Available"}
+                      </p>
+                    </div>
+                    <button className="view-details">View</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {pickupUnits.length > 0 && (
+        <section className="pickup-diagonal-section" ref={pickupRef}>
+          <div className="pickup-diagonal-strip">
+            <div className="pickup-diagonal-scroll">
+              <div className="diagonal-text">
+                PICKUP PICKUP PICKUP PICKUP PICKUP PICKUP&nbsp;
+              </div>
+              <div className="diagonal-text">
+                PICKUP PICKUP PICKUP PICKUP PICKUP PICKUP&nbsp;
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={pickupRef}
+            id="pickup-section"
+            className="category-section pickup-section"
+          >
+            <h2>PICKUP</h2>
+
+            <div className="car-list">
+              {pickupUnits.map((car, index) => (
+                <div
+                  key={index}
+                  className="car-card"
+                  onClick={(event) => openOverlay(car, event)}
+                >
+                  <div className="car-image-container">
+                    <img
+                      src={
+                        fetchedImages[car.imageId]?.base64 ||
+                        "/assets/images/default.png"
+                      }
+                      alt={car.name}
+                      className="car-image"
+                    />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="car-content-overlay">
+                    <div className="car-content-wrapper">
+                      <h3
+                        style={{
+                          textTransform: "uppercase",
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "900",
+                          lineHeight: "1",
+                        }}
+                      >
+                        {" "}
+                        <span
+                          style={{
+                            fontSize: "0.6em",
+                            textTransform: "uppercase",
+                            fontFamily: "Arial, sans-serif",
+                            fontWeight: "900",
+                          }}
+                        >
+                          {car.brand}
+                          <br />
+                        </span>
+                        {car.name}
+                      </h3>
+                      <p
+                        className={`availability ${
+                          car.hidden ? "rented" : "available"
+                        }`}
+                      >
+                        {car.hidden ? "Ongoing Rent" : "Available"}
+                      </p>
+                    </div>
+                    <button className="view-details">View</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       {/* Expanded Details Overlay */}
       {expandedCard && (
         <>
@@ -1008,7 +1042,7 @@ const FleetDetails = ({ openBooking }) => {
                       carType: expandedCard.carType,
                       image:
                         fetchedImages[expandedCard.imageId]?.base64 ||
-                        "/images/default.png",
+                        "/assets/images/default.png",
                       drivingOption: "Self-Drive",
                       pickupOption: "Pickup",
                     });
@@ -1024,7 +1058,7 @@ const FleetDetails = ({ openBooking }) => {
                 src={
                   currentOverlayImage ||
                   fetchedImages[expandedCard?.imageId]?.base64 ||
-                  "/images/default.png"
+                  "/assets/images/default.png"
                 }
                 alt={expandedCard?.name || ""}
                 className="overlay-image"

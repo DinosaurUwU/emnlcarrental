@@ -97,30 +97,39 @@
 
 
 
-
-.social-svg {
-  color: var(--supporting-color);
-}
-
-.footer-section.social-icons {
+.social-icons {
   display: flex;
   gap: 10px;
 }
 
-.footer-section .social-icons img,
-.footer-section .social-icons .social-svg {
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.social-icon:hover .icon-wrapper {
+  transform: scale(1.2);
+}
+
+.social-img,
+.social-svg {
   width: 40px;
   height: 40px;
-  transition: all 0.3s ease;
+  color: var(--supporting-color); /* This makes currentColor work */
+  transition: color 0.3s ease;
 }
 
-.footer-section .social-icons a:hover img,
-.footer-section .social-icons a:hover .social-svg {
-  transform: scale(1.2);  
+.social-icon:hover .social-svg {
+  color: #1877F2; /* or whatever color you want on hover */
 }
-
-
-
 
 
 
