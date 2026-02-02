@@ -50,7 +50,6 @@ import { auth, db } from "./firebase";
 
 import { useRouter } from "next/navigation";
 
-
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
