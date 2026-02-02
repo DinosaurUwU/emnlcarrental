@@ -3303,7 +3303,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Deleting Unit"
                 className="car-gif"
               />
@@ -3359,7 +3359,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving unit..."
                 className="car-gif"
               />
@@ -3492,7 +3492,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving payment method..."
                 className="car-gif"
               />
@@ -3687,7 +3687,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving..."
                 className="car-gif"
               />
@@ -3864,7 +3864,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving..."
                 className="car-gif"
               />
@@ -4795,7 +4795,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving content..."
                 className="car-gif"
               />

@@ -1642,7 +1642,7 @@ const icons = [
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving admin profile..."
                 className="car-gif"
               />
@@ -1681,7 +1681,7 @@ const icons = [
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Resetting admin profile..."
                 className="car-gif"
               />
@@ -2279,7 +2279,7 @@ const icons = [
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Saving unit..."
                 className="car-gif"
               />
@@ -2382,7 +2382,7 @@ const icons = [
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Blocking user..."
                 className="car-gif"
               />
@@ -2474,7 +2474,7 @@ const icons = [
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Unblocking user..."
                 className="car-gif"
               />

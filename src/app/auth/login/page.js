@@ -711,7 +711,7 @@ const Login = () => {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Loading"
                 className="car-gif"
               />

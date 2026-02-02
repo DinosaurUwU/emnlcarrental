@@ -1472,7 +1472,7 @@ setSelectedCarId("");
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Submitting Car"
                 className="car-gif"
               />
@@ -1490,7 +1490,7 @@ setSelectedCarId("");
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Submitting Car"
                 className="car-gif"
               />
@@ -1507,7 +1507,7 @@ setSelectedCarId("");
       <div className="loading-container">
       <div className="loading-bar-road">
         <img
-          src="/images/submitting.gif"
+          src="/assets/images/submitting.gif"
           alt="Discarding Changes"
           className="car-gif"
         />
@@ -1544,7 +1544,7 @@ setSelectedCarId("");
     <div className="loading-container">
       <div className="loading-bar-road">
         <img
-          src="/images/submitting.gif"
+          src="/assets/images/submitting.gif"
           alt="Loading Saved Data"
           className="car-gif"
         />
@@ -1581,7 +1581,7 @@ setSelectedCarId("");
     <div className="loading-container">
       <div className="loading-bar-road">
         <img
-          src="/images/submitting.gif"
+          src="/assets/images/submitting.gif"
           alt="Discarding Saved Data"
           className="car-gif"
         />

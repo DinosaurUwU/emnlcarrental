@@ -214,7 +214,7 @@ function Home() {
           <div className="loading-container">
             <div className="loading-bar-road">
               <img
-                src="/images/submitting.gif"
+                src="/assets/images/submitting.gif"
                 alt="Processing Booking"
                 className="car-gif"
               />
