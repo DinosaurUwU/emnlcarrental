@@ -77,7 +77,7 @@ function Carousel() {
               /\.(png|jpe?g|svg)$/,
             ),
           );
-          fetchedImages.push(localImages[i] || ""); // Empty string or placeholder if no local image
+          fetchedImages.push(localImages[i] || "/assets/images/default.png"); // Empty string or placeholder if no local image
         }
       }
       setCarouselImages(fetchedImages);

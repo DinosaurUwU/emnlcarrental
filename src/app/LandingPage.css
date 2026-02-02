@@ -114,14 +114,14 @@
   transition: 0.3s;
   text-decoration: none;
   display: inline-block;
-  background-color: #b9b9b9;
-  color: var(--accent-color);
+  background-color: #cc821b;
+  color: white;
   transition: all 0.5s ease;
 }
 
 .cta-button-call-us:hover {
-  background-color: #ffffff;
-    box-shadow: 0 0 10px #fff;
+  background-color: #ff9100;
+    box-shadow: 0 0 10px #ff9100;
 }
 
 /* Wrapper for the images */

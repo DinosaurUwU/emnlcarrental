@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { useUser } from "../lib/UserContext";
+import { useBooking } from "../component/BookingProvider";
 import { useParams } from "next/navigation";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
@@ -8,7 +9,10 @@ import Header from "../component/Header";
 import Footer from "../component/Footer";
 import "./FleetDetails.css";
 
-const FleetDetails = ({ openBooking }) => {
+// const FleetDetails = ({ openBooking }) => {
+  const FleetDetails = () => {
+  const { openBooking } = useBooking();
+
   const { fleetDetailsUnits, fetchImageFromFirestore } = useUser();
   const [carouselImages, setCarouselImages] = useState([]);
 
@@ -254,15 +258,29 @@ const FleetDetails = ({ openBooking }) => {
     "Features",
   ];
 
-  useEffect(() => {
+    useEffect(() => {
+    if (carouselImages.length === 0) return;
+
     slideIntervalRef.current = setInterval(() => {
-      setCurrentSlide((prev) =>
-        prev === carouselImages.length - 1 ? 0 : prev + 1,
-      );
+      setCurrentSlide((prev) => {
+        if (prev >= carouselImages.length - 1) return 0;
+        return prev + 1;
+      });
     }, 3000);
 
     return () => clearInterval(slideIntervalRef.current);
-  }, []);
+  }, [carouselImages]);
+
+
+  // useEffect(() => {
+  //   slideIntervalRef.current = setInterval(() => {
+  //     setCurrentSlide((prev) =>
+  //       prev === carouselImages.length - 1 ? 0 : prev + 1,
+  //     );
+  //   }, 3000);
+
+  //   return () => clearInterval(slideIntervalRef.current);
+  // }, []);
 
   const goToSlide = (newIndex) => {
     setCurrentSlide(newIndex);
