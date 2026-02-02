@@ -197,3 +197,6 @@ dmypy.json
 .vscode/
 *.swp
 *.swo
+
+# Exception for Next.js app lib folder
+!src/app/lib/**
