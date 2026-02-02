@@ -245,7 +245,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [originalTestimonials, setOriginalTestimonials] = useState([
     {
       id: null,
-      img: "/assets/images/customer1.jpg",
+      img: "/assets/images/default.png",
       name: "Bruce Hardy",
       date: "Jan 15, 2025",
       review: "Great experience!",
@@ -253,7 +253,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     },
     {
       id: null,
-      img: "/assets/images/customer2.jpg",
+      img: "/assets/images/default.png",
       name: "Mark Smith",
       date: "Feb 18, 2025",
       review: "Loved the experience!",
@@ -261,7 +261,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     },
     {
       id: null,
-      img: "/assets/images/customer3.jpg",
+      img: "/assets/images/default.png",
       name: "Vera Duncan",
       date: "Mar 24, 2025",
       review: "Highly recommended!",
@@ -269,7 +269,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     },
     {
       id: null,
-      img: "/assets/images/customer4.jpg",
+      img: "/assets/images/default.png",
       name: "Sophia Lopez",
       date: "Apr 27, 2025",
       review: "Exceptional service!",
@@ -277,7 +277,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     },
     {
       id: null,
-      img: "/assets/images/customer5.jpg",
+      img: "/assets/images/default.png",
       name: "Daniel Carter",
       date: "May 31, 2025",
       review: "Great rental options!",
@@ -4832,6 +4832,5 @@ const AdminSettings = ({ subSection = "overview" }) => {
 };
 
 // export default AdminSettings;
-
 
 export default React.memo(AdminSettings);

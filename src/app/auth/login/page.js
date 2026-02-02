@@ -520,7 +520,7 @@ const Login = () => {
         </div>
 
         <div className="login form-section">
-          <img src="/assets/logo.svg" alt="Logo" className="login-logo" />
+          <img src="/assets/logo.png" alt="Logo" className="login-logo" />
 
           <h2>{isLogin ? "Log in to your Account" : "Create an Account"}</h2>
           <p className="auth-toggle-text">

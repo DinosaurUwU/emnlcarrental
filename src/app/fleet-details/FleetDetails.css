@@ -20,6 +20,8 @@ height: clamp(
 
   position: relative;
   overflow: hidden;
+
+  background: url("/assets/images/default.png") center/cover;
 }
 
 
