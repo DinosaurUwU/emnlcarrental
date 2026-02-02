@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import "./Footer.css";
 import Link from "next/link";
+import { FaFacebookSquare, FaInstagramSquare } from 'react-icons/fa';
+import { AiFillTikTok } from 'react-icons/ai';
 
 const Footer = () => {
   const [fbHovered, setFbHovered] = useState(false);
@@ -78,52 +80,60 @@ const Footer = () => {
 
         <div className="footer-section social">
           <h3 className="footer-section-h3">Follow Us</h3>
-          <div className="social-icons">
-            <a
-              href="https://www.facebook.com/EMNLOrmoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="social-icon"
-              onMouseEnter={() => setFbHovered(true)}
-              onMouseLeave={() => setFbHovered(false)}
-            >
-              {fbHovered ? (
-                <img src="/assets/fb-filled.png" alt="Facebook" />
-              ) : (
-                <img src="/assets/fb-outlined.svg" alt="Facebook" />
-              )}
-            </a>
+      
+      
 
-            <a
-              href="https://www.instagram.com/emnl.rentals.ph"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="social-icon"
-              onMouseEnter={() => setIgHovered(true)}
-              onMouseLeave={() => setIgHovered(false)}
-            >
-              {igHovered ? (
-                <img src="/assets/ig-filled.png" alt="Instagram" />
-              ) : (
-                <img src="/assets/ig-outlined.svg" alt="Instagram" />
-              )}
-            </a>
 
-            <a
-              href="https://www.tiktok.com/@emnl.rentals.ph"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="social-icon"
-              onMouseEnter={() => setTkHovered(true)}
-              onMouseLeave={() => setTkHovered(false)}
-            >
-              {tkHovered ? (
-                <img src="/assets/tk-filled.png" alt="Tiktok" />
-              ) : (
-                <img src="/assets/tk-outlined.svg" alt="Tiktok" />
-              )}
-            </a>
-          </div>
+<div className="social-icons">
+  <a
+    href="https://www.facebook.com/EMNLOrmoc"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon"
+    onMouseEnter={() => setFbHovered(true)}
+    onMouseLeave={() => setFbHovered(false)}
+  >
+    <FaFacebookSquare 
+      size={36}
+      fill={fbHovered ? "#1877F2" : "var(--accent-color)"} 
+    />
+  </a>
+
+  <a
+    href="https://www.instagram.com/emnl.rentals.ph"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon"
+    onMouseEnter={() => setIgHovered(true)}
+    onMouseLeave={() => setIgHovered(false)}
+  >
+    <FaInstagramSquare 
+      size={36}
+      fill={igHovered ? "#E4405F" : "var(--accent-color)"} 
+    />
+  </a>
+
+  <a
+    href="https://www.tiktok.com/@emnl.rentals.ph"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon"
+    onMouseEnter={() => setTkHovered(true)}
+    onMouseLeave={() => setTkHovered(false)}
+  >
+    <AiFillTikTok  
+      size={36}
+      fill={tkHovered ? "#000000" : "var(--accent-color)"} 
+    />
+  </a>
+</div>
+
+
+
+
+
+
+
         </div>
       </div>
       <div className="footer-bottom">

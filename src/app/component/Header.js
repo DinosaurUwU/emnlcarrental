@@ -206,7 +206,7 @@ function Header() {
       default:
         return (
           <img
-            src="/assets/logo.svg"
+            src="/assets/logo.png"
             alt="EMNL Logo"
             className="Header__logo"
           />

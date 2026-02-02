@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu } from 'react-icons/fi';
+import { FiMenu, FiUser} from 'react-icons/fi';
+import { BiSearch, BiSearchAlt } from 'react-icons/bi';
+
 
 const Header = ({
   onNavClick,
@@ -384,14 +386,18 @@ const Header = ({
     switch (theme) {
       case "december":
         return (
-          <img src="/assets/december-logo.svg" className="header-admin-logo" />
+          <img src="/assets/december-logo.png" className="header-admin-logo" />
         );
       case "november":
         return (
-          <img src="/assets/november-logo.svg" className="header-admin-logo" />
+          <img src="/assets/november-logo.png" className="header-admin-logo" />
+        );
+        case "clover":
+        return (
+          <img src="/assets/clover-logo.png" className="header-admin-logo" />
         );
       default:
-        return <img src="/assets/logo.svg" className="header-admin-logo" />;
+        return <img src="/assets/logo.png" className="header-admin-logo" />;
     }
   };
 
@@ -414,18 +420,19 @@ const Header = ({
     { name: "Admin", id: "settings", icon: "/assets/settings.png" },
   ];
 
-  const icons = [
-    {
-      outline: "/assets/search.svg",
-      filled: "/assets/search-filled.svg",
-      alt: "Search",
-    },
-    {
-      outline: "/assets/account.svg",
-      filled: "/assets/account-filled.svg",
-      alt: "Account",
-    },
-  ];
+const icons = [
+  {
+    outline: BiSearch,
+    filled: BiSearchAlt,  // close icon when hovered
+    alt: "Search",
+  },
+  {
+    outline: FiUser,
+    filled: FiUser,  // same icon when hovered
+    alt: "Account",
+  },
+];
+
 
   // SEARCH FUNCTION
   const routes = [
@@ -1050,54 +1057,52 @@ const Header = ({
               )}
             </div>
 
-            {icons.map((icon, index) => {
-              let IconComponent =
-                hoveredIcon === index ? icon.filled : icon.outline;
+{icons.map((icon, index) => {
+ const showFilled = hoveredIcon === index || 
+    (icon.alt === "Search" && searchExpanded);
+  const IconComponent = showFilled ? icon.filled : icon.outline;
 
-              if (icon.alt === "Account" && user?.profilePic) {
-                return (
-                  <img
-                    key={index}
-                    src={user.profilePic}
-                    alt="User Profile"
-                    className="main-icon account-icon"
-                    onError={(e) => {
-                      e.target.onerror = null;
+  if (icon.alt === "Account" && user?.profilePic) {
+    return (
+      <img
+        key={index}
+        src={user.profilePic}
+        alt="User Profile"
+        className="main-icon account-icon"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = "/assets/account.svg";
+        }}
+        onClick={() => setAccountDropdownOpen((prev) => !prev)}
+      />
+    );
+  }
 
-                      e.target.src = "/assets/account.svg";
-                    }}
-                    onClick={() => {
-                      setAccountDropdownOpen((prev) => !prev);
-                    }}
-                  />
-                );
-              }
+  return (
+    <IconComponent
+      key={index}
+      className={`main-icon ${icon.alt === "Account" ? "account-icon" : ""}`}
+      onMouseEnter={() => setHoveredIcon(index)}
+      onMouseLeave={() => setHoveredIcon(null)}
+      onClick={() => {
+        if (icon.alt === "Search") {
+          if (searchExpanded) {
+            setFadingOut(true);
+            setTimeout(() => {
+              setSearchExpanded(false);
+              setFadingOut(false);
+            }, 300);
+          } else {
+            setSearchExpanded(true);
+          }
+        } else if (icon.alt === "Account") {
+          setAccountDropdownOpen((prev) => !prev);
+        }
+      }}
+    />
+  );
+})}
 
-              return (
-                <img
-                  src={IconComponent}
-                  key={index}
-                  className={`main-icon ${icon.alt === "Account" ? "account-icon" : ""}`}
-                  onMouseEnter={() => setHoveredIcon(index)}
-                  onMouseLeave={() => setHoveredIcon(null)}
-                  onClick={() => {
-                    if (icon.alt === "Search") {
-                      if (searchExpanded) {
-                        setFadingOut(true);
-                        setTimeout(() => {
-                          setSearchExpanded(false);
-                          setFadingOut(false);
-                        }, 300);
-                      } else {
-                        setSearchExpanded(true);
-                      }
-                    } else if (icon.alt === "Account") {
-                      setAccountDropdownOpen((prev) => !prev);
-                    }
-                  }}
-                />
-              );
-            })}
           </div>
 
           {/* Account dropdown */}
@@ -2533,7 +2538,7 @@ const Header = ({
                 htmlFor="theme-select"
                 style={{
                   fontFamily: "Montserrat, san-serif",
-                  fontWeight: 900,
+                  fontWeight: 700,
                   textTransform: "uppercase",
                 }}
               >

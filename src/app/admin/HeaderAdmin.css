@@ -64,6 +64,7 @@
   padding: 0 10px 0 10px;
 }
 
+
 .theme-toggle .theme-option {
   display: flex;
   align-items: center;
@@ -726,7 +727,8 @@
 }
 
 .header-admin-container .search-input:focus {
-  border-color: var(--supporting-color);
+  box-shadow: 0 0 10px #28a745 !important;
+  border-color: #28a745 !important;
 }
 
 @keyframes fadeOutSlideOut {
@@ -942,7 +944,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 18px;
+  padding: 19px;
   position: relative;
   border-bottom: 1px solid var(--accent-color);
 }
@@ -1176,10 +1178,12 @@
   font-size: 16px;
   outline: none;
   font-family: "Poppins", sans-serif;
+  transition: all 0.5s ease;
 }
 
 .search-input:focus {
-  border-color: var(--supporting-color);
+    box-shadow: 0 0 10px #28a745 !important;
+  border-color: #28a745 !important;
 }
 
 .sidebar .search-input-container.visible {
