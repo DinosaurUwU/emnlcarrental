@@ -271,11 +271,11 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         } catch {
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         }
       });
@@ -483,7 +483,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   useEffect(() => {
     // Preload images to prevent flash when switching tabs or rendering units
     const imagesToPreload = unitData.map(
-      (unit) => unit.image || "/images/default.png",
+      (unit) => unit.image || "/assets/images/default.png",
     );
     imagesToPreload.forEach((src) => {
       const img = new Image();
@@ -3144,16 +3144,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                               setShowUnitDetailsOverlay(true);
                             }}
                           >
-                            {/* <td className="table-cell image-cell">
-                          <img
-                            src={car.unitImage || "/images/default.png"}
-                            alt={car.model}
-                            className="table-image"
-                            onError={(e) =>
-                              (e.target.src = "/images/default.png")
-                            }
-                          />
-                        </td> */}
+
 
                             <td className="table-cell image-cell">
                               {(() => {
@@ -3173,12 +3164,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                                 return (
                                   <img
-                                    src={image?.base64 || "/images/default.png"}
+                                    src={image?.base64 || "/assets/images/default.png"}
                                     alt={car.carName || car.model}
                                     className="unit-table-image"
                                     key={image?.updatedAt}
                                     onError={(e) =>
-                                      (e.target.src = "/images/default.png")
+                                      (e.target.src = "/assets/images/default.png")
                                     }
                                   />
                                 );
@@ -3496,7 +3487,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                             <img
                               src={
                                 fetchedImages[car.imageId]?.base64 ||
-                                "/images/default.png"
+                                "/assets/images/default.png"
                               }
                               alt={car.carName}
                               className="table-image-aff"
@@ -3876,12 +3867,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                             return (
                               <img
-                                src={image?.base64 || "/images/default.png"}
+                                src={image?.base64 || "/assets/images/default.png"}
                                 alt={booking.carName}
                                 className="unit-table-image"
                                 key={image?.updatedAt}
                                 onError={(e) =>
-                                  (e.target.src = "/images/default.png")
+                                  (e.target.src = "/assets/images/default.png")
                                 }
                               />
                             );

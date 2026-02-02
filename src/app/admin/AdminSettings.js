@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
+import { TbRefresh } from "react-icons/tb";
+
 
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
@@ -34,6 +36,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
     updateReview,
     fetchReviews,
   } = useUser();
+
+const [settingsRefreshKey, setSettingsRefreshKey] = useState(0);
+
 
   const [isAddingUnit, setIsAddingUnit] = useState(false);
   const [showSaveUnitConfirmDialog, setShowSaveUnitConfirmDialog] =
@@ -1146,11 +1151,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         } catch {
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         }
       });
@@ -1633,10 +1638,20 @@ const AdminSettings = ({ subSection = "overview" }) => {
     });
   }, [clientsList, clientsSearchTerm]);
 
-  
+
   return (
-    <div className="admin-settings">
-      <h2 className="admin-settings-title">Admin Settings</h2>
+    <div key={settingsRefreshKey} className="admin-settings">
+     <h2 className="admin-settings-title">
+  Admin Settings
+  <button
+    className="refresh-section-btn"
+    onClick={() => setSettingsRefreshKey((prev) => prev + 1)}
+    title="Refresh this section"
+  >
+    <TbRefresh size={18} />
+  </button>
+</h2>
+
 
       {/* Cars Section */}
       {(subSection === "overview" || subSection === "units") && (
@@ -1764,7 +1779,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       >
                         <td>
                           <img
-                            src={image?.base64 || "/images/default.png"}
+                            src={image?.base64 || "/assets/images/default.png"}
                             alt={car.name}
                             className="car-image"
                             key={image?.updatedAt}
@@ -2465,6 +2480,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       }}
                     >
                       <span className="plus-sign">+</span>
+                       <span className="recommended-dimensions">
+                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  </span>
                     </div>
                   </div>
                 )}
@@ -2659,6 +2677,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         }}
                       >
                         <span className="plus-sign">+</span>
+                         <span className="recommended-dimensions">
+                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  </span>
                       </div>
                     )}
                   </div>
@@ -2713,6 +2734,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                   >
                                     +
                                   </span>
+                                   <span className="recommended-dimensions">
+                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  </span>
                                 </div>
                                 {isEditing && (
                                   <div className="gallery-buttons">
@@ -2759,9 +2783,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                           } else {
                             // Placeholder for uploading new images
                             return (
-                              <div className="image-item">
+                              <div  key={index} className="image-item">
                                 <div
-                                  key={index}
+                                 
                                   className="unit-gallery-placeholder"
                                   onClick={() => {
                                     if (!isEditing) {
@@ -2774,6 +2798,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                   }}
                                 >
                                   <span className="plus-sign">+</span>
+
+ <span className="recommended-dimensions">
+                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  </span>
+
                                 </div>
                               </div>
                             );
@@ -4169,7 +4198,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                               >
                                 <td>
                                   <img
-                                    src={image?.base64 || "/images/default.png"}
+                                    src={image?.base64 || "/assets/images/default.png"}
                                     alt={booking.carName || "Car Image"}
                                     className="booking-car-image"
                                   />

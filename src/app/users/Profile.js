@@ -152,7 +152,7 @@ useEffect(() => {
       } catch {
         return {
           [unit.imageId]: {
-            base64: "/images/default.png",
+            base64: "/assets/images/default.png",
             updatedAt: Date.now(),
           },
         };
@@ -2207,7 +2207,7 @@ useEffect(() => {
 
   return (
     <img
-      src={image?.base64 || "/images/default.png"}
+      src={image?.base64 || "/assets/images/default.png"}
       alt={`Booking request: ${rental.carName}`}
       className="ongoing-unit-image"
       key={image?.updatedAt}
@@ -2567,7 +2567,7 @@ useEffect(() => {
 
   return (
     <img
-      src={image?.base64 || "/images/default.png"}
+      src={image?.base64 || "/assets/images/default.png"}
       alt={`Booking request: ${rental.carName}`}
       className="ongoing-unit-image"
       key={image?.updatedAt}
@@ -2706,7 +2706,7 @@ useEffect(() => {
 
   return (
     <img
-      src={image?.base64 || "/images/default.png"}
+      src={image?.base64 || "/assets/images/default.png"}
       alt="Rented Car"
       className="history-car-image"
       key={image?.updatedAt}

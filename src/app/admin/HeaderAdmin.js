@@ -243,11 +243,11 @@ const Header = ({
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         } catch {
           return {
-            [id]: { base64: "/images/default.png", updatedAt: Date.now() },
+            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
           };
         }
       });
@@ -1407,7 +1407,7 @@ const icons = [
                               >
                                 <td>
                                   <img
-                                    src={image?.base64 || "/images/default.png"}
+                                    src={image?.base64 || "/assets/images/default.png"}
                                     alt={booking.carName || "Car Image"}
                                     className="booking-car-image"
                                   />
@@ -1482,7 +1482,7 @@ const icons = [
                       fetchedImages[
                         selectedBooking.imageId ||
                           `${selectedBooking.plateNo}_main`
-                      ]?.base64 || "/images/default.png"
+                      ]?.base64 || "/assets/images/default.png"
                     }
                     className="unit-main-image"
                     alt={selectedBooking.carName}
