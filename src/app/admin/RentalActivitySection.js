@@ -1504,33 +1504,6 @@ const RentalActivitySection = ({ subSection }) => {
     setSelectedCustomerName("None");
   };
 
-  // Initialize formData when selectedUnitId changes
-useEffect(() => {
-  if (!selectedUnitId) return;
-
-  // Initialize formData for the selected unit if not already initialized
-  if (!formData[selectedUnitId]) {
-    const unit = allUnitData.find((u) => u.id === selectedUnitId);
-    if (unit) {
-      setFormData((prev) => ({
-        ...prev,
-        [selectedUnitId]: {
-          carName: unit.name,
-          plateNo: unit.plateNo,
-          carType: unit.carType,
-          price: unit.price,
-          driverRate: unit.driverRate,
-          extension: unit.extension,
-          deliveryFee: unit.deliveryFee,
-          ownerShare: unit.ownerShare,
-          // Add other default fields as needed
-        },
-      }));
-    }
-  }
-}, [selectedUnitId, allUnitData, formData]);
-
-
   useEffect(() => {
     if (!selectedUnitId) return;
 
@@ -7727,7 +7700,7 @@ useEffect(() => {
                   {selectedUnitId &&
                     (() => {
                       const selectedUnit =
-                        unitData.find((u) => u.id === selectedUnitId) || null;
+                        allUnitData.find((u) => u.id === selectedUnitId) || null;
 
                       if (!selectedUnit) {
                         return null;
