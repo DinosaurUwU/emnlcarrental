@@ -16,26 +16,6 @@
   text-align: center;
 }
 
-.refresh-section-btn {
-  background-color: var(--accent-color);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  margin-left: 10px;
-  transition: transform 0.3s ease;
-}
-
-.refresh-section-btn:hover {
-  transform: rotate(180deg);
-}
-
-
 /* Cars Section */
 .cars-section {
   box-sizing: border-box;

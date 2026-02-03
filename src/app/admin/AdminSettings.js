@@ -3,8 +3,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
-import { TbRefresh } from "react-icons/tb";
-
 
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
@@ -36,9 +34,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     updateReview,
     fetchReviews,
   } = useUser();
-
-const [settingsRefreshKey, setSettingsRefreshKey] = useState(0);
-
 
   const [isAddingUnit, setIsAddingUnit] = useState(false);
   const [showSaveUnitConfirmDialog, setShowSaveUnitConfirmDialog] =
@@ -1640,18 +1635,8 @@ const [settingsRefreshKey, setSettingsRefreshKey] = useState(0);
 
 
   return (
-    <div key={settingsRefreshKey} className="admin-settings">
-     <h2 className="admin-settings-title">
-  Admin Settings
-  <button
-    className="refresh-section-btn"
-    onClick={() => setSettingsRefreshKey((prev) => prev + 1)}
-    title="Refresh this section"
-  >
-    <TbRefresh size={18} />
-  </button>
-</h2>
-
+    <div className="admin-settings">
+      <h2 className="admin-settings-title">Admin Settings</h2>
 
       {/* Cars Section */}
       {(subSection === "overview" || subSection === "units") && (
