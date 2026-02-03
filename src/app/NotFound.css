@@ -198,7 +198,7 @@
     /* subtle white reflective glow */ 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Slightly lighter variant for Fleet */
+
 .fleet-button {
   background-color: #0077cc;
   box-shadow: 0 0 0 6px #0077cc, 0 3px 10px rgba(0, 0, 0, 0.3);
@@ -213,7 +213,7 @@
   margin-top: 40px;
   text-align: center;
   z-index: 20;
-  position: relative; /* creates a stacking context */
+  position: relative;
 }
 
 .helpful-links p {
@@ -229,7 +229,7 @@
   justify-content: center;
   flex-wrap: wrap;
   position: relative;
-  z-index: 1; /* buttons are on top layer */
+  z-index: 1;
 }
 
 /* Red circular sign style */
