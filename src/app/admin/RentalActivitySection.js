@@ -416,28 +416,29 @@ const RentalActivitySection = ({ subSection }) => {
     });
 
   // PICK-A-CAR DISPLAY
-  useEffect(() => {
-    if (unitData.length > 0 && completedBookingsAnalytics) {
-      let leastRentedUnit = null;
-      let leastTimes = Infinity;
+useEffect(() => {
+  if (allUnitData.length > 0) {
+    let leastRentedUnit = null;
+    let leastTimes = Infinity;
 
-      unitData.forEach((unit) => {
-        if (!unit.hidden) {
-          const analytics = completedBookingsAnalytics[unit.id];
-          const timesRented = analytics?.timesRented || 0; // default to 0 if never rented
+    allUnitData.forEach((unit) => {
+      if (!unit.hidden) {
+        const analytics = completedBookingsAnalytics?.[unit.id];  // ✅ Safe with optional chaining
+        const timesRented = analytics?.timesRented || 0;
 
-          if (timesRented < leastTimes) {
-            leastTimes = timesRented;
-            leastRentedUnit = unit.id;
-          }
+        if (timesRented < leastTimes) {
+          leastTimes = timesRented;
+          leastRentedUnit = unit.id;
         }
-      });
-
-      if (leastRentedUnit) {
-        setSelectedUnitId(leastRentedUnit);
       }
+    });
+
+    if (leastRentedUnit) {
+      setSelectedUnitId(leastRentedUnit);
     }
-  }, [unitData, completedBookingsAnalytics]);
+  }
+}, [allUnitData]); // ✅ Only depends on allUnitData
+
 
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
   useEffect(() => {
@@ -1504,19 +1505,25 @@ const RentalActivitySection = ({ subSection }) => {
     setSelectedCustomerName("None");
   };
 
-  useEffect(() => {
-    if (!selectedUnitId) return;
+useEffect(() => {
+  if (!selectedUnitId) return;
 
-    const filteredUnits = allUnitData.filter(
-      (unit) =>
-        filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
-    );
+  const filteredUnits = allUnitData.filter(
+    (unit) =>
+      filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
+  );
 
-    if (filteredUnits.some((u) => u.id === selectedUnitId)) return;
+  // If selected unit is still available and NOT hidden, keep it
+  const selectedUnit = filteredUnits.find((u) => u.id === selectedUnitId);
+  if (selectedUnit && !selectedUnit.hidden) return;
 
-    // pick next closest unit
-    setSelectedUnitId(filteredUnits[0]?.id || "");
-  }, [allUnitData, filterType, selectedUnitId]);
+  // Otherwise, pick the first NON-HIDDEN unit
+  const nonHiddenUnit = filteredUnits.find((u) => !u.hidden);
+  if (nonHiddenUnit) {
+    setSelectedUnitId(nonHiddenUnit.id);
+  }
+}, [allUnitData, filterType, selectedUnitId]);
+
 
   return (
     <>
