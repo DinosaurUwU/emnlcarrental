@@ -395,227 +395,364 @@ useEffect(() => {
   };
 
   // REAL-TIME SYNC BOOKINGS TO USERS
-  useEffect(() => {
-    // Only run when someone is logged in
-    if (!user?.uid || !adminUid) {
-      return;
-    }
+useEffect(() => {
+  // Only run when someone is logged in
+  if (!user?.uid || !adminUid) {
+    return;
+  }
 
-    let unsubscribeUsers;
-    let unsubscribeBookings;
+  let unsubscribeUsers;
 
-    // Sync bookings to a specific user
-    const syncBookingsToUser = async (userId, userEmail) => {
-      try {
-        const adminActiveRef = collection(
-          db,
-          "users",
-          adminUid,
-          "activeBookings",
-        );
-        const bookingQuery = query(
-          adminActiveRef,
-          where("email", "==", userEmail),
-        );
-        const bookingSnapshot = await getDocs(bookingQuery);
+  // Sync bookings to a specific user
+  const syncBookingsToUser = async (userId, userEmail) => {
+    try {
+      const adminActiveRef = collection(db, "users", adminUid, "activeBookings");
+      const bookingQuery = query(adminActiveRef, where("email", "==", userEmail));
+      const bookingSnapshot = await getDocs(bookingQuery);
 
-        if (!bookingSnapshot.empty) {
-          const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
-            const bookingData = docSnap.data();
+      if (!bookingSnapshot.empty) {
+        const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
+          const bookingData = docSnap.data();
 
-            const userBookingData = {
-              ...bookingData,
-              createdBy: userId,
-              syncedFromAdmin: true,
-              syncedAt: serverTimestamp(),
-            };
+          const userBookingData = {
+            ...bookingData,
+            createdBy: userId,
+            syncedFromAdmin: true,
+            syncedAt: serverTimestamp(),
+          };
 
-            // Save booking under user’s activeRentals
-            const userRentalRef = doc(
-              db,
-              "users",
-              userId,
-              "activeRentals",
-              docSnap.id,
-            );
-            await setDoc(userRentalRef, userBookingData);
+          // Save booking under user's activeRentals
+          const userRentalRef = doc(db, "users", userId, "activeRentals", docSnap.id);
+          await setDoc(userRentalRef, userBookingData);
 
-            // Update admin’s copy so cancelRental still works
-            const adminBookingRef = doc(
-              db,
-              "users",
-              adminUid,
-              "activeBookings",
-              docSnap.id,
-            );
-            await updateDoc(adminBookingRef, { createdBy: userId });
+          // Update admin's copy so cancelRental still works
+          const adminBookingRef = doc(db, "users", adminUid, "activeBookings", docSnap.id);
+          await updateDoc(adminBookingRef, { createdBy: userId });
 
-            console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
-          });
-
-          await Promise.all(copyPromises);
-          console.log(
-            `✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`,
-          );
-        } else {
-          console.log(`ℹ️ No admin bookings found for ${userEmail}`);
-        }
-      } catch (err) {
-        console.error("❌ Error syncing bookings to user:", err);
-      }
-    };
-
-    const setupSmartSync = async () => {
-      console.log(
-        "🔄 Setting up smart booking sync for:",
-        user.role,
-        user.email,
-      );
-
-      if (user.role === "admin") {
-        // ADMIN MODE
-        console.log("👑 Admin mode: Watching for new users + new bookings");
-
-        // Watch for brand new users being added
-        const usersRef = collection(db, "users");
-        const qUsers = query(usersRef, where("role", "==", "user"));
-
-        unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
-          const changes = snapshot.docChanges();
-          for (const change of changes) {
-            if (change.type === "added") {
-              const newUser = change.doc.data();
-              const newUserId = change.doc.id;
-              const newUserEmail = newUser.email?.trim().toLowerCase();
-
-              console.log("👤 New user detected:", newUserEmail);
-              if (newUserEmail) {
-                await syncBookingsToUser(newUserId, newUserEmail);
-              }
-            }
-          }
+          console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
         });
 
-        // Watch for new admin-created bookings
-        const adminActiveRef = collection(
-          db,
-          "users",
-          adminUid,
-          "activeBookings",
-        );
-        unsubscribeBookings = onSnapshot(adminActiveRef, async (snapshot) => {
-          const changes = snapshot.docChanges();
-          for (const change of changes) {
-            if (change.type === "added") {
-              const booking = change.doc.data();
-              const bookingId = change.doc.id;
-              const bookingEmail = booking.email?.trim().toLowerCase();
-
-              console.log(
-                "📦 New booking created by admin:",
-                bookingId,
-                bookingEmail,
-              );
-
-              if (bookingEmail) {
-                const usersRef = collection(db, "users");
-                const userMatchQ = query(
-                  usersRef,
-                  where("email", "==", bookingEmail),
-                );
-                const userSnap = await getDocs(userMatchQ);
-
-                if (!userSnap.empty) {
-                  const matchedUser = userSnap.docs[0];
-                  const matchedUserId = matchedUser.id;
-                  await syncBookingsToUser(matchedUserId, bookingEmail);
-                } else {
-                  console.log(
-                    `ℹ️ No user found yet for booking ${bookingId} (${bookingEmail})`,
-                  );
-                }
-              }
-            }
-          }
-        });
+        await Promise.all(copyPromises);
+        console.log(`✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`);
       } else {
-        // USER MODE
-        console.log("👤 User mode: Checking for existing admin bookings");
+        console.log(`ℹ️ No admin bookings found for ${userEmail}`);
+      }
+    } catch (err) {
+      console.error("❌ Error syncing bookings to user:", err);
+    }
+  };
 
-        // Prevent multiple syncs per session
-        if (lastSyncedUid === user.uid) {
-          console.log("⏭️ User already synced, skipping");
+  const setupSmartSync = async () => {
+    console.log("🔄 Setting up smart booking sync for:", user.role, user.email);
+
+    if (user.role === "admin") {
+      // ADMIN MODE - Watch for new users being added
+      console.log("👑 Admin mode: Watching for new users");
+
+      const usersRef = collection(db, "users");
+      const qUsers = query(usersRef, where("role", "==", "user"));
+
+      unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
+        const changes = snapshot.docChanges();
+        for (const change of changes) {
+          if (change.type === "added") {
+            const newUser = change.doc.data();
+            const newUserId = change.doc.id;
+            const newUserEmail = newUser.email?.trim().toLowerCase();
+
+            console.log("👤 New user detected:", newUserEmail);
+            if (newUserEmail) {
+              await syncBookingsToUser(newUserId, newUserEmail);
+            }
+          }
+        }
+      });
+
+      // REMOVED: adminActiveBookings listener (not needed)
+      // User mode already handles sync when user logs in
+      
+    } else {
+      // USER MODE - Check for existing admin bookings on login
+      console.log("👤 User mode: Checking for existing admin bookings");
+
+      if (lastSyncedUid === user.uid) {
+        console.log("⏭️ User already synced, skipping");
+        return;
+      }
+
+      try {
+        const adminActiveRef = collection(db, "users", adminUid, "activeBookings");
+        const emailToSearch = user.email?.trim().toLowerCase();
+        const q = query(adminActiveRef, where("email", "==", emailToSearch));
+
+        console.log("🔍 User searching for bookings with email:", emailToSearch);
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          console.log("✅ No admin bookings found for this user");
+          setLastSyncedUid(user.uid);
           return;
         }
 
-        try {
-          const adminActiveRef = collection(
-            db,
-            "users",
-            adminUid,
-            "activeBookings",
-          );
-          const emailToSearch = user.email?.trim().toLowerCase();
-          const q = query(adminActiveRef, where("email", "==", emailToSearch));
+        const copyPromises = snapshot.docs.map(async (docSnap) => {
+          const bookingData = docSnap.data();
 
-          console.log(
-            "🔍 User searching for bookings with email:",
-            emailToSearch,
-          );
-          const snapshot = await getDocs(q);
+          const userBookingData = {
+            ...bookingData,
+            createdBy: user.uid,
+            syncedFromAdmin: true,
+            syncedAt: serverTimestamp(),
+          };
 
-          if (snapshot.empty) {
-            console.log("✅ No admin bookings found for this user");
-            setLastSyncedUid(user.uid);
-            return;
-          }
+          const userRentalRef = doc(db, "users", user.uid, "activeRentals", docSnap.id);
+          await setDoc(userRentalRef, userBookingData);
 
-          const copyPromises = snapshot.docs.map(async (docSnap) => {
-            const bookingData = docSnap.data();
+          console.log("✅ User synced booking:", docSnap.id);
+        });
 
-            const userBookingData = {
-              ...bookingData,
-              createdBy: user.uid,
-              syncedFromAdmin: true,
-              syncedAt: serverTimestamp(),
-            };
-
-            const userRentalRef = doc(
-              db,
-              "users",
-              user.uid,
-              "activeRentals",
-              docSnap.id,
-            );
-            await setDoc(userRentalRef, userBookingData);
-
-            console.log("✅ User synced booking:", docSnap.id);
-          });
-
-          await Promise.all(copyPromises);
-          console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
-          setLastSyncedUid(user.uid);
-        } catch (error) {
-          console.error("❌ User sync error:", error);
-        }
+        await Promise.all(copyPromises);
+        console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
+        setLastSyncedUid(user.uid);
+      } catch (error) {
+        console.error("❌ User sync error:", error);
       }
-    };
+    }
+  };
 
-    // Start
-    setupSmartSync();
+  // Start
+  setupSmartSync();
 
-    // Cleanup
-    return () => {
-      if (unsubscribeUsers) {
-        console.log("🧹 Cleaning up user listener");
-        unsubscribeUsers();
-      }
-      if (unsubscribeBookings) {
-        console.log("🧹 Cleaning up booking listener");
-        unsubscribeBookings();
-      }
-    };
-  }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
+  // Cleanup
+  return () => {
+    if (unsubscribeUsers) {
+      console.log("🧹 Cleaning up user listener");
+      unsubscribeUsers();
+    }
+  };
+}, [user?.uid, user?.role, adminUid, lastSyncedUid]);
+
+
+  // useEffect(() => {
+  //   // Only run when someone is logged in
+  //   if (!user?.uid || !adminUid) {
+  //     return;
+  //   }
+
+  //   let unsubscribeUsers;
+  //   let unsubscribeBookings;
+
+  //   // Sync bookings to a specific user
+  //   const syncBookingsToUser = async (userId, userEmail) => {
+  //     try {
+  //       const adminActiveRef = collection(
+  //         db,
+  //         "users",
+  //         adminUid,
+  //         "activeBookings",
+  //       );
+  //       const bookingQuery = query(
+  //         adminActiveRef,
+  //         where("email", "==", userEmail),
+  //       );
+  //       const bookingSnapshot = await getDocs(bookingQuery);
+
+  //       if (!bookingSnapshot.empty) {
+  //         const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
+  //           const bookingData = docSnap.data();
+
+  //           const userBookingData = {
+  //             ...bookingData,
+  //             createdBy: userId,
+  //             syncedFromAdmin: true,
+  //             syncedAt: serverTimestamp(),
+  //           };
+
+  //           // Save booking under user’s activeRentals
+  //           const userRentalRef = doc(
+  //             db,
+  //             "users",
+  //             userId,
+  //             "activeRentals",
+  //             docSnap.id,
+  //           );
+  //           await setDoc(userRentalRef, userBookingData);
+
+  //           // Update admin’s copy so cancelRental still works
+  //           const adminBookingRef = doc(
+  //             db,
+  //             "users",
+  //             adminUid,
+  //             "activeBookings",
+  //             docSnap.id,
+  //           );
+  //           await updateDoc(adminBookingRef, { createdBy: userId });
+
+  //           console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
+  //         });
+
+  //         await Promise.all(copyPromises);
+  //         console.log(
+  //           `✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`,
+  //         );
+  //       } else {
+  //         console.log(`ℹ️ No admin bookings found for ${userEmail}`);
+  //       }
+  //     } catch (err) {
+  //       console.error("❌ Error syncing bookings to user:", err);
+  //     }
+  //   };
+
+  //   const setupSmartSync = async () => {
+  //     console.log(
+  //       "🔄 Setting up smart booking sync for:",
+  //       user.role,
+  //       user.email,
+  //     );
+
+  //     if (user.role === "admin") {
+  //       // ADMIN MODE
+  //       console.log("👑 Admin mode: Watching for new users + new bookings");
+
+  //       // Watch for brand new users being added
+  //       const usersRef = collection(db, "users");
+  //       const qUsers = query(usersRef, where("role", "==", "user"));
+
+  //       unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
+  //         const changes = snapshot.docChanges();
+  //         for (const change of changes) {
+  //           if (change.type === "added") {
+  //             const newUser = change.doc.data();
+  //             const newUserId = change.doc.id;
+  //             const newUserEmail = newUser.email?.trim().toLowerCase();
+
+  //             console.log("👤 New user detected:", newUserEmail);
+  //             if (newUserEmail) {
+  //               await syncBookingsToUser(newUserId, newUserEmail);
+  //             }
+  //           }
+  //         }
+  //       });
+
+  //       // Watch for new admin-created bookings
+  //       const adminActiveRef = collection(
+  //         db,
+  //         "users",
+  //         adminUid,
+  //         "activeBookings",
+  //       );
+  //       unsubscribeBookings = onSnapshot(adminActiveRef, async (snapshot) => {
+  //         const changes = snapshot.docChanges();
+  //         for (const change of changes) {
+  //           if (change.type === "added") {
+  //             const booking = change.doc.data();
+  //             const bookingId = change.doc.id;
+  //             const bookingEmail = booking.email?.trim().toLowerCase();
+
+  //             console.log(
+  //               "📦 New booking created by admin:",
+  //               bookingId,
+  //               bookingEmail,
+  //             );
+
+  //             if (bookingEmail) {
+  //               const usersRef = collection(db, "users");
+  //               const userMatchQ = query(
+  //                 usersRef,
+  //                 where("email", "==", bookingEmail),
+  //               );
+  //               const userSnap = await getDocs(userMatchQ);
+
+  //               if (!userSnap.empty) {
+  //                 const matchedUser = userSnap.docs[0];
+  //                 const matchedUserId = matchedUser.id;
+  //                 await syncBookingsToUser(matchedUserId, bookingEmail);
+  //               } else {
+  //                 console.log(
+  //                   `ℹ️ No user found yet for booking ${bookingId} (${bookingEmail})`,
+  //                 );
+  //               }
+  //             }
+  //           }
+  //         }
+  //       });
+  //     } else {
+  //       // USER MODE
+  //       console.log("👤 User mode: Checking for existing admin bookings");
+
+  //       // Prevent multiple syncs per session
+  //       if (lastSyncedUid === user.uid) {
+  //         console.log("⏭️ User already synced, skipping");
+  //         return;
+  //       }
+
+  //       try {
+  //         const adminActiveRef = collection(
+  //           db,
+  //           "users",
+  //           adminUid,
+  //           "activeBookings",
+  //         );
+  //         const emailToSearch = user.email?.trim().toLowerCase();
+  //         const q = query(adminActiveRef, where("email", "==", emailToSearch));
+
+  //         console.log(
+  //           "🔍 User searching for bookings with email:",
+  //           emailToSearch,
+  //         );
+  //         const snapshot = await getDocs(q);
+
+  //         if (snapshot.empty) {
+  //           console.log("✅ No admin bookings found for this user");
+  //           setLastSyncedUid(user.uid);
+  //           return;
+  //         }
+
+  //         const copyPromises = snapshot.docs.map(async (docSnap) => {
+  //           const bookingData = docSnap.data();
+
+  //           const userBookingData = {
+  //             ...bookingData,
+  //             createdBy: user.uid,
+  //             syncedFromAdmin: true,
+  //             syncedAt: serverTimestamp(),
+  //           };
+
+  //           const userRentalRef = doc(
+  //             db,
+  //             "users",
+  //             user.uid,
+  //             "activeRentals",
+  //             docSnap.id,
+  //           );
+  //           await setDoc(userRentalRef, userBookingData);
+
+  //           console.log("✅ User synced booking:", docSnap.id);
+  //         });
+
+  //         await Promise.all(copyPromises);
+  //         console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
+  //         setLastSyncedUid(user.uid);
+  //       } catch (error) {
+  //         console.error("❌ User sync error:", error);
+  //       }
+  //     }
+  //   };
+
+  //   // Start
+  //   setupSmartSync();
+
+  //   // Cleanup
+  //   return () => {
+  //     if (unsubscribeUsers) {
+  //       console.log("🧹 Cleaning up user listener");
+  //       unsubscribeUsers();
+  //     }
+  //     if (unsubscribeBookings) {
+  //       console.log("🧹 Cleaning up booking listener");
+  //       unsubscribeBookings();
+  //     }
+  //   };
+  // }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
 
   useEffect(() => {
     if (!adminUid || activeBookings.length === 0) return;
@@ -1524,51 +1661,89 @@ Call them now to check if they want to extend. If no response, call them when re
 
 
   // REALTIME BLOCKED USERS LISTENER
-  useEffect(() => {
-    // Listener for admins
-    const adminQuery = query(
-      collection(db, "users"),
-      where("role", "==", "admin"),
-    );
-    const unsubscribeAdmins = onSnapshot(adminQuery, (snapshot) => {
-      const admins = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setAdminAccounts(admins);
-    });
+useEffect(() => {
+  // Listener for blocked users (KEEP - shows overlay immediately)
+  const blockedUserQuery = query(
+    collection(db, "users"),
+    where("role", "==", "user"),
+    where("blocked", "==", true),
+  );
+  const unsubscribeBlocked = onSnapshot(blockedUserQuery, (snapshot) => {
+    const blocked = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setBlockedUsers(blocked);
+  });
 
-    // Listener for active users
-    const activeUserQuery = query(
-      collection(db, "users"),
-      where("role", "==", "user"),
-      where("blocked", "==", false),
-    );
-    const unsubscribeUsers = onSnapshot(activeUserQuery, (snapshot) => {
-      const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setUserAccounts(users);
-    });
+  // Fetch admin accounts and active users ONCE (not real-time)
+  const fetchAccounts = async () => {
+    const usersRef = collection(db, "users");
 
-    // Listener for blocked users
-    const blockedUserQuery = query(
-      collection(db, "users"),
-      where("role", "==", "user"),
-      where("blocked", "==", true),
-    );
-    const unsubscribeBlocked = onSnapshot(blockedUserQuery, (snapshot) => {
-      const blocked = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBlockedUsers(blocked);
-    });
+    // Admin accounts
+    const adminQuery = query(usersRef, where("role", "==", "admin"));
+    const adminSnap = await getDocs(adminQuery);
+    setAdminAccounts(adminSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
 
-    return () => {
-      unsubscribeAdmins();
-      unsubscribeUsers();
-      unsubscribeBlocked();
-    };
-  }, []);
+    // Active users
+    const activeQuery = query(usersRef, where("role", "==", "user"), where("blocked", "==", false));
+    const activeSnap = await getDocs(activeQuery);
+    setUserAccounts(activeSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+  };
+
+  fetchAccounts();
+
+  return () => {
+    unsubscribeBlocked();
+  };
+}, []);
+
+
+  // useEffect(() => {
+  //   // Listener for admins
+  //   const adminQuery = query(
+  //     collection(db, "users"),
+  //     where("role", "==", "admin"),
+  //   );
+  //   const unsubscribeAdmins = onSnapshot(adminQuery, (snapshot) => {
+  //     const admins = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setAdminAccounts(admins);
+  //   });
+
+  //   // Listener for active users
+  //   const activeUserQuery = query(
+  //     collection(db, "users"),
+  //     where("role", "==", "user"),
+  //     where("blocked", "==", false),
+  //   );
+  //   const unsubscribeUsers = onSnapshot(activeUserQuery, (snapshot) => {
+  //     const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  //     setUserAccounts(users);
+  //   });
+
+  //   // Listener for blocked users
+  //   const blockedUserQuery = query(
+  //     collection(db, "users"),
+  //     where("role", "==", "user"),
+  //     where("blocked", "==", true),
+  //   );
+  //   const unsubscribeBlocked = onSnapshot(blockedUserQuery, (snapshot) => {
+  //     const blocked = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setBlockedUsers(blocked);
+  //   });
+
+  //   return () => {
+  //     unsubscribeAdmins();
+  //     unsubscribeUsers();
+  //     unsubscribeBlocked();
+  //   };
+  // }, []);
 
   // BLOCK USER FUNCTION
   const confirmBlockUser = (usr) => {
@@ -1755,28 +1930,51 @@ Call them now to check if they want to extend. If no response, call them when re
   };
 
   // LISTEN FOR THEME CHANGES FROM FIRESTORE (appConfig)
-  useEffect(() => {
-    if (!user) {
-      // GUEST USERS: force default theme
-      setTheme("default");
-      document.documentElement.setAttribute("data-theme", "default");
-      return;
-    }
+useEffect(() => {
+  if (!user) {
+    setTheme("default");
+    document.documentElement.setAttribute("data-theme", "default");
+    return;
+  }
 
-    // REGISTERED USERS: SET GLOBAL THEME BASED ON FIRESTORE
+  const fetchTheme = async () => {
     const settingsRef = doc(db, "config", "appSettings");
-    const unsub = onSnapshot(settingsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        if (data.theme) {
-          setTheme(data.theme);
-          document.documentElement.setAttribute("data-theme", data.theme);
-        }
+    const snapshot = await getDoc(settingsRef);
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      if (data.theme) {
+        setTheme(data.theme);
+        document.documentElement.setAttribute("data-theme", data.theme);
       }
-    });
+    }
+  };
 
-    return () => unsub();
-  }, [user]);
+  fetchTheme();
+}, [user]);
+
+
+  // useEffect(() => {
+  //   if (!user) {
+  //     // GUEST USERS: force default theme
+  //     setTheme("default");
+  //     document.documentElement.setAttribute("data-theme", "default");
+  //     return;
+  //   }
+
+  //   // REGISTERED USERS: SET GLOBAL THEME BASED ON FIRESTORE
+  //   const settingsRef = doc(db, "config", "appSettings");
+  //   const unsub = onSnapshot(settingsRef, (snapshot) => {
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.data();
+  //       if (data.theme) {
+  //         setTheme(data.theme);
+  //         document.documentElement.setAttribute("data-theme", data.theme);
+  //       }
+  //     }
+  //   });
+
+  //   return () => unsub();
+  // }, [user]);
 
   // // (USER) REAL-TIME LISTENER FOR UNIT DATA ARRAY !!! UNIT DATA !!!
   // useEffect(() => {
@@ -4699,243 +4897,392 @@ Please ensure follow-ups and updates for the customer.`,
   };
 
   // (ADMIN) LISTEN TO BOOKINGS CHANGES FOR ANALYTICS & CALENDAR
-  useEffect(() => {
-    if (!adminUid) return;
+useEffect(() => {
+  if (!adminUid) return;
 
-    const statusColorMap = {
-      Completed: "#28a74650",
-      Pending: "#ffc107",
-      Active: "#28a745",
-    };
+  const statusColorMap = {
+    Completed: "#28a74650",
+    Pending: "#ffc107",
+    Active: "#28a745",
+  };
 
-    const completedRef = collection(db, "users", adminUid, "completedBookings");
-    const activeRef = collection(db, "users", adminUid, "activeBookings");
+  const completedRef = collection(db, "users", adminUid, "completedBookings");
+  const activeRef = collection(db, "users", adminUid, "activeBookings");
 
-    // LISTEN TO COMPLETED BOOKINGS
-    const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
-      const analyticsMap = {};
-      const calendarEventsArray = [];
+  // Keep track of processed document IDs
+  const processedCompleted = new Set();
+  const processedActive = new Set();
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+  // LISTEN TO COMPLETED BOOKINGS (incremental only)
+  const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
+    const changes = snapshot.docChanges();
+
+    changes.forEach((change) => {
+      if (change.type === "added") {
+        const data = change.doc.data();
         if (data.status !== "Completed") return;
 
+        const docId = change.doc.id;
+        if (processedCompleted.has(docId)) return; // Skip duplicates
+        processedCompleted.add(docId);
+
+        // Process ONLY the new document
         const plateNo = data.plateNo || "UNKNOWN_UNIT";
         const carType = data.carType || "UNKNOWN";
         const carName = data.carName || plateNo;
-        const unitImage = data.unitImage || "";
         const totalRevenue = Number(data.totalPaid) || 0;
         const durationSec = Number(data.totalDurationInSeconds) || 0;
 
-        if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime))
-          return;
+        if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime)) return;
 
         let rentalEnd;
-
         if (data.endTimestamp?.seconds) {
           rentalEnd = new Date(data.endTimestamp.seconds * 1000);
         } else if (data.endDate && data.endTime) {
           const [year, month, day] = data.endDate.split("-");
           const [hour, minute] = data.endTime.split(":");
-          rentalEnd = new Date(
-            Number(year),
-            Number(month) - 1,
-            Number(day),
-            Number(hour),
-            Number(minute),
-          );
+          rentalEnd = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
         } else {
           return;
         }
 
-        const dayKey = rentalEnd.toISOString().slice(0, 10);
-        const monthKey = rentalEnd.toISOString().slice(0, 7);
-        const yearKey = rentalEnd.getFullYear().toString();
-        const keys = [dayKey, monthKey, yearKey];
-
-        // Determine rentalStart (so overlap checks can use both start & end)
-        let rentalStart;
-        if (data.startTimestamp?.seconds) {
-          rentalStart = new Date(data.startTimestamp.seconds * 1000);
-        } else if (data.startDate && data.startTime) {
-          const [sy, sm, sd] = data.startDate.split("-");
-          const [sh, smn] = data.startTime.split(":");
-          rentalStart = new Date(
-            Number(sy),
-            Number(sm) - 1,
-            Number(sd),
-            Number(sh),
-            Number(smn),
-          );
-        } else {
-          // fallback: set rentalStart to rentalEnd (treat as single-day booking)
-          rentalStart = new Date(rentalEnd);
-          rentalStart.setHours(0, 0, 0, 0);
-        }
-
-        // Compute "yesterday" key
-        const now = new Date();
-        const yesterday = new Date(now);
-        yesterday.setDate(now.getDate() - 1);
-        const yesterdayKey = yesterday.toISOString().slice(0, 10);
-
-        // Compute this week's full range (Sunday -> Saturday)
-        const currentDay = now.getDay(); // Sunday = 0
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - currentDay);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-
-        // Booking overlaps this week if any part is within the range
-        const overlapsThisWeek =
-          rentalStart <= weekEnd && rentalEnd >= weekStart;
-        const isYesterday = dayKey === yesterdayKey;
-
-        // Add keys when appropriate
-        if (overlapsThisWeek) keys.push("thisWeek");
-        if (isYesterday) keys.push("yesterday");
-
-        if (!analyticsMap[plateNo]) {
-          analyticsMap[plateNo] = { carName, carType, unitImage };
-        }
-
-        keys.forEach((key) => {
-          if (!analyticsMap[plateNo][key]) {
-            analyticsMap[plateNo][key] = {
-              revenue: 0,
-              hours: 0,
-              timesRented: 0,
-              bookings: [],
-            };
+        // Update analyticsMap with new data
+        setCompletedBookingsAnalytics((prevMap) => {
+          const newMap = { ...prevMap };
+          if (!newMap[plateNo]) {
+            newMap[plateNo] = { carName, carType, unitImage: data.unitImage || "" };
           }
 
-          analyticsMap[plateNo][key].revenue += totalRevenue;
-          analyticsMap[plateNo][key].hours += durationSec / 3600;
-          analyticsMap[plateNo][key].timesRented += 1;
-          analyticsMap[plateNo][key].bookings.push(data);
+          const dayKey = rentalEnd.toISOString().slice(0, 10);
+          const monthKey = rentalEnd.toISOString().slice(0, 7);
+          const yearKey = rentalEnd.getFullYear().toString();
+          const keys = [dayKey, monthKey, yearKey];
+
+          keys.forEach((key) => {
+            if (!newMap[plateNo][key]) {
+              newMap[plateNo][key] = { revenue: 0, hours: 0, timesRented: 0, bookings: [] };
+            }
+            newMap[plateNo][key].revenue += totalRevenue;
+            newMap[plateNo][key].hours += durationSec / 3600;
+            newMap[plateNo][key].timesRented += 1;
+            newMap[plateNo][key].bookings.push({ id: docId, ...data });
+          });
+
+          return newMap;
         });
 
+        // Add to calendar
         if (data.startTimestamp?.seconds) {
           const start = new Date(data.startTimestamp.seconds * 1000);
-          calendarEventsArray.push({
-            title: `Completed: ${carName}`,
-            start: start.toISOString(),
-            end: rentalEnd.toISOString(),
-            fullData: data,
-            backgroundColor: statusColorMap["Completed"],
-            borderColor: "#00000020",
-            textColor: "#fff",
-            source: "completed",
-          });
+          setCalendarEventsSafe((prev) => [
+            ...prev,
+            {
+              title: `Completed: ${carName}`,
+              start: start.toISOString(),
+              end: rentalEnd.toISOString(),
+              fullData: data,
+              backgroundColor: statusColorMap["Completed"],
+              borderColor: "#00000020",
+              textColor: "#fff",
+              source: "completed",
+            },
+          ]);
         }
-      });
-
-      // Deduplicate analytics bookings
-      for (const plateNo in analyticsMap) {
-        const carData = analyticsMap[plateNo];
-        const allBookings = [];
-
-        for (const key in carData) {
-          if (["carType", "unitImage", "carName"].includes(key)) continue;
-          if (Array.isArray(carData[key]?.bookings)) {
-            allBookings.push(...carData[key].bookings);
-          }
-        }
-
-        const uniqueMap = new Map();
-        allBookings.forEach((booking) => {
-          const key = `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}-${booking.firstName}-${booking.surname}`;
-          uniqueMap.set(key, booking);
-        });
-
-        analyticsMap[plateNo].bookings = Array.from(uniqueMap.values());
       }
-
-      setCompletedBookingsAnalytics(analyticsMap);
-
-      setCalendarEventsSafe((prevEvents) => {
-        const others = prevEvents.filter((e) => e.source !== "completed");
-        const existingKeys = new Set(
-          others.map(
-            (e) => `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`,
-          ),
-        );
-
-        const uniqueCompleted = calendarEventsArray.filter((e) => {
-          const key = `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`;
-          return !existingKeys.has(key);
-        });
-
-        return [...others, ...uniqueCompleted];
-      });
     });
+  });
 
-    // LISTEN TO ACTIVE BOOKINGS
-    const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
-      const activeEvents = [];
+  // LISTEN TO ACTIVE BOOKINGS (incremental only)
+  const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
+    const changes = snapshot.docChanges();
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
-          return;
+    changes.forEach((change) => {
+      if (change.type === "added" || change.type === "modified") {
+        const data = change.doc.data();
+        if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime) return;
 
+        const docId = change.doc.id;
         const start = new Date(data.startTimestamp.seconds * 1000);
         const [year, month, day] = data.endDate.split("-");
         const [hour, minute] = data.endTime.split(":");
         const end = data.endTimestamp?.seconds
           ? new Date(data.endTimestamp.seconds * 1000)
-          : new Date(
-              Number(year),
-              Number(month) - 1,
-              Number(day),
-              Number(hour),
-              Number(minute),
-            );
+          : new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
 
         const carName = data.carName || "Unknown Car";
-        const status =
-          data.status?.charAt(0).toUpperCase() +
-            data.status?.slice(1).toLowerCase() || "Unknown";
+        const status = data.status?.charAt(0).toUpperCase() + data.status?.slice(1).toLowerCase() || "Unknown";
 
-        activeEvents.push({
-          title: `${status}: ${carName}`,
-          start: start.toISOString(),
-          end: end.toISOString(),
-          fullData: data,
-          backgroundColor: statusColorMap[status] || "#6c757d",
-          borderColor: "#00000020",
-          textColor: "#fff",
-          source: status.toLowerCase(),
+        setCalendarEventsSafe((prev) => {
+          const filtered = prev.filter((e) => e.fullData?.id !== docId);
+          return [
+            ...filtered,
+            {
+              title: `${status}: ${carName}`,
+              start: start.toISOString(),
+              end: end.toISOString(),
+              fullData: data,
+              backgroundColor: statusColorMap[status] || "#6c757d",
+              borderColor: "#00000020",
+              textColor: "#fff",
+              source: status.toLowerCase(),
+            },
+          ];
         });
-      });
+      }
 
-      setCalendarEventsSafe((prevEvents) => {
-        const others = prevEvents.filter(
-          (e) => e.source !== "active" && e.source !== "pending",
+      if (change.type === "removed") {
+        const docId = change.doc.id;
+        setCalendarEventsSafe((prev) =>
+          prev.filter((e) => e.fullData?.id !== docId)
         );
-        const existingKeys = new Set(
-          others.map(
-            (e) => `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`,
-          ),
-        );
-
-        const uniqueActive = activeEvents.filter((e) => {
-          const key = `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`;
-          return !existingKeys.has(key);
-        });
-
-        return [...others, ...uniqueActive];
-      });
+      }
     });
+  });
 
-    return () => {
-      unsubscribeCompleted();
-      unsubscribeActive();
-    };
-  }, [adminUid]);
+  return () => {
+    unsubscribeCompleted();
+    unsubscribeActive();
+  };
+}, [adminUid]);
+
+
+  // useEffect(() => {
+  //   if (!adminUid) return;
+
+  //   const statusColorMap = {
+  //     Completed: "#28a74650",
+  //     Pending: "#ffc107",
+  //     Active: "#28a745",
+  //   };
+
+  //   const completedRef = collection(db, "users", adminUid, "completedBookings");
+  //   const activeRef = collection(db, "users", adminUid, "activeBookings");
+
+  //   // LISTEN TO COMPLETED BOOKINGS
+  //   const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
+  //     const analyticsMap = {};
+  //     const calendarEventsArray = [];
+
+  //     snapshot.forEach((doc) => {
+  //       const data = doc.data();
+  //       if (data.status !== "Completed") return;
+
+  //       const plateNo = data.plateNo || "UNKNOWN_UNIT";
+  //       const carType = data.carType || "UNKNOWN";
+  //       const carName = data.carName || plateNo;
+  //       const unitImage = data.unitImage || "";
+  //       const totalRevenue = Number(data.totalPaid) || 0;
+  //       const durationSec = Number(data.totalDurationInSeconds) || 0;
+
+  //       if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime))
+  //         return;
+
+  //       let rentalEnd;
+
+  //       if (data.endTimestamp?.seconds) {
+  //         rentalEnd = new Date(data.endTimestamp.seconds * 1000);
+  //       } else if (data.endDate && data.endTime) {
+  //         const [year, month, day] = data.endDate.split("-");
+  //         const [hour, minute] = data.endTime.split(":");
+  //         rentalEnd = new Date(
+  //           Number(year),
+  //           Number(month) - 1,
+  //           Number(day),
+  //           Number(hour),
+  //           Number(minute),
+  //         );
+  //       } else {
+  //         return;
+  //       }
+
+  //       const dayKey = rentalEnd.toISOString().slice(0, 10);
+  //       const monthKey = rentalEnd.toISOString().slice(0, 7);
+  //       const yearKey = rentalEnd.getFullYear().toString();
+  //       const keys = [dayKey, monthKey, yearKey];
+
+  //       // Determine rentalStart (so overlap checks can use both start & end)
+  //       let rentalStart;
+  //       if (data.startTimestamp?.seconds) {
+  //         rentalStart = new Date(data.startTimestamp.seconds * 1000);
+  //       } else if (data.startDate && data.startTime) {
+  //         const [sy, sm, sd] = data.startDate.split("-");
+  //         const [sh, smn] = data.startTime.split(":");
+  //         rentalStart = new Date(
+  //           Number(sy),
+  //           Number(sm) - 1,
+  //           Number(sd),
+  //           Number(sh),
+  //           Number(smn),
+  //         );
+  //       } else {
+  //         // fallback: set rentalStart to rentalEnd (treat as single-day booking)
+  //         rentalStart = new Date(rentalEnd);
+  //         rentalStart.setHours(0, 0, 0, 0);
+  //       }
+
+  //       // Compute "yesterday" key
+  //       const now = new Date();
+  //       const yesterday = new Date(now);
+  //       yesterday.setDate(now.getDate() - 1);
+  //       const yesterdayKey = yesterday.toISOString().slice(0, 10);
+
+  //       // Compute this week's full range (Sunday -> Saturday)
+  //       const currentDay = now.getDay(); // Sunday = 0
+  //       const weekStart = new Date(now);
+  //       weekStart.setDate(now.getDate() - currentDay);
+  //       weekStart.setHours(0, 0, 0, 0);
+
+  //       const weekEnd = new Date(weekStart);
+  //       weekEnd.setDate(weekStart.getDate() + 6);
+  //       weekEnd.setHours(23, 59, 59, 999);
+
+  //       // Booking overlaps this week if any part is within the range
+  //       const overlapsThisWeek =
+  //         rentalStart <= weekEnd && rentalEnd >= weekStart;
+  //       const isYesterday = dayKey === yesterdayKey;
+
+  //       // Add keys when appropriate
+  //       if (overlapsThisWeek) keys.push("thisWeek");
+  //       if (isYesterday) keys.push("yesterday");
+
+  //       if (!analyticsMap[plateNo]) {
+  //         analyticsMap[plateNo] = { carName, carType, unitImage };
+  //       }
+
+  //       keys.forEach((key) => {
+  //         if (!analyticsMap[plateNo][key]) {
+  //           analyticsMap[plateNo][key] = {
+  //             revenue: 0,
+  //             hours: 0,
+  //             timesRented: 0,
+  //             bookings: [],
+  //           };
+  //         }
+
+  //         analyticsMap[plateNo][key].revenue += totalRevenue;
+  //         analyticsMap[plateNo][key].hours += durationSec / 3600;
+  //         analyticsMap[plateNo][key].timesRented += 1;
+  //         analyticsMap[plateNo][key].bookings.push(data);
+  //       });
+
+  //       if (data.startTimestamp?.seconds) {
+  //         const start = new Date(data.startTimestamp.seconds * 1000);
+  //         calendarEventsArray.push({
+  //           title: `Completed: ${carName}`,
+  //           start: start.toISOString(),
+  //           end: rentalEnd.toISOString(),
+  //           fullData: data,
+  //           backgroundColor: statusColorMap["Completed"],
+  //           borderColor: "#00000020",
+  //           textColor: "#fff",
+  //           source: "completed",
+  //         });
+  //       }
+  //     });
+
+  //     // Deduplicate analytics bookings
+  //     for (const plateNo in analyticsMap) {
+  //       const carData = analyticsMap[plateNo];
+  //       const allBookings = [];
+
+  //       for (const key in carData) {
+  //         if (["carType", "unitImage", "carName"].includes(key)) continue;
+  //         if (Array.isArray(carData[key]?.bookings)) {
+  //           allBookings.push(...carData[key].bookings);
+  //         }
+  //       }
+
+  //       const uniqueMap = new Map();
+  //       allBookings.forEach((booking) => {
+  //         const key = `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}-${booking.firstName}-${booking.surname}`;
+  //         uniqueMap.set(key, booking);
+  //       });
+
+  //       analyticsMap[plateNo].bookings = Array.from(uniqueMap.values());
+  //     }
+
+  //     setCompletedBookingsAnalytics(analyticsMap);
+
+  //     setCalendarEventsSafe((prevEvents) => {
+  //       const others = prevEvents.filter((e) => e.source !== "completed");
+  //       const existingKeys = new Set(
+  //         others.map(
+  //           (e) => `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`,
+  //         ),
+  //       );
+
+  //       const uniqueCompleted = calendarEventsArray.filter((e) => {
+  //         const key = `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`;
+  //         return !existingKeys.has(key);
+  //       });
+
+  //       return [...others, ...uniqueCompleted];
+  //     });
+  //   });
+
+  //   // LISTEN TO ACTIVE BOOKINGS
+  //   const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
+  //     const activeEvents = [];
+
+  //     snapshot.forEach((doc) => {
+  //       const data = doc.data();
+  //       if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
+  //         return;
+
+  //       const start = new Date(data.startTimestamp.seconds * 1000);
+  //       const [year, month, day] = data.endDate.split("-");
+  //       const [hour, minute] = data.endTime.split(":");
+  //       const end = data.endTimestamp?.seconds
+  //         ? new Date(data.endTimestamp.seconds * 1000)
+  //         : new Date(
+  //             Number(year),
+  //             Number(month) - 1,
+  //             Number(day),
+  //             Number(hour),
+  //             Number(minute),
+  //           );
+
+  //       const carName = data.carName || "Unknown Car";
+  //       const status =
+  //         data.status?.charAt(0).toUpperCase() +
+  //           data.status?.slice(1).toLowerCase() || "Unknown";
+
+  //       activeEvents.push({
+  //         title: `${status}: ${carName}`,
+  //         start: start.toISOString(),
+  //         end: end.toISOString(),
+  //         fullData: data,
+  //         backgroundColor: statusColorMap[status] || "#6c757d",
+  //         borderColor: "#00000020",
+  //         textColor: "#fff",
+  //         source: status.toLowerCase(),
+  //       });
+  //     });
+
+  //     setCalendarEventsSafe((prevEvents) => {
+  //       const others = prevEvents.filter(
+  //         (e) => e.source !== "active" && e.source !== "pending",
+  //       );
+  //       const existingKeys = new Set(
+  //         others.map(
+  //           (e) => `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`,
+  //         ),
+  //       );
+
+  //       const uniqueActive = activeEvents.filter((e) => {
+  //         const key = `${e.fullData?.id || e.fullData?.bookingId}-${e.start}`;
+  //         return !existingKeys.has(key);
+  //       });
+
+  //       return [...others, ...uniqueActive];
+  //     });
+  //   });
+
+  //   return () => {
+  //     unsubscribeCompleted();
+  //     unsubscribeActive();
+  //   };
+  // }, [adminUid]);
 
   // (ADMIN) GENERATE VACANCY FUNCTION
   const generatePerDayCalendarEvents = (booking) => {

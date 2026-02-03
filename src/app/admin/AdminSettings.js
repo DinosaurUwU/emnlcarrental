@@ -7,6 +7,7 @@ import { useUser } from "../lib/UserContext";
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
     unitData,
+    allUnitData,
     completedBookingsAnalytics,
     updateUnitData,
     mopTypes,
@@ -565,7 +566,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   // Filter units by search term ONLY, ignore hidden
   const filteredUnitData =
-    unitData?.filter((car) => {
+    allUnitData?.filter((car) => {
       if (!searchTerm) return true;
       const search = searchTerm.toLowerCase();
       const analytics = completedBookingsAnalytics[car.plateNo];
@@ -1642,7 +1643,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
       {(subSection === "overview" || subSection === "units") && (
         <div className="cars-section">
           <h2 className="section-title">
-            Units ({unitData ? unitData.length : 0})
+            Units ({allUnitData ? allUnitData.length : 0})
             <div className="search-and-add">
               <input
                 type="text"

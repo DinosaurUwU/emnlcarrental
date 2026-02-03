@@ -38,6 +38,7 @@ const RentalActivitySection = ({ subSection }) => {
     serverTimestamp,
     triggerForceFinishRental,
     unitData,
+    allUnitData,
     saveBookingToFirestore,
     completedBookingsAnalytics,
     activeBookings,
@@ -1503,10 +1504,37 @@ const RentalActivitySection = ({ subSection }) => {
     setSelectedCustomerName("None");
   };
 
+  // Initialize formData when selectedUnitId changes
+useEffect(() => {
+  if (!selectedUnitId) return;
+
+  // Initialize formData for the selected unit if not already initialized
+  if (!formData[selectedUnitId]) {
+    const unit = allUnitData.find((u) => u.id === selectedUnitId);
+    if (unit) {
+      setFormData((prev) => ({
+        ...prev,
+        [selectedUnitId]: {
+          carName: unit.name,
+          plateNo: unit.plateNo,
+          carType: unit.carType,
+          price: unit.price,
+          driverRate: unit.driverRate,
+          extension: unit.extension,
+          deliveryFee: unit.deliveryFee,
+          ownerShare: unit.ownerShare,
+          // Add other default fields as needed
+        },
+      }));
+    }
+  }
+}, [selectedUnitId, allUnitData, formData]);
+
+
   useEffect(() => {
     if (!selectedUnitId) return;
 
-    const filteredUnits = unitData.filter(
+    const filteredUnits = allUnitData.filter(
       (unit) =>
         filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
     );
@@ -1515,7 +1543,7 @@ const RentalActivitySection = ({ subSection }) => {
 
     // pick next closest unit
     setSelectedUnitId(filteredUnits[0]?.id || "");
-  }, [unitData, filterType, selectedUnitId]);
+  }, [allUnitData, filterType, selectedUnitId]);
 
   return (
     <>
@@ -7599,7 +7627,7 @@ const RentalActivitySection = ({ subSection }) => {
 
                 <div className="pick-a-car">
                   {(() => {
-                    const filteredUnits = unitData.filter(
+                    const filteredUnits = allUnitData.filter(
                       (unit) =>
                         filterType === "ALL" ||
                         unit.carType?.toUpperCase() === filterType,
@@ -7669,9 +7697,9 @@ const RentalActivitySection = ({ subSection }) => {
               <form onSubmit={handleSubmit}>
                 <div className="select-container">
                   {(() => {
-                    const filteredUnits = unitData.filter(
+                    const filteredUnits = allUnitData.filter(
                       (u) =>
-                        !u.hidden &&
+                        // !u.hidden &&
                         (filterType === "ALL" ||
                           u.carType?.toUpperCase() === filterType),
                     );
