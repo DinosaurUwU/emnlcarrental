@@ -332,23 +332,40 @@ export const UserProvider = ({ children }) => {
     }));
   };
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
-      const allFetchedUnits = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  // REALTIME FETCH UNITS COLLECTION
+useEffect(() => {
+  const fetchUnits = async () => {
+    const snapshot = await getDocs(collection(db, "units"));
+    const allFetchedUnits = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-      // Set all units (including hidden)
-      setAllUnitData(allFetchedUnits);
+    setAllUnitData(allFetchedUnits);
+    const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
+    setUnitData(filteredUnits);
+  };
 
-      // Set filtered units (exclude hidden, existing logic)
-      const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
-      setUnitData(filteredUnits);
-    });
+  fetchUnits();
+}, []);
 
-    return () => unsubscribe();
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
+  //     const allFetchedUnits = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     // Set all units (including hidden)
+  //     setAllUnitData(allFetchedUnits);
+
+  //     // Set filtered units (exclude hidden, existing logic)
+  //     const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
+  //     setUnitData(filteredUnits);
+  //   });
+
+  //   return () => unsubscribe();
+  // }, []);
 
   // Shared Action Overlay
   const [actionOverlay, setActionOverlay] = useState({
@@ -377,6 +394,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // REAL-TIME SYNC BOOKINGS TO USERS
   useEffect(() => {
     // Only run when someone is logged in
     if (!user?.uid || !adminUid) {
@@ -1504,8 +1522,8 @@ Call them now to check if they want to extend. If no response, call them when re
     handleEmailVerification();
   }, []);
 
-  // (ADMIN) PROFILE OVERLAY LISTENER
-  // BLOCKED USERS LISTENER
+
+  // REALTIME BLOCKED USERS LISTENER
   useEffect(() => {
     // Listener for admins
     const adminQuery = query(
@@ -5017,6 +5035,7 @@ Please ensure follow-ups and updates for the customer.`,
     return () => unsubscribe();
   }, []);
 
+  // REALTIME FINANCIALREPORTS SERVER COUNTER
   useEffect(() => {
     if (!user || user.role !== "admin") return;
 
