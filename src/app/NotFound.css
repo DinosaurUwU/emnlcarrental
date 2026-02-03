@@ -114,23 +114,23 @@
 
 
 
-/* 🌀 Full-width tumbleweed area */
+/* tumbleweed container */
 .tumbleweed-container {
-  position: absolute; /* ✅ anchors it to full page width */
+  position: absolute;
   left: 0;
-  bottom: 0; /* optional – if you want it near the bottom of view */
+  bottom: 0;
   width: 100vw;
   height: 120px;
-  margin: 0; /* ✅ remove top/bottom spacing */
+  margin: 0;
   overflow: hidden;
   z-index: 2;
 }
 
-/* 🎞️ Two tumbleweeds moving continuously */
+/* Tumbleweeds animation */
 .tumbleweed-gif {
   position: absolute;
   bottom: 0;
-  left: 0; /* start from true left edge */
+  left: 0;
   width: 120px;
   opacity: 0.9;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
@@ -138,16 +138,16 @@
 }
 
 .tumbleweed-gif.second {
-  animation-delay: -10s; /* half duration offset for smooth looping */
+  animation-delay: -10s;
 }
 
-/* 🌾 Seamless left-to-right movement */
+/* left-to-right animation */
 @keyframes tumbleweed-move {
   0% {
-    transform: translateX(-120px); /* start fully offscreen left */
+    transform: translateX(-120px); /* start offscreen left */
   }
   100% {
-    transform: translateX(100vw); /* end fully offscreen right */
+    transform: translateX(100vw); /* end offscreen right */
   }
 }
 
