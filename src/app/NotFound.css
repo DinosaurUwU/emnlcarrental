@@ -181,10 +181,10 @@
   transition: all 0.3s ease;
   width: 230px;
   color: #fff;
-  background-color: #005eb8; /* deep blue sign */
-  border: 3px solid #ffffff; /* thinner white inner border */
+  background-color: #005eb8;
+  border: 3px solid #ffffff;
   box-shadow: 0 0 0 6px #005eb8,
-    /* slimmer outer blue ring */ 0 3px 10px rgba(0, 0, 0, 0.3); /* softer drop shadow */
+    /* slimmer outer blue ring */ 0 3px 10px rgba(0, 0, 0, 0.3);
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
