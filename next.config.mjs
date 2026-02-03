@@ -3,6 +3,9 @@ const nextConfig = {
   // Transpile all packages that use modern JavaScript features
   transpilePackages: ['undici', 'firebase', '@firebase/auth', '@firebase/firestore'],
   
+
+   reactStrictMode: false,  
+
   // Empty turbopack config to silence the warning
   turbopack: {},
   

@@ -1760,25 +1760,25 @@ Call them now to check if they want to extend. If no response, call them when re
     return () => unsub();
   }, [user]);
 
-  // (USER) REAL-TIME LISTENER FOR UNIT DATA ARRAY !!! UNIT DATA !!!
-  useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, "units"),
-      (snapshot) => {
-        const unitsArray = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUnitData(unitsArray);
-        console.log("USER UNIT DATA LOADED:", unitsArray);
-      },
-      (error) => {
-        console.error("❌ Real-time fetch failed:", error);
-      },
-    );
+  // // (USER) REAL-TIME LISTENER FOR UNIT DATA ARRAY !!! UNIT DATA !!!
+  // useEffect(() => {
+  //   const unsubscribe = onSnapshot(
+  //     collection(db, "units"),
+  //     (snapshot) => {
+  //       const unitsArray = snapshot.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       }));
+  //       setUnitData(unitsArray);
+  //       console.log("USER UNIT DATA LOADED:", unitsArray);
+  //     },
+  //     (error) => {
+  //       console.error("❌ Real-time fetch failed:", error);
+  //     },
+  //   );
 
-    return () => unsubscribe();
-  }, []);
+  //   return () => unsubscribe();
+  // }, []);
 
   // (USER) RENTAL HISTORY LISTENER BETTER???
   useEffect(() => {
@@ -1798,27 +1798,27 @@ Call them now to check if they want to extend. If no response, call them when re
     return () => unsubscribe();
   }, [user?.uid]);
 
-  // (ADMIN) REAL-TIME LISTENER FOR UNIT DATA ARRAY !!! UNIT DATA !!! HIDDEN UNITS ARE "NOT" HIDDEN
-  useEffect(() => {
-    if (!adminUid) return;
+  // // (ADMIN) REAL-TIME LISTENER FOR UNIT DATA ARRAY !!! UNIT DATA !!! HIDDEN UNITS ARE "NOT" HIDDEN
+  // useEffect(() => {
+  //   if (!adminUid) return;
 
-    // Set up a real-time listener on the units collection
-    const unsubscribe = onSnapshot(
-      collection(db, "units"),
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUnitData(data); // Include all units
-      },
-      (error) => {
-        console.error("Error with real-time unit listener:", error);
-      },
-    );
+  //   // Set up a real-time listener on the units collection
+  //   const unsubscribe = onSnapshot(
+  //     collection(db, "units"),
+  //     (snapshot) => {
+  //       const data = snapshot.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       }));
+  //       setUnitData(data); // Include all units
+  //     },
+  //     (error) => {
+  //       console.error("Error with real-time unit listener:", error);
+  //     },
+  //   );
 
-    return () => unsubscribe();
-  }, [adminUid]);
+  //   return () => unsubscribe();
+  // }, [adminUid]);
 
   // (ADMIN) REAL-TIME LISTENER FOR ACTIVE BOOKINGS // 1. Listener just updates state
   useEffect(() => {
