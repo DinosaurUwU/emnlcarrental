@@ -1,4 +1,4 @@
-.info-page {
+/* .info-page {
   background-color: #ffffff;
   color: #333;
   padding-top: 8rem;
@@ -18,9 +18,42 @@
   width: 50%;
   height: auto;
   object-fit: contain;
+} */
+
+.info-page {
+  background-color: #ffffff;
+  color: #333;
+  padding-top: 8rem;
+  line-height: 1.6;
 }
 
+.info-title {
+  position: relative;
+  z-index: 1;
+  will-change: transform;
+  width: 100%;
+  height: 40vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-title .login-logo {
+  width: 50%;
+  height: auto;
+  object-fit: contain;
+  max-width: 400px;
+}
+
+
+
+
 .info-page .section-title {
+  font-family: "Montserrat", sans-serif;
+  text-transform: uppercase;
+  font-size: 2rem;
+  font-weight: 900;
   color: var(--accent-color);
   margin-bottom: 0.5rem;
   text-align: center;

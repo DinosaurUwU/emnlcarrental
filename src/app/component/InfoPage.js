@@ -1197,11 +1197,15 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
   };
 
   // PARALLAX EFFECT
-  useEffect(() => {
-    const handleScroll = () => setOffsetY(window.scrollY * 0.5);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+
+
+
+  // useEffect(() => {
+  //   const handleScroll = () => setOffsetY(window.scrollY * 0.5);
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   const faqs = [
     {
@@ -1372,14 +1376,7 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
     <div className="info-page" ref={pageRef}>
       <Header openBooking={openBooking} />
 
-      <div className="info-title">
-        <img
-          src="/assets/dark-logo.png"
-          alt="Logo"
-          className="login-logo"
-          style={{ transform: `translateY(${offsetY}px)` }}
-        />
-      </div>
+
 
       {/* Help Center */}
       <section id="help-center" className="help-center">
