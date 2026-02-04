@@ -1254,6 +1254,16 @@ const getCarRate = () => {
 
 
   const handleConfirmBooking = async () => {
+
+if (!user) {
+  setShowBookingConfirmOverlay(false);
+  setShowConfirmOverlay(false);
+  closeOverlay();
+  router.push("/auth/login");
+  return;
+}
+
+
     if (!user?.emailVerified) {
       setShowVerifyOverlay(true); // ✅ opens the global verification overlay
       return;
