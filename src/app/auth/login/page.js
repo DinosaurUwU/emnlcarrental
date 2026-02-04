@@ -137,6 +137,29 @@ const Login = () => {
     }, 3000);
   };
 
+
+
+  // After successful login
+const handleSuccessfulLogin = async () => {
+  // Check for pending booking data
+  const pendingDataStr = localStorage.getItem("pendingBookingData");
+  
+  if (pendingDataStr) {
+    // Save to user-specific key before redirect
+    const pendingData = JSON.parse(pendingDataStr);
+    localStorage.setItem(`pendingBookingData_${user.uid}`, pendingDataStr);
+    localStorage.removeItem("pendingBookingData");
+    
+    // Redirect to home with flag to auto-open booking
+    router.push("/?openBooking=true");
+  } else {
+    router.push(user.role === "admin" ? "/admin" : "/");
+  }
+};
+
+
+
+
   useEffect(() => {
     setCarouselInterval();
     return () => clearInterval(intervalRef.current);
