@@ -161,13 +161,6 @@ useEffect(() => {
   setFilteredUnits(filtered);
 }, [allUnitData, selectedCarType]);
 
-// Debug logging
-console.log("🔍 allUnitData length:", allUnitData?.length);
-const wigo = allUnitData?.find(u => u.name?.includes("WIGO"));
-console.log("🔍 WIGO unit:", wigo?.name, "hidden:", wigo?.hidden);
-console.log("🔍 filteredUnits length:", filteredUnits?.length);
-const wigoFiltered = filteredUnits?.find(u => u.name?.includes("WIGO"));
-console.log("🔍 WIGO in filteredUnits:", wigoFiltered?.name, "hidden:", wigoFiltered?.hidden);
 
 
 
@@ -2251,14 +2244,7 @@ onChange={(e) => {
   <option
     key={unit.id}
     value={unit.id}
-    style={
-      unit.hidden
-        ? {
-            color: "#DC3545 !important",
-            backgroundColor: "#F8D7DA !important",
-          }
-        : {}
-    }
+    className={unit.hidden ? "hidden-unit" : ""}
   >
     {unit.name}
   </option>

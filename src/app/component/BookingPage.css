@@ -398,6 +398,12 @@
   text-align: right;
 }
 
+.hidden-unit {
+  color: #DC3545 !important;
+  background-color: #F8D7DA !important;
+}
+
+
 /* Form Fields */
 .drive-type-form-row {
   display: flex;
