@@ -1251,8 +1251,6 @@ const getCarRate = () => {
 
 
 
-
-
   const handleConfirmBooking = async () => {
 
 if (!user) {
