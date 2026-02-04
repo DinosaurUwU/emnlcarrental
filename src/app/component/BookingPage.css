@@ -658,6 +658,12 @@ select option {
   color: white !important;
 }
 
+.booking-overlay select option.hidden-unit {
+  color: #DC3545 !important;
+  background-color: #F8D7DA !important;
+}
+
+
 .booking-overlay select:active,
 .booking-overlay select:focus {
   background-color: white !important;

@@ -13,7 +13,7 @@ import AccountDashboard from "./users/AccountDashboard";
 import Login from "./auth/login/page";
 import BookingPage from "./component/BookingPage";
 
-import InfoPage from "./users/InfoPage";
+import InfoPage from "./component/InfoPage";
 import NotFound from "./NotFound";
 
 import "./styles/theme.css";

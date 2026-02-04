@@ -1031,7 +1031,7 @@ Call them now to check if they want to extend. If no response, call them when re
   // Fetch Terms & Conditions from Firestore
   const fetchTermsConditions = async () => {
     try {
-      const docRef = doc(db, "public", "termsConditions");
+      const docRef = doc(db, "terms", "termsConditions");
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data = snap.data();

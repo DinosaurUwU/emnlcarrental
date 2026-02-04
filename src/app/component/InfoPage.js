@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 import { useUser } from "../lib/UserContext";
-import Header from "../component/Header";
-import Footer from "../component/Footer";
+import Header from "./Header";
+import Footer from "./Footer";
 
 import "./InfoPage.css";
 
@@ -888,6 +888,9 @@ const InfoPage = ({ openBooking }) => {
   const [deleteTermsVersionIdx, setDeleteTermsVersionIdx] = useState(null);
   const [showTermsSaveConfirm, setShowTermsSaveConfirm] = useState(false);
   const [showTermsCancelConfirm, setShowTermsCancelConfirm] = useState(false);
+
+  // At the top of InfoPage.js, after imports
+const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
   // Add useEffect to fetch data on mount
   useEffect(() => {
@@ -2004,11 +2007,11 @@ const InfoPage = ({ openBooking }) => {
                 month: "long",
                 day: "numeric",
               })
-            : new Date().toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+            : LAUNCH_DATE.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
         </p>
 
         {/* Scrollable only in edit mode */}
@@ -2285,11 +2288,11 @@ const InfoPage = ({ openBooking }) => {
                 month: "long",
                 day: "numeric",
               })
-            : new Date().toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+            : LAUNCH_DATE.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
         </p>
 
         {isEditingTerms ? (
