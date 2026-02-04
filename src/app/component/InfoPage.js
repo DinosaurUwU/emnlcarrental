@@ -2,12 +2,30 @@
 // src/user/InfoPage.js
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-
 import { useUser } from "../lib/UserContext";
 import Header from "./Header";
 import Footer from "./Footer";
-
 import "./InfoPage.css";
+import {
+  MdEmail,
+  MdPhone,
+  MdChat,
+  MdDescription,
+  MdDirectionsCar,
+  MdPerson,
+  MdPolicy,
+  MdDriveEta,
+} from "react-icons/md";
+import {
+  FaQuestion,
+  FaCar,
+  FaUser,
+  FaFileAlt,
+  FaCarSide,
+} from "react-icons/fa";
+
+// Simple parallax reference
+let infoTitleRef = null;
 
 const InfoPage = ({ openBooking }) => {
   const pathname = usePathname();
@@ -889,15 +907,17 @@ const InfoPage = ({ openBooking }) => {
   const [showTermsSaveConfirm, setShowTermsSaveConfirm] = useState(false);
   const [showTermsCancelConfirm, setShowTermsCancelConfirm] = useState(false);
 
+  const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
+
   // At the top of InfoPage.js, after imports
-const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
+  const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
   // Add useEffect to fetch data on mount
   useEffect(() => {
     const loadPolicies = async () => {
       const privacyData = await fetchPrivacyPolicy();
       console.log("Privacy data:", privacyData);
-      
+
       if (privacyData) {
         if (privacyData.content) {
           setPrivacyContent(privacyData.content);
@@ -909,7 +929,7 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
       const termsData = await fetchTermsConditions();
       console.log("Terms data:", termsData);
-      
+
       if (termsData) {
         if (termsData.content) {
           setTermsContent(termsData.content);
@@ -922,7 +942,6 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
     loadPolicies();
   }, [fetchPrivacyPolicy, fetchTermsConditions]);
-
 
   const pushToHistory = (prevState) => {
     const historyEntry = {
@@ -1197,9 +1216,33 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
   };
 
   // PARALLAX EFFECT
+  useEffect(() => {
+    infoTitleRef = document.querySelector(".info-title");
 
+    let lastScrollY = window.scrollY;
+    let ticking = false;
 
+    const updateParallax = () => {
+      const scrollY = window.scrollY;
+      if (scrollY < 500 && infoTitleRef) {
+        const offset = scrollY * 0.5;
+        infoTitleRef.style.transform = `translateY(${offset}px)`;
+      }
+      ticking = false;
+    };
 
+    const onScroll = () => {
+      lastScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // useEffect(() => {
   //   const handleScroll = () => setOffsetY(window.scrollY * 0.5);
@@ -1209,24 +1252,65 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
   const faqs = [
     {
-      question: "How can I book a car?",
+      question: "What personal information do you collect?",
       answer:
-        "You can book online through our website or contact us directly via phone or email. We recommend booking at least 24 hours in advance to ensure vehicle availability.",
+        "We collect personal identification information including full name, contact phone number, email address, and residential address. We also collect government-issued identification documents such as driver's license, passport, or national ID for age verification and legal compliance. Additionally, we collect vehicle rental preferences, booking history, usage patterns, emergency contact information, technical data including IP address, browser type, device information, and location data when you use our services.",
     },
     {
-      question: "What documents do I need?",
+      question: "How is my data shared or disclosed?",
       answer:
-        "A valid driver’s license and a government-issued ID are required for all rentals. Additional documents may be required for international drivers.",
+        "We do not sell, trade, or rent your personal information to third parties. We only share your data when necessary for legitimate business purposes or as required by law. This includes sharing with insurance companies for claims processing, law enforcement agencies when required by law, vehicle maintenance and repair service providers, payment processors, our affiliated service centers, and credit reporting agencies for rental eligibility assessment.",
     },
     {
-      question: "Do you require a security deposit?",
+      question: "What are my rights regarding my personal information?",
       answer:
-        "Yes, a refundable security deposit is required at the time of booking. The amount depends on the type of vehicle rented.",
+        "You have several rights including: Right to access - request a copy of the personal information we hold about you; Right to rectification - request correction of inaccurate or incomplete personal information; Right to erasure - request deletion of your personal information in certain circumstances; Right to data portability - request transfer of your data to another service provider; Right to object - object to processing of your personal information for certain purposes; Right to restrict processing - request limitation of how we process your personal information.",
     },
     {
-      question: "Can I extend my rental period?",
+      question: "What eligibility requirements do I need to rent a vehicle?",
       answer:
-        "Yes, you can extend your rental period by contacting us before your current booking ends. Additional fees may apply.",
+        "To rent vehicles from EMNL Car Rental Services, you must be at least 21 years old (or the minimum legal driving age as required by Philippine law). You must possess a valid, government-issued driver's license for the entire rental period and provide a valid government-issued ID for identity verification. You must also have a valid contact number and email address, be physically fit to operate a motor vehicle safely, not be under the influence of alcohol, drugs, or any substance that impairs driving ability, and have no criminal record that would prevent safe vehicle operation.",
+    },
+    {
+      question: "How do I make a reservation or booking?",
+      answer:
+        "Bookings can be made through our website, clicking the Book Now button or by contacting our office directly. A booking is confirmed only after receiving a confirmation email, message, or call from EMNL Car Rental Services. All bookings require advance reservation with minimum 24-hour notice for same-day pickups. Vehicle availability is not guaranteed until booking confirmation is received. Changes to booking details must be made at least 12 hours before scheduled pickup time.",
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer:
+        "All payments for vehicle rentals are processed on-site at our office location. We accept cash, bank transfers, GCash, GoTyme, and other approved digital wallets. Security deposits are required for all rentals and are refundable upon vehicle return in good condition. Deposit amounts vary based on vehicle type, rental duration, and customer history. Additional charges may apply for fuel, parking violations, or vehicle damage.",
+    },
+    {
+      question: "What is your cancellation and refund policy?",
+      answer:
+        "Cancellations made 48+ hours in advance receive full refunds. Late cancellations may incur fees depending on the timing and circumstances. All payments are final and non-refundable except as specified in our cancellation policy. You can modify your booking up to 24 hours before pickup through your account dashboard. Please contact us as soon as possible if you need to cancel or modify your reservation.",
+    },
+    {
+      question: "What are the vehicle usage and driver responsibilities?",
+      answer:
+        "Renters are responsible for the vehicle during the rental period and must comply with all traffic laws and regulations. The vehicle must not be used for illegal activities, racing, or commercial purposes without explicit consent. All vehicles are smoke-free zones. Pets are only allowed in pet-friendly vehicles with prior arrangements. Unauthorized drivers are not permitted to operate the rental vehicle. The renter must report any accidents, breakdowns, or mechanical issues immediately to our office.",
+    },
+    {
+      question: "How do you protect my personal information?",
+      answer:
+        "We implement comprehensive security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. All personal data is encrypted during transmission and storage using industry-standard SSL/TLS protocols. Access to customer data is restricted to authorized personnel only on a need-to-know basis. We conduct regular security audits and vulnerability assessments. Multi-factor authentication is required for administrative access to customer data.",
+    },
+    {
+      question: "How long do you retain my personal information?",
+      answer:
+        "We retain your personal information only as long as necessary for the purposes outlined in our Privacy Policy. Active rental data is retained for the duration of the rental period plus 7 years for legal compliance. Booking history and transaction records are retained for 7 years for tax and legal purposes. Account information is retained while your account is active and for 3 years after account closure. Marketing preferences are retained until you unsubscribe or request deletion. Anonymized analytics data is retained indefinitely for service improvement.",
+    },
+    {
+      question: "Do you use cookies and tracking technologies?",
+      answer:
+        "We use cookies and similar technologies to enhance your experience on our website and mobile applications. Essential cookies are required for website functionality and security. Analytics cookies help us understand how you use our services and improve performance. Preference cookies remember your settings and preferences. Marketing cookies show relevant advertisements and promotions. You can control cookie preferences through your browser settings. Disabling cookies may affect website functionality and user experience.",
+    },
+    {
+      question:
+        "What happens if the vehicle breaks down or I get into an accident?",
+      answer:
+        "In case of a breakdown, immediately contact our office for assistance. We provide 24/7 roadside support for all rentals. For accidents, ensure everyone's safety first, then contact local authorities and our office immediately. Do not admit liability or negotiate with other parties. Comprehensive insurance coverage is included with all rentals, but you must complete an accident report within 24 hours. Emergency contact numbers are provided in your rental agreement and vehicle.",
     },
   ];
 
@@ -1372,11 +1456,33 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
     }
   };
 
+  // Overlay handling for Messenger confirm
+  useEffect(() => {
+    const scrollYRef = { current: 0 };
+
+    if (showMessengerConfirm) {
+      scrollYRef.current = window.scrollY;
+      document.body.classList.add("modal-open");
+      document.body.style.top = `-${scrollYRef.current}px`;
+    } else {
+      document.body.classList.remove("modal-open");
+      document.body.style.top = "";
+      window.scrollTo(0, scrollYRef.current);
+    }
+
+    return () => {
+      document.body.classList.remove("modal-open");
+      document.body.style.top = "";
+    };
+  }, [showMessengerConfirm]);
+
   return (
     <div className="info-page" ref={pageRef}>
       <Header openBooking={openBooking} />
 
-
+      <div className="info-title" ref={(el) => (infoTitleRef = el)}>
+        <img src="/assets/dark-logo.png" alt="Logo" className="login-logo" />
+      </div>
 
       {/* Help Center */}
       <section id="help-center" className="help-center">
@@ -1439,31 +1545,41 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
         {/* Categories */}
         <div className="help-categories">
           <a href="#faqs" className="help-card">
-            <div className="icon">📄</div>
+            <div className="icon">
+              <FaQuestion size={24} color="#FF9100" />
+            </div>
             <h3>FAQs</h3>
             <p>Quick answers to common rental questions.</p>
           </a>
 
           <a href="#bookings" className="help-card">
-            <div className="icon">🚗</div>
+            <div className="icon">
+              <FaCar size={24} color="#FF9100" />
+            </div>
             <h3>Bookings</h3>
             <p>How to reserve, modify, or cancel your car rental.</p>
           </a>
 
           <a href="#account" className="help-card">
-            <div className="icon">👤</div>
+            <div className="icon">
+              <FaUser size={24} color="#FF9100" />
+            </div>
             <h3>Account Support</h3>
             <p>Help with signing in, profiles, and settings.</p>
           </a>
 
           <a href="#privacy-policy" className="help-card">
-            <div className="icon">📜</div>
+            <div className="icon">
+              <FaFileAlt size={24} color="#FF9100" />
+            </div>
             <h3>Rental Policies</h3>
             <p>Learn about our rules, requirements, and coverage.</p>
           </a>
 
           <a href="/fleet-details" className="help-card">
-            <div className="icon">🚙</div>
+            <div className="icon">
+              <FaCarSide size={24} color="#FF9100" />
+            </div>
             <h3>Vehicle Info</h3>
             <p>Details on our fleet, specifications, and availability.</p>
           </a>
@@ -1474,12 +1590,45 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
           <div className="help-contact">
             <h3 className="section-title">Need more help?</h3>
             <p className="contact-info">
-              📧 Email:{" "}
-              <a href="mailto:info@emnlcarrental.com">info@emnlcarrental.com</a>
+              <MdEmail
+                style={{
+                  marginRight: "5px",
+                  verticalAlign: "middle",
+                  color: "#FF9100",
+                }}
+              />
+              <strong>Email:</strong>{" "}
+              <a href="mailto:rentalinquiries.emnl@gmail.com">
+                rentalinquiries.emnl@gmail.com
+              </a>
               <br />
-              📞 Phone: <a href="tel:+639123456789">+63 912 345 6789</a>
+              <MdPhone
+                style={{
+                  marginRight: "5px",
+                  verticalAlign: "middle",
+                  color: "#FF9100",
+                }}
+              />
+              <strong>Phone:</strong>{" "}
+              <a href="tel:+639754778178">+63 975 477 8178</a>
               <br />
-              💬 Live Chat: <a href="#chat">Start a conversation</a>
+              <MdChat
+                style={{
+                  marginRight: "5px",
+                  verticalAlign: "middle",
+                  color: "#FF9100",
+                }}
+              />
+              <strong>Chat:</strong>{" "}
+              <a
+                href="#chat"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowMessengerConfirm(true);
+                }}
+              >
+                Start a conversation
+              </a>
             </p>
           </div>
         </div>
@@ -1524,7 +1673,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I make a booking?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "booking-process" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "booking-process" ? "show" : ""}`}
@@ -1550,7 +1703,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>What are the booking requirements?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "booking-requirements" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "booking-requirements" ? "show" : ""}`}
@@ -1559,7 +1716,8 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
                 To book a vehicle, you must be at least 21 years old, have a
                 valid driver's license, and provide a government-issued ID.
                 International drivers may need additional documentation. Guest
-                users can book without an account.
+                users must call or message to book a rental or create an account
+                in this website to be eligible in the online booking.
               </p>
             </div>
           </div>
@@ -1574,7 +1732,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>Can I modify or cancel my booking?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "modify-booking" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "modify-booking" ? "show" : ""}`}
@@ -1598,7 +1760,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>When do I need to pay for my booking?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "payment-booking" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "payment-booking" ? "show" : ""}`}
@@ -1624,7 +1790,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I know my booking is confirmed?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "booking-confirmation" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "booking-confirmation" ? "show" : ""}`}
@@ -1646,7 +1816,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>Can I pick up my vehicle early?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "early-pickup" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "early-pickup" ? "show" : ""}`}
@@ -1676,16 +1850,21 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I create an account?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "create-account" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "create-account" ? "show" : ""}`}
             >
               <p className="infopage-p">
-                Click the profile/account icon in the header and select "Sign
-                Up". Fill out the registration form with your personal details,
-                email, and password. You'll need to verify your email address to
-                complete registration.
+                In /login page, fill out the registration form with your
+                personal details, email, and password or you can just directly
+                sign in with Google. For Email and Passwords, you'll need to
+                verify your email address to complete registration. You can
+                access the verification in /account page.
               </p>
             </div>
           </div>
@@ -1698,17 +1877,22 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>I'm having trouble logging in</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "login-issues" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "login-issues" ? "show" : ""}`}
             >
               <p className="infopage-p">
-                Click the profile/account icon in the header to access the login
-                form. Make sure you're using the correct email and password. If
-                you've forgotten your password, use the "Forgot Password" link.
-                Clear your browser cache and try again. Contact support if
-                issues persist.
+                Make sure you're using the correct email and password. If you've
+                forgotten your password, use the "Forgot Password" link. In
+                other cases, you may have forgotten that you logged in with your
+                account using Google. Email / Passwords log in are different
+                from Google direct signup Clear your browser cache and try
+                again. Contact support if issues persist.
               </p>
             </div>
           </div>
@@ -1723,16 +1907,22 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I reset my password?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "reset-password" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "reset-password" ? "show" : ""}`}
             >
               <p className="infopage-p">
-                Click the profile/account icon in the header, then select
-                "Forgot Password" on the login form. Enter your email address,
-                and follow the instructions sent to your email. The reset link
-                is valid for 24 hours.
+                In /login page, in the bottom part of the password field, select
+                "Forgot Password". You will be given an password reset email
+                from the gmail account you used, make sure you entered your
+                email address, before clicking on forgot password, and follow
+                the instructions sent to your email. The reset link is valid for
+                24 hours.
               </p>
             </div>
           </div>
@@ -1745,16 +1935,21 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I link my Google account?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "google-link" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "google-link" ? "show" : ""}`}
             >
               <p className="infopage-p">
                 After logging in, go to your Account Dashboard or Profile
-                settings. Look for the "Link Account" or "Connect Google" option
-                to link your email/password account with your Google account for
-                easier login.
+                settings. In the Right top most part of your Profile Picture,
+                click the 3 vertical dotted menu, Look for the "Link Account"
+                option to link your email/password account with your Google
+                account for easier login.
               </p>
             </div>
           </div>
@@ -1769,7 +1964,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I update my profile information?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "update-profile" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "update-profile" ? "show" : ""}`}
@@ -1793,16 +1992,19 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How is my account information protected?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "account-security" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "account-security" ? "show" : ""}`}
             >
               <p className="infopage-p">
                 We use industry-standard encryption and security measures to
-                protect your account. Enable two-factor authentication in your
-                Profile settings for additional security. Never share your login
-                credentials with others.
+                protect your account. NEVER SHARE your login credentials with
+                others.
               </p>
             </div>
           </div>
@@ -1817,15 +2019,21 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I delete my account?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "delete-account" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "delete-account" ? "show" : ""}`}
             >
               <p className="infopage-p">
-                Go to your Account Dashboard or Profile settings and select
-                "Delete Account". You'll need to confirm this action. Note that
-                some data may be retained for legal compliance purposes.
+                Go to your Account Dashboard, in the right top most corner of
+                your profile picture, there is a 3 dotted vertical menu, click
+                that and select "Delete Account". You'll need to confirm this
+                action. Note that some data may be retained for legal compliance
+                purposes.
               </p>
             </div>
           </div>
@@ -1840,7 +2048,11 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               }
             >
               <span>How do I view my booking history?</span>
-              <span className="faq-icon">▼</span>
+              <span
+                className={`faq-icon ${openFAQ === "booking-history" ? "rotate" : ""}`}
+              >
+                ▼
+              </span>
             </button>
             <div
               className={`faq-answer ${openFAQ === "booking-history" ? "show" : ""}`}
@@ -1848,34 +2060,7 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
               <p className="infopage-p">
                 Click the profile/account icon in the header to access your
                 Account Dashboard. Navigate to "My Bookings" or "Rental History"
-                section to view past and current bookings, download receipts,
-                and track your rental activity.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "notification-settings"
-                    ? null
-                    : "notification-settings",
-                )
-              }
-            >
-              <span>How do I manage notification preferences?</span>
-              <span className="faq-icon">▼</span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "notification-settings" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Go to your Account Dashboard or Profile settings. Select
-                "Notifications" to choose which emails and alerts you want to
-                receive, including booking confirmations, reminders, and
-                promotional offers.
+                section to view past and current bookings.
               </p>
             </div>
           </div>
@@ -2005,10 +2190,10 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
                 day: "numeric",
               })
             : LAUNCH_DATE.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })}
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
         </p>
 
         {/* Scrollable only in edit mode */}
@@ -2286,10 +2471,10 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
                 day: "numeric",
               })
             : LAUNCH_DATE.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })}
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
         </p>
 
         {isEditingTerms ? (
@@ -2440,6 +2625,36 @@ const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
       </section>
 
       <Footer />
+
+      {showMessengerConfirm && (
+        <div className="overlay-delete">
+          <div className="confirm-modal">
+            <h3 className="confirm-header">Open Messenger?</h3>
+            <p className="confirm-text">
+              You will be redirected to Facebook Messenger to chat with us.
+            </p>
+
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={() => {
+                  setShowMessengerConfirm(false);
+                  window.open("https://m.me/111898015131645", "_blank");
+                }}
+              >
+                Open Messenger
+              </button>
+
+              <button
+                className="confirm-btn cancel"
+                onClick={() => setShowMessengerConfirm(false)}
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showHistoryOverlay && (
         <div className="admin-booking-confirm-overlay">
