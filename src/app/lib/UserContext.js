@@ -148,6 +148,31 @@ export const UserProvider = ({ children }) => {
     setUser(u);
   };
 
+  // SAVE GUEST USER BOOKING FORM AFTER LOGIN
+  useEffect(() => {
+  if (user && user.emailVerified) {
+    // Check for pending booking data
+    const pendingBookingData = localStorage.getItem("pendingBookingData");
+    
+    if (pendingBookingData) {
+      try {
+        const data = JSON.parse(pendingBookingData);
+        
+        // Store in localStorage with user-specific key
+        localStorage.setItem(`pendingBookingData_${user.uid}`, pendingBookingData);
+        
+        // Clear the general pending data
+        localStorage.removeItem("pendingBookingData");
+        
+        console.log("📝 Pending booking data restored for user:", user.uid);
+      } catch (error) {
+        console.error("Error parsing pending booking data:", error);
+      }
+    }
+  }
+}, [user]);
+
+
   // Load ALL settings on mount (MOP, POP/POE, referralSources)
   useEffect(() => {
     const loadAllSettings = async () => {
