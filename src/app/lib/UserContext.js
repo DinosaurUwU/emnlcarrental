@@ -334,8 +334,7 @@ export const UserProvider = ({ children }) => {
 
   // REALTIME FETCH UNITS COLLECTION
 useEffect(() => {
-  const fetchUnits = async () => {
-    const snapshot = await getDocs(collection(db, "units"));
+  const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
     const allFetchedUnits = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -344,9 +343,9 @@ useEffect(() => {
     setAllUnitData(allFetchedUnits);
     const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
     setUnitData(filteredUnits);
-  };
+  });
 
-  fetchUnits();
+  return () => unsubscribe();
 }, []);
 
   // useEffect(() => {

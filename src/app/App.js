@@ -11,7 +11,8 @@ import Contact from "./contact/page";
 import AdminDashboard from "./admin/AdminDashboard";
 import AccountDashboard from "./users/AccountDashboard";
 import Login from "./auth/login/page";
-import BookingPage from "./users/BookingPage";
+import BookingPage from "./component/BookingPage";
+
 import InfoPage from "./users/InfoPage";
 import NotFound from "./NotFound";
 

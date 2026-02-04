@@ -1513,14 +1513,16 @@ useEffect(() => {
       filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
   );
 
-  // If selected unit is still available and NOT hidden, keep it
+  // Check if selected unit still exists and matches filterType
   const selectedUnit = filteredUnits.find((u) => u.id === selectedUnitId);
-  if (selectedUnit && !selectedUnit.hidden) return;
-
-  // Otherwise, pick the first NON-HIDDEN unit
-  const nonHiddenUnit = filteredUnits.find((u) => !u.hidden);
-  if (nonHiddenUnit) {
-    setSelectedUnitId(nonHiddenUnit.id);
+  
+  // Only auto-select if:
+  // 1. Selected unit no longer exists (deleted), OR
+  // 2. Selected unit no longer matches filterType
+  if (!selectedUnit && filteredUnits.length > 0) {
+    // Pick the first unit that matches filter (can be hidden or not)
+    const firstUnit = filteredUnits[0];
+    setSelectedUnitId(firstUnit.id);
   }
 }, [allUnitData, filterType, selectedUnitId]);
 

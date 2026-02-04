@@ -10,11 +10,7 @@ import "photoswipe/style.css";
 
 import "./BookingPage.css";
 import { useUser } from "../lib/UserContext";
-// import pickacar from "../assets/images/image1.png";
-// import showBtn from "../assets/prv-btn.png";
-// import hideBtn from "../assets/nxt-btn.png";
-// import close_0Btn from "../assets/close_0.png";
-// import close_1Btn from "../assets/close_1.png";
+
 
 const BookingPage = ({
   isOpen,
@@ -24,7 +20,7 @@ const BookingPage = ({
   prefillData,
   editingBookingData,
 }) => {
-  const { unitData, user, setShowVerifyOverlay, referralSources, fetchImageFromFirestore } = useUser();
+  const { unitData, allUnitData, user, setShowVerifyOverlay, referralSources, fetchImageFromFirestore } = useUser();
 const [skipImageUpdate, setSkipImageUpdate] = useState(false);
 
   const [isDurationInvalid, setIsDurationInvalid] = useState(false);
@@ -98,31 +94,82 @@ const [showDiscardSavedData, setShowDiscardSavedData] = useState(false);
   const [hideAnimation, setHideAnimation] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [filteredUnits, setFilteredUnits] = useState(unitData || []);
-  const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+  // const [filteredUnits, setFilteredUnits] = useState(unitData || []);
+  // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
 
 
-  useEffect(() => {
-    if (!unitData || unitData.length === 0) {
-      console.log("🔍 No unitData yet — clearing filteredUnits");
-      setFilteredUnits([]);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!unitData || unitData.length === 0) {
+  //     console.log("🔍 No unitData yet — clearing filteredUnits");
+  //     setFilteredUnits([]);
+  //     return;
+  //   }
 
-    // 🧩 Normalize car type to prevent accidental blanks or undefined
-    const type = selectedCarType?.trim() || "ALL";
+  //   // 🧩 Normalize car type to prevent accidental blanks or undefined
+  //   const type = selectedCarType?.trim() || "ALL";
 
-    // 🧠 Filter logic with double safety
-    const filtered =
-      type === "ALL"
-        ? unitData
-        : unitData.filter(
-            (unit) => unit.carType?.toLowerCase() === type.toLowerCase()
-          );
+  //   // 🧠 Filter logic with double safety
+  //   const filtered =
+  //     type === "ALL"
+  //       ? unitData
+  //       : unitData.filter(
+  //           (unit) => unit.carType?.toLowerCase() === type.toLowerCase()
+  //         );
 
-    console.log(`✅ Filtered units set: ${filtered.length} (type: ${type})`);
-    setFilteredUnits(filtered);
-  }, [unitData, selectedCarType]);
+  //   console.log(`✅ Filtered units set: ${filtered.length} (type: ${type})`);
+  //   setFilteredUnits(filtered);
+  // }, [unitData, selectedCarType]);
+
+
+  const [filteredUnits, setFilteredUnits] = useState(allUnitData || []);
+const selectedUnit = allUnitData.find((unit) => unit.id === selectedCarId);
+
+useEffect(() => {
+  if (!allUnitData || allUnitData.length === 0) {
+    setFilteredUnits([]);
+    return;
+  }
+  const type = selectedCarType?.trim() || "ALL";
+  const filtered =
+    type === "ALL"
+      ? allUnitData
+      : allUnitData.filter(
+          (unit) => unit.carType?.toLowerCase() === type.toLowerCase()
+        );
+  setFilteredUnits(filtered);
+}, [allUnitData, selectedCarType]);
+
+useEffect(() => {
+  if (!allUnitData || allUnitData.length === 0) {
+    console.log("🔍 No allUnitData yet — clearing filteredUnits");
+    setFilteredUnits([]);
+    return;
+  }
+
+  // 🧩 Normalize car type to prevent accidental blanks or undefined
+  const type = selectedCarType?.trim() || "ALL";
+
+  // 🧠 Filter logic - show ALL units including hidden
+  const filtered =
+    type === "ALL"
+      ? allUnitData
+      : allUnitData.filter(
+          (unit) => unit.carType?.toLowerCase() === type.toLowerCase()
+        );
+
+  console.log(`✅ Filtered units set: ${filtered.length} (type: ${type})`);
+  setFilteredUnits(filtered);
+}, [allUnitData, selectedCarType]);
+
+// Debug logging
+console.log("🔍 allUnitData length:", allUnitData?.length);
+const wigo = allUnitData?.find(u => u.name?.includes("WIGO"));
+console.log("🔍 WIGO unit:", wigo?.name, "hidden:", wigo?.hidden);
+console.log("🔍 filteredUnits length:", filteredUnits?.length);
+const wigoFiltered = filteredUnits?.find(u => u.name?.includes("WIGO"));
+console.log("🔍 WIGO in filteredUnits:", wigoFiltered?.name, "hidden:", wigoFiltered?.hidden);
+
+
 
   const derivedPrefill = prefillData || user || {};
 
@@ -186,7 +233,7 @@ useEffect(() => {
     return;
   }
 
-  const selectedUnit = unitData.find((u) => u.id === selectedCarId);
+  const selectedUnit = allUnitData.find((u) => u.id === selectedCarId);
   if (selectedUnit?.imageId) {
     fetchImageFromFirestore(selectedUnit.imageId)
       .then(({ base64 }) => {
@@ -198,7 +245,7 @@ useEffect(() => {
   } else {
     setPreviewImage("/assets/images/image1.png");
   }
-}, [selectedCarId, unitData, fetchImageFromFirestore]);
+}, [selectedCarId, allUnitData, fetchImageFromFirestore]);
 
 
 
@@ -2164,7 +2211,7 @@ onChange={(e) => {
   setHasChanges(true);
   setImageAnimation("fade-out");
 
-  const selectedUnit = unitData.find((u) => u.id === carId);
+  const selectedUnit = allUnitData.find((u) => u.id === carId);
 
   if (selectedUnit?.imageId) {
     fetchImageFromFirestore(selectedUnit.imageId)
@@ -2194,11 +2241,30 @@ onChange={(e) => {
   <option value="" disabled hidden>
     Pick a Car
   </option>
-  {filteredUnits.map((unit) => (
+  {/* {filteredUnits.map((unit) => (
     <option key={unit.id} value={unit.id}>
       {unit.name}
     </option>
-  ))}
+  ))} */}
+
+{filteredUnits.map((unit) => (
+  <option
+    key={unit.id}
+    value={unit.id}
+    style={
+      unit.hidden
+        ? {
+            color: "#DC3545 !important",
+            backgroundColor: "#F8D7DA !important",
+          }
+        : {}
+    }
+  >
+    {unit.name}
+  </option>
+))}
+
+
 </select>
 
                 </div>

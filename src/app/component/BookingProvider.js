@@ -7,7 +7,8 @@ import React, {
   useRef,
 } from "react";
 import { useUser } from "../lib/UserContext";
-import BookingPage from "../users/BookingPage";
+import BookingPage from "./BookingPage";
+
 
 const BookingContext = createContext();
 

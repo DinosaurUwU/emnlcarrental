@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "./lib/UserContext";
 import LandingPage from "./LandingPage";
-import BookingPage from "./users/BookingPage";
+import BookingPage from "./component/BookingPage";
+
 
 function Home() {
   const {
