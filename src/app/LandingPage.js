@@ -83,6 +83,8 @@ useEffect(() => {
           email: data.formData?.email || "",
           contact: data.formData?.contactNo || "",
           location: data.formData?.location || "",
+          occupation: data.formData?.occupation || "",
+          address: data.formData?.address || "",
           dropoffLocation: data.formData?.dropoffLocation || "",
           purpose: data.formData?.purpose || "",
           referralSource: data.formData?.referralSource || "",
