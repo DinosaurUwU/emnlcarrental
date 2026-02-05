@@ -442,45 +442,30 @@ useEffect(() => {
     additionalMessage: "",
   });
 
-  useEffect(() => {
-  if (prefillData) {
-    console.log("📥 BookingPage received prefillData:");
-    console.log("  - carId:", prefillData.carId);
-    console.log("  - CARNAME:", prefillData.carName);
-    console.log("  - carType:", prefillData.carType);
-    console.log("  - driverLicense:", prefillData.driverLicense);
-    console.log("  - unitData.length:", unitData.length);
-  }
-}, [prefillData]);
 
 
-  useEffect(() => {
+
+useEffect(() => {
   if (prefillData) {
     // Car selection
     setSelectedCarType(prefillData.carType || "ALL");
-    // const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
-    // setSelectedCarId(prefillUnit?.selectedCarId || "");
 
     if (prefillData.carId) {
-  // First try to find by ID directly (if unitData is loaded)
-  const unitById = unitData.find((u) => u.id === prefillData.carId);
-  if (unitById) {
-    setSelectedCarId(unitById.id);
-    console.log("✅ Car found by ID:", unitById.name);
-  } else {
-    // unitData not loaded yet, store carId for later lookup
-    console.log("⏳ unitData not loaded, storing carId:", prefillData.carId);
-    setSelectedCarId(prefillData.carId);
-  }
-}
+      const unitById = unitData.find((u) => u.id === prefillData.carId);
+      if (unitById) {
+        setSelectedCarId(unitById.id);
+      } else {
+        setSelectedCarId(prefillData.carId);
+      }
+    }
 
-// Fallback: also look for carName if provided
-if (prefillData.carName && !unitById) {
-  const unitByName = unitData.find((u) => u.name === prefillData.carName);
-  if (unitByName) {
-    setSelectedCarId(unitByName.id);
-  }
-}
+    // Fallback: also look for carName if provided
+    if (prefillData.carName) {
+      const unitByName = unitData.find((u) => u.name === prefillData.carName);
+      if (unitByName) {
+        setSelectedCarId(unitByName.id);
+      }
+    }
 
     // Drive/Drop options
     setDriveType(prefillData.drivingOption || "Self-Drive");
@@ -511,29 +496,45 @@ if (prefillData.carName && !unitById) {
 
     // Driver's License
     if (prefillData.driverLicense) {
-      console.log("📸 driverLicense type:", typeof prefillData.driverLicense);
-  console.log("📸 driverLicense value:", prefillData.driverLicense);
       setUploadedID(prefillData.driverLicense);
     }
 
-    // Image handling...
-      const selectedUnit = unitData.find((u) => u.name === prefillData.carName);
-      // setPreviewImage(selectedUnit?.image || pickacar);
-      if (selectedUnit?.imageId) {
-        fetchImageFromFirestore(selectedUnit.imageId)
+    // Image handling
+    const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
+                         unitData.find((u) => u.name === prefillData.carName);
+    if (selectedUnit?.imageId) {
+      fetchImageFromFirestore(selectedUnit.imageId)
+        .then(({ base64 }) => {
+          setPreviewImage(base64 || "/assets/images/image1.png");
+        })
+        .catch(() => {
+          setPreviewImage("/assets/images/image1.png");
+        });
+    } else {
+      setPreviewImage("/assets/images/image1.png");
+    }
+  }
+}, [prefillData, unitData, fetchImageFromFirestore]);
+
+useEffect(() => {
+  if (prefillData?.carId && unitData.length > 0 && selectedCarId !== prefillData.carId) {
+    const unitById = unitData.find((u) => u.id === prefillData.carId);
+    if (unitById) {
+      setSelectedCarId(unitById.id);
+      
+      // Also update image
+      if (unitById.imageId) {
+        fetchImageFromFirestore(unitById.imageId)
           .then(({ base64 }) => {
             setPreviewImage(base64 || "/assets/images/image1.png");
           })
           .catch(() => {
             setPreviewImage("/assets/images/image1.png");
           });
-      } else {
-        setPreviewImage("/assets/images/image1.png");
       }
-
-
-          }
-  }, [prefillData, unitData, fetchImageFromFirestore]);
+    }
+  }
+}, [unitData, prefillData]);
 
 
   // useEffect(() => {
