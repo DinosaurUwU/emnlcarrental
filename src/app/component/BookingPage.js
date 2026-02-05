@@ -147,6 +147,43 @@ useEffect(() => {
   }
 }, [user]);
 
+useEffect(() => {
+  // Check for URL search params (from guest session redirect)
+  const searchParams = new URLSearchParams(window.location.search);
+  const hasPrefill = searchParams.get('prefill') === 'true';
+  
+  if (hasPrefill) {
+    const urlPrefillData = {
+      carType: searchParams.get('carType') || undefined,
+      carName: searchParams.get('carName') || undefined,
+      drivingOption: searchParams.get('drivingOption') || undefined,
+      pickupOption: searchParams.get('pickupOption') || undefined,
+      startDate: searchParams.get('startDate') || undefined,
+      startTime: searchParams.get('startTime') || undefined,
+      endDate: searchParams.get('endDate') || undefined,
+      endTime: searchParams.get('endTime') || undefined,
+      firstName: searchParams.get('firstName') || undefined,
+      middleName: searchParams.get('middleName') || undefined,
+      surname: searchParams.get('surname') || undefined,
+      occupation: searchParams.get('occupation') || undefined,
+      address: searchParams.get('address') || undefined,
+      contact: searchParams.get('contact') || undefined,
+      email: searchParams.get('email') || undefined,
+      location: searchParams.get('location') || undefined,
+      dropoffLocation: searchParams.get('dropoffLocation') || undefined,
+      purpose: searchParams.get('purpose') || undefined,
+      additionalMessage: searchParams.get('additionalMessage') || undefined,
+      referralSource: searchParams.get('referralSource') || undefined,
+      driverLicense: searchParams.get('driverLicense') || undefined,
+    };
+    
+    // Clean URL without reloading
+    window.history.replaceState({}, document.title, window.location.pathname);
+    
+    // Merge with existing prefillData
+    setPrefillData(urlPrefillData);
+  }
+}, []);
 
 
 
@@ -406,21 +443,45 @@ useEffect(() => {
   });
 
   useEffect(() => {
-    if (prefillData) {
-      setSelectedCarType(prefillData.carType || "ALL");
-      // setSelectedCar(prefillData.carName || "");
-      const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
-      setSelectedCarId(prefillUnit?.id || "");
+  if (prefillData) {
+    // Car selection
+    setSelectedCarType(prefillData.carType || "ALL");
+    const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
+    setSelectedCarId(prefillUnit?.id || "");
 
-      setDriveType(prefillData.drivingOption || "Self-Drive");
-      setDropOffType(prefillData.pickupOption || "Pickup");
+    // Drive/Drop options
+    setDriveType(prefillData.drivingOption || "Self-Drive");
+    setDropOffType(prefillData.pickupOption || "Pickup");
 
-      setStartDate(prefillData.startDate || "");
-      setStartTime(prefillData.startTime || "");
-      setEndDate(prefillData.endDate || "");
-      setEndTime(prefillData.endTime || "");
+    // Dates and times
+    setStartDate(prefillData.startDate || "");
+    setStartTime(prefillData.startTime || "");
+    setEndDate(prefillData.endDate || "");
+    setEndTime(prefillData.endTime || "");
 
-      // Image
+    // Form data fields
+    setFormData((prev) => ({
+      ...prev,
+      firstName: prefillData.firstName || prev.firstName,
+      middleName: prefillData.middleName || prev.middleName,
+      surname: prefillData.surname || prev.surname,
+      occupation: prefillData.occupation || prev.occupation,
+      address: prefillData.address || prev.address,
+      contactNo: prefillData.contact || prev.contactNo,
+      email: prefillData.email || prev.email,
+      location: prefillData.location || prev.location,
+      dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
+      purpose: prefillData.purpose || prev.purpose,
+      additionalMessage: prefillData.additionalMessage || prev.additionalMessage,
+      referralSource: prefillData.referralSource || prev.referralSource,
+    }));
+
+    // Driver's License
+    if (prefillData.driverLicense) {
+      setUploadedID(prefillData.driverLicense);
+    }
+
+    // Image handling...
       const selectedUnit = unitData.find((u) => u.name === prefillData.carName);
       // setPreviewImage(selectedUnit?.image || pickacar);
       if (selectedUnit?.imageId) {
@@ -435,28 +496,63 @@ useEffect(() => {
         setPreviewImage("/assets/images/image1.png");
       }
 
-      // Form data
-      setFormData((prev) => ({
-        ...prev,
-        firstName: prefillData.firstName || prev.firstName,
-        middleName: prefillData.middleName || prev.middleName,
-        surname: prefillData.surname || prev.surname,
-        occupation: prefillData.occupation || prev.occupation,
-        address: prefillData.address || prev.address,
-        contactNo: prefillData.contact || prev.contactNo,
-        email: prefillData.email || prev.email,
-        location: prefillData.location || prev.location,
-        dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
-        purpose: prefillData.purpose || prev.purpose,
-        additionalMessage:
-          prefillData.additionalMessage || prev.additionalMessage,
-      }));
 
-      if (prefillData.driverLicense) {
-        setUploadedID(prefillData.driverLicense);
-      }
-    }
+          }
   }, [prefillData, unitData, fetchImageFromFirestore]);
+
+
+  // useEffect(() => {
+  //   if (prefillData) {
+  //     setSelectedCarType(prefillData.carType || "ALL");
+  //     // setSelectedCar(prefillData.carName || "");
+  //     const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
+  //     setSelectedCarId(prefillUnit?.id || "");
+
+  //     setDriveType(prefillData.drivingOption || "Self-Drive");
+  //     setDropOffType(prefillData.pickupOption || "Pickup");
+
+  //     setStartDate(prefillData.startDate || "");
+  //     setStartTime(prefillData.startTime || "");
+  //     setEndDate(prefillData.endDate || "");
+  //     setEndTime(prefillData.endTime || "");
+
+  //     // Image
+  //     const selectedUnit = unitData.find((u) => u.name === prefillData.carName);
+  //     // setPreviewImage(selectedUnit?.image || pickacar);
+  //     if (selectedUnit?.imageId) {
+  //       fetchImageFromFirestore(selectedUnit.imageId)
+  //         .then(({ base64 }) => {
+  //           setPreviewImage(base64 || "/assets/images/image1.png");
+  //         })
+  //         .catch(() => {
+  //           setPreviewImage("/assets/images/image1.png");
+  //         });
+  //     } else {
+  //       setPreviewImage("/assets/images/image1.png");
+  //     }
+
+  //     // Form data
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       firstName: prefillData.firstName || prev.firstName,
+  //       middleName: prefillData.middleName || prev.middleName,
+  //       surname: prefillData.surname || prev.surname,
+  //       occupation: prefillData.occupation || prev.occupation,
+  //       address: prefillData.address || prev.address,
+  //       contactNo: prefillData.contact || prev.contactNo,
+  //       email: prefillData.email || prev.email,
+  //       location: prefillData.location || prev.location,
+  //       dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
+  //       purpose: prefillData.purpose || prev.purpose,
+  //       additionalMessage:
+  //         prefillData.additionalMessage || prev.additionalMessage,
+  //     }));
+
+  //     if (prefillData.driverLicense) {
+  //       setUploadedID(prefillData.driverLicense);
+  //     }
+  //   }
+  // }, [prefillData, unitData, fetchImageFromFirestore]);
 
   useEffect(() => {
     if (!startDate || !endDate || !startTime || !endTime) {

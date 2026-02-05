@@ -79,32 +79,75 @@ const BookingProviderInner = ({ children }) => {
     };
   }, [showVerifyOverlay, showVerifyInstructions]);
 
+  // const openBooking = (event, prefillData = {}) => {
+  //   event.stopPropagation();
+
+  //   const rect = event.target.getBoundingClientRect();
+  //   setButtonRect({
+  //     top: rect.top + window.scrollY,
+  //     left: rect.left + window.scrollX,
+  //     width: rect.width,
+  //     height: rect.height,
+  //   });
+
+  //   const mergedData = {
+  //     firstName: user?.firstName || "",
+  //     middleName: user?.middleName || "",
+  //     surname: user?.surname || "",
+  //     occupation: user?.occupation || "",
+  //     address: user?.address || "",
+  //     contact: user?.phone || "",
+  //     email: user?.email || "",
+  //     ...prefillData, // Car info overrides or adds
+  //   };
+
+  //   setPrefillBookingData(mergedData);
+
+  //   setIsBookingOpen(true);
+  // };
+
+
   const openBooking = (event, prefillData = {}) => {
+  if (event) {
     event.stopPropagation();
+  }
 
-    const rect = event.target.getBoundingClientRect();
-    setButtonRect({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
-      width: rect.width,
-      height: rect.height,
-    });
-
-    const mergedData = {
-      firstName: user?.firstName || "",
-      middleName: user?.middleName || "",
-      surname: user?.surname || "",
-      occupation: user?.occupation || "",
-      address: user?.address || "",
-      contact: user?.phone || "",
-      email: user?.email || "",
-      ...prefillData, // Car info overrides or adds
+  let rect;
+  if (event?.target) {
+    const targetRect = event.target.getBoundingClientRect();
+    rect = {
+      top: targetRect.top + window.scrollY,
+      left: targetRect.left + window.scrollX,
+      width: targetRect.width,
+      height: targetRect.height,
     };
+  } else {
+    // Default center position if no event
+    rect = {
+      top: window.scrollY + 100,
+      left: window.scrollX + (window.innerWidth / 2) - 150,
+      width: 300,
+      height: 50,
+    };
+  }
 
-    setPrefillBookingData(mergedData);
+  setButtonRect(rect);
 
-    setIsBookingOpen(true);
+  const mergedData = {
+    firstName: user?.firstName || "",
+    middleName: user?.middleName || "",
+    surname: user?.surname || "",
+    occupation: user?.occupation || "",
+    address: user?.address || "",
+    contact: user?.phone || "",
+    email: user?.email || "",
+    ...prefillData,
   };
+
+  setPrefillBookingData(mergedData);
+  setIsBookingOpen(true);
+};
+
 
   const closeBooking = () => setIsBookingOpen(false);
 

@@ -10,6 +10,8 @@ import CustomerTestimonials from "./CustomerTestimonials";
 import CompanyMap from "./CompanyMap";
 import Footer from "./component/Footer";
 import { useBooking } from "./component/BookingProvider";
+import { useUser } from "./lib/UserContext";
+import { useRouter } from "next/navigation";
 
 import "./LandingPage.css";
 import "./Carousel.css";
@@ -23,6 +25,15 @@ import "./component/Footer.css";
 
 function LandingPage() {
   const { openBooking } = useBooking();
+
+const hiddenButtonRef = useRef(null);
+const router = useRouter();
+
+    const {
+
+      user,
+
+    } = useUser();
 
   const carouselRef = useRef(null);
   const specialOffersRef = useRef(null);
@@ -47,6 +58,66 @@ function LandingPage() {
   const [showImages, setShowImages] = useState(false);
 
   const [scrollProgress, setScrollProgress] = useState(0);
+
+
+  
+
+useEffect(() => {
+  const checkPendingBookingAndOpenOverlay = async () => {
+    if (!user?.uid || !openBooking) return;
+
+    const pendingData = localStorage.getItem(`pendingBookingData_${user.uid}`);
+    
+    if (pendingData) {
+      try {
+        const data = JSON.parse(pendingData);
+        localStorage.removeItem(`pendingBookingData_${user.uid}`);
+        
+        console.log("📝 Found pending booking data from guest session, opening overlay...");
+        
+        // Build prefill data from saved booking
+        const prefillData = {
+          firstName: data.formData?.firstName || "",
+          middleName: data.formData?.middleName || "",
+          surname: data.formData?.surname || "",
+          email: data.formData?.email || "",
+          contact: data.formData?.contactNo || "",
+          location: data.formData?.location || "",
+          dropoffLocation: data.formData?.dropoffLocation || "",
+          purpose: data.formData?.purpose || "",
+          referralSource: data.formData?.referralSource || "",
+          carType: data.selectedCarType || "ALL",
+          carName: data.selectedCarId || "",
+          drivingOption: data.driveType || "Self-Drive",
+          pickupOption: data.dropOffType || "Pickup",
+          startDate: data.startDate || "",
+          startTime: data.startTime || "",
+          endDate: data.endDate || "",
+          endTime: data.endTime || "",
+          driverLicense: data.uploadedID || "",
+        };
+        
+        // Call openBooking directly - it will center the overlay since no event
+        openBooking(null, prefillData);
+      } catch (error) {
+        console.error("Error parsing pending booking data:", error);
+      }
+    }
+  };
+
+  const timer = setTimeout(() => {
+    checkPendingBookingAndOpenOverlay();
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [user, openBooking]);
+
+
+
+
+
+
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -176,6 +247,7 @@ function LandingPage() {
 
   return (
     <div className="LandingPage">
+
       <Header openBooking={openBooking} />
 
       <div ref={carouselRef} className="carousel-container">
