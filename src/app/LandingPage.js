@@ -74,6 +74,12 @@ useEffect(() => {
         localStorage.removeItem(`pendingBookingData_${user.uid}`);
         
         console.log("📝 Found pending booking data from guest session, opening overlay...");
+
+        // DEBUG: Log raw data before building prefill
+        console.log("🔍 Raw pending data:");
+        console.log("  - selectedCarId:", data.selectedCarId, typeof data.selectedCarId);
+        console.log("  - uploadedID:", data.uploadedID, typeof data.uploadedID);
+        console.log("  - uploadedID value:", JSON.stringify(data.uploadedID));
         
         // Build prefill data from saved booking
         const prefillData = {
@@ -89,7 +95,7 @@ useEffect(() => {
           purpose: data.formData?.purpose || "",
           referralSource: data.formData?.referralSource || "",
           carType: data.selectedCarType || "ALL",
-          carName: data.selectedCarId || "",
+          carId: data.selectedCarId || "",
           drivingOption: data.driveType || "Self-Drive",
           pickupOption: data.dropOffType || "Pickup",
           startDate: data.startDate || "",
@@ -98,6 +104,14 @@ useEffect(() => {
           endTime: data.endTime || "",
           driverLicense: data.uploadedID || "",
         };
+
+         // DEBUG: Log built prefillData
+        console.log("📤 Built prefillData:");
+        console.log("  - carId:", prefillData.carId);
+        console.log("  - carType:", prefillData.carType);
+        console.log("  - driverLicense:", prefillData.driverLicense, typeof prefillData.driverLicense);
+        console.log("  - driverLicense is array?", Array.isArray(prefillData.driverLicense));
+        console.log("  - driverLicense keys?", prefillData.driverLicense ? Object.keys(prefillData.driverLicense) : "N/A");
         
         // Call openBooking directly - it will center the overlay since no event
         openBooking(null, prefillData);

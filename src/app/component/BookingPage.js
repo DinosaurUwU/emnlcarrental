@@ -444,10 +444,43 @@ useEffect(() => {
 
   useEffect(() => {
   if (prefillData) {
+    console.log("📥 BookingPage received prefillData:");
+    console.log("  - carId:", prefillData.carId);
+    console.log("  - CARNAME:", prefillData.carName);
+    console.log("  - carType:", prefillData.carType);
+    console.log("  - driverLicense:", prefillData.driverLicense);
+    console.log("  - unitData.length:", unitData.length);
+  }
+}, [prefillData]);
+
+
+  useEffect(() => {
+  if (prefillData) {
     // Car selection
     setSelectedCarType(prefillData.carType || "ALL");
-    const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
-    setSelectedCarId(prefillUnit?.id || "");
+    // const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
+    // setSelectedCarId(prefillUnit?.selectedCarId || "");
+
+    if (prefillData.carId) {
+  // First try to find by ID directly (if unitData is loaded)
+  const unitById = unitData.find((u) => u.id === prefillData.carId);
+  if (unitById) {
+    setSelectedCarId(unitById.id);
+    console.log("✅ Car found by ID:", unitById.name);
+  } else {
+    // unitData not loaded yet, store carId for later lookup
+    console.log("⏳ unitData not loaded, storing carId:", prefillData.carId);
+    setSelectedCarId(prefillData.carId);
+  }
+}
+
+// Fallback: also look for carName if provided
+if (prefillData.carName && !unitById) {
+  const unitByName = unitData.find((u) => u.name === prefillData.carName);
+  if (unitByName) {
+    setSelectedCarId(unitByName.id);
+  }
+}
 
     // Drive/Drop options
     setDriveType(prefillData.drivingOption || "Self-Drive");
@@ -478,6 +511,8 @@ useEffect(() => {
 
     // Driver's License
     if (prefillData.driverLicense) {
+      console.log("📸 driverLicense type:", typeof prefillData.driverLicense);
+  console.log("📸 driverLicense value:", prefillData.driverLicense);
       setUploadedID(prefillData.driverLicense);
     }
 
