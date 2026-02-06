@@ -8,7 +8,7 @@ import { useUser } from "../../lib/UserContext";
 
 const images = [
   "/assets/images/image1.png",
-  "/assets/images/pickup.png",
+  "/assets/images/about.png",
   "/assets/images/sedan.png",
 ];
 
@@ -22,10 +22,8 @@ const Login = () => {
   const [imageClass, setImageClass] = useState("visible");
   const intervalRef = useRef(null);
 
-
-const [showErrorOverlay, setShowErrorOverlay] = useState(false);
-const [errorMessage, setErrorMessage] = useState("");
-
+  const [showErrorOverlay, setShowErrorOverlay] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // =========================
   // Redirect if logged in
@@ -69,30 +67,28 @@ const [errorMessage, setErrorMessage] = useState("");
   // =========================
 
   const handleGoogleSignIn = async () => {
-  try {
-    setIsSubmitting(true);
-    await signInWithPopup(auth, provider);
-    // UserContext onAuthStateChanged will handle user state
-  } catch (error) {
-    setIsSubmitting(false);
-    
-    // Handle popup closed by user - respond fast, no overlay
-  if (error.code === "auth/popup-closed-by-user") {
-  console.log("ℹ️ User closed the popup");
-  // Still show overlay for closed popup
-  setErrorMessage("Sign-in was cancelled");
-  setShowErrorOverlay(true);
-  return;
-}
+    try {
+      setIsSubmitting(true);
+      await signInWithPopup(auth, provider);
+      // UserContext onAuthStateChanged will handle user state
+    } catch (error) {
+      setIsSubmitting(false);
 
-    
-    // Show overlay for real errors
-    console.error("Google Sign-In Error:", error);
-    setErrorMessage(error.message || "Google Sign-In failed");
-    setShowErrorOverlay(true);
-  }
-};
+      // Handle popup closed by user - respond fast, no overlay
+      if (error.code === "auth/popup-closed-by-user") {
+        console.log("ℹ️ User closed the popup");
+        // Still show overlay for closed popup
+        setErrorMessage("Sign-in was cancelled");
+        setShowErrorOverlay(true);
+        return;
+      }
 
+      // Show overlay for real errors
+      console.error("Google Sign-In Error:", error);
+      setErrorMessage(error.message || "Google Sign-In failed");
+      setShowErrorOverlay(true);
+    }
+  };
 
   // const handleGoogleSignIn = async () => {
   //   try {
@@ -107,10 +103,9 @@ const [errorMessage, setErrorMessage] = useState("");
   // };
 
   const closeErrorOverlay = () => {
-  setShowErrorOverlay(false);
-  setErrorMessage("");
-};
-
+    setShowErrorOverlay(false);
+    setErrorMessage("");
+  };
 
   return (
     <div className="login background">
@@ -155,31 +150,38 @@ const [errorMessage, setErrorMessage] = useState("");
             <span>Continue with Google</span>
           </button>
 
-                  {/* ================= Terms & Privacy ================= */}
-        <div className="terms-container">
-<label className="terms-label">
-  <input
-    type="checkbox"
-    checked={acceptedTerms}
-    onChange={(e) => setAcceptedTerms(e.target.checked)}
-    className="terms-checkbox"
-  />
-  <span className="terms-text">
-    I agree to the{" "}
-    <a href="/info#terms" target="_blank" rel="noopener noreferrer" className="terms-link">
-      Terms of Service
-    </a>{" "}
-    and{" "}
-    <a href="/info#privacy-policy" target="_blank" rel="noopener noreferrer" className="terms-link">
-      Privacy Policy
-    </a>
-  </span>
-</label>
-
+          {/* ================= Terms & Privacy ================= */}
+          <div className="terms-container">
+            <label className="terms-label">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="terms-checkbox"
+              />
+              <span className="terms-text">
+                I agree to the{" "}
+                <a
+                  href="/info#terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="terms-link"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/info#privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="terms-link"
+                >
+                  Privacy Policy
+                </a>
+              </span>
+            </label>
+          </div>
         </div>
-        </div>
-
-
       </div>
 
       {/* ================= Loading Overlay ================= */}
@@ -208,7 +210,6 @@ const [errorMessage, setErrorMessage] = useState("");
         </div>
       )}
 
-
       {/* ================= Error Overlay ================= */}
       {showErrorOverlay && (
         <div className="error-overlay" onClick={closeErrorOverlay}>
@@ -222,8 +223,6 @@ const [errorMessage, setErrorMessage] = useState("");
           </div>
         </div>
       )}
-
-
     </div>
   );
 };
