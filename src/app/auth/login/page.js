@@ -424,6 +424,11 @@ const [pendingGoogleEmail, setPendingGoogleEmail] = useState("");
   //   }
   // };
 
+// Test useEffect to check methods on mount
+// Define function FIRST
+
+
+
 const handleGoogleSignIn = async () => {
   try {
     let emailToCheck = formData.email?.trim().toLowerCase();
