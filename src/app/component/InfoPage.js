@@ -387,6 +387,10 @@ const InfoPage = ({ openBooking }) => {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  const [showInfoPageError, setShowInfoPageError] = useState(false);
+const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
+
+
   // --- History stacks ---
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
@@ -1475,6 +1479,12 @@ const InfoPage = ({ openBooking }) => {
       document.body.style.top = "";
     };
   }, [showMessengerConfirm]);
+
+  const closeInfoPageError = () => {
+  setShowInfoPageError(false);
+  setInfoPageErrorMessage("");
+};
+
 
   return (
     <div className="info-page" ref={pageRef}>
@@ -3062,8 +3072,10 @@ const InfoPage = ({ openBooking }) => {
                     setDraftRedoStack([]);
                     setShowSaveConfirm(false);
                   } else {
-                    alert("Failed to save Privacy Policy. Please try again.");
-                  }
+  setInfoPageErrorMessage("Failed to save Privacy Policy. Please try again.");
+  setShowInfoPageError(true);
+}
+
                 }}
               >
                 Yes, Save Changes
@@ -3079,6 +3091,21 @@ const InfoPage = ({ openBooking }) => {
           </div>
         </div>
       )}
+
+            {/* ================= InfoPage Error Overlay ================= */}
+      {showInfoPageError && (
+        <div className="error-overlay" onClick={closeInfoPageError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">❌</div>
+            <h3>Save Failed</h3>
+            <p>{infoPageErrorMessage}</p>
+            <button className="error-btn" onClick={closeInfoPageError}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {showTermsSaveConfirm && (
         <div className="overlay-delete">
@@ -3102,9 +3129,9 @@ const InfoPage = ({ openBooking }) => {
                     setDraftTermsRedoStack([]);
                     setShowTermsSaveConfirm(false);
                   } else {
-                    alert(
-                      "Failed to save Terms & Conditions. Please try again.",
-                    );
+                    setInfoPageErrorMessage("Failed to save Terms & Conditions. Please try again.");
+setShowInfoPageError(true);
+
                   }
                 }}
               >

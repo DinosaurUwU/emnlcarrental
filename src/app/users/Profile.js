@@ -46,6 +46,12 @@ const Profile = ({ openBooking }) => {
     imageUpdateTrigger,
   } = useUser();
 
+  const [showProfileError, setShowProfileError] = useState(false);
+const [profileErrorMessage, setProfileErrorMessage] = useState("");
+
+const [showProfileWarning, setShowProfileWarning] = useState(false);
+const [profileWarningMessage, setProfileWarningMessage] = useState("");
+
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [replyMode, setReplyMode] = useState(false);
@@ -639,10 +645,14 @@ const Profile = ({ openBooking }) => {
         setTempProfilePic(compressedBase64);
       } catch (error) {
         console.error("❌ Error compressing image:", error);
-        alert("Failed to process image. Please try a different file.");
+setProfileErrorMessage("Failed to process image. Please try a different file.");
+setShowProfileError(true);
+
       }
     } else {
-      alert("Please select a valid image file.");
+      setProfileWarningMessage("Please select a valid image file.");
+setShowProfileWarning(true);
+
     }
 
     if (fileInputRef.current) {
@@ -745,6 +755,16 @@ const Profile = ({ openBooking }) => {
     alert("Your reply has been sent!");
     setReplyText("");
   };
+
+  const closeProfileError = () => {
+  setShowProfileError(false);
+  setProfileErrorMessage("");
+};
+
+const closeProfileWarning = () => {
+  setShowProfileWarning(false);
+  setProfileWarningMessage("");
+};
 
   return (
     <div className="profile-main">
@@ -3772,6 +3792,37 @@ const Profile = ({ openBooking }) => {
           </div>
         </div>
       )}
+
+            {/* ================= Profile Error Overlay ================= */}
+      {showProfileError && (
+        <div className="error-overlay" onClick={closeProfileError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">❌</div>
+            <h3>Update Failed</h3>
+            <p>{profileErrorMessage}</p>
+            <button className="error-btn" onClick={closeProfileError}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ================= Profile Warning Overlay ================= */}
+      {showProfileWarning && (
+        <div className="warning-overlay" onClick={closeProfileWarning}>
+          <div className="warning-container" onClick={(e) => e.stopPropagation()}>
+            <div className="warning-icon">⚠️</div>
+            <h3>Invalid File</h3>
+            <p>{profileWarningMessage}</p>
+            <button className="warning-btn" onClick={closeProfileWarning}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+
+
     </div>
   );
 };

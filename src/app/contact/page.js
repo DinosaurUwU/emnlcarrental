@@ -347,11 +347,7 @@ function Contact({ openBooking }) {
     alert("Message sent successfully!");
   };
 
-  const handleCountryChange = (event) => {
-    const selectedCode = event.target.value;
-    const country = countries.find((c) => c.dialCode === selectedCode);
-    setSelectedCountry(country);
-  };
+
 
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()),

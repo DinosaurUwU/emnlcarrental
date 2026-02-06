@@ -9,7 +9,6 @@ import React, {
 import { useUser } from "../lib/UserContext";
 import BookingPage from "./BookingPage";
 
-
 const BookingContext = createContext();
 
 export const useBooking = () => useContext(BookingContext);
@@ -24,6 +23,9 @@ const BookingProviderInner = ({ children }) => {
   } = useUser();
   const [verifyTargetEmail, setVerifyTargetEmail] = useState("");
   const [showVerifyInstructions, setShowVerifyInstructions] = useState(false);
+
+  const [showVerifyError, setShowVerifyError] = useState(false);
+  const [verifyErrorMessage, setVerifyErrorMessage] = useState("");
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [buttonRect, setButtonRect] = useState(null);
@@ -106,50 +108,53 @@ const BookingProviderInner = ({ children }) => {
   //   setIsBookingOpen(true);
   // };
 
-
   const openBooking = (event, prefillData = {}) => {
-  if (event) {
-    event.stopPropagation();
-  }
+    if (event) {
+      event.stopPropagation();
+    }
 
-  let rect;
-  if (event?.target) {
-    const targetRect = event.target.getBoundingClientRect();
-    rect = {
-      top: targetRect.top + window.scrollY,
-      left: targetRect.left + window.scrollX,
-      width: targetRect.width,
-      height: targetRect.height,
+    let rect;
+    if (event?.target) {
+      const targetRect = event.target.getBoundingClientRect();
+      rect = {
+        top: targetRect.top + window.scrollY,
+        left: targetRect.left + window.scrollX,
+        width: targetRect.width,
+        height: targetRect.height,
+      };
+    } else {
+      // Default center position if no event
+      rect = {
+        top: window.scrollY + 100,
+        left: window.scrollX + window.innerWidth / 2 - 150,
+        width: 300,
+        height: 50,
+      };
+    }
+
+    setButtonRect(rect);
+
+    const mergedData = {
+      firstName: user?.firstName || "",
+      middleName: user?.middleName || "",
+      surname: user?.surname || "",
+      occupation: user?.occupation || "",
+      address: user?.address || "",
+      contact: user?.phone || "",
+      email: user?.email || "",
+      ...prefillData,
     };
-  } else {
-    // Default center position if no event
-    rect = {
-      top: window.scrollY + 100,
-      left: window.scrollX + (window.innerWidth / 2) - 150,
-      width: 300,
-      height: 50,
-    };
-  }
 
-  setButtonRect(rect);
-
-  const mergedData = {
-    firstName: user?.firstName || "",
-    middleName: user?.middleName || "",
-    surname: user?.surname || "",
-    occupation: user?.occupation || "",
-    address: user?.address || "",
-    contact: user?.phone || "",
-    email: user?.email || "",
-    ...prefillData,
+    setPrefillBookingData(mergedData);
+    setIsBookingOpen(true);
   };
 
-  setPrefillBookingData(mergedData);
-  setIsBookingOpen(true);
-};
-
-
   const closeBooking = () => setIsBookingOpen(false);
+
+  const closeVerifyError = () => {
+    setShowVerifyError(false);
+    setVerifyErrorMessage("");
+  };
 
   return (
     <BookingContext.Provider value={{ openBooking }}>
@@ -328,12 +333,16 @@ const BookingProviderInner = ({ children }) => {
                     setVerifyTargetEmail(res.email);
                     setShowVerifyInstructions(true);
                   } else {
-                    alert("Failed to send verification email. Try again.");
+                    setVerifyErrorMessage(
+                      "Failed to send verification email. Please try again.",
+                    );
+                    setShowVerifyError(true);
                   }
                 }}
               >
                 Send Verification Email
               </button>
+
               <button
                 className="confirm-cancel-btn"
                 onClick={() => setShowVerifyOverlay(false)}
@@ -341,6 +350,20 @@ const BookingProviderInner = ({ children }) => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= Verify Email Error Overlay ================= */}
+      {showVerifyError && (
+        <div className="error-overlay" onClick={closeVerifyError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">❌</div>
+            <h3>Failed to Send</h3>
+            <p>{verifyErrorMessage}</p>
+            <button className="error-btn" onClick={closeVerifyError}>
+              OK
+            </button>
           </div>
         </div>
       )}

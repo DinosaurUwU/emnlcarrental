@@ -90,18 +90,6 @@ const Login = () => {
     }
   };
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     setIsSubmitting(true);
-  //     await signInWithPopup(auth, provider);
-  //     // UserContext onAuthStateChanged will handle user state
-  //   } catch (error) {
-  //     console.error("Google Sign-In Error:", error);
-  //     alert("Google Sign-In failed: " + error.message);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const closeErrorOverlay = () => {
     setShowErrorOverlay(false);
     setErrorMessage("");

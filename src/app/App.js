@@ -30,7 +30,10 @@ function AppContent() {
     sendVerificationEmail,
   } = useUser();
   const [verifyTargetEmail, setVerifyTargetEmail] = useState("");
-  const [showVerifyInstructions, setShowVerifyInstructions] = useState(false);
+const [showVerifyInstructions, setShowVerifyInstructions] = useState(false);
+const [showVerifyError, setShowVerifyError] = useState(false);
+const [verifyErrorMessage, setVerifyErrorMessage] = useState("");
+
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [buttonRect, setButtonRect] = useState(null);
@@ -114,6 +117,12 @@ function AppContent() {
   };
 
   const closeBooking = () => setIsBookingOpen(false);
+
+  const closeVerifyError = () => {
+  setShowVerifyError(false);
+  setVerifyErrorMessage("");
+};
+
 
   return (
     <>
@@ -331,15 +340,17 @@ function AppContent() {
                   const res = await sendVerificationEmail();
 
                   if (res.ok) {
-                    setVerifyTargetEmail(res.email); // Store email for overlay
+                    setVerifyTargetEmail(res.email);
                     setShowVerifyInstructions(true);
                   } else {
-                    alert("Failed to send verification email. Try again.");
+                    setVerifyErrorMessage("Failed to send verification email. Please try again.");
+                    setShowVerifyError(true);
                   }
                 }}
               >
                 Send Verification Email
               </button>
+
               <button
                 className="confirm-cancel-btn"
                 onClick={() => setShowVerifyOverlay(false)}
@@ -350,6 +361,24 @@ function AppContent() {
           </div>
         </div>
       )}
+
+
+      {/* ================= Verify Email Error Overlay ================= */}
+      {showVerifyError && (
+        <div className="error-overlay" onClick={closeVerifyError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">❌</div>
+            <h3>Failed to Send</h3>
+            <p>{verifyErrorMessage}</p>
+            <button className="error-btn" onClick={closeVerifyError}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+
+
 
       {showVerifyInstructions && (
         <div className="admin-booking-confirm-overlay">
