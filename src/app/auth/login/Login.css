@@ -11,7 +11,8 @@
   width: 100%;
 }
 
-html, body {
+html,
+body {
   min-height: 100%;
   width: 100%;
   margin: 0;
@@ -35,9 +36,15 @@ html, body {
 }
 
 @keyframes bgSlide {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .glass-container {
@@ -155,6 +162,94 @@ html, body {
   margin-right: 10px;
 }
 
+/* Terms and Privacy */
+.terms-container {
+  width: 100%;
+  margin-top: 8px;
+  padding: 0 10px;
+  text-align: center;
+}
+
+/* Hide default checkbox */
+.terms-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Custom checkbox container */
+.terms-checkbox + .terms-text::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-right: 8px;
+  border: 2px solid #074609;
+  border-radius: 3px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+  margin-top: -1px;
+}
+
+/* Checked state */
+.terms-checkbox:checked + .terms-text::before {
+  background-color: #074609;
+  border-color: #074609;
+}
+
+/* Checkmark icon */
+.terms-checkbox:checked + .terms-text::after {
+  content: "✓";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Make the label relative for positioning */
+.terms-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #074609;
+  line-height: 1.4;
+  text-align: left;
+  position: relative;
+  padding-left: 22px;
+}
+
+.terms-text {
+  position: relative;
+}
+
+/* Hover effect */
+.terms-label:hover::before {
+  border-color: #28a745;
+}
+
+.terms-text {
+  flex: 1;
+}
+
+.terms-link {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
 .submitting-overlay {
   position: fixed;
   top: 0;
@@ -168,6 +263,88 @@ html, body {
   z-index: 1000;
 }
 
+
+
+/* ================= Error Overlay ================= */
+.error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+}
+
+.error-container {
+  width: 380px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.error-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+.error-container h3 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #dc3545;
+  margin: 0 0 12px 0;
+}
+
+.error-container p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.error-btn {
+  width: 100%;
+  max-width: 180px;
+  border: 2px solid #074609;
+  background-color: #fff;
+  color: #074609;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.error-btn:hover {
+  background-color: #074609;
+  color: #fff;
+  box-shadow: 0 0px 10px var(--accent-color);
+}
+
+
+
+
 @media (max-width: 600px) {
   .glass-container {
     flex-direction: column;
@@ -175,12 +352,12 @@ html, body {
     height: auto;
     min-height: 450px;
   }
-  
+
   .carousel {
     width: 100%;
     height: 50%;
   }
-  
+
   .form-section {
     width: 100%;
     padding: 30px 20px;
