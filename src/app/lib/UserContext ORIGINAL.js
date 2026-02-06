@@ -1626,7 +1626,7 @@ Call them now to check if they want to extend. If no response, call them when re
               const data = settingsSnap.data();
               setAdminContactInfo({
                 email: data.adminEmail || "rentalinquiries.emnl@gmail.com",
-                contact: data.adminContact || "+63 912 345 6789",
+                contact: data.adminContact || "+63 975 477 8178",
                 name: data.adminName || "EMNL Admin",
               });
             }

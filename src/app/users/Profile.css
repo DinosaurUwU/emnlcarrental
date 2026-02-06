@@ -22,10 +22,20 @@ body.modal-open {
   transition: all 0.5s ease;
 }
 
+.profile-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  width: 100%;
+}
+
+.profile-columns .divider {
+  margin: 0 10px;
+}
+
 .profile-container {
   flex: 1;
-  min-width: 400px;
-  position: relative;
+  max-width: 400px;
 }
 
 .welcome-message {
@@ -464,31 +474,16 @@ body.modal-open {
   box-shadow: 0 0 10px var(--accent-color);
 }
 
-@media (max-width: 480px) {
-  .profile-picture {
-    width: 90px;
-    height: 90px;
-  }
 
-  .confirm-details-btn {
-    width: 100%;
-  }
-
-  input[type="text"],
-  input[type="email"] {
-    max-width: 100%;
-  }
-}
 
 .divider {
   width: 1px;
   background: var(--accent-color);
+  flex-shrink: 0;
 }
 
 .user-messages-container {
   flex: 2;
-  width: 100%;
-  max-width: 1000px;
 }
 
 .user-messages-container h3 {
@@ -705,57 +700,7 @@ body.modal-open {
   font-weight: bold;
 }
 
-@media (max-width: 500px) {
-  .message-read-toggle {
-    position: absolute;
-    top: 10px;
-    right: 3px;
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    gap: 3px;
-  }
 
-  .user-message-item {
-    padding-left: 10px;
-  }
-
-  .user-messages-container .message-contact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  .user-messages-container .message-phone {
-    margin-left: 0;
-  }
-
-  .user-messages-container .message-phone::before {
-    content: "";
-    margin: 0;
-  }
-
-  .user-message-overlay .message-contact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  .user-message-overlay .message-phone {
-    margin-left: 0;
-  }
-
-  .user-message-overlay .message-phone::before {
-    content: "";
-    margin: 0;
-  }
-
-  .profile-container {
-    flex: 1;
-    min-width: 300px;
-    position: relative;
-  }
-}
 
 .user-messages-container .message-date {
   font-size: 14px;
@@ -1396,9 +1341,12 @@ body.modal-open {
     flex: none;
   }
 
-  .divider {
-    width: 100%;
-    height: 1px;
+  .profile-columns .divider {
+    display: none;
+  }
+  
+  .profile-columns {
+    flex-direction: column;
   }
 
   .rental-panels-container {
@@ -1438,6 +1386,74 @@ body.modal-open {
       rgba(255, 255, 255, 0) 100%
     );
     box-sizing: border-box;
+  }
+}
+
+@media (max-width: 500px) {
+  .message-read-toggle {
+    position: absolute;
+    top: 10px;
+    right: 3px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .user-message-item {
+    padding-left: 10px;
+  }
+
+  .user-messages-container .message-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .user-messages-container .message-phone {
+    margin-left: 0;
+  }
+
+  .user-messages-container .message-phone::before {
+    content: "";
+    margin: 0;
+  }
+
+  .user-message-overlay .message-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .user-message-overlay .message-phone {
+    margin-left: 0;
+  }
+
+  .user-message-overlay .message-phone::before {
+    content: "";
+    margin: 0;
+  }
+
+  .profile-container {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-picture {
+    width: 90px;
+    height: 90px;
+  }
+
+  .confirm-details-btn {
+    width: 100%;
+  }
+
+  input[type="text"],
+  input[type="email"] {
+    max-width: 100%;
   }
 }
 

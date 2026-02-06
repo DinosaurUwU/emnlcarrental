@@ -42,8 +42,8 @@ const CompanyMap = () => {
               Phone:
             </strong>{" "}
             <br />
-            <a href="tel:+639123456789" className="contact-link">
-              +63 912 345 6789
+            <a href="tel:+639754778178" className="contact-link">
+              +63 975 477 8178
             </a>
           </p>
           <p>

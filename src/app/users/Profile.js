@@ -1399,6 +1399,8 @@ useEffect(() => {
         )}
 
 
+
+<div className="profile-columns">
       <div className="profile-container">
         {showEditProfileOverlay && (
           <div className="admin-booking-confirm-overlay">
@@ -2112,6 +2114,10 @@ useEffect(() => {
           )}
         </div>
       </div>
+</div>
+
+
+
 
       {/* Separator Above History Section */}
       <div className="divider-horizontal"></div>

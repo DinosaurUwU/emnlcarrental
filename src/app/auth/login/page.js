@@ -956,8 +956,8 @@ const Login = () => {
                   <p className="help-text">Need help signing in?</p>
                   <ul className="contact-list">
                     <li>
-                      <a href="tel:+639123456789" className="contact-link">
-                        +63 912 345 6789
+                      <a href="tel:+639754778178" className="contact-link">
+                       +63 975 477 8178
                       </a>
                     </li>
                     <li>
@@ -1005,8 +1005,8 @@ const Login = () => {
                 <p className="help-text">Still need assistance?</p>
                 <ul className="contact-list">
                   <li>
-                    <a href="tel:+639123456789" className="contact-link">
-                      +63 912 345 6789
+                    <a href="tel:+639754778178" className="contact-link">
+                      +63 975 477 8178
                     </a>
                   </li>
                   <li>
@@ -1053,8 +1053,8 @@ const Login = () => {
                 <p className="help-text">Still need assistance?</p>
                 <ul className="contact-list">
                   <li>
-                    <a href="tel:+639123456789" className="contact-link">
-                      +63 912 345 6789
+                    <a href="tel:+639754778178" className="contact-link">
+                      +63 975 477 8178
                     </a>
                   </li>
                   <li>
