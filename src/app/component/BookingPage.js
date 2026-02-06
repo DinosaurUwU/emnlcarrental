@@ -96,6 +96,9 @@ const BookingPage = ({
 
   // Save booking data to localStorage
   const saveBookingDataToStorage = () => {
+    // Extract just the preview base64 for localStorage
+  const savedUploadedID = uploadedID?.preview || uploadedID || null;
+
   const bookingData = {
     selectedCarId,
     selectedCarType,
@@ -106,7 +109,7 @@ const BookingPage = ({
     startTime,
     endTime,
     formData,
-    uploadedID,
+    uploadedID: savedUploadedID, // Save base64 string
     totalPrice,
   };
     localStorage.setItem("pendingBookingData", JSON.stringify(bookingData));
@@ -297,6 +300,7 @@ useEffect(() => {
     return () => lightbox.destroy();
   }, []);
 
+  // CHECK AND LOAD SAVED DATA FROM GUEST USER
   useEffect(() => {
     const checkForSavedData = async () => {
       try {
@@ -337,50 +341,69 @@ useEffect(() => {
     }
   }, [isOpen, editingBookingData]);
 
-  const handleLoadSavedData = async () => {
-    try {
-      setLoadSavedData(true); // 🟢 Show loading overlay
+  // LOAD SAVED DATA
+const handleLoadSavedData = async () => {
+  try {
+    setLoadSavedData(true); // 🟢 Show loading overlay
 
-      // Optional delay for animation feel
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+    // Optional delay for animation feel
+    await new Promise((resolve) => setTimeout(resolve, 1200));
 
-      if (savedFormData) {
-        // Load the saved form data
-        setFormData({
-          firstName: savedFormData.firstName || "",
-          middleName: savedFormData.middleName || "",
-          surname: savedFormData.surname || "",
-          occupation: savedFormData.occupation || "",
-          address: savedFormData.address || "",
-          contactNo: savedFormData.contactNo || "",
-          email: savedFormData.email || "",
-          location: savedFormData.location || "",
-          dropoffLocation: savedFormData.dropoffLocation || "",
-          purpose: savedFormData.purpose || "",
-          additionalMessage: savedFormData.additionalMessage || "",
-          referralSource: savedFormData.referralSource || "",
+    if (savedFormData) {
+      // Load the saved form data
+      setFormData({
+        firstName: savedFormData.firstName || "",
+        middleName: savedFormData.middleName || "",
+        surname: savedFormData.surname || "",
+        occupation: savedFormData.occupation || "",
+        address: savedFormData.address || "",
+        contactNo: savedFormData.contactNo || "",
+        email: savedFormData.email || "",
+        location: savedFormData.location || "",
+        dropoffLocation: savedFormData.dropoffLocation || "",
+        purpose: savedFormData.purpose || "",
+        additionalMessage: savedFormData.additionalMessage || "",
+        referralSource: savedFormData.referralSource || "",
+      });
+
+      // Handle car selection - check both car ID and car name
+      if (savedFormData.selectedCar) {
+        // First try to find by ID (for guest session data)
+        const savedUnitById = unitData.find((u) => u.id === savedFormData.selectedCar);
+        if (savedUnitById) {
+          setSelectedCarId(savedUnitById.id);
+        } else {
+          // Fallback to name lookup
+          const savedUnit = unitData.find(
+            (u) => u.name === savedFormData.selectedCar,
+          );
+          setSelectedCarId(savedUnit?.id || "");
+        }
+      }
+
+      setSelectedCarType(savedFormData.selectedCarType || "ALL");
+      setDriveType(savedFormData.driveType || "Self-Drive");
+      setDropOffType(savedFormData.dropOffType || "Pickup");
+      setStartDate(savedFormData.startDate || "");
+      setStartTime(savedFormData.startTime || "");
+      setEndDate(savedFormData.endDate || "");
+      setEndTime(savedFormData.endTime || "");
+
+      // Handle driver's license
+      if (savedFormData.driverLicense) {
+        setUploadedID({
+          preview: savedFormData.driverLicense,
         });
+      }
 
-        // Load other fields
-        // setSelectedCar(savedFormData.selectedCar || "");
-        const savedUnit = unitData.find(
+      // Handle car image
+      if (savedFormData.selectedCar) {
+        const savedUnitById = unitData.find((u) => u.id === savedFormData.selectedCar);
+        const savedUnitByName = unitData.find(
           (u) => u.name === savedFormData.selectedCar,
         );
-        setSelectedCarId(savedUnit?.id || "");
+        const selectedUnit = savedUnitById || savedUnitByName;
 
-        setSelectedCarType(savedFormData.selectedCarType || "ALL");
-        setDriveType(savedFormData.driveType || "Self-Drive");
-        setDropOffType(savedFormData.dropOffType || "Pickup");
-        setStartDate(savedFormData.startDate || "");
-        setStartTime(savedFormData.startTime || "");
-        setEndDate(savedFormData.endDate || "");
-        setEndTime(savedFormData.endTime || "");
-        setUploadedID(savedFormData.driverLicense || null);
-
-        const selectedUnit = unitData.find(
-          (u) => u.name === savedFormData.selectedCar,
-        );
-        // setPreviewImage(selectedUnit?.image || pickacar);
         if (selectedUnit?.imageId) {
           const { base64 } = await fetchImageFromFirestore(
             selectedUnit.imageId,
@@ -389,43 +412,171 @@ useEffect(() => {
         } else {
           setPreviewImage("/assets/images/image1.png");
         }
-
-        setHasChanges(true);
       }
 
-      setLoadSavedData(false);
-
-      setShowLoadSavedData(true);
-
-      setTimeout(() => setShowLoadSavedData(false), 4000);
-    } catch (error) {
-      console.error("❌ Error loading saved data:", error);
-      setLoadSavedData(false);
-    } finally {
-      setShowLoadSavedDialog(false);
+      setHasChanges(true);
     }
-  };
 
-  const handleDiscardSavedData = async () => {
-    try {
-      setDiscardSavedData(true);
+    setLoadSavedData(false);
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+    setShowLoadSavedData(true);
 
-      await clearSavedBookingFormData();
+    setTimeout(() => setShowLoadSavedData(false), 4000);
+  } catch (error) {
+    console.error("❌ Error loading saved data:", error);
+    setLoadSavedData(false);
+  } finally {
+    setShowLoadSavedDialog(false);
+  }
+};
 
-      setDiscardSavedData(false);
 
-      setShowDiscardSavedData(true);
 
-      setTimeout(() => setShowDiscardSavedData(false), 4000);
-    } catch (error) {
-      console.error("❌ Error discarding saved data:", error);
-      setDiscardSavedData(false);
-    } finally {
-      setShowLoadSavedDialog(false);
+  // const handleLoadSavedData = async () => {
+  //   try {
+  //     setLoadSavedData(true); // 🟢 Show loading overlay
+
+  //     // Optional delay for animation feel
+  //     await new Promise((resolve) => setTimeout(resolve, 1200));
+
+  //     if (savedFormData) {
+  //       // Load the saved form data
+  //       setFormData({
+  //         firstName: savedFormData.firstName || "",
+  //         middleName: savedFormData.middleName || "",
+  //         surname: savedFormData.surname || "",
+  //         occupation: savedFormData.occupation || "",
+  //         address: savedFormData.address || "",
+  //         contactNo: savedFormData.contactNo || "",
+  //         email: savedFormData.email || "",
+  //         location: savedFormData.location || "",
+  //         dropoffLocation: savedFormData.dropoffLocation || "",
+  //         purpose: savedFormData.purpose || "",
+  //         additionalMessage: savedFormData.additionalMessage || "",
+  //         referralSource: savedFormData.referralSource || "",
+  //       });
+
+  //       // Load other fields
+  //       // setSelectedCar(savedFormData.selectedCar || "");
+  //       const savedUnit = unitData.find(
+  //         (u) => u.name === savedFormData.selectedCar,
+  //       );
+  //       setSelectedCarId(savedUnit?.id || "");
+
+  //       setSelectedCarType(savedFormData.selectedCarType || "ALL");
+  //       setDriveType(savedFormData.driveType || "Self-Drive");
+  //       setDropOffType(savedFormData.dropOffType || "Pickup");
+  //       setStartDate(savedFormData.startDate || "");
+  //       setStartTime(savedFormData.startTime || "");
+  //       setEndDate(savedFormData.endDate || "");
+  //       setEndTime(savedFormData.endTime || "");
+  //       setUploadedID(savedFormData.driverLicense || null);
+
+  //       const selectedUnit = unitData.find(
+  //         (u) => u.name === savedFormData.selectedCar,
+  //       );
+  //       // setPreviewImage(selectedUnit?.image || pickacar);
+  //       if (selectedUnit?.imageId) {
+  //         const { base64 } = await fetchImageFromFirestore(
+  //           selectedUnit.imageId,
+  //         );
+  //         setPreviewImage(base64 || "/assets/images/image1.png");
+  //       } else {
+  //         setPreviewImage("/assets/images/image1.png");
+  //       }
+
+  //       setHasChanges(true);
+  //     }
+
+  //     setLoadSavedData(false);
+
+  //     setShowLoadSavedData(true);
+
+  //     setTimeout(() => setShowLoadSavedData(false), 4000);
+  //   } catch (error) {
+  //     console.error("❌ Error loading saved data:", error);
+  //     setLoadSavedData(false);
+  //   } finally {
+  //     setShowLoadSavedDialog(false);
+  //   }
+  // };
+
+  // DISCARD SAVED DATA
+const handleDiscardSavedData = async () => {
+  try {
+    setDiscardSavedData(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
+    // Clear localStorage guest data
+    if (user?.uid) {
+      localStorage.removeItem(`pendingBookingData_${user.uid}`);
+    } else {
+      localStorage.removeItem("pendingBookingData");
     }
-  };
+
+    // Clear Firestore saved data (if any)
+    await clearSavedBookingFormData();
+
+    // Reset all form fields
+    setFormData({
+      firstName: "",
+      middleName: "",
+      surname: "",
+      occupation: "",
+      address: "",
+      contactNo: "",
+      email: "",
+      location: "",
+      dropoffLocation: "",
+      purpose: "",
+      additionalMessage: "",
+    });
+    setSelectedCarId("");
+    setSelectedCarType("ALL");
+    setDriveType("Self-Drive");
+    setDropOffType("Pickup");
+    setStartDate("");
+    setEndDate("");
+    setStartTime("");
+    setEndTime("");
+    setUploadedID(null);
+    setPreviewImage("/assets/images/image1.png");
+
+    setDiscardSavedData(false);
+
+    setShowDiscardSavedData(true);
+
+    setTimeout(() => setShowDiscardSavedData(false), 4000);
+  } catch (error) {
+    console.error("❌ Error discarding saved data:", error);
+    setDiscardSavedData(false);
+  } finally {
+    setShowLoadSavedDialog(false);
+  }
+};
+
+  
+  // const handleDiscardSavedData = async () => {
+  //   try {
+  //     setDiscardSavedData(true);
+
+  //     await new Promise((resolve) => setTimeout(resolve, 1200));
+
+  //     await clearSavedBookingFormData();
+
+  //     setDiscardSavedData(false);
+
+  //     setShowDiscardSavedData(true);
+
+  //     setTimeout(() => setShowDiscardSavedData(false), 4000);
+  //   } catch (error) {
+  //     console.error("❌ Error discarding saved data:", error);
+  //     setDiscardSavedData(false);
+  //   } finally {
+  //     setShowLoadSavedDialog(false);
+  //   }
+  // };
 
   //AUTOFILL DATA
   const [formData, setFormData] = useState({
@@ -444,10 +595,48 @@ useEffect(() => {
 
 
 
-  
 
+// PREFILL
 useEffect(() => {
   if (prefillData) {
+    console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
+
+    // Check if this is guest session data - show dialog instead of auto-restoring
+    if (prefillData.isFromGuestSession) {
+      console.log("📝 Guest session data detected, showing load dialog...");
+
+      // Set savedFormData with the guest data
+      setSavedFormData({
+        firstName: prefillData.firstName || "",
+        middleName: prefillData.middleName || "",
+        surname: prefillData.surname || "",
+        occupation: prefillData.occupation || "",
+        address: prefillData.address || "",
+        contactNo: prefillData.contact || "",
+        email: prefillData.email || "",
+        location: prefillData.location || "",
+        dropoffLocation: prefillData.dropoffLocation || "",
+        purpose: prefillData.purpose || "",
+        additionalMessage: prefillData.additionalMessage || "",
+        referralSource: prefillData.referralSource || "",
+        selectedCar: prefillData.carId || "", // carId will be resolved by handleLoadSavedData
+        selectedCarType: prefillData.carType || "ALL",
+        driveType: prefillData.drivingOption || "Self-Drive",
+        dropOffType: prefillData.pickupOption || "Pickup",
+        startDate: prefillData.startDate || "",
+        startTime: prefillData.startTime || "",
+        endDate: prefillData.endDate || "",
+        endTime: prefillData.endTime || "",
+        driverLicense: prefillData.driverLicense || null,
+      });
+
+      // Show the load saved dialog
+      setShowLoadSavedDialog(true);
+
+      // Don't auto-restore - let user choose
+      return;
+    }
+
     // Car selection
     setSelectedCarType(prefillData.carType || "ALL");
 
@@ -497,7 +686,9 @@ useEffect(() => {
 
     // Driver's License
     if (prefillData.driverLicense) {
-      setUploadedID(prefillData.driverLicense);
+      setUploadedID({
+        preview: prefillData.driverLicense,
+      });
     }
 
     // Image handling
@@ -516,6 +707,84 @@ useEffect(() => {
     }
   }
 }, [prefillData, unitData, fetchImageFromFirestore]);
+
+
+// useEffect(() => {
+//   if (prefillData) {
+//     // Car selection
+//     setSelectedCarType(prefillData.carType || "ALL");
+
+//     if (prefillData.carId) {
+//       const unitById = unitData.find((u) => u.id === prefillData.carId);
+//       if (unitById) {
+//         setSelectedCarId(unitById.id);
+//       } else {
+//         setSelectedCarId(prefillData.carId);
+//       }
+//     }
+
+//     // Fallback: also look for carName if provided
+//     if (prefillData.carName) {
+//       const unitByName = unitData.find((u) => u.name === prefillData.carName);
+//       if (unitByName) {
+//         setSelectedCarId(unitByName.id);
+//       }
+//     }
+
+//     // Drive/Drop options
+//     setDriveType(prefillData.drivingOption || "Self-Drive");
+//     setDropOffType(prefillData.pickupOption || "Pickup");
+
+//     // Dates and times
+//     setStartDate(prefillData.startDate || "");
+//     setStartTime(prefillData.startTime || "");
+//     setEndDate(prefillData.endDate || "");
+//     setEndTime(prefillData.endTime || "");
+
+//     // Form data fields
+//     setFormData((prev) => ({
+//       ...prev,
+//       firstName: prefillData.firstName || prev.firstName,
+//       middleName: prefillData.middleName || prev.middleName,
+//       surname: prefillData.surname || prev.surname,
+//       occupation: prefillData.occupation || prev.occupation,
+//       address: prefillData.address || prev.address,
+//       contactNo: prefillData.contact || prev.contactNo,
+//       email: prefillData.email || prev.email,
+//       location: prefillData.location || prev.location,
+//       dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
+//       purpose: prefillData.purpose || prev.purpose,
+//       additionalMessage: prefillData.additionalMessage || prev.additionalMessage,
+//       referralSource: prefillData.referralSource || prev.referralSource,
+//     }));
+
+//     // Driver's License
+// if (prefillData.driverLicense) {
+//   setUploadedID({
+//     preview: prefillData.driverLicense,
+//   });
+// }
+
+
+//     // Image handling
+//     const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
+//                          unitData.find((u) => u.name === prefillData.carName);
+//     if (selectedUnit?.imageId) {
+//       fetchImageFromFirestore(selectedUnit.imageId)
+//         .then(({ base64 }) => {
+//           setPreviewImage(base64 || "/assets/images/image1.png");
+//         })
+//         .catch(() => {
+//           setPreviewImage("/assets/images/image1.png");
+//         });
+//     } else {
+//       setPreviewImage("/assets/images/image1.png");
+//     }
+//   }
+// }, [prefillData, unitData, fetchImageFromFirestore]);
+
+
+
 
 useEffect(() => {
   if (prefillData?.carId && unitData.length > 0 && selectedCarId !== prefillData.carId) {
@@ -1147,14 +1416,36 @@ useEffect(() => {
     return `${formattedDate} | ${formattedTime}`;
   };
 
+  // const handleFileUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     setUploadedID(file);
+  //     setFileError(false);
+  //     setHasChanges(true);
+  //   }
+  // };
+
   const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setUploadedID(file);
-      setFileError(false);
-      setHasChanges(true);
-    }
-  };
+  const file = event.target.files[0];
+  if (file) {
+    // Convert file to base64 for localStorage preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Save base64 string to localStorage along with the file
+      setUploadedID({
+        file: file,
+        preview: reader.result,  // base64 data URL
+        name: file.name,
+        type: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+    
+    setFileError(false);
+    setHasChanges(true);
+  }
+};
+
 
   const handleConfirmBooking = async () => {
 if (!user) {
@@ -1511,11 +1802,19 @@ if (!user) {
         >
           <div className="image-modal-content">
             <img
+              // src={
+              //   typeof uploadedID === "string"
+              //     ? uploadedID
+              //     : URL.createObjectURL(uploadedID)
+              // }
+
               src={
-                typeof uploadedID === "string"
-                  ? uploadedID
-                  : URL.createObjectURL(uploadedID)
-              }
+  uploadedID?.preview || 
+  (typeof uploadedID === "string" ? uploadedID : null) ||
+  (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null) ||
+  (uploadedID instanceof File || uploadedID instanceof Blob ? URL.createObjectURL(uploadedID) : "/assets/images/image1.png")
+}
+
               alt="Driver's License"
               className="image-fullview"
             />
@@ -1825,7 +2124,13 @@ if (!user) {
               <div className="confirm-image-container">
                 {uploadedID ? (
                   <img
-                    src={URL.createObjectURL(uploadedID)}
+                    // src={URL.createObjectURL(uploadedID)}
+                    src={
+  uploadedID?.preview || 
+  (typeof uploadedID === "string" ? uploadedID : null) ||
+  (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null)
+}
+
                     alt="Driver's License"
                     className="confirm-id-preview"
                     onClick={handleImageClick}
@@ -2179,6 +2484,46 @@ if (!user) {
               )}
 
               {uploadedID && (
+  <div className="image-preview">
+    {(() => {
+      if (typeof uploadedID === "string") {
+        return (
+          <img
+            src={uploadedID}
+            alt="Uploaded ID"
+            onClick={handleImageClick}
+            className="preview-thumbnail"
+          />
+        );
+      } else if (uploadedID?.preview) {
+        return (
+          <img
+            src={uploadedID.preview}
+            alt="Uploaded ID"
+            onClick={handleImageClick}
+            className="preview-thumbnail"
+          />
+        );
+      } else if (
+        uploadedID instanceof File ||
+        uploadedID instanceof Blob
+      ) {
+        return (
+          <img
+            src={URL.createObjectURL(uploadedID)}
+            alt="Uploaded ID"
+            onClick={handleImageClick}
+            className="preview-thumbnail"
+          />
+        );
+      }
+      return null;
+    })()}
+  </div>
+)}
+
+
+              {/* {uploadedID && (
                 <div className="image-preview">
                   {(() => {
                     if (typeof uploadedID === "string") {
@@ -2211,7 +2556,7 @@ if (!user) {
                     }
                   })()}
                 </div>
-              )}
+              )} */}
 
               <label htmlFor="uploadID" className="file-label">
                 {uploadedID

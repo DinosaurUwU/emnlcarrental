@@ -94,6 +94,7 @@ useEffect(() => {
           endDate: data.endDate || "",
           endTime: data.endTime || "",
           driverLicense: data.uploadedID || null,
+          isFromGuestSession: true,
         };
         
         openBooking(null, prefillData);
