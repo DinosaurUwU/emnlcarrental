@@ -63,9 +63,9 @@ const Login = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [showGoogleConfirmOverlay, setShowGoogleConfirmOverlay] = useState(false);
-const [pendingGoogleEmail, setPendingGoogleEmail] = useState("");
-
+  const [showGoogleConfirmOverlay, setShowGoogleConfirmOverlay] =
+    useState(false);
+  const [pendingGoogleEmail, setPendingGoogleEmail] = useState("");
 
   useEffect(() => {
     const checkExpiry = () => {
@@ -142,10 +142,6 @@ const [pendingGoogleEmail, setPendingGoogleEmail] = useState("");
       }, 500);
     }, 3000);
   };
-
-
-  
-  
 
   useEffect(() => {
     setCarouselInterval();
@@ -413,232 +409,31 @@ const [pendingGoogleEmail, setPendingGoogleEmail] = useState("");
     setShowForgotPasswordOverlay(true);
   };
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     await signInWithPopup(auth, provider);
-  //     // onAuthStateChanged in UserContext will set isSubmitting true once user is detected
-  //   } catch (error) {
-  //     console.error("Google Sign-In Error:", error);
-  //     alert("Google Sign-In failed: " + error.message);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-// Test useEffect to check methods on mount
-// Define function FIRST
-
-
-
-const handleGoogleSignIn = async () => {
-  try {
-    let emailToCheck = formData.email?.trim().toLowerCase();
-    
-    if (!emailToCheck) {
-      alert("Please enter your email address first.");
-      return;
-    }
-    
-    // Check if email already has password account
-    const methods = await fetchSignInMethodsForEmail(auth, emailToCheck);
-    console.log("Methods found:", methods);
-    
-    // If email exists with password (not Google), BLOCK Google sign-in and show dialog
-    if (methods.includes("password") && !methods.includes("google.com")) {
-      setConflictEmail(emailToCheck);
-      setConflictMode("link-google-to-existing");
-      
-      setInvalidPasswordMessage(
-        <div>
-          <p>
-            An account with <strong>{emailToCheck}</strong> already exists with Email/Password.
-          </p>
-          <p style={{ marginTop: "10px", marginBottom: "0px" }}>
-            Would you like to <strong>link Google</strong> to this account?
-          </p>
-        </div>
-      );
-      
-      setShowInvalidPasswordOverlay(true);
-      return; // ← BLOCK the Google sign-in here!
-    }
-    
-    // No conflict - proceed with Google sign-in
-    await signInWithPopup(auth, provider);
-    
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    
-    // Handle conflict error (in case Firebase throws it)
-    if (error.code === "auth/account-exists-with-different-credential") {
-      await signOut(auth);
-      
-      const existingEmail = error.customData?.email;
-      setConflictEmail(existingEmail);
-      setConflictMode("link-google-to-existing");
-      
-      setInvalidPasswordMessage(
-        <div>
-          <p>An account with this email already exists with a different sign-in method.</p>
-          <p style={{ marginTop: "10px" }}>Would you like to link Google to this account?</p>
-        </div>
-      );
-      
-      setShowInvalidPasswordOverlay(true);
-      return;
-    }
-    
-    alert("Google Sign-In failed: " + error.message);
-    setIsSubmitting(false);
-  }
-};
-
-
-
-
-const handleLinkGoogleToExistingAccount = async () => {
-  try {
-    setIsSubmitting(true);
-    
-    // First, sign in with Google popup
-    const result = await signInWithPopup(auth, provider);
-    
-    // Get password from user
-    const password = prompt(`Enter the password for ${conflictEmail}:`);
-    if (!password) {
-      await signOut(auth);
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // Create email credential
-    const credential = EmailAuthProvider.credential(conflictEmail, password);
-    
-    // Link to Google account
-    await linkWithCredential(result.user, credential);
-    
-    showActionOverlay?.({
-      message: "✅ Google linked successfully! You can now use both methods.",
-      type: "success",
-      autoHide: true,
-    });
-    
-    setShowInvalidPasswordOverlay(false);
-    setConflictMode(null);
-    setConflictEmail("");
-  } catch (err) {
-    console.error("❌ Linking failed:", err);
-    await signOut(auth);
-    alert("Link failed: " + err.message);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-
-
-  const handleLinkGoogleToPassword = async () => {
+  const handleGoogleSignIn = async () => {
     try {
-      const pw = prompt(`Enter your password for ${conflictEmail}:`);
-      if (!pw) return;
-
-      // 1. Sign in with Email/Password
-      const emailCred = EmailAuthProvider.credential(conflictEmail, pw);
-      const userCred = await signInWithEmailAndPassword(
-        auth,
-        conflictEmail,
-        pw,
-      );
-
-      // 2. Link Google provider to this existing account
-      await linkWithPopup(userCred.user, provider);
-
-      alert("✅ Google linked successfully! You can now use both methods.");
-      setShowInvalidPasswordOverlay(false);
-      setConflictMode(null);
-      setConflictEmail("");
-    } catch (err) {
-      console.error("❌ Linking failed:", err);
-      alert("Link failed: " + err.message);
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged in UserContext will set isSubmitting true once user is detected
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      alert("Google Sign-In failed: " + error.message);
+      setIsSubmitting(false);
     }
   };
 
-  // const handleLinkExistingAccount = async () => {
-  //   try {
-  //     setIsSubmitting(true);
-  //     // Sign in with Google (opens popup) — this should sign the user into the existing provider account
-  //     await signInWithPopup(auth, provider);
-
-  //     // after successful popup sign-in, currentUser is the provider account — link the email credential
-  //     const credential = EmailAuthProvider.credential(
-  //       conflictEmail,
-  //       conflictPassword,
-  //     );
-  //     await linkWithCredential(auth.currentUser, credential);
-
-  //     // refresh user in context (UserContext onAuthStateChanged should handle)
-  //     showActionOverlay?.({
-  //       message: "Account linked successfully.",
-  //       type: "success",
-  //       autoHide: true,
-  //     });
-  //     setShowInvalidPasswordOverlay(false);
-  //     setConflictMode(null);
-  //     setConflictEmail("");
-  //     setConflictPassword("");
-  //   } catch (err) {
-  //     console.error("Link existing account error:", err);
-  //     showActionOverlay?.({
-  //       message: `Link failed: ${err?.message || "Unknown error"}`,
-  //       type: "warning",
-  //       autoHide: true,
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-const handleLinkExistingAccount = async () => {
-  try {
-    setIsSubmitting(true);
-    
-    // Check if pending Google email exists
-    const pendingGoogleEmail = localStorage.getItem("pendingGoogleEmail");
-    
-    if (pendingGoogleEmail) {
-      // First sign in with Google popup
-      const result = await signInWithPopup(auth, provider);
-      
-      // Then link the email credential to Google account
-      const credential = EmailAuthProvider.credential(
-        pendingGoogleEmail,
-        conflictPassword || prompt("Please enter your password for the existing account:"),
-      );
-      
-      await linkWithCredential(result.user, credential);
-      
-      // Clear storage
-      localStorage.removeItem("pendingGoogleEmail");
-      
-      showActionOverlay?.({
-        message: "Account linked successfully!",
-        type: "success",
-        autoHide: true,
-      });
-      setShowInvalidPasswordOverlay(false);
-      setConflictMode(null);
-      setConflictEmail("");
-      setConflictPassword("");
-    } else {
-      // Original flow for existing Google user linking password
+  const handleLinkExistingAccount = async () => {
+    try {
+      setIsSubmitting(true);
+      // Sign in with Google (opens popup) — this should sign the user into the existing provider account
       await signInWithPopup(auth, provider);
-      
+
+      // after successful popup sign-in, currentUser is the provider account — link the email credential
       const credential = EmailAuthProvider.credential(
         conflictEmail,
         conflictPassword,
       );
       await linkWithCredential(auth.currentUser, credential);
-      
+
+      // refresh user in context (UserContext onAuthStateChanged should handle)
       showActionOverlay?.({
         message: "Account linked successfully.",
         type: "success",
@@ -648,19 +443,17 @@ const handleLinkExistingAccount = async () => {
       setConflictMode(null);
       setConflictEmail("");
       setConflictPassword("");
+    } catch (err) {
+      console.error("Link existing account error:", err);
+      showActionOverlay?.({
+        message: `Link failed: ${err?.message || "Unknown error"}`,
+        type: "warning",
+        autoHide: true,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (err) {
-    console.error("Link existing account error:", err);
-    showActionOverlay?.({
-      message: `Link failed: ${err?.message || "Unknown error"}`,
-      type: "warning",
-      autoHide: true,
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   const handleCancelConflict = () => {
     setConflictMode(null);
@@ -1030,7 +823,7 @@ const handleLinkExistingAccount = async () => {
             <img src="/assets/google-icon.png" alt="Google" />
             <span>Google</span>
           </button>
-                  {/* <button
+          {/* <button
           type="button"
           className="login-btn google-btn"
           onClick={signInWithFacebook}
@@ -1039,7 +832,6 @@ const handleLinkExistingAccount = async () => {
           <img src="/assets/facebook-icon.png" alt="Facebook" style={{ width: "20px", height: "20px" }} />
           Facebook
         </button> */}
-
         </div>
       </div>
 
@@ -1080,15 +872,14 @@ const handleLinkExistingAccount = async () => {
               />
             </button>
             <h3 className="confirm-header">
-  {conflictMode === "email-already-in-use"
-    ? "ACCOUNT ALREADY EXISTS"
-    : conflictMode === "google-to-password"
-      ? "GOOGLE ACCOUNT ALREADY LINKED"
-      : conflictMode === "google-link-existing"
-        ? "LINK GOOGLE TO EXISTING ACCOUNT"
-        : "INVALID CREDENTIALS"}
-</h3>
-
+              {conflictMode === "email-already-in-use"
+                ? "ACCOUNT ALREADY EXISTS"
+                : conflictMode === "google-to-password"
+                  ? "GOOGLE ACCOUNT ALREADY LINKED"
+                  : conflictMode === "google-link-existing"
+                    ? "LINK GOOGLE TO EXISTING ACCOUNT"
+                    : "INVALID CREDENTIALS"}
+            </h3>
 
             <div className="confirm-message-block">
               <p className="confirm-message-main">{invalidPasswordMessage}</p>
@@ -1147,37 +938,37 @@ const handleLinkExistingAccount = async () => {
                   </div>
                 </div>
               ) : conflictMode === "google-link-existing" ? (
-  // Existing email/password -> link Google
-  <div className="confirm-message-help">
-    <p>
-      Would you like to <strong>link Google</strong> to your existing Email/Password account?
-    </p>
-    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-      <button
-        className="confirm-details-btn"
-        style={{ backgroundColor: "#28a745" }}
-        onClick={handleLinkGoogleToExistingAccount}
-      >
-        Link Google
-      </button>
-      <button
-        className="confirm-details-btn"
-        style={{ backgroundColor: "#dc3545" }}
-        onClick={handleCancelConflict}
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-) : (
-
+                // Existing email/password -> link Google
+                <div className="confirm-message-help">
+                  <p>
+                    Would you like to <strong>link Google</strong> to your
+                    existing Email/Password account?
+                  </p>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button
+                      className="confirm-details-btn"
+                      style={{ backgroundColor: "#28a745" }}
+                      onClick={handleLinkGoogleToExistingAccount}
+                    >
+                      Link Google
+                    </button>
+                    <button
+                      className="confirm-details-btn"
+                      style={{ backgroundColor: "#dc3545" }}
+                      onClick={handleCancelConflict}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 // Fallback (invalid credentials)
                 <div className="confirm-message-help">
                   <p className="help-text">Need help signing in?</p>
                   <ul className="contact-list">
                     <li>
                       <a href="tel:+639754778178" className="contact-link">
-                       +63 975 477 8178
+                        +63 975 477 8178
                       </a>
                     </li>
                     <li>
