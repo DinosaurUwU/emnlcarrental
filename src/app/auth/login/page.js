@@ -14,6 +14,7 @@ import {
   fetchSignInMethodsForEmail,
   linkWithCredential,
   EmailAuthProvider,
+  FacebookAuthProvider,
   GoogleAuthProvider,
 } from "firebase/auth";
 import { useUser } from "../../lib/UserContext";
@@ -38,6 +39,7 @@ const Login = () => {
     setShowBlockedUserOverlay,
     blockedUserReason,
     adminContactInfo,
+    signInWithFacebook,
   } = useUser();
 
   const [rememberMe, setRememberMe] = useState(false);
@@ -407,16 +409,63 @@ const Login = () => {
     setShowForgotPasswordOverlay(true);
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged in UserContext will set isSubmitting true once user is detected
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      alert("Google Sign-In failed: " + error.message);
-      setIsSubmitting(false);
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     await signInWithPopup(auth, provider);
+  //     // onAuthStateChanged in UserContext will set isSubmitting true once user is detected
+  //   } catch (error) {
+  //     console.error("Google Sign-In Error:", error);
+  //     alert("Google Sign-In failed: " + error.message);
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+const handleGoogleSignIn = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    // onAuthStateChanged in UserContext will set isSubmitting true once user is detected
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    
+    // Check for account exists with different credential error
+    if (error.code === "auth/account-exists-with-different-credential") {
+      const existingEmail = error.customData?.email;
+      
+      if (existingEmail) {
+        // Store the email for linking
+        localStorage.setItem("pendingGoogleEmail", existingEmail);
+        
+        // Check what provider is already linked
+        const methods = await fetchSignInMethodsForEmail(auth, existingEmail);
+        
+        // Show conflict dialog with linking option
+        setConflictEmail(existingEmail);
+        setConflictPassword(""); // Will be filled by user if needed
+        setConflictMode("google-link-existing");
+        
+        setInvalidPasswordMessage(
+          <div>
+            <p>
+              An account with <strong>{existingEmail}</strong> already exists using{" "}
+              {methods.map(m => m === "password" ? "Email/Password" : m).join(", ")}.
+            </p>
+            <p style={{ marginTop: "10px", marginBottom: "0px" }}>
+              Would you like to <strong>link Google</strong> to this existing account?
+            </p>
+          </div>
+        );
+        
+        setShowInvalidPasswordOverlay(true);
+        return;
+      }
     }
-  };
+    
+    alert("Google Sign-In failed: " + error.message);
+    setIsSubmitting(false);
+  }
+};
+
+
 
   const handleLinkGoogleToPassword = async () => {
     try {
@@ -444,20 +493,82 @@ const Login = () => {
     }
   };
 
-  const handleLinkExistingAccount = async () => {
-    try {
-      setIsSubmitting(true);
-      // Sign in with Google (opens popup) — this should sign the user into the existing provider account
-      await signInWithPopup(auth, provider);
+  // const handleLinkExistingAccount = async () => {
+  //   try {
+  //     setIsSubmitting(true);
+  //     // Sign in with Google (opens popup) — this should sign the user into the existing provider account
+  //     await signInWithPopup(auth, provider);
 
-      // after successful popup sign-in, currentUser is the provider account — link the email credential
+  //     // after successful popup sign-in, currentUser is the provider account — link the email credential
+  //     const credential = EmailAuthProvider.credential(
+  //       conflictEmail,
+  //       conflictPassword,
+  //     );
+  //     await linkWithCredential(auth.currentUser, credential);
+
+  //     // refresh user in context (UserContext onAuthStateChanged should handle)
+  //     showActionOverlay?.({
+  //       message: "Account linked successfully.",
+  //       type: "success",
+  //       autoHide: true,
+  //     });
+  //     setShowInvalidPasswordOverlay(false);
+  //     setConflictMode(null);
+  //     setConflictEmail("");
+  //     setConflictPassword("");
+  //   } catch (err) {
+  //     console.error("Link existing account error:", err);
+  //     showActionOverlay?.({
+  //       message: `Link failed: ${err?.message || "Unknown error"}`,
+  //       type: "warning",
+  //       autoHide: true,
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+const handleLinkExistingAccount = async () => {
+  try {
+    setIsSubmitting(true);
+    
+    // Check if pending Google email exists
+    const pendingGoogleEmail = localStorage.getItem("pendingGoogleEmail");
+    
+    if (pendingGoogleEmail) {
+      // First sign in with Google popup
+      const result = await signInWithPopup(auth, provider);
+      
+      // Then link the email credential to Google account
+      const credential = EmailAuthProvider.credential(
+        pendingGoogleEmail,
+        conflictPassword || prompt("Please enter your password for the existing account:"),
+      );
+      
+      await linkWithCredential(result.user, credential);
+      
+      // Clear storage
+      localStorage.removeItem("pendingGoogleEmail");
+      
+      showActionOverlay?.({
+        message: "Account linked successfully!",
+        type: "success",
+        autoHide: true,
+      });
+      setShowInvalidPasswordOverlay(false);
+      setConflictMode(null);
+      setConflictEmail("");
+      setConflictPassword("");
+    } else {
+      // Original flow for existing Google user linking password
+      await signInWithPopup(auth, provider);
+      
       const credential = EmailAuthProvider.credential(
         conflictEmail,
         conflictPassword,
       );
       await linkWithCredential(auth.currentUser, credential);
-
-      // refresh user in context (UserContext onAuthStateChanged should handle)
+      
       showActionOverlay?.({
         message: "Account linked successfully.",
         type: "success",
@@ -467,17 +578,19 @@ const Login = () => {
       setConflictMode(null);
       setConflictEmail("");
       setConflictPassword("");
-    } catch (err) {
-      console.error("Link existing account error:", err);
-      showActionOverlay?.({
-        message: `Link failed: ${err?.message || "Unknown error"}`,
-        type: "warning",
-        autoHide: true,
-      });
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  } catch (err) {
+    console.error("Link existing account error:", err);
+    showActionOverlay?.({
+      message: `Link failed: ${err?.message || "Unknown error"}`,
+      type: "warning",
+      autoHide: true,
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleCancelConflict = () => {
     setConflictMode(null);
@@ -847,6 +960,16 @@ const Login = () => {
             <img src="/assets/google-icon.png" alt="Google" />
             <span>Google</span>
           </button>
+                  {/* <button
+          type="button"
+          className="login-btn google-btn"
+          onClick={signInWithFacebook}
+          disabled={isSubmitting}
+        >
+          <img src="/assets/facebook-icon.png" alt="Facebook" style={{ width: "20px", height: "20px" }} />
+          Facebook
+        </button> */}
+
         </div>
       </div>
 
