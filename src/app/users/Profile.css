@@ -45,23 +45,18 @@ body.modal-open {
 
 .profile-settings-container {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -3px; /* Move UP */
+  right: -10px; /* Move LEFT from right edge */
   z-index: 100;
+  padding: 0 !important;
 }
 
 .settings-icon {
   cursor: pointer;
-  font-size: 20px;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Add spacing */
-  margin-left: auto; /* Push to right edge */
-  padding: 5px; /* Small padding around icon */
+  padding: 0 !important;
 }
+
+
 
 
 .settings-dropdown {
@@ -69,8 +64,8 @@ body.modal-open {
   border: 1px solid #ccc;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   position: absolute;
-  left: 0;
-  top: 30px;
+  left: 10;
+  top: 40px;
   z-index: 10;
   width: 250px;
   border-radius: 6px;

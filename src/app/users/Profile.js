@@ -1,6 +1,6 @@
-'use client';
+"use client";
 import React, { useState, useEffect, useRef } from "react";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
 
 import { useUser } from "../lib/UserContext";
 import { auth } from "../lib/firebase";
@@ -8,12 +8,9 @@ import { auth } from "../lib/firebase";
 import "./Profile.css";
 import { MdMoreVert } from "react-icons/md";
 
-
-
 const Profile = ({ openBooking }) => {
-    const pathname = usePathname();
+  const pathname = usePathname();
   const router = useRouter();
-
 
   const {
     user,
@@ -62,7 +59,9 @@ const Profile = ({ openBooking }) => {
   const [messageToDelete, setMessageToDelete] = useState(null);
 
   const [showEditProfileOverlay, setShowEditProfileOverlay] = useState(false);
-  const [tempProfilePic, setTempProfilePic] = useState(user?.profilePic || "/assets/dark-logo.png");
+  const [tempProfilePic, setTempProfilePic] = useState(
+    user?.profilePic || "/assets/dark-logo.png",
+  );
   const [editedProfile, setEditedProfile] = useState({
     surname: user?.surname || "",
     firstName: user?.firstName || "",
@@ -119,7 +118,7 @@ const Profile = ({ openBooking }) => {
   // const hasEmail = providerIds.includes("password");
 
   const providerIds = (auth.currentUser?.providerData || []).map(
-    (p) => p.providerId
+    (p) => p.providerId,
   );
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
@@ -129,53 +128,48 @@ const Profile = ({ openBooking }) => {
 
   const [fetchedImages, setFetchedImages] = useState({});
 
+  useEffect(() => {
+    if (!unitData || unitData.length === 0) return;
 
-useEffect(() => {
-  if (!unitData || unitData.length === 0) return;
+    const fetchProfileImages = async () => {
+      const promises = unitData.map(async (unit) => {
+        if (!unit.imageId) return null;
 
-  const fetchProfileImages = async () => {
-    const promises = unitData.map(async (unit) => {
-      if (!unit.imageId) return null;
+        try {
+          const { base64, updatedAt } = await fetchImageFromFirestore(
+            unit.imageId,
+          );
 
-      try {
-        const { base64, updatedAt } =
-          await fetchImageFromFirestore(unit.imageId);
+          return { [unit.imageId]: { base64, updatedAt } };
+        } catch {
+          return {
+            [unit.imageId]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
+          };
+        }
+      });
 
-        return { [unit.imageId]: { base64, updatedAt } };
-      } catch {
-        return {
-          [unit.imageId]: {
-            base64: "/assets/images/default.png",
-            updatedAt: Date.now(),
-          },
-        };
-      }
-    });
+      const results = await Promise.all(promises);
 
-    const results = await Promise.all(promises);
+      const merged = results
+        .filter(Boolean)
+        .reduce((acc, cur) => ({ ...acc, ...cur }), {});
 
-    const merged = results
-      .filter(Boolean)
-      .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+      setFetchedImages((prev) => ({
+        ...prev,
+        ...merged,
+      }));
+    };
 
-    setFetchedImages((prev) => ({
-      ...prev,
-      ...merged,
-    }));
-  };
-
-  fetchProfileImages();
-}, [unitData, imageUpdateTrigger]);
-
-
-
-
-
+    fetchProfileImages();
+  }, [unitData, imageUpdateTrigger]);
 
   useEffect(() => {
     if (user) {
       const providerIds = (auth.currentUser?.providerData || []).map(
-        (p) => p.providerId
+        (p) => p.providerId,
       );
       console.log("Full providerIds array:", providerIds); // Add this for debugging
 
@@ -462,7 +456,7 @@ useEffect(() => {
           : new Date();
 
         const end = new Date(
-          start.getTime() + rental.totalDurationInSeconds * 1000
+          start.getTime() + rental.totalDurationInSeconds * 1000,
         );
 
         const isActive = rental.status === "Active";
@@ -475,7 +469,7 @@ useEffect(() => {
             // 🔁 Compress and convert if driverLicense is still a File
             if (rentalCopy.driverLicense instanceof File) {
               rentalCopy.driverLicense = await compressAndConvertFileToBase64(
-                rentalCopy.driverLicense
+                rentalCopy.driverLicense,
               );
             }
 
@@ -566,17 +560,17 @@ useEffect(() => {
   };
 
   const formatPaymentDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString; // Fallback if invalid
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  const hour12 = hours % 12 || 12;
-  return `${month}-${day}-${year} | ${hour12}:${minutes} ${ampm}`;
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // Fallback if invalid
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = String(date.getFullYear()).slice(-2);
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    return `${month}-${day}-${year} | ${hour12}:${minutes} ${ampm}`;
   };
 
   const formatDualTime = (timeInput) => {
@@ -684,7 +678,7 @@ useEffect(() => {
       setHideCancelAnimation(true);
       removeTimerRef.current = setTimeout(
         () => setShowSaveProfileChanges(false),
-        400
+        400,
       );
     }, 5000);
   };
@@ -706,7 +700,7 @@ useEffect(() => {
       "Opening message overlay with:",
       message,
       "from source:",
-      source
+      source,
     );
   };
 
@@ -834,16 +828,16 @@ useEffect(() => {
                       {formatDateTime(
                         selectedBooking.startTimestamp?.toDate?.() ||
                           new Date(
-                            `${selectedBooking.startDate}T${selectedBooking.startTime}`
-                          )
+                            `${selectedBooking.startDate}T${selectedBooking.startTime}`,
+                          ),
                       )}
                       <br />
                       to <br />
                       {formatDateTime(
                         selectedBooking.endTimestamp?.toDate?.() ||
                           new Date(
-                            `${selectedBooking.endDate}T${selectedBooking.endTime}`
-                          )
+                            `${selectedBooking.endDate}T${selectedBooking.endTime}`,
+                          ),
                       )}
                     </span>
                   </div>
@@ -863,9 +857,7 @@ useEffect(() => {
                   </div>
 
                   <div className="confirm-row">
-                    <strong className="confirm-label">
-                      Referral Source:
-                    </strong>
+                    <strong className="confirm-label">Referral Source:</strong>
                     <span className="confirm-value">
                       {selectedBooking.referralSource || "Not specified"}
                     </span>
@@ -894,7 +886,7 @@ useEffect(() => {
                               .split(" ")
                               .map(
                                 (word) =>
-                                  word.charAt(0).toUpperCase() + word.slice(1)
+                                  word.charAt(0).toUpperCase() + word.slice(1),
                               )
                               .join(" ")}{" "}
                             <br />
@@ -966,114 +958,117 @@ useEffect(() => {
 
                 <h4 className="confirm-subtitle">QUOTATION SUMMARY</h4>
                 <ul className="admin-confirm-summary-list">
-                   <div className="admin-confirm-scroll-container">
-                  <li>
-                    <strong className="summary-label">
-                      (
-                      <span style={{ color: "#28a745" }}>
-                        {selectedBooking.carName}
-                      </span>
-                      ):
-                    </strong>
+                  <div className="admin-confirm-scroll-container">
+                    <li>
+                      <strong className="summary-label">
+                        (
+                        <span style={{ color: "#28a745" }}>
+                          {selectedBooking.carName}
+                        </span>
+                        ):
+                      </strong>
 
-                    <span className="summary-value">
-                      (₱{(selectedBooking.discountedRate ?? 0).toLocaleString()}{" "}
-                      x {selectedBooking.billedDays} Day
-                      {selectedBooking.billedDays > 1 ? "s" : ""}) ₱
-                      {(
-                        selectedBooking.discountedRate *
-                          selectedBooking.billedDays ?? 0
-                      ).toLocaleString()}
-                    </span>
-                  </li>
-                  <li>
-                    <strong className="summary-label">
-                      (
-                      <span style={{ color: "#28a745" }}>
-                        {selectedBooking.drivingOption}
+                      <span className="summary-value">
+                        (₱
+                        {(selectedBooking.discountedRate ?? 0).toLocaleString()}{" "}
+                        x {selectedBooking.billedDays} Day
+                        {selectedBooking.billedDays > 1 ? "s" : ""}) ₱
+                        {(
+                          selectedBooking.discountedRate *
+                            selectedBooking.billedDays ?? 0
+                        ).toLocaleString()}
                       </span>
-                      ):
-                    </strong>
+                    </li>
+                    <li>
+                      <strong className="summary-label">
+                        (
+                        <span style={{ color: "#28a745" }}>
+                          {selectedBooking.drivingOption}
+                        </span>
+                        ):
+                      </strong>
 
-                    <span className="summary-value">
-                      {selectedBooking.drivingPrice > 0 ? (
-                        <>
-                          (₱
-                          {(
-                            selectedBooking.drivingPrice ?? 0
-                          ).toLocaleString()}{" "}
-                          x {selectedBooking.billedDays} Day
-                          {selectedBooking.billedDays > 1 ? "s" : ""}) ₱
-                          {(
-                            selectedBooking.drivingPrice *
-                              selectedBooking.billedDays ?? 0
-                          ).toLocaleString()}
-                        </>
-                      ) : (
-                        <>₱0</>
-                      )}
-                    </span>
-                  </li>
-                  <li>
-                    <strong className="summary-label">
-                      (
-                      <span style={{ color: "#28a745" }}>
-                        {selectedBooking.pickupOption}
-                      </span>
-                      ):
-                    </strong>
-                    <span className="summary-value">
-                      ₱{selectedBooking.pickupPrice.toLocaleString()}
-                    </span>
-                  </li>
-                  <li>
-                    <strong className="summary-label">Rental Duration:</strong>
-                    <span className="summary-value">
-                      ({selectedBooking.billedDays} Day /{" "}
-                      {selectedBooking.rentalDuration.isFlatRateSameDay ? (
-                        <>
-                          for{" "}
-                          <span style={{ color: "#dc3545" }}>
-                            {Math.floor(
-                              selectedBooking.rentalDuration.actualSeconds /
-                                3600
-                            )}
-                            {Math.floor(
-                              selectedBooking.rentalDuration.actualSeconds /
-                                3600
-                            ) === 1
-                              ? "hr"
-                              : "hrs"}
-                          </span>{" "}
-                          only
-                        </>
-                      ) : (
-                        `${24 * selectedBooking.billedDays} hrs`
-                      )}
-                      )
-                      <br />
-                      {selectedBooking.rentalDuration.extraHours > 0 && (
-                        <>
-                          (
-                          <span style={{ color: "#dc3545" }}>
-                            +{selectedBooking.rentalDuration.extraHours}{" "}
-                            {selectedBooking.rentalDuration.extraHours === 1
-                              ? "hr"
-                              : "hrs"}{" "}
-                            | ₱
+                      <span className="summary-value">
+                        {selectedBooking.drivingPrice > 0 ? (
+                          <>
+                            (₱
                             {(
-                              selectedBooking.extraHourCharge || 0
+                              selectedBooking.drivingPrice ?? 0
+                            ).toLocaleString()}{" "}
+                            x {selectedBooking.billedDays} Day
+                            {selectedBooking.billedDays > 1 ? "s" : ""}) ₱
+                            {(
+                              selectedBooking.drivingPrice *
+                                selectedBooking.billedDays ?? 0
                             ).toLocaleString()}
-                          </span>
-                          )
-                        </>
-                      )}
-                    </span>
-                  </li>
+                          </>
+                        ) : (
+                          <>₱0</>
+                        )}
+                      </span>
+                    </li>
+                    <li>
+                      <strong className="summary-label">
+                        (
+                        <span style={{ color: "#28a745" }}>
+                          {selectedBooking.pickupOption}
+                        </span>
+                        ):
+                      </strong>
+                      <span className="summary-value">
+                        ₱{selectedBooking.pickupPrice.toLocaleString()}
+                      </span>
+                    </li>
+                    <li>
+                      <strong className="summary-label">
+                        Rental Duration:
+                      </strong>
+                      <span className="summary-value">
+                        ({selectedBooking.billedDays} Day /{" "}
+                        {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                          <>
+                            for{" "}
+                            <span style={{ color: "#dc3545" }}>
+                              {Math.floor(
+                                selectedBooking.rentalDuration.actualSeconds /
+                                  3600,
+                              )}
+                              {Math.floor(
+                                selectedBooking.rentalDuration.actualSeconds /
+                                  3600,
+                              ) === 1
+                                ? "hr"
+                                : "hrs"}
+                            </span>{" "}
+                            only
+                          </>
+                        ) : (
+                          `${24 * selectedBooking.billedDays} hrs`
+                        )}
+                        )
+                        <br />
+                        {selectedBooking.rentalDuration.extraHours > 0 && (
+                          <>
+                            (
+                            <span style={{ color: "#dc3545" }}>
+                              +{selectedBooking.rentalDuration.extraHours}{" "}
+                              {selectedBooking.rentalDuration.extraHours === 1
+                                ? "hr"
+                                : "hrs"}{" "}
+                              | ₱
+                              {(
+                                selectedBooking.extraHourCharge || 0
+                              ).toLocaleString()}
+                            </span>
+                            )
+                          </>
+                        )}
+                      </span>
+                    </li>
 
-                  {(() => {
+                    {(() => {
                       const discountValue = Number(
-                        selectedBooking.discountValue || 0
+                        selectedBooking.discountValue || 0,
                       );
                       const discountType =
                         selectedBooking.discountType || "peso";
@@ -1112,7 +1107,7 @@ useEffect(() => {
                                   .map(
                                     (word) =>
                                       word.charAt(0).toUpperCase() +
-                                      word.slice(1)
+                                      word.slice(1),
                                   )
                                   .join(" ")
                               : "";
@@ -1131,17 +1126,16 @@ useEffect(() => {
                                 </span>
                               </li>
                             );
-                          }
+                          },
                         );
                       }
                       return null;
                     })()}
-
                   </div>
 
                   {(() => {
                     const discountValue = Number(
-                      selectedBooking.discountValue || 0
+                      selectedBooking.discountValue || 0,
                     );
                     const discountType = selectedBooking.discountType || "peso";
                     const rawTotal =
@@ -1157,12 +1151,12 @@ useEffect(() => {
                     } else if (discountType === "percent") {
                       discountAmount = Math.min(
                         (discountValue / 100) * rawTotal,
-                        rawTotal
+                        rawTotal,
                       );
                     }
                     const discountedTotal = Math.max(
                       0,
-                      rawTotal - discountAmount
+                      rawTotal - discountAmount,
                     );
                     return (
                       <li className="confirm-total-price">
@@ -1176,7 +1170,7 @@ useEffect(() => {
 
                   {(() => {
                     const discountValue = Number(
-                      selectedBooking.discountValue || 0
+                      selectedBooking.discountValue || 0,
                     );
                     const discountType = selectedBooking.discountType || "peso";
                     const rawTotal =
@@ -1192,18 +1186,18 @@ useEffect(() => {
                     } else if (discountType === "percent") {
                       discountAmount = Math.min(
                         (discountValue / 100) * rawTotal,
-                        rawTotal
+                        rawTotal,
                       );
                     }
                     const discountedTotal = Math.max(
                       0,
-                      rawTotal - discountAmount
+                      rawTotal - discountAmount,
                     );
                     const totalPaid = (
                       selectedBooking.paymentEntries || []
                     ).reduce(
                       (sum, entry) => sum + Number(entry.amount || 0),
-                      0
+                      0,
                     );
                     const balanceDue = Math.max(0, discountedTotal - totalPaid);
                     return (
@@ -1220,13 +1214,17 @@ useEffect(() => {
                         <li className="confirm-total-price">
                           <strong
                             className="summary-label"
-                            style={{ color: balanceDue === 0 ? "#28a745" : "#ffb347" }}
+                            style={{
+                              color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                            }}
                           >
                             Balance Due:
                           </strong>
                           <span
                             className="summary-value"
-                            style={{ color: balanceDue === 0 ? "#28a745" : "#dc3545" }}
+                            style={{
+                              color: balanceDue === 0 ? "#28a745" : "#dc3545",
+                            }}
                           >
                             ₱{balanceDue.toLocaleString()}
                           </span>
@@ -1400,372 +1398,404 @@ useEffect(() => {
           </div>
         )}
 
-
-
-<div className="profile-columns">
-      <div className="profile-container">
-        {showEditProfileOverlay && (
-          <div className="admin-booking-confirm-overlay">
-            <div className="admin-booking-confirm-container">
-              <button
-                className="close-btn"
-                type="button"
-                onClick={() => setShowEditProfileOverlay(false)}
-              >
-                <img
-                  src="/assets/close_0.png"
-                  alt="Close"
-                  className="close-icon close-icon-0"
-                />
-                <img
-                  src="/assets/close_1.png"
-                  alt="Close"
-                  className="close-icon close-icon-1"
-                />
-              </button>
-
-              <h3 className="confirm-header">EDIT PROFILE</h3>
-              <p className="confirm-text">
-                Make changes to your profile information.
-              </p>
-
-              <div className="admin-confirm-details">
-                <label className="profile-section-label">Profile Picture</label>
-
-                <div className="profile-picture-wrapper">
+      <div className="profile-columns">
+        <div className="profile-container">
+          {showEditProfileOverlay && (
+            <div className="admin-booking-confirm-overlay">
+              <div className="admin-booking-confirm-container">
+                <button
+                  className="close-btn"
+                  type="button"
+                  onClick={() => setShowEditProfileOverlay(false)}
+                >
                   <img
-                    src={tempProfilePic || "/assets/dark-logo.png"}
-                    alt="Profile"
-                    className="profile-picture"
+                    src="/assets/close_0.png"
+                    alt="Close"
+                    className="close-icon close-icon-0"
                   />
-                  <button
-                    className="change-profile-btn"
-                    onClick={() =>
-                      document.getElementById("profile-upload").click()
+                  <img
+                    src="/assets/close_1.png"
+                    alt="Close"
+                    className="close-icon close-icon-1"
+                  />
+                </button>
+
+                <h3 className="confirm-header">EDIT PROFILE</h3>
+                <p className="confirm-text">
+                  Make changes to your profile information.
+                </p>
+
+                <div className="admin-confirm-details">
+                  <label className="profile-section-label">
+                    Profile Picture
+                  </label>
+
+                  <div className="profile-picture-wrapper">
+                    <img
+                      src={tempProfilePic || "/assets/dark-logo.png"}
+                      alt="Profile"
+                      className="profile-picture"
+                    />
+                    <button
+                      className="change-profile-btn"
+                      onClick={() =>
+                        document.getElementById("profile-upload").click()
+                      }
+                    >
+                      Change Profile Picture
+                    </button>
+                  </div>
+
+                  <label className="profile-section-label">
+                    Personal Information
+                  </label>
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Surname"
+                    value={editedProfile.surname}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        surname: e.target.value,
+                      })
                     }
-                  >
-                    Change Profile Picture
-                  </button>
-                </div>
+                  />
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="First Name"
+                    value={editedProfile.firstName}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        firstName: e.target.value,
+                      })
+                    }
+                  />
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Middle Name (N/A if none)"
+                    value={editedProfile.middleName}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        middleName: e.target.value,
+                      })
+                    }
+                  />
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Occupation"
+                    value={editedProfile.occupation}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        occupation: e.target.value,
+                      })
+                    }
+                  />
 
-                <label className="profile-section-label">
-                  Personal Information
-                </label>
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="Surname"
-                  value={editedProfile.surname}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      surname: e.target.value,
-                    })
-                  }
-                />
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="First Name"
-                  value={editedProfile.firstName}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      firstName: e.target.value,
-                    })
-                  }
-                />
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="Middle Name (N/A if none)"
-                  value={editedProfile.middleName}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      middleName: e.target.value,
-                    })
-                  }
-                />
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="Occupation"
-                  value={editedProfile.occupation}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      occupation: e.target.value,
-                    })
-                  }
-                />
+                  <label className="profile-section-label">Contacts</label>
+                  <input
+                    className="profile-section-label-input"
+                    type="email"
+                    placeholder="Email Address"
+                    value={editedProfile.email}
+                    readOnly // ✅ Prevent user from editing
+                    style={{
+                      backgroundColor: "#f5f5f5",
+                      cursor: "not-allowed",
+                    }} // Optional: visual cue
+                  />
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Contact No."
+                    value={editedProfile.contact}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        contact: e.target.value,
+                      })
+                    }
+                  />
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Current Address"
+                    value={editedProfile.address}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        address: e.target.value,
+                      })
+                    }
+                  />
 
-                <label className="profile-section-label">Contacts</label>
-                <input
-                  className="profile-section-label-input"
-                  type="email"
-                  placeholder="Email Address"
-                  value={editedProfile.email}
-                  readOnly // ✅ Prevent user from editing
-                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }} // Optional: visual cue
-                />
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="Contact No."
-                  value={editedProfile.contact}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      contact: e.target.value,
-                    })
-                  }
-                />
-                <input
-                  className="profile-section-label-input"
-                  type="text"
-                  placeholder="Current Address"
-                  value={editedProfile.address}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      address: e.target.value,
-                    })
-                  }
-                />
-
-                <div className="confirm-button-group">
-                  <button
-                    className="confirm-proceed-btn"
-                    onClick={handleSaveProfileChanges}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="confirm-cancel-btn"
-                    onClick={handleCancelChanges}
-                  >
-                    Cancel Changes
-                  </button>
+                  <div className="confirm-button-group">
+                    <button
+                      className="confirm-proceed-btn"
+                      onClick={handleSaveProfileChanges}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="confirm-cancel-btn"
+                      onClick={handleCancelChanges}
+                    >
+                      Cancel Changes
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <h2 className="welcome-message">
-          Welcome back, {user?.name || "User"}!
-        </h2>
-
-
-
-        <div className="profile-content">
-          <div className="profile-picture-section">
-
-        <div className="profile-settings-container" ref={dropdownRef}>
-<div
-  className="settings-icon"
-  onClick={() => setShowSettings((prev) => !prev)}
->
-  <MdMoreVert size={24} />
-</div>
-
-
-          {showSettings && (
-            <div className="settings-dropdown">
-              <p
-                className="settings-item"
-                style={{
-                  color: user?.emailVerified ? "#28a745" : "#ffb300", // green if verified, amber if not
-                  fontWeight: "bold",
-                  cursor: user?.emailVerified ? "default" : "pointer",
-                }}
-                onClick={() => {
-                  if (!user?.emailVerified) {
-                    setShowVerifyOverlay(true); // open overlay only if not verified
-                  }
-                }}
-              >
-                {user?.emailVerified ? "Account Verified" : "Verify Account"}
-              </p>
-
-              <p
-                className="settings-item"
-                onClick={() => setShowLinkAccountOverlay(true)}
-              >
-                Link Account
-              </p>
-              <p
-                className="settings-item"
-                onClick={() => setShowRevertConfirm(true)}
-              >
-                Revert Profile Info to Original
-              </p>
-              <p
-                className="settings-item delete"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                Delete Account
-              </p>
-            </div>
           )}
-        </div>
 
- <div className="profile-picture-wrapper">
-            <img
-              src={user?.profilePic || "/assets/dark-logo.png"}
-              alt="Profile"
-              className="profile-picture"
-            />
+          <h2 className="welcome-message">
+            Welcome back, {user?.name || "User"}!
+          </h2>
 
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              id="profile-upload"
-              ref={fileInputRef}
-              onChange={handleProfileChange}
-            />
+          <div className="profile-content">
+            <div className="profile-picture-section">
+              <div className="profile-settings-container" ref={dropdownRef}>
+                <div
+                  className="settings-icon"
+                  onClick={() => setShowSettings((prev) => !prev)}
+                >
+                  <MdMoreVert size={24} />
+                </div>
 
-            </div>
-          </div>
-          <div className="profile-info-section">
-            <div className="profile-row">
-              <strong>Full Name: </strong>
-              <br />
-              <span
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                {user?.firstName && user?.surname
-                  ? `${user.surname}, ${user.firstName}${
-                      user.middleName && user.middleName !== "N/A"
-                        ? " " + user.middleName
-                        : ""
-                    }`
-                  : user?.name || "N/A"}
+                {showSettings && (
+                  <div className="settings-dropdown">
+                    <p
+                      className="settings-item"
+                      style={{
+                        color: user?.emailVerified ? "#28a745" : "#ffb300", // green if verified, amber if not
+                        fontWeight: "bold",
+                        cursor: user?.emailVerified ? "default" : "pointer",
+                      }}
+                      onClick={() => {
+                        if (!user?.emailVerified) {
+                          setShowVerifyOverlay(true); // open overlay only if not verified
+                        }
+                      }}
+                    >
+                      {user?.emailVerified
+                        ? "Account Verified"
+                        : "Verify Account"}
+                    </p>
 
-                {/* ✅ Verification Icon */}
+                    <p
+                      className="settings-item"
+                      onClick={() => setShowLinkAccountOverlay(true)}
+                    >
+                      Link Account
+                    </p>
+                    <p
+                      className="settings-item"
+                      onClick={() => setShowRevertConfirm(true)}
+                    >
+                      Revert Profile Info to Original
+                    </p>
+                    <p
+                      className="settings-item delete"
+                      onClick={() => setShowDeleteConfirm(true)}
+                    >
+                      Delete Account
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="profile-picture-wrapper">
                 <img
-                  src={
-                    auth.currentUser?.emailVerified
-                      // ? require("../assets/verified.png")
-                      // : require("../assets/unverified.png")
-                      ? "../assets/verified.png"
-                      : "../assets/unverified.png"
-                  }
-                  alt={
-                    auth.currentUser?.emailVerified ? "Verified" : "Unverified"
-                  }
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    cursor: auth.currentUser?.emailVerified
-                      ? "default"
-                      : "pointer",
-                  }}
-                  onClick={() => {
-                    if (!user?.emailVerified) {
-                      setShowVerifyOverlay(true);
-                    }
-                  }}
+                  src={user?.profilePic || "/assets/dark-logo.png"}
+                  alt="Profile"
+                  className="profile-picture"
                 />
-              </span>
-            </div>
 
-            <div className="profile-row">
-              <strong>Phone Number: </strong>
-              <br />
-              <span>{user?.phone || "N/A"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  id="profile-upload"
+                  ref={fileInputRef}
+                  onChange={handleProfileChange}
+                />
+              </div>
             </div>
+            <div className="profile-info-section">
+              <div className="profile-row">
+                <strong>Full Name: </strong>
+                <br />
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  {user?.firstName && user?.surname
+                    ? `${user.surname}, ${user.firstName}${
+                        user.middleName && user.middleName !== "N/A"
+                          ? " " + user.middleName
+                          : ""
+                      }`
+                    : user?.name || "N/A"}
 
-            <div className="profile-row">
-              <strong>Email Address: </strong>
-              <br /> <span>{user?.email || "N/A"} </span>
+                  {/* ✅ Verification Icon */}
+                  <img
+                    src={
+                      auth.currentUser?.emailVerified
+                        ? // ? require("../assets/verified.png")
+                          // : require("../assets/unverified.png")
+                          "../assets/verified.png"
+                        : "../assets/unverified.png"
+                    }
+                    alt={
+                      auth.currentUser?.emailVerified
+                        ? "Verified"
+                        : "Unverified"
+                    }
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      cursor: auth.currentUser?.emailVerified
+                        ? "default"
+                        : "pointer",
+                    }}
+                    onClick={() => {
+                      if (!user?.emailVerified) {
+                        setShowVerifyOverlay(true);
+                      }
+                    }}
+                  />
+                </span>
+              </div>
+
+              <div className="profile-row">
+                <strong>Phone Number: </strong>
+                <br />
+                <span>{user?.phone || "N/A"}</span>
+              </div>
+
+              <div className="profile-row">
+                <strong>Email Address: </strong>
+                <br /> <span>{user?.email || "N/A"} </span>
+              </div>
             </div>
+          </div>
+
+          <div className="profile-buttons">
+            <button
+              className="edit-picture-btn"
+              onClick={handleOpenEditProfile}
+            >
+              Edit Profile
+            </button>
           </div>
         </div>
 
-        <div className="profile-buttons">
-          <button className="edit-picture-btn" onClick={handleOpenEditProfile}>
-            Edit Profile
-          </button>
-        </div>
-      </div>
+        {/* Messages Section */}
+        <div className="user-messages-container">
+          <h3>Messages & Notifications</h3>
 
+          <div className="message-tabs-controls">
+            <div className="message-tabs">
+              <button
+                className={activeTab === "inbox" ? "active-tab" : ""}
+                onClick={() => {
+                  setActiveTab("inbox");
+                  setSelectedMessageIds([]);
+                }}
+              >
+                Inbox
+              </button>
+              <button
+                className={activeTab === "sentbox" ? "active-tab" : ""}
+                onClick={() => {
+                  setActiveTab("sentbox");
+                  setSelectedMessageIds([]);
+                }}
+              >
+                Sentbox
+              </button>
+            </div>
 
+            <div className="checkbox-dropdown-wrapper">
+              <div className="message-action-icons">
+                {activeTab === "inbox" && selectedMessageIds.length > 0 && (
+                  <>
+                    {userMessages
+                      .filter((message) =>
+                        selectedMessageIds.includes(message.id),
+                      )
+                      .some((message) => !message.readStatus) && (
+                      <img
+                        src="/assets/open-envelope.png"
+                        alt="Mark as Read"
+                        className="message-action-icon"
+                        title="Mark as Read"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectedMessageIds.forEach((id) => {
+                            const msg = userMessages.find(
+                              (msg) => msg.id === id,
+                            );
+                            if (msg && !msg.readStatus) {
+                              markMessageAsRead(id);
+                            }
+                          });
+                        }}
+                      />
+                    )}
 
-      {/* Messages Section */}
-      <div className="user-messages-container">
-        <h3>Messages & Notifications</h3>
+                    {userMessages
+                      .filter((msg) => selectedMessageIds.includes(msg.id))
+                      .some((msg) => msg.readStatus) && (
+                      <img
+                        src="/assets/close-envelope.png"
+                        alt="Mark as Unread"
+                        className="message-action-icon"
+                        title="Mark as Unread"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectedMessageIds.forEach((id) => {
+                            const msg = userMessages.find(
+                              (msg) => msg.id === id,
+                            );
+                            if (msg && msg.readStatus) {
+                              markMessageAsRead(id);
+                            }
+                          });
+                        }}
+                      />
+                    )}
 
-        <div className="message-tabs-controls">
-          <div className="message-tabs">
-            <button
-              className={activeTab === "inbox" ? "active-tab" : ""}
-              onClick={() => {
-                setActiveTab("inbox");
-                setSelectedMessageIds([]);
-              }}
-            >
-              Inbox
-            </button>
-            <button
-              className={activeTab === "sentbox" ? "active-tab" : ""}
-              onClick={() => {
-                setActiveTab("sentbox");
-                setSelectedMessageIds([]);
-              }}
-            >
-              Sentbox
-            </button>
-          </div>
-
-          <div className="checkbox-dropdown-wrapper">
-            <div className="message-action-icons">
-              {activeTab === "inbox" && selectedMessageIds.length > 0 && (
-                <>
-                  {userMessages
-                    .filter((message) =>
-                      selectedMessageIds.includes(message.id)
-                    )
-                    .some((message) => !message.readStatus) && (
                     <img
-                      src="/assets/open-envelope.png"
-                      alt="Mark as Read"
+                      src="/assets/delete.png"
+                      alt="Delete"
                       className="message-action-icon"
-                      title="Mark as Read"
+                      title="Delete Selected"
                       onClick={(e) => {
                         e.stopPropagation();
-                        selectedMessageIds.forEach((id) => {
-                          const msg = userMessages.find((msg) => msg.id === id);
-                          if (msg && !msg.readStatus) {
-                            markMessageAsRead(id);
-                          }
-                        });
+                        const messagesToDelete =
+                          activeTab === "inbox"
+                            ? userMessages.filter((msg) =>
+                                selectedMessageIds.includes(msg.id),
+                              )
+                            : sentMessages.filter((msg) =>
+                                selectedMessageIds.includes(msg.id),
+                              );
+
+                        if (messagesToDelete.length > 0) {
+                          setMessageToDelete(messagesToDelete);
+                          setShowDeleteOverlay(true);
+                        }
                       }}
                     />
-                  )}
-
-                  {userMessages
-                    .filter((msg) => selectedMessageIds.includes(msg.id))
-                    .some((msg) => msg.readStatus) && (
-                    <img
-                      src="/assets/close-envelope.png"
-                      alt="Mark as Unread"
-                      className="message-action-icon"
-                      title="Mark as Unread"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        selectedMessageIds.forEach((id) => {
-                          const msg = userMessages.find((msg) => msg.id === id);
-                          if (msg && msg.readStatus) {
-                            markMessageAsRead(id);
-                          }
-                        });
-                      }}
-                    />
-                  )}
-
+                  </>
+                )}
+                {activeTab === "sentbox" && selectedMessageIds.length > 0 && (
                   <img
                     src="/assets/delete.png"
                     alt="Delete"
@@ -1773,14 +1803,9 @@ useEffect(() => {
                     title="Delete Selected"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const messagesToDelete =
-                        activeTab === "inbox"
-                          ? userMessages.filter((msg) =>
-                              selectedMessageIds.includes(msg.id)
-                            )
-                          : sentMessages.filter((msg) =>
-                              selectedMessageIds.includes(msg.id)
-                            );
+                      const messagesToDelete = sentMessages.filter((msg) =>
+                        selectedMessageIds.includes(msg.id),
+                      );
 
                       if (messagesToDelete.length > 0) {
                         setMessageToDelete(messagesToDelete);
@@ -1788,344 +1813,327 @@ useEffect(() => {
                       }
                     }}
                   />
-                </>
-              )}
-              {activeTab === "sentbox" && selectedMessageIds.length > 0 && (
-                <img
-                  src="/assets/delete.png"
-                  alt="Delete"
-                  className="message-action-icon"
-                  title="Delete Selected"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const messagesToDelete = sentMessages.filter((msg) =>
-                      selectedMessageIds.includes(msg.id)
-                    );
+                )}
+              </div>
 
-                    if (messagesToDelete.length > 0) {
-                      setMessageToDelete(messagesToDelete);
-                      setShowDeleteOverlay(true);
-                    }
-                  }}
-                />
-              )}
+              <input
+                type="checkbox"
+                ref={(el) => {
+                  if (el) {
+                    el.indeterminate =
+                      selectedMessageIds.length > 0 &&
+                      selectedMessageIds.length <
+                        (activeTab === "inbox"
+                          ? userMessages.length
+                          : sentMessages.length);
+                  }
+                }}
+                className="message-tabs-checkbox"
+                checked={
+                  (activeTab === "inbox" &&
+                    userMessages.length > 0 &&
+                    selectedMessageIds.length === userMessages.length) ||
+                  (activeTab === "sentbox" &&
+                    sentMessages.length > 0 &&
+                    selectedMessageIds.length === sentMessages.length)
+                }
+                onChange={(e) => {
+                  const currentMessages =
+                    activeTab === "inbox" ? userMessages : sentMessages;
+                  if (e.target.checked) {
+                    setSelectedMessageIds(currentMessages.map((msg) => msg.id));
+                  } else {
+                    setSelectedMessageIds([]);
+                  }
+                }}
+                title="Select All"
+              />
+
+              <select
+                className="message-tabs-select hide-text"
+                onChange={(e) => {
+                  const option = e.target.value;
+                  setSelectedOption(option);
+
+                  let selected = [];
+                  const currentMessages =
+                    activeTab === "inbox" ? userMessages : sentMessages;
+
+                  if (option === "all") {
+                    selected = currentMessages.map((msg) => msg.id);
+                  } else if (option === "unread") {
+                    selected = currentMessages
+                      .filter((msg) => !msg.readStatus)
+                      .map((msg) => msg.id);
+                  } else if (option === "read") {
+                    selected = currentMessages
+                      .filter((msg) => msg.readStatus)
+                      .map((msg) => msg.id);
+                  } else if (option === "none") {
+                    selected = [];
+                  }
+
+                  setSelectedMessageIds(selected);
+                  e.target.selectedIndex = 0;
+                }}
+                title="More select options"
+              >
+                <option value="none">
+                  &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
+                </option>
+                <option value="all">
+                  &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                </option>
+                {activeTab === "inbox" && (
+                  <>
+                    <option value="unread">
+                      &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
+                    </option>
+                    <option value="read">
+                      &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
+                    </option>
+                  </>
+                )}
+              </select>
             </div>
+          </div>
 
-            <input
-              type="checkbox"
-              ref={(el) => {
-                if (el) {
-                  el.indeterminate =
-                    selectedMessageIds.length > 0 &&
-                    selectedMessageIds.length <
-                      (activeTab === "inbox"
-                        ? userMessages.length
-                        : sentMessages.length);
-                }
-              }}
-              className="message-tabs-checkbox"
-              checked={
-                (activeTab === "inbox" &&
-                  userMessages.length > 0 &&
-                  selectedMessageIds.length === userMessages.length) ||
-                (activeTab === "sentbox" &&
-                  sentMessages.length > 0 &&
-                  selectedMessageIds.length === sentMessages.length)
-              }
-              onChange={(e) => {
-                const currentMessages =
-                  activeTab === "inbox" ? userMessages : sentMessages;
-                if (e.target.checked) {
-                  setSelectedMessageIds(currentMessages.map((msg) => msg.id));
-                } else {
-                  setSelectedMessageIds([]);
-                }
-              }}
-              title="Select All"
-            />
+          <div className="messages-list">
+            {activeTab === "inbox" && (
+              <>
+                {userMessages && userMessages.length > 0 ? (
+                  [...userMessages]
+                    .sort(
+                      (a, b) =>
+                        (b.startTimestamp?.toDate?.().getTime() || 0) -
+                        (a.startTimestamp?.toDate?.().getTime() || 0),
+                    )
 
-            <select
-              className="message-tabs-select hide-text"
-              onChange={(e) => {
-                const option = e.target.value;
-                setSelectedOption(option);
+                    .map((message) => (
+                      <div
+                        key={message.id}
+                        className="user-message-item"
+                        style={{
+                          opacity: selectedMessageIds.includes(message.id)
+                            ? 1
+                            : message.readStatus
+                              ? 0.5
+                              : 1,
+                          fontWeight: message.readStatus ? "lighter" : "bolder",
+                          backgroundColor: selectedMessageIds.includes(
+                            message.id,
+                          )
+                            ? "#c8e6c9"
+                            : "transparent",
+                        }}
+                        onClick={() => {
+                          if (!message.readStatus) {
+                            markMessageAsRead(message.id);
+                          }
+                          openMessageOverlay(message, "inbox");
+                        }}
+                      >
+                        <div className="message-read-toggle">
+                          <img
+                            src={
+                              message.readStatus
+                                ? "/assets/open-envelope.png"
+                                : "/assets/close-envelope.png"
+                            }
+                            alt={
+                              message.readStatus
+                                ? "Mark as Unread"
+                                : "Mark as Read"
+                            }
+                            className="mark-read-icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markMessageAsRead(message.id);
+                            }}
+                          />
 
-                let selected = [];
-                const currentMessages =
-                  activeTab === "inbox" ? userMessages : sentMessages;
+                          <img
+                            src={
+                              hoveredMessageId === message.id
+                                ? "/assets/delete-hover.png"
+                                : "/assets/delete.png"
+                            }
+                            alt="Delete"
+                            className="delete-icon"
+                            onMouseEnter={() => setHoveredMessageId(message.id)}
+                            onMouseLeave={() => setHoveredMessageId(null)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMessageToDelete(message);
+                              setShowDeleteOverlay(true);
+                            }}
+                          />
+                          <input
+                            type="checkbox"
+                            className="message-checkbox"
+                            checked={selectedMessageIds.includes(message.id)}
+                            onChange={(e) => {
+                              setSelectedMessageIds((prev) =>
+                                e.target.checked
+                                  ? [...prev, message.id]
+                                  : prev.filter((id) => id !== message.id),
+                              );
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
 
-                if (option === "all") {
-                  selected = currentMessages.map((msg) => msg.id);
-                } else if (option === "unread") {
-                  selected = currentMessages
-                    .filter((msg) => !msg.readStatus)
-                    .map((msg) => msg.id);
-                } else if (option === "read") {
-                  selected = currentMessages
-                    .filter((msg) => msg.readStatus)
-                    .map((msg) => msg.id);
-                } else if (option === "none") {
-                  selected = [];
-                }
+                        <div className="message-header">
+                          <img
+                            src={message.profilePic}
+                            alt="Profile"
+                            className="message-profile-pic"
+                          />
+                          <div className="message-info">
+                            <div className="message-name">{message.name}</div>
+                            <div className="message-contact">
+                              <span className="message-email">
+                                {message.email}
+                              </span>
+                              <span className="message-phone">
+                                {" "}
+                                <a
+                                  href={`tel:${
+                                    message.contact
+                                      ? message.contact.replace(/\s/g, "")
+                                      : ""
+                                  }`}
+                                >
+                                  {message.contact || "No contact"}
+                                </a>
+                              </span>
+                            </div>
+                            <div className="message-date">
+                              {message.formattedDateTime || "No timestamp"}
+                            </div>
+                          </div>
+                        </div>
 
-                setSelectedMessageIds(selected);
-                e.target.selectedIndex = 0;
-              }}
-              title="More select options"
-            >
-              <option value="none">
-                &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
-              </option>
-              <option value="all">
-                &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
-              </option>
-              {activeTab === "inbox" && (
-                <>
-                  <option value="unread">
-                    &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
-                  </option>
-                  <option value="read">
-                    &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
-                  </option>
-                </>
-              )}
-            </select>
+                        <div className="message-text">
+                          {message.content
+                            ? message.content
+                                .replace(/<[^>]+>/g, "")
+                                .substring(0, 90) +
+                              (message.content.length > 90 ? "..." : "")
+                            : ""}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <p className="empty-message">No received messages yet.</p>
+                )}
+              </>
+            )}
+
+            {activeTab === "sentbox" && (
+              <>
+                {sentMessages && sentMessages.length > 0 ? (
+                  [...sentMessages]
+
+                    .sort(
+                      (a, b) =>
+                        (b.startTimestamp?.toDate?.().getTime() || 0) -
+                        (a.startTimestamp?.toDate?.().getTime() || 0),
+                    )
+
+                    .map((message) => (
+                      <div
+                        key={message.id}
+                        className="user-message-item"
+                        style={{
+                          backgroundColor: selectedMessageIds.includes(
+                            message.id,
+                          )
+                            ? "#c8e6c9"
+                            : "transparent",
+                        }}
+                        onClick={() => openMessageOverlay(message, "sentbox")}
+                      >
+                        <div className="message-read-toggle">
+                          <img
+                            src={
+                              hoveredMessageId === message.id
+                                ? "/assets/delete-hover.png"
+                                : "/assets/delete.png"
+                            }
+                            alt="Delete"
+                            className="delete-icon"
+                            onMouseEnter={() => setHoveredMessageId(message.id)}
+                            onMouseLeave={() => setHoveredMessageId(null)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMessageToDelete(message);
+                              setShowDeleteOverlay(true);
+                            }}
+                          />
+
+                          <input
+                            type="checkbox"
+                            className="message-checkbox"
+                            checked={selectedMessageIds.includes(message.id)}
+                            onChange={(e) => {
+                              setSelectedMessageIds((prev) =>
+                                e.target.checked
+                                  ? [...prev, message.id]
+                                  : prev.filter((id) => id !== message.id),
+                              );
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="message-header">
+                          <img
+                            src={message.profilePic}
+                            alt="Profile"
+                            className="message-profile-pic"
+                          />
+                          <div className="message-info">
+                            <div className="message-name">From: You</div>
+                            <div className="message-contact">
+                              <span className="message-email">
+                                To: {message.recipientEmail}
+                              </span>
+                              <span className="message-phone">
+                                {" "}
+                                <a
+                                  href={`tel:${message.recipientContact.replace(
+                                    /\s/g,
+                                    "",
+                                  )}`}
+                                >
+                                  {message.recipientContact}
+                                </a>
+                              </span>
+                            </div>
+                            <div className="message-date">
+                              {message.formattedDateTime || "No timestamp"}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="message-text">
+                          {message.content
+                            ? message.content
+                                .replace(/<[^>]+>/g, "")
+                                .substring(0, 90) +
+                              (message.content.length > 90 ? "..." : "")
+                            : ""}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <p className="empty-message">No sent messages yet.</p>
+                )}
+              </>
+            )}
           </div>
         </div>
-
-        <div className="messages-list">
-          {activeTab === "inbox" && (
-            <>
-              {userMessages && userMessages.length > 0 ? (
-                [...userMessages]
-                  .sort(
-                    (a, b) =>
-                      (b.startTimestamp?.toDate?.().getTime() || 0) -
-                      (a.startTimestamp?.toDate?.().getTime() || 0)
-                  )
-
-                  .map((message) => (
-                    <div
-                      key={message.id}
-                      className="user-message-item"
-                      style={{
-                        opacity: selectedMessageIds.includes(message.id)
-                          ? 1
-                          : message.readStatus
-                          ? 0.5
-                          : 1,
-                        fontWeight: message.readStatus ? "lighter" : "bolder",
-                        backgroundColor: selectedMessageIds.includes(message.id)
-                          ? "#c8e6c9"
-                          : "transparent",
-                      }}
-                      onClick={() => {
-                        if (!message.readStatus) {
-                          markMessageAsRead(message.id);
-                        }
-                        openMessageOverlay(message, "inbox");
-                      }}
-                    >
-                      <div className="message-read-toggle">
-                        <img
-                          src={
-                            message.readStatus ? "/assets/open-envelope.png" : "/assets/close-envelope.png"
-                          }
-                          alt={
-                            message.readStatus
-                              ? "Mark as Unread"
-                              : "Mark as Read"
-                          }
-                          className="mark-read-icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            markMessageAsRead(message.id);
-                          }}
-                        />
-
-                        <img
-                          src={
-                            hoveredMessageId === message.id
-                              ? "/assets/delete-hover.png"
-                              : "/assets/delete.png"
-                          }
-                          alt="Delete"
-                          className="delete-icon"
-                          onMouseEnter={() => setHoveredMessageId(message.id)}
-                          onMouseLeave={() => setHoveredMessageId(null)}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMessageToDelete(message);
-                            setShowDeleteOverlay(true);
-                          }}
-                        />
-                        <input
-                          type="checkbox"
-                          className="message-checkbox"
-                          checked={selectedMessageIds.includes(message.id)}
-                          onChange={(e) => {
-                            setSelectedMessageIds((prev) =>
-                              e.target.checked
-                                ? [...prev, message.id]
-                                : prev.filter((id) => id !== message.id)
-                            );
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-
-                      <div className="message-header">
-                        <img
-                          src={message.profilePic}
-                          alt="Profile"
-                          className="message-profile-pic"
-                        />
-                        <div className="message-info">
-                          <div className="message-name">{message.name}</div>
-                          <div className="message-contact">
-                            <span className="message-email">
-                              {message.email}
-                            </span>
-                            <span className="message-phone">
-                              {" "}
-                              <a
-                                href={`tel:${
-                                  message.contact
-                                    ? message.contact.replace(/\s/g, "")
-                                    : ""
-                                }`}
-                              >
-                                {message.contact || "No contact"}
-                              </a>
-                            </span>
-                          </div>
-                          <div className="message-date">
-                            {message.formattedDateTime || "No timestamp"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="message-text">
-                        {message.content
-                          ? message.content
-                              .replace(/<[^>]+>/g, "")
-                              .substring(0, 90) +
-                            (message.content.length > 90 ? "..." : "")
-                          : ""}
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <p className="empty-message">No received messages yet.</p>
-              )}
-            </>
-          )}
-
-          {activeTab === "sentbox" && (
-            <>
-              {sentMessages && sentMessages.length > 0 ? (
-                [...sentMessages]
-
-                  .sort(
-                    (a, b) =>
-                      (b.startTimestamp?.toDate?.().getTime() || 0) -
-                      (a.startTimestamp?.toDate?.().getTime() || 0)
-                  )
-
-                  .map((message) => (
-                    <div
-                      key={message.id}
-                      className="user-message-item"
-                      style={{
-                        backgroundColor: selectedMessageIds.includes(message.id)
-                          ? "#c8e6c9"
-                          : "transparent",
-                      }}
-                      onClick={() => openMessageOverlay(message, "sentbox")}
-                    >
-                      <div className="message-read-toggle">
-                        <img
-                          src={
-                            hoveredMessageId === message.id
-                              ? "/assets/delete-hover.png"
-                              : "/assets/delete.png"
-                          }
-                          alt="Delete"
-                          className="delete-icon"
-                          onMouseEnter={() => setHoveredMessageId(message.id)}
-                          onMouseLeave={() => setHoveredMessageId(null)}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMessageToDelete(message);
-                            setShowDeleteOverlay(true);
-                          }}
-                        />
-
-                        <input
-                          type="checkbox"
-                          className="message-checkbox"
-                          checked={selectedMessageIds.includes(message.id)}
-                          onChange={(e) => {
-                            setSelectedMessageIds((prev) =>
-                              e.target.checked
-                                ? [...prev, message.id]
-                                : prev.filter((id) => id !== message.id)
-                            );
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                      <div className="message-header">
-                        <img
-                          src={message.profilePic}
-                          alt="Profile"
-                          className="message-profile-pic"
-                        />
-                        <div className="message-info">
-                          <div className="message-name">From: You</div>
-                          <div className="message-contact">
-                            <span className="message-email">
-                              To: {message.recipientEmail}
-                            </span>
-                            <span className="message-phone">
-                              {" "}
-                              <a
-                                href={`tel:${message.recipientContact.replace(
-                                  /\s/g,
-                                  ""
-                                )}`}
-                              >
-                                {message.recipientContact}
-                              </a>
-                            </span>
-                          </div>
-                          <div className="message-date">
-                            {message.formattedDateTime || "No timestamp"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="message-text">
-                        {message.content
-                          ? message.content
-                              .replace(/<[^>]+>/g, "")
-                              .substring(0, 90) +
-                            (message.content.length > 90 ? "..." : "")
-                          : ""}
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <p className="empty-message">No sent messages yet.</p>
-              )}
-            </>
-          )}
-        </div>
       </div>
-</div>
-
-
-
 
       {/* Separator Above History Section */}
       <div className="divider-horizontal"></div>
@@ -2144,7 +2152,7 @@ useEffect(() => {
 
                     const endTimestamp = new Date(
                       startTimestamp.getTime() +
-                        rental.totalDurationInSeconds * 1000
+                        rental.totalDurationInSeconds * 1000,
                     );
 
                     const isActive = rental.status === "Active";
@@ -2194,7 +2202,7 @@ useEffect(() => {
                                   : `Starts on ${
                                       isToday(startTimestamp)
                                         ? `Today at ${formatHourMinute(
-                                            startTimestamp
+                                            startTimestamp,
                                           )}`
                                         : formatDateTime(startTimestamp)
                                     }`}
@@ -2205,22 +2213,27 @@ useEffect(() => {
 
                         <div className="ongoing-unit-image-wrapper">
                           {(() => {
-  const unit = unitData.find(u => u.plateNo === rental.plateNo);
-  const imageId =
-    rental.imageId || unit?.imageId || `${rental.plateNo}_main`;
+                            const unit = unitData.find(
+                              (u) => u.plateNo === rental.plateNo,
+                            );
+                            const imageId =
+                              rental.imageId ||
+                              unit?.imageId ||
+                              `${rental.plateNo}_main`;
 
-  const image = fetchedImages[imageId];
+                            const image = fetchedImages[imageId];
 
-  return (
-    <img
-      src={image?.base64 || "/assets/images/default.png"}
-      alt={`Booking request: ${rental.carName}`}
-      className="ongoing-unit-image"
-      key={image?.updatedAt}
-    />
-  );
-})()}
-
+                            return (
+                              <img
+                                src={
+                                  image?.base64 || "/assets/images/default.png"
+                                }
+                                alt={`Booking request: ${rental.carName}`}
+                                className="ongoing-unit-image"
+                                key={image?.updatedAt}
+                              />
+                            );
+                          })()}
                         </div>
 
                         <span
@@ -2251,9 +2264,9 @@ useEffect(() => {
                                           currentTimeLeftInSeconds) /
                                           rental.totalDurationInSeconds) *
                                           100,
-                                        0
+                                        0,
                                       ),
-                                      100
+                                      100,
                                     ).toFixed(2)}%`
                                   : "0%",
                               }}
@@ -2311,11 +2324,11 @@ useEffect(() => {
                           className="confirm-btn delete"
                           onClick={async () => {
                             showProcessingOverlay(
-                              "Cancelling Your Booking Request..."
+                              "Cancelling Your Booking Request...",
                             );
                             try {
                               await cancelUserBookingRequest(
-                                bookingToCancel.id
+                                bookingToCancel.id,
                               );
                               await fetchUserActiveRentals?.();
                               await fetchUserBookingRequests?.();
@@ -2330,7 +2343,7 @@ useEffect(() => {
                                 setHideCancelAnimation(true);
                                 setTimeout(
                                   () => setShowCancelBookingRequest(false),
-                                  400
+                                  400,
                                 );
                               }, 5000);
                             } catch (err) {
@@ -2424,11 +2437,11 @@ useEffect(() => {
                           className="confirm-btn delete"
                           onClick={async () => {
                             showProcessingOverlay(
-                              "Deleting Your Booking Request..."
+                              "Deleting Your Booking Request...",
                             );
                             try {
                               await cancelUserBookingRequest(
-                                bookingToCancel.id
+                                bookingToCancel.id,
                               );
                               await fetchUserActiveRentals?.();
                               await fetchUserBookingRequests?.();
@@ -2443,7 +2456,7 @@ useEffect(() => {
                                 setHideCancelAnimation(true);
                                 setTimeout(
                                   () => setShowDeletedBookingRequest(false),
-                                  400
+                                  400,
                                 );
                               }, 5000);
                             } catch (err) {
@@ -2492,11 +2505,11 @@ useEffect(() => {
                 {userBookingRequests.length > 0 ? (
                   userBookingRequests.map((rental) => {
                     const startTimestamp = new Date(
-                      `${rental.startDate}T${rental.startTime}`
+                      `${rental.startDate}T${rental.startTime}`,
                     );
                     const endTimestamp = new Date(
                       startTimestamp.getTime() +
-                        rental.totalDurationInSeconds * 1000
+                        rental.totalDurationInSeconds * 1000,
                     );
 
                     const isActive = rental.status === "Active";
@@ -2529,18 +2542,21 @@ useEffect(() => {
                               </span>
                               <span
                                 className="value"
-                                 style={{
-    overflowY: "scroll",
-    maxHeight: "40px",
-    whiteSpace: "normal",
-    display: "block",
-    color: rental.status === "Rejected" ? "#dc3545" : "",
-    // backgroundColor: rental.status === "Rejected" ? "#f8d7da" : "",
-    // borderRadius: "5px",
-    // padding: "5px",
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-  }}
+                                style={{
+                                  overflowY: "scroll",
+                                  maxHeight: "40px",
+                                  whiteSpace: "normal",
+                                  display: "block",
+                                  color:
+                                    rental.status === "Rejected"
+                                      ? "#dc3545"
+                                      : "",
+                                  // backgroundColor: rental.status === "Rejected" ? "#f8d7da" : "",
+                                  // borderRadius: "5px",
+                                  // padding: "5px",
+                                  scrollbarWidth: "none",
+                                  msOverflowStyle: "none",
+                                }}
                               >
                                 {rental.status === "Rejected"
                                   ? `${
@@ -2548,16 +2564,16 @@ useEffect(() => {
                                       "No reason provided"
                                     }`
                                   : isActive
-                                  ? hasStarted
-                                    ? formatTime(currentTimeLeftInSeconds)
-                                    : `Starts on ${
-                                        isToday(startTimestamp)
-                                          ? `Today at ${formatHourMinute(
-                                              startTimestamp
-                                            )}`
-                                          : formatDateTime(startTimestamp)
-                                      }`
-                                  : "Pending for Approval"}
+                                    ? hasStarted
+                                      ? formatTime(currentTimeLeftInSeconds)
+                                      : `Starts on ${
+                                          isToday(startTimestamp)
+                                            ? `Today at ${formatHourMinute(
+                                                startTimestamp,
+                                              )}`
+                                            : formatDateTime(startTimestamp)
+                                        }`
+                                    : "Pending for Approval"}
                               </span>
                             </div>
                           </div>
@@ -2565,22 +2581,27 @@ useEffect(() => {
 
                         <div className="ongoing-unit-image-wrapper">
                           {(() => {
-  const unit = unitData.find(u => u.plateNo === rental.plateNo);
-  const imageId =
-    rental.imageId || unit?.imageId || `${rental.plateNo}_main`;
+                            const unit = unitData.find(
+                              (u) => u.plateNo === rental.plateNo,
+                            );
+                            const imageId =
+                              rental.imageId ||
+                              unit?.imageId ||
+                              `${rental.plateNo}_main`;
 
-  const image = fetchedImages[imageId];
+                            const image = fetchedImages[imageId];
 
-  return (
-    <img
-      src={image?.base64 || "/assets/images/default.png"}
-      alt={`Booking request: ${rental.carName}`}
-      className="ongoing-unit-image"
-      key={image?.updatedAt}
-    />
-  );
-})()}
-
+                            return (
+                              <img
+                                src={
+                                  image?.base64 || "/assets/images/default.png"
+                                }
+                                alt={`Booking request: ${rental.carName}`}
+                                className="ongoing-unit-image"
+                                key={image?.updatedAt}
+                              />
+                            );
+                          })()}
                         </div>
 
                         <span
@@ -2611,9 +2632,9 @@ useEffect(() => {
                                           currentTimeLeftInSeconds) /
                                           rental.totalDurationInSeconds) *
                                           100,
-                                        0
+                                        0,
                                       ),
-                                      100
+                                      100,
                                     ).toFixed(2)}%`
                                   : "0%",
                               }}
@@ -2632,7 +2653,10 @@ useEffect(() => {
                                     className="action-button finish"
                                     onClick={() => {
                                       // setBookingToEdit(rental);
-                                      setBookingToEdit({...rental, isResubmitting: true});
+                                      setBookingToEdit({
+                                        ...rental,
+                                        isResubmitting: true,
+                                      });
                                       setShowReSubmitBooking(true);
                                       console.log("Re-submit request:", rental);
                                     }}
@@ -2656,7 +2680,10 @@ useEffect(() => {
                                     className="action-button finish"
                                     onClick={() => {
                                       // setBookingToEdit(rental);
-                                      setBookingToEdit({...rental, isResubmitting: false});
+                                      setBookingToEdit({
+                                        ...rental,
+                                        isResubmitting: false,
+                                      });
                                       setShowEditBookingConfirm(true);
                                       console.log("Edit request:", rental);
                                     }}
@@ -2704,21 +2731,25 @@ useEffect(() => {
                       Details
                     </button>
                     {(() => {
-  const unit = unitData.find(u => u.plateNo === history.plateNo);
-  const imageId =
-    history.imageId || unit?.imageId || `${history.plateNo}_main`;
+                      const unit = unitData.find(
+                        (u) => u.plateNo === history.plateNo,
+                      );
+                      const imageId =
+                        history.imageId ||
+                        unit?.imageId ||
+                        `${history.plateNo}_main`;
 
-  const image = fetchedImages[imageId];
+                      const image = fetchedImages[imageId];
 
-  return (
-    <img
-      src={image?.base64 || "/assets/images/default.png"}
-      alt="Rented Car"
-      className="history-car-image"
-      key={image?.updatedAt}
-    />
-  );
-})()}
+                      return (
+                        <img
+                          src={image?.base64 || "/assets/images/default.png"}
+                          alt="Rented Car"
+                          className="history-car-image"
+                          key={image?.updatedAt}
+                        />
+                      );
+                    })()}
 
                     <div className="history-details">
                       <p className="car-name">{history.carName}</p>
@@ -2799,16 +2830,16 @@ useEffect(() => {
                       </div>
 
                       {selectedHistoryRental.drivingOption === "With Driver" &&
-                    selectedHistoryRental.assignedDriver && (
-                      <div className="confirm-row">
-                        <strong className="confirm-label">
-                          Assigned Driver:
-                        </strong>
-                        <span className="confirm-value">
-                          {selectedHistoryRental.assignedDriver}
-                        </span>
-                      </div>
-                    )}
+                        selectedHistoryRental.assignedDriver && (
+                          <div className="confirm-row">
+                            <strong className="confirm-label">
+                              Assigned Driver:
+                            </strong>
+                            <span className="confirm-value">
+                              {selectedHistoryRental.assignedDriver}
+                            </span>
+                          </div>
+                        )}
 
                       <div className="confirm-row">
                         <strong className="confirm-label">
@@ -2839,16 +2870,16 @@ useEffect(() => {
                           {formatDateTime(
                             selectedHistoryRental.startTimestamp?.toDate?.() ||
                               new Date(
-                                `${selectedHistoryRental.startDate}T${selectedHistoryRental.startTime}`
-                              )
+                                `${selectedHistoryRental.startDate}T${selectedHistoryRental.startTime}`,
+                              ),
                           )}
                           <br />
                           to <br />
                           {formatDateTime(
                             selectedHistoryRental.endTimestamp?.toDate?.() ||
                               new Date(
-                                `${selectedHistoryRental.endDate}T${selectedHistoryRental.endTime}`
-                              )
+                                `${selectedHistoryRental.endDate}T${selectedHistoryRental.endTime}`,
+                              ),
                           )}
                         </span>
                       </div>
@@ -2869,12 +2900,15 @@ useEffect(() => {
                         </span>
                       </div>
 
-                                        <div className="confirm-row">
-                    <strong className="confirm-label">Referral Source:</strong>
-                    <span className="confirm-value">
-                      {selectedHistoryRental.referralSource || "Not specified"}
-                    </span>
-                  </div>
+                      <div className="confirm-row">
+                        <strong className="confirm-label">
+                          Referral Source:
+                        </strong>
+                        <span className="confirm-value">
+                          {selectedHistoryRental.referralSource ||
+                            "Not specified"}
+                        </span>
+                      </div>
 
                       <div className="confirm-row">
                         <strong className="confirm-label">
@@ -2886,29 +2920,35 @@ useEffect(() => {
                       </div>
 
                       {selectedHistoryRental?.paymentEntries?.length > 0 && (
-                    <div className="confirm-row">
-                      <strong className="confirm-label">Payments:</strong>
-                      <span className="confirm-value">
-                        {selectedHistoryRental.paymentEntries.map((entry, index) => (
-                          <div key={index} style={{ marginBottom: "0.5rem" }}>
-                            <br />₱{Number(entry.amount).toLocaleString()}{" "}
-                            <br />
-                            {entry.mop} |{" "}
-                            {entry.pop
-                              .toLowerCase()
-                              .split(" ")
-                              .map(
-                                (word) =>
-                                  word.charAt(0).toUpperCase() + word.slice(1)
-                              )
-                              .join(" ")}{" "}
-                            <br />
-                            {formatPaymentDate(entry.date)}
-                          </div>
-                        ))}
-                      </span>
-                    </div>
-                  )}
+                        <div className="confirm-row">
+                          <strong className="confirm-label">Payments:</strong>
+                          <span className="confirm-value">
+                            {selectedHistoryRental.paymentEntries.map(
+                              (entry, index) => (
+                                <div
+                                  key={index}
+                                  style={{ marginBottom: "0.5rem" }}
+                                >
+                                  <br />₱{Number(entry.amount).toLocaleString()}{" "}
+                                  <br />
+                                  {entry.mop} |{" "}
+                                  {entry.pop
+                                    .toLowerCase()
+                                    .split(" ")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1),
+                                    )
+                                    .join(" ")}{" "}
+                                  <br />
+                                  {formatPaymentDate(entry.date)}
+                                </div>
+                              ),
+                            )}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -2962,7 +3002,7 @@ useEffect(() => {
                             "string"
                               ? selectedHistoryRental.driverLicense
                               : URL.createObjectURL(
-                                  selectedHistoryRental.driverLicense
+                                  selectedHistoryRental.driverLicense,
                                 )
                           }
                           alt="Driver's License"
@@ -2980,294 +3020,311 @@ useEffect(() => {
                     <h4 className="confirm-subtitle">QUOTATION SUMMARY</h4>
                     <ul className="admin-confirm-summary-list">
                       <div className="admin-confirm-scroll-container">
-                      <li>
-                        <strong className="summary-label">
-                          (
-                          <span style={{ color: "#28a745" }}>
-                            {selectedHistoryRental.carName}
-                          </span>
-                          ):
-                        </strong>
-
-                        <span className="summary-value">
-                          (₱
-                          {(
-                            selectedHistoryRental.discountedRate ?? 0
-                          ).toLocaleString()}{" "}
-                          x {selectedHistoryRental.billedDays} Day
-                          {selectedHistoryRental.billedDays > 1 ? "s" : ""}) ₱
-                          {(
-                            selectedHistoryRental.discountedRate *
-                              selectedHistoryRental.billedDays ?? 0
-                          ).toLocaleString()}
-                        </span>
-                      </li>
-                      <li>
-                        <strong className="summary-label">
-                          (
-                          <span style={{ color: "#28a745" }}>
-                            {selectedHistoryRental.drivingOption}
-                          </span>
-                          ):
-                        </strong>
-
-                        <span className="summary-value">
-                          {selectedHistoryRental.drivingPrice > 0 ? (
-                            <>
-                              (₱
-                              {(
-                                selectedHistoryRental.drivingPrice ?? 0
-                              ).toLocaleString()}{" "}
-                              x {selectedHistoryRental.billedDays} Day
-                              {selectedHistoryRental.billedDays > 1 ? "s" : ""})
-                              ₱
-                              {(
-                                selectedHistoryRental.drivingPrice *
-                                  selectedHistoryRental.billedDays ?? 0
-                              ).toLocaleString()}
-                            </>
-                          ) : (
-                            <>₱0</>
-                          )}
-                        </span>
-                      </li>
-                      <li>
-                        <strong className="summary-label">
-                          (
-                          <span style={{ color: "#28a745" }}>
-                            {selectedHistoryRental.pickupOption}
-                          </span>
-                          ):
-                        </strong>
-                        <span className="summary-value">
-                          ₱{selectedHistoryRental.pickupPrice.toLocaleString()}
-                        </span>
-                      </li>
-                      <li>
-                        <strong className="summary-label">
-                          Rental Duration:
-                        </strong>
-                        <span className="summary-value">
-                          ({selectedHistoryRental.billedDays} Day /{" "}
-                          {selectedHistoryRental.rentalDuration
-                            .isFlatRateSameDay ? (
-                            <>
-                              for{" "}
-                              <span style={{ color: "#dc3545" }}>
-                                {Math.floor(
-                                  selectedHistoryRental.rentalDuration
-                                    .actualSeconds / 3600
-                                )}
-                                {Math.floor(
-                                  selectedHistoryRental.rentalDuration
-                                    .actualSeconds / 3600
-                                ) === 1
-                                  ? "hr"
-                                  : "hrs"}
-                              </span>{" "}
-                              only
-                            </>
-                          ) : (
-                            `${24 * selectedHistoryRental.billedDays} hrs`
-                          )}
-                          )
-                          <br />
-                          {selectedHistoryRental.rentalDuration.extraHours >
-                            0 && (
-                            <>
-                              (
-                              <span style={{ color: "#dc3545" }}>
-                                +
-                                {
-                                  selectedHistoryRental.rentalDuration
-                                    .extraHours
-                                }{" "}
-                                {selectedHistoryRental.rentalDuration
-                                  .extraHours === 1
-                                  ? "hr"
-                                  : "hrs"}{" "}
-                                | ₱
-                                {(
-                                  selectedHistoryRental.extraHourCharge || 0
-                                ).toLocaleString()}
-                              </span>
-                              )
-                            </>
-                          )}
-                        </span>
-                      </li>
-
-                    {(() => {
-                      const discountValue = Number(
-                        selectedHistoryRental.discountValue || 0
-                      );
-                      const discountType =
-                        selectedHistoryRental.discountType || "peso";
-
-                      if (discountValue > 0) {
-                        return (
-                          <li>
-                            <strong className="summary-label">Discount:</strong>
-                            <span
-                              className="summary-value"
-                              style={{ color: "#dc3545" }}
-                            >
-                              {discountType === "peso"
-                                ? `- ₱${discountValue.toLocaleString()}`
-                                : `- ${discountValue}%`}
+                        <li>
+                          <strong className="summary-label">
+                            (
+                            <span style={{ color: "#28a745" }}>
+                              {selectedHistoryRental.carName}
                             </span>
-                          </li>
-                        );
-                      }
+                            ):
+                          </strong>
 
-                      return null;
-                    })()}
+                          <span className="summary-value">
+                            (₱
+                            {(
+                              selectedHistoryRental.discountedRate ?? 0
+                            ).toLocaleString()}{" "}
+                            x {selectedHistoryRental.billedDays} Day
+                            {selectedHistoryRental.billedDays > 1 ? "s" : ""}) ₱
+                            {(
+                              selectedHistoryRental.discountedRate *
+                                selectedHistoryRental.billedDays ?? 0
+                            ).toLocaleString()}
+                          </span>
+                        </li>
+                        <li>
+                          <strong className="summary-label">
+                            (
+                            <span style={{ color: "#28a745" }}>
+                              {selectedHistoryRental.drivingOption}
+                            </span>
+                            ):
+                          </strong>
 
-                    {(() => {
-                      if (
-                        selectedHistoryRental.paymentEntries &&
-                        selectedHistoryRental.paymentEntries.length > 0
-                      ) {
-                        return selectedHistoryRental.paymentEntries.map(
-                          (entry, index) => {
-                            // Convert pop to Title Case (capitalize each word)
-                            const titleCasePop = entry.pop
-                              ? entry.pop
-                                  .toLowerCase()
-                                  .split(" ")
-                                  .map(
-                                    (word) =>
-                                      word.charAt(0).toUpperCase() +
-                                      word.slice(1)
-                                  )
-                                  .join(" ")
-                              : "";
+                          <span className="summary-value">
+                            {selectedHistoryRental.drivingPrice > 0 ? (
+                              <>
+                                (₱
+                                {(
+                                  selectedHistoryRental.drivingPrice ?? 0
+                                ).toLocaleString()}{" "}
+                                x {selectedHistoryRental.billedDays} Day
+                                {selectedHistoryRental.billedDays > 1
+                                  ? "s"
+                                  : ""}
+                                ) ₱
+                                {(
+                                  selectedHistoryRental.drivingPrice *
+                                    selectedHistoryRental.billedDays ?? 0
+                                ).toLocaleString()}
+                              </>
+                            ) : (
+                              <>₱0</>
+                            )}
+                          </span>
+                        </li>
+                        <li>
+                          <strong className="summary-label">
+                            (
+                            <span style={{ color: "#28a745" }}>
+                              {selectedHistoryRental.pickupOption}
+                            </span>
+                            ):
+                          </strong>
+                          <span className="summary-value">
+                            ₱
+                            {selectedHistoryRental.pickupPrice.toLocaleString()}
+                          </span>
+                        </li>
+                        <li>
+                          <strong className="summary-label">
+                            Rental Duration:
+                          </strong>
+                          <span className="summary-value">
+                            ({selectedHistoryRental.billedDays} Day /{" "}
+                            {selectedHistoryRental.rentalDuration
+                              .isFlatRateSameDay ? (
+                              <>
+                                for{" "}
+                                <span style={{ color: "#dc3545" }}>
+                                  {Math.floor(
+                                    selectedHistoryRental.rentalDuration
+                                      .actualSeconds / 3600,
+                                  )}
+                                  {Math.floor(
+                                    selectedHistoryRental.rentalDuration
+                                      .actualSeconds / 3600,
+                                  ) === 1
+                                    ? "hr"
+                                    : "hrs"}
+                                </span>{" "}
+                                only
+                              </>
+                            ) : (
+                              `${24 * selectedHistoryRental.billedDays} hrs`
+                            )}
+                            )
+                            <br />
+                            {selectedHistoryRental.rentalDuration.extraHours >
+                              0 && (
+                              <>
+                                (
+                                <span style={{ color: "#dc3545" }}>
+                                  +
+                                  {
+                                    selectedHistoryRental.rentalDuration
+                                      .extraHours
+                                  }{" "}
+                                  {selectedHistoryRental.rentalDuration
+                                    .extraHours === 1
+                                    ? "hr"
+                                    : "hrs"}{" "}
+                                  | ₱
+                                  {(
+                                    selectedHistoryRental.extraHourCharge || 0
+                                  ).toLocaleString()}
+                                </span>
+                                )
+                              </>
+                            )}
+                          </span>
+                        </li>
 
+                        {(() => {
+                          const discountValue = Number(
+                            selectedHistoryRental.discountValue || 0,
+                          );
+                          const discountType =
+                            selectedHistoryRental.discountType || "peso";
+
+                          if (discountValue > 0) {
                             return (
-                              <li key={index}>
+                              <li>
                                 <strong className="summary-label">
-                                  {formatPaymentDate(entry.date)} <br />
-                                  {entry.mop} | {titleCasePop}
+                                  Discount:
                                 </strong>
                                 <span
                                   className="summary-value"
                                   style={{ color: "#dc3545" }}
                                 >
-                                  - ₱{Number(entry.amount).toLocaleString()}
+                                  {discountType === "peso"
+                                    ? `- ₱${discountValue.toLocaleString()}`
+                                    : `- ${discountValue}%`}
                                 </span>
                               </li>
                             );
                           }
-                        );
-                      }
-                      return null;
-                    })()}
 
+                          return null;
+                        })()}
+
+                        {(() => {
+                          if (
+                            selectedHistoryRental.paymentEntries &&
+                            selectedHistoryRental.paymentEntries.length > 0
+                          ) {
+                            return selectedHistoryRental.paymentEntries.map(
+                              (entry, index) => {
+                                // Convert pop to Title Case (capitalize each word)
+                                const titleCasePop = entry.pop
+                                  ? entry.pop
+                                      .toLowerCase()
+                                      .split(" ")
+                                      .map(
+                                        (word) =>
+                                          word.charAt(0).toUpperCase() +
+                                          word.slice(1),
+                                      )
+                                      .join(" ")
+                                  : "";
+
+                                return (
+                                  <li key={index}>
+                                    <strong className="summary-label">
+                                      {formatPaymentDate(entry.date)} <br />
+                                      {entry.mop} | {titleCasePop}
+                                    </strong>
+                                    <span
+                                      className="summary-value"
+                                      style={{ color: "#dc3545" }}
+                                    >
+                                      - ₱{Number(entry.amount).toLocaleString()}
+                                    </span>
+                                  </li>
+                                );
+                              },
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
 
                       {(() => {
-                    const discountValue = Number(
-                      selectedHistoryRental.discountValue || 0
-                    );
-                    const discountType = selectedHistoryRental.discountType || "peso";
-                    const rawTotal =
-                      selectedHistoryRental.billedDays *
-                        selectedHistoryRental.discountedRate +
-                      selectedHistoryRental.billedDays *
-                        selectedHistoryRental.drivingPrice +
-                      selectedHistoryRental.extraHourCharge +
-                      selectedHistoryRental.pickupPrice;
-                    let discountAmount = 0;
-                    if (discountType === "peso") {
-                      discountAmount = Math.min(discountValue, rawTotal);
-                    } else if (discountType === "percent") {
-                      discountAmount = Math.min(
-                        (discountValue / 100) * rawTotal,
-                        rawTotal
-                      );
-                    }
-                    const discountedTotal = Math.max(
-                      0,
-                      rawTotal - discountAmount
-                    );
-                    return (
-                      <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
-                        <span className="summary-value">
-                          ₱{discountedTotal.toLocaleString()}
-                        </span>
-                      </li>
-                    );
-                  })()}
+                        const discountValue = Number(
+                          selectedHistoryRental.discountValue || 0,
+                        );
+                        const discountType =
+                          selectedHistoryRental.discountType || "peso";
+                        const rawTotal =
+                          selectedHistoryRental.billedDays *
+                            selectedHistoryRental.discountedRate +
+                          selectedHistoryRental.billedDays *
+                            selectedHistoryRental.drivingPrice +
+                          selectedHistoryRental.extraHourCharge +
+                          selectedHistoryRental.pickupPrice;
+                        let discountAmount = 0;
+                        if (discountType === "peso") {
+                          discountAmount = Math.min(discountValue, rawTotal);
+                        } else if (discountType === "percent") {
+                          discountAmount = Math.min(
+                            (discountValue / 100) * rawTotal,
+                            rawTotal,
+                          );
+                        }
+                        const discountedTotal = Math.max(
+                          0,
+                          rawTotal - discountAmount,
+                        );
+                        return (
+                          <li className="confirm-total-price">
+                            <strong className="summary-label">
+                              Total Price:
+                            </strong>
+                            <span className="summary-value">
+                              ₱{discountedTotal.toLocaleString()}
+                            </span>
+                          </li>
+                        );
+                      })()}
 
-                  {(() => {
-                    const discountValue = Number(
-                      selectedHistoryRental.discountValue || 0
-                    );
-                    const discountType = selectedHistoryRental.discountType || "peso";
-                    const rawTotal =
-                      selectedHistoryRental.billedDays *
-                        selectedHistoryRental.discountedRate +
-                      selectedHistoryRental.billedDays *
-                        selectedHistoryRental.drivingPrice +
-                      selectedHistoryRental.extraHourCharge +
-                      selectedHistoryRental.pickupPrice;
-                    let discountAmount = 0;
-                    if (discountType === "peso") {
-                      discountAmount = Math.min(discountValue, rawTotal);
-                    } else if (discountType === "percent") {
-                      discountAmount = Math.min(
-                        (discountValue / 100) * rawTotal,
-                        rawTotal
-                      );
-                    }
-                    const discountedTotal = Math.max(
-                      0,
-                      rawTotal - discountAmount
-                    );
-                    const totalPaid = (
-                      selectedHistoryRental.paymentEntries || []
-                    ).reduce(
-                      (sum, entry) => sum + Number(entry.amount || 0),
-                      0
-                    );
-                    const balanceDue = Math.max(0, discountedTotal - totalPaid);
-                    return (
-                      <>
-                        <li>
-                          <strong className="summary-label">Total Paid:</strong>
-                          <span
-                            className="summary-value"
-                            style={{ color: "#dc3545" }}
-                          >
-                            - ₱{totalPaid.toLocaleString()}
-                          </span>
-                        </li>
-                        <li className="confirm-total-price">
-                          <strong
-                            className="summary-label"
-                            style={{ color: balanceDue === 0 ? "#28a745" : "#ffb347" }}
-                          >
-                            Balance Due:
-                          </strong>
-                          <span
-                            className="summary-value"
-                            style={{ color: balanceDue === 0 ? "#28a745" : "#dc3545" }}
-                          >
-                            ₱{balanceDue.toLocaleString()}
-                          </span>
-                        </li>
-                      </>
-                    );
-                  })()}
-
+                      {(() => {
+                        const discountValue = Number(
+                          selectedHistoryRental.discountValue || 0,
+                        );
+                        const discountType =
+                          selectedHistoryRental.discountType || "peso";
+                        const rawTotal =
+                          selectedHistoryRental.billedDays *
+                            selectedHistoryRental.discountedRate +
+                          selectedHistoryRental.billedDays *
+                            selectedHistoryRental.drivingPrice +
+                          selectedHistoryRental.extraHourCharge +
+                          selectedHistoryRental.pickupPrice;
+                        let discountAmount = 0;
+                        if (discountType === "peso") {
+                          discountAmount = Math.min(discountValue, rawTotal);
+                        } else if (discountType === "percent") {
+                          discountAmount = Math.min(
+                            (discountValue / 100) * rawTotal,
+                            rawTotal,
+                          );
+                        }
+                        const discountedTotal = Math.max(
+                          0,
+                          rawTotal - discountAmount,
+                        );
+                        const totalPaid = (
+                          selectedHistoryRental.paymentEntries || []
+                        ).reduce(
+                          (sum, entry) => sum + Number(entry.amount || 0),
+                          0,
+                        );
+                        const balanceDue = Math.max(
+                          0,
+                          discountedTotal - totalPaid,
+                        );
+                        return (
+                          <>
+                            <li>
+                              <strong className="summary-label">
+                                Total Paid:
+                              </strong>
+                              <span
+                                className="summary-value"
+                                style={{ color: "#dc3545" }}
+                              >
+                                - ₱{totalPaid.toLocaleString()}
+                              </span>
+                            </li>
+                            <li className="confirm-total-price">
+                              <strong
+                                className="summary-label"
+                                style={{
+                                  color:
+                                    balanceDue === 0 ? "#28a745" : "#ffb347",
+                                }}
+                              >
+                                Balance Due:
+                              </strong>
+                              <span
+                                className="summary-value"
+                                style={{
+                                  color:
+                                    balanceDue === 0 ? "#28a745" : "#dc3545",
+                                }}
+                              >
+                                ₱{balanceDue.toLocaleString()}
+                              </span>
+                            </li>
+                          </>
+                        );
+                      })()}
                     </ul>
                   </div>
 
                   <div className="confirm-details-button-group">
                     <button
                       className="confirm-details-btn"
-                      
                       onClick={() => setShowHistoryDetailsOverlay(false)}
                     >
                       Confirm
@@ -3345,7 +3402,7 @@ useEffect(() => {
                             selectedMessage.recipientContact
                               ? selectedMessage.recipientContact.replace(
                                   /\s/g,
-                                  ""
+                                  "",
                                 )
                               : ""
                           }`}
@@ -3383,7 +3440,11 @@ useEffect(() => {
 
             <div className="overlay-actions">
               <img
-                src={deleteIsHovered ? "/assets/delete-hover.png" : "/assets/delete.png"}
+                src={
+                  deleteIsHovered
+                    ? "/assets/delete-hover.png"
+                    : "/assets/delete.png"
+                }
                 alt="Delete"
                 className="delete-icon"
                 onMouseEnter={() => setDeleteIsHovered(true)}
@@ -3636,11 +3697,20 @@ useEffect(() => {
                   )} */}
 
                   {showPassword ? (
-                    <img src="/assets/hide.svg" alt="Hide" width={20} height={20} />
+                    <img
+                      src="/assets/hide.svg"
+                      alt="Hide"
+                      width={20}
+                      height={20}
+                    />
                   ) : (
-                    <img src="/assets/unhide.svg" alt="Unhide" width={20} height={20} />
+                    <img
+                      src="/assets/unhide.svg"
+                      alt="Unhide"
+                      width={20}
+                      height={20}
+                    />
                   )}
-
                 </span>
               </div>
 
@@ -3707,5 +3777,3 @@ useEffect(() => {
 };
 
 export default Profile;
-
-

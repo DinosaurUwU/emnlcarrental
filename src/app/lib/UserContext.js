@@ -15,6 +15,7 @@ import {
   signOut,
   deleteUser,
   GoogleAuthProvider,
+  FacebookAuthProvider,
   reauthenticateWithPopup,
   reload,
   EmailAuthProvider,
@@ -47,8 +48,10 @@ import {
   increment,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
-
 import { useRouter } from "next/navigation";
+
+const fbProvider = new FacebookAuthProvider();
+
 
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
@@ -147,6 +150,18 @@ export const UserProvider = ({ children }) => {
     setLastKnownUser(u);
     setUser(u);
   };
+
+  const signInWithFacebook = async () => {
+  try {
+    const result = await signInWithPopup(auth, fbProvider);
+    console.log("✅ Facebook login success:", result.user);
+    return { success: true, user: result.user };
+  } catch (error) {
+    console.error("❌ Facebook Sign-In Error:", error);
+    return { success: false, error };
+  }
+};
+
 
   // SAVE GUEST USER BOOKING FORM AFTER LOGIN
   useEffect(() => {
@@ -6232,6 +6247,7 @@ useEffect(() => {
   return (
     <UserContext.Provider
       value={{
+        signInWithFacebook,
         isUpdatingUser,
         linkAccount,
         unlinkAccount,
