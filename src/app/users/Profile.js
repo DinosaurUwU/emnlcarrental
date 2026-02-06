@@ -6,6 +6,8 @@ import { useUser } from "../lib/UserContext";
 import { auth } from "../lib/firebase";
 
 import "./Profile.css";
+import { MdMoreVert } from "react-icons/md";
+
 
 
 const Profile = ({ openBooking }) => {
@@ -1555,13 +1557,19 @@ useEffect(() => {
           Welcome back, {user?.name || "User"}!
         </h2>
 
+
+
+        <div className="profile-content">
+          <div className="profile-picture-section">
+
         <div className="profile-settings-container" ref={dropdownRef}>
-          <div
-            className="settings-icon"
-            onClick={() => setShowSettings((prev) => !prev)}
-          >
-            &#8942; {/* This is ⋮ Unicode for vertical dots */}
-          </div>
+<div
+  className="settings-icon"
+  onClick={() => setShowSettings((prev) => !prev)}
+>
+  <MdMoreVert size={24} />
+</div>
+
 
           {showSettings && (
             <div className="settings-dropdown">
@@ -1591,7 +1599,7 @@ useEffect(() => {
                 className="settings-item"
                 onClick={() => setShowRevertConfirm(true)}
               >
-                Revert Info Changes to Original
+                Revert Profile Info to Original
               </p>
               <p
                 className="settings-item delete"
@@ -1603,8 +1611,7 @@ useEffect(() => {
           )}
         </div>
 
-        <div className="profile-content">
-          <div className="profile-picture-section">
+ <div className="profile-picture-wrapper">
             <img
               src={user?.profilePic || "/assets/dark-logo.png"}
               alt="Profile"
@@ -1619,6 +1626,8 @@ useEffect(() => {
               ref={fileInputRef}
               onChange={handleProfileChange}
             />
+
+            </div>
           </div>
           <div className="profile-info-section">
             <div className="profile-row">
@@ -1683,8 +1692,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Separator */}
-      <div className="divider"></div>
+
 
       {/* Messages Section */}
       <div className="user-messages-container">
