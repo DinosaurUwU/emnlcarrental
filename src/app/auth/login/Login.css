@@ -19,7 +19,7 @@ html, body {
   overflow-x: hidden;
 }
 
-#loginBackground {
+.login.background {
   position: absolute;
   top: 0;
   left: 0;
@@ -41,10 +41,10 @@ html, body {
 }
 
 .glass-container {
-  width: 750px;
+  width: 90%;
   height: 480px;
   display: flex;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgb(255, 255, 255, 0.75);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(12px);
@@ -53,7 +53,7 @@ html, body {
 }
 
 .carousel {
-  width: 45%;
+  width: 90%;
   height: 100%;
   position: relative;
 }
@@ -105,15 +105,17 @@ html, body {
 }
 
 .login-logo {
-  width: 130px;
+  width: 200px;
   height: auto;
 }
 
 .form-section h2 {
+  font-family: "Montserrat", sans-serif;
+  text-transform: uppercase;
+  font-weight: 900;
   font-size: 22px;
   color: #074609;
   margin: 0;
-  font-weight: 600;
 }
 
 .form-section p {
@@ -159,7 +161,7 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(255, 255, 255, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,7 +178,7 @@ html, body {
   
   .carousel {
     width: 100%;
-    height: 180px;
+    height: 50%;
   }
   
   .form-section {
