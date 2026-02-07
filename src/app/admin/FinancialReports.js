@@ -160,12 +160,30 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
     }
   }, [serverChangeCounter]);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const loadBothTabs = async () => {
+  //     isHydratingRef.current = true;
+
+  //     const revenueData = await loadFinancialReport("revenue");
+  //     const expenseData = await loadFinancialReport("expense");
+
+  //     setRevenueGrid(revenueData.gridData);
+  //     setExpenseGrid(expenseData.gridData);
+  //     setGridData(revenueData.gridData);
+
+  //     lastSavedGridRef.current = revenueData.gridData;
+  //     isHydratingRef.current = false;
+  //   };
+
+  //   loadBothTabs();
+  // }, []);
+
+    useEffect(() => {
     const loadBothTabs = async () => {
       isHydratingRef.current = true;
 
-      const revenueData = await loadFinancialReport("revenue");
-      const expenseData = await loadFinancialReport("expense");
+      const revenueData = await loadFinancialReport("revenue", currentYear);
+      const expenseData = await loadFinancialReport("expense", currentYear);
 
       setRevenueGrid(revenueData.gridData);
       setExpenseGrid(expenseData.gridData);
@@ -176,7 +194,9 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
     };
 
     loadBothTabs();
-  }, []);
+  }, [currentYear]);
+
+
 
   useEffect(() => {
     if (
@@ -193,7 +213,9 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
     (async () => {
       try {
         setSavingStatus(true);
-        await saveFinancialReport(activeTab, gridData);
+        // await saveFinancialReport(activeTab, gridData);
+await saveFinancialReport(activeTab, gridData, currentYear);
+
 
         const now = new Date();
         setLastSavedAt(now);
@@ -304,7 +326,9 @@ const createBlankGrid = () => {
   const handleManualSave = async () => {
     try {
       setSavingStatus(true);
-      await saveFinancialReport(activeTab, gridData);
+      // await saveFinancialReport(activeTab, gridData);
+await saveFinancialReport(activeTab, gridData, currentYear);
+
 
       const now = new Date();
       setLastSavedAt(now);
@@ -331,7 +355,12 @@ const createBlankGrid = () => {
       setShowManualLoadConfirm(false);
       setSavingStatus(true);
 
-      const { gridData, updatedAt } = await loadFinancialReport(activeTab);
+      // const { gridData, updatedAt } = await loadFinancialReport(activeTab);
+
+      const { gridData, updatedAt } = await loadFinancialReport(activeTab, currentYear);
+
+
+
       setGridData(gridData);
       setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
 
