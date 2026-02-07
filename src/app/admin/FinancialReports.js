@@ -1101,14 +1101,15 @@ const cleanAndReorderRows = (rows) => {
   }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab]);
 
   useEffect(() => {
-    console.log(`🧾 ${activeTab.toUpperCase()} GRID UPDATED:`);
-    // Only show October (index 9) and November (index 10)
+    console.log(`🧾 ${activeTab.toUpperCase()} GRID - Year ${currentYear}:`);
+    // Only show January (index 0)
     Object.entries(gridData)
-      .filter(([monthIndex]) => monthIndex === "11")
+      .filter(([monthIndex]) => monthIndex === "0")
       .forEach(([monthIndex, rows]) => {
-        console.log(`Month ${months[monthIndex]}:`, rows);
+        console.log(`${months[monthIndex]} ${currentYear}:`, rows);
       });
-  }, [gridData, activeTab]);
+  }, [gridData, activeTab, currentYear]);
+
 
   // Format properly on blur
   const handleAmountBlur = (monthIndex, rowIndex, colIndex, value) => {

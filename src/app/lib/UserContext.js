@@ -5606,86 +5606,130 @@ Please ensure follow-ups and updates for the customer.`,
 // Example: users/xxx/financialReports/revenue/2026/gridData
 
 const saveFinancialReport = async (type, gridData, year) => {
-  if (!adminUid || !type) return;
+  console.log("saveFinancialReport called:", { type, year, adminUid });
 
-  const reportYear = year || new Date().getFullYear().toString();
-  const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
+  if (!adminUid || !type || !db) {
+    console.warn("Early return - missing params");
+    return;
+  }
 
-  // Convert object format to Firestore-compatible format
-  const firestoreData = {};
+  const reportYear = `${year || new Date().getFullYear()}`;
   
-  Object.keys(gridData).forEach((monthKey) => {
-    const monthRows = gridData[monthKey];
-    firestoreData[monthKey] = {};
+  try {
+    console.log("Creating docRef...");
+    const docPath = `users/${adminUid}/financialReports/${type}/${reportYear}/gridData`;
+    console.log("Doc path:", docPath);
     
-    // monthRows is now an object { Row_0: [], Row_1: [], ... }
-    Object.keys(monthRows).forEach((rowKey) => {
-      const row = monthRows[rowKey];
-      firestoreData[monthKey][rowKey] = Array.isArray(row) ? row : [];
+    const docRef = doc(db, docPath);
+    console.log("docRef created:", docRef);
+    
+    // Convert object format to Firestore-compatible format
+    const firestoreData = {};
+    
+    Object.keys(gridData).forEach((monthKey) => {
+      const monthRows = gridData[monthKey];
+      firestoreData[monthKey] = {};
+      
+      Object.keys(monthRows).forEach((rowKey) => {
+        const row = monthRows[rowKey];
+        firestoreData[monthKey][rowKey] = Array.isArray(row) ? row : [];
+      });
     });
-  });
 
-  await setDoc(docRef, {
-    gridData: firestoreData,
-    updatedAt: serverTimestamp(),
-  });
+    await setDoc(docRef, {
+      gridData: firestoreData,
+      updatedAt: serverTimestamp(),
+    });
+    console.log("✅ Saved successfully");
+  } catch (err) {
+    console.error("ERROR in saveFinancialReport:", err);
+    console.error("Error name:", err.name);
+    console.error("Error message:", err.message);
+  }
 };
+
+
 
 
 
 const loadFinancialReport = async (type, year) => {
-  console.log("LOAD FINANCIAL REPORT INPUTS:", {
-    type,
-    year,
-    adminUid,
-    adminUidType: typeof adminUid,
-    dbExists: !!db,
-    dbType: typeof db
-  });
+  console.log("LOAD FINANCIAL REPORT INPUTS:", { type, year, adminUid });
   
   if (!adminUid || !type || !db) {
-    console.log("RETURNING EARLY due to missing params");
     return { gridData: {} };
   }
 
-  const reportYear = year || new Date().getFullYear().toString();
-  const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
-  const docSnap = await getDoc(docRef);  // ← Use docRef here
-
-  if (docSnap.exists()) {
-    const firestoreData = docSnap.data().gridData || {};
+  const reportYear = `${year || new Date().getFullYear()}`;
+  
+  console.log("About to create docRef with:", {
+    segment1: "users",
+    segment2: adminUid,
+    segment3: "financialReports",
+    segment4: type,
+    segment5: reportYear,
+    segment6: "gridData"
+  });
+  
+  try {
+    const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
+    console.log("docRef created successfully:", docRef);
+    const docSnap = await getDoc(docRef);
+    console.log("getDoc completed, exists:", docSnap.exists());
     
-    // Convert object format back to nested arrays
-    const gridData = {};
-    
-    Object.keys(firestoreData).forEach((monthKey) => {
-      const monthData = firestoreData[monthKey];
-      gridData[monthKey] = [];
+    if (docSnap.exists()) {
+      const firestoreData = docSnap.data().gridData || {};
       
-      Object.keys(monthData).forEach((rowKey) => {
-        gridData[monthKey].push(monthData[rowKey]);
+      // Convert object format back to UI format
+      const gridData = {};
+      
+      Object.keys(firestoreData).forEach((monthKey) => {
+        const monthData = firestoreData[monthKey];
+        gridData[monthKey] = {};
+        
+        Object.keys(monthData).forEach((rowKey) => {
+          gridData[monthKey][rowKey] = monthData[rowKey];
+        });
       });
-    });
 
-    return {
-      gridData,
-      updatedAt: docSnap.data().updatedAt,
-    };
-  }
+      console.log("✅ Loaded gridData:", gridData);
+      return { gridData, updatedAt: docSnap.data().updatedAt };
+    }
 
-  // Return blank grid with object format
-  const blankGrid = {};
-  for (let i = 0; i < 12; i++) {
-    blankGrid[i] = {
-      Row_0: ["", "", "", "", ""],
-      Row_1: ["", "", "", "", ""],
-      Row_2: ["", "", "", "", ""],
-      Row_3: ["", "", "", "", ""],
-      Row_4: ["", "", "", "", ""],
-    };
+    // Return blank grid
+    console.log("No existing data, returning blank grid");
+    const blankGrid = {};
+    for (let i = 0; i < 12; i++) {
+      blankGrid[i] = {
+        Row_0: ["", "", "", "", ""],
+        Row_1: ["", "", "", "", ""],
+        Row_2: ["", "", "", "", ""],
+        Row_3: ["", "", "", "", ""],
+        Row_4: ["", "", "", "", ""],
+      };
+    }
+    return { gridData: blankGrid };
+  } catch (err) {
+    console.error("ERROR in loadFinancialReport:", err);
+    console.error("Error name:", err.name);
+    console.error("Error message:", err.message);
+    console.error("Error code:", err.code);
+    
+    // Return blank grid on error
+    const blankGrid = {};
+    for (let i = 0; i < 12; i++) {
+      blankGrid[i] = {
+        Row_0: ["", "", "", "", ""],
+        Row_1: ["", "", "", "", ""],
+        Row_2: ["", "", "", "", ""],
+        Row_3: ["", "", "", "", ""],
+        Row_4: ["", "", "", "", ""],
+      };
+    }
+    return { gridData: blankGrid };
   }
-  return { gridData: blankGrid };
 };
+
+
 
 
 
