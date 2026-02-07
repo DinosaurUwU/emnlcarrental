@@ -1109,6 +1109,7 @@ const cleanAndReorderRows = (rows) => {
 
   };
 
+
   
   // When user focuses on amount field
   const handleAmountFocus = (monthIndex, rowIndex, colIndex, value) => {
