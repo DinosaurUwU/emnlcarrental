@@ -5602,20 +5602,34 @@ Please ensure follow-ups and updates for the customer.`,
 
 
 
+// Use: users/{adminUid}/financialReports/{type}/{year}/gridData
+// Example: users/xxx/financialReports/revenue/2026/gridData
 
 const saveFinancialReport = async (type, gridData) => {
   if (!adminUid) return;
 
   const year = new Date().getFullYear().toString();
-  // Save under admin's user document: users/{uid}/financialReports/{type}/{year}
-  const docRef = doc(db, "users", adminUid, "financialReports", type, year);
+  const docRef = doc(db, "users", adminUid, "financialReports", type, year, "gridData");
+
+  // Convert object format to Firestore-compatible format
+  const firestoreData = {};
+  
+  Object.keys(gridData).forEach((monthKey) => {
+    const monthRows = gridData[monthKey];
+    firestoreData[monthKey] = {};
+    
+    // monthRows is now an object { Row_0: [], Row_1: [], ... }
+    Object.keys(monthRows).forEach((rowKey) => {
+      const row = monthRows[rowKey];
+      firestoreData[monthKey][rowKey] = Array.isArray(row) ? row : [];
+    });
+  });
 
   await setDoc(docRef, {
-    gridData,
+    gridData: firestoreData,
     updatedAt: serverTimestamp(),
   });
 };
-
 
 
 
@@ -5623,28 +5637,48 @@ const loadFinancialReport = async (type) => {
   if (!adminUid) return { gridData: {} };
 
   const year = new Date().getFullYear().toString();
-  const docRef = doc(db, "users", adminUid, "financialReports", type, year);
-  const docSnap = await getDoc(docRef);
+  const docRef = doc(db, "users", adminUid, "financialReports", type, year, "gridData");
+  const docSnap = await getDoc(docRef);  // ← Use docRef here
 
   if (docSnap.exists()) {
+    const firestoreData = docSnap.data().gridData || {};
+    
+    // Convert object format back to nested arrays
+    const gridData = {};
+    
+    Object.keys(firestoreData).forEach((monthKey) => {
+      const monthData = firestoreData[monthKey];
+      gridData[monthKey] = [];
+      
+      Object.keys(monthData).forEach((rowKey) => {
+        gridData[monthKey].push(monthData[rowKey]);
+      });
+    });
+
     return {
-      gridData: docSnap.data().gridData || {},
+      gridData,
       updatedAt: docSnap.data().updatedAt,
     };
   }
 
-  // Return blank grid if no data
-  const months = [
-    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
-  ];
+  // Return blank grid with object format
   const blankGrid = {};
-  months.forEach((_, i) => {
-    blankGrid[i] = Array(5).fill().map(() => Array(5).fill(""));
-  });
-
+  for (let i = 0; i < 12; i++) {
+    blankGrid[i] = {
+      Row_0: ["", "", "", "", ""],
+      Row_1: ["", "", "", "", ""],
+      Row_2: ["", "", "", "", ""],
+      Row_3: ["", "", "", "", ""],
+      Row_4: ["", "", "", "", ""],
+    };
+  }
   return { gridData: blankGrid };
 };
+
+
+
+
+
 
 
 

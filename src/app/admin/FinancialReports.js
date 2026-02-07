@@ -257,17 +257,21 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
   //   return blank;
   // };
 
-// CHANGE TO:
 const createBlankGrid = () => {
   const blank = {};
   for (let i = 0; i < 12; i++) {
-    blank[i] = {};
-    for (let j = 0; j < 5; j++) {
-      blank[i][`Row ${j}`] = Array(10).fill("");
-    }
+    blank[i] = {
+      Row_0: ["", "", "", "", ""],
+      Row_1: ["", "", "", "", ""],
+      Row_2: ["", "", "", "", ""],
+      Row_3: ["", "", "", "", ""],
+      Row_4: ["", "", "", "", ""],
+    };
   }
   return blank;
 };
+
+
 
 
 
@@ -344,13 +348,21 @@ const createBlankGrid = () => {
     }
   };
 
+  // const applySorting = (monthIndex) => {
+  //   setGridData((prev) => {
+  //     const updated = { ...prev };
+  //     updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || []);
+  //     return updated;
+  //   });
+  // };
+
   const applySorting = (monthIndex) => {
-    setGridData((prev) => {
-      const updated = { ...prev };
-      updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || []);
-      return updated;
-    });
-  };
+  setGridData((prev) => {
+    const updated = { ...prev };
+    updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
+    return updated;
+  });
+};
 
   // Handles typing in cells (SAFE VERSION)
 //   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
@@ -443,15 +455,14 @@ const createBlankGrid = () => {
 
 const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
   let newValue = value;
-  const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
 
-  // AMOUNT COLUMN — keep ₱ visible at all times
+  // AMOUNT COLUMN
   if (colIndex === 1) {
     const numeric = value.replace(/[^0-9.]/g, "");
     newValue = `₱${numeric}`;
   }
 
-  // DATE COLUMN — store raw ISO-like value (from datetime-local)
+  // DATE COLUMN
   if (colIndex === 4) {
     newValue = value;
   }
@@ -459,47 +470,54 @@ const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
   setGridData((prev) => {
     const updated = { ...prev };
 
-    // Ensure month data exists
-    if (!updated[monthIndex]) {
+    // Ensure month exists
+    if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
       updated[monthIndex] = {};
     }
 
-    // Create row key (Row 0, Row 1, etc.)
-    const rowKey = `Row ${rowIndex}`;
+    // Use Row_0, Row_1, etc. format
+    const rowKey = `Row_${rowIndex}`;
 
     // Get current row or create new one
     const currentRow = updated[monthIndex][rowKey]
       ? [...updated[monthIndex][rowKey]]
-      : Array(10).fill("");
+      : ["", "", "", "", ""];
 
-    // preserve or create metadata with suffix
+    // Metadata
     const meta = {
-      [`_sourceType${suffix}`]: updated[monthIndex][rowKey]?.[`_sourceType${suffix}`] || "manual",
-      [`_bookingId${suffix}`]: updated[monthIndex][rowKey]?.[`_bookingId${suffix}`] || null,
-      [`_isAutoFill${suffix}`]: updated[monthIndex][rowKey]?.[`_isAutoFill${suffix}`] || false,
-      [`_entryIndex${suffix}`]: updated[monthIndex][rowKey]?.[`_entryIndex${suffix}`] ?? null,
-      [`_manualId${suffix}`]: updated[monthIndex][rowKey]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
+      _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
+      _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
+      _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
+      _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
+      _manualId: updated[monthIndex][rowKey]?._manualId || `manual-${crypto.randomUUID()}`,
     };
 
-    // manual rows NEVER get bookingId accidentally
-    if (meta[`_sourceType${suffix}`] === "manual") {
-      meta[`_bookingId${suffix}`] = null;
-      meta[`_isAutoFill${suffix}`] = false;
-      meta[`_entryIndex${suffix}`] = null;
+    if (meta._sourceType === "manual") {
+      meta._bookingId = null;
+      meta._isAutoFill = false;
+      meta._entryIndex = null;
     }
 
-    // apply typed change
+    // Apply change
     currentRow[colIndex] = newValue;
 
-    // reattach metadata
+    // Reattach metadata
     Object.assign(currentRow, meta);
 
-    // put cloned row back
+    // Put row back
     updated[monthIndex][rowKey] = currentRow;
 
     return updated;
   });
+
+  setIsSynced(false);
+
+  if (colIndex === 4) {
+    setTimeout(() => applySorting(monthIndex), 0);
+  }
 };
+
+
 
 
 
@@ -556,57 +574,60 @@ const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
 
 // CHANGE TO:
 
+// CHANGE FROM:
+const cleanAndReorderRows = (rows) => {
+  if (!Array.isArray(rows)) return rows;
+  // ... rest of function using rows.forEach
+};
+
+// TO:
 const cleanAndReorderRows = (rows) => {
   if (!rows || typeof rows !== "object") return {};
+  
+  // Convert object to array for processing
+  const rowsArray = Object.keys(rows).map((key) => ({
+    key,
+    data: rows[key],
+  }));
 
-  const filledRows = {};
-  const emptyRows = {};
+  const filledRows = [];
+  const emptyRows = [];
 
-  Object.keys(rows).forEach((key) => {
-    const row = rows[key];
-    // Check if row has data (excluding metadata fields)
-    const hasData = Object.keys(row || {}).some((k) => {
-      const val = row[k];
-      // Skip metadata keys and empty values
-      return !k.startsWith("_") && val !== "" && val !== null && val !== undefined;
-    });
-
-    if (hasData) {
-      filledRows[key] = row;
+  rowsArray.forEach(({ data }) => {
+    if (!data || !Array.isArray(data)) return;
+    if (data.some((c) => c !== "" && c !== null && c !== undefined)) {
+      filledRows.push(data);
     } else {
-      emptyRows[key] = row;
+      emptyRows.push(data);
     }
   });
 
   // Sort filled rows by date
-  const sortedKeys = Object.keys(filledRows).sort((a, b) => {
-    const dateA = filledRows[a]?.[4] || "";
-    const dateB = filledRows[b]?.[4] || "";
-    const da = new Date(dateA).getTime();
-    const db = new Date(dateB).getTime();
+  filledRows.sort((a, b) => {
+    const da = new Date(a[4] || "").getTime();
+    const db = new Date(b[4] || "").getTime();
     return sortDirection === "asc" ? da - db : db - da;
   });
 
-  const output = {};
-  sortedKeys.forEach((key) => {
-    output[key] = filledRows[key];
+  // Reconstruct as object
+  const result = {};
+  filledRows.forEach((row, idx) => {
+    result[`Row_${idx}`] = row;
   });
-
-  // Add empty rows
-  Object.keys(emptyRows).forEach((key) => {
-    output[key] = emptyRows[key];
+  emptyRows.forEach((row, idx) => {
+    result[`Row_${filledRows.length + idx}`] = row;
   });
 
   // Ensure we have 5 rows
   for (let i = 0; i < 5; i++) {
-    const rowKey = `Row ${i}`;
-    if (!output[rowKey]) {
-      output[rowKey] = Array(10).fill("");
+    if (!result[`Row_${i}`]) {
+      result[`Row_${i}`] = ["", "", "", "", ""];
     }
   }
 
-  return output;
+  return result;
 };
+
 
 
 
@@ -1184,6 +1205,16 @@ const addRow = (monthIndex) => {
   setShowFinancialWarning(false);
   setFinancialWarningMessage("");
 };
+
+// Add this near the top of FinancialReports.js, after the imports
+const ensureArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "object" && value !== null) {
+    return Object.values(value);
+  }
+  return Array(5).fill("");
+};
+
 
 
   return (
@@ -2035,31 +2066,39 @@ const addRow = (monthIndex) => {
               {visibleMonths.map((month, index) => {
                 const monthIndex = months.indexOf(month);
 
-                // Extract current month's rows
-                let entries = gridData[monthIndex] || [];
+// Get current month's rows as array
+let entries = gridData[monthIndex] || [];
 
-while (entries.length < 5) {
-  entries.push(Array(5).fill(""));
+// Ensure it's an array
+if (!Array.isArray(entries)) {
+  entries = Object.values(entries);
 }
 
-                // Apply Date Sort with original index tracking
-                if (sortMode === "date") {
-                  entries = entries
-                    .map((row, idx) => ({ row, originalIndex: idx }))
-                    .sort((a, b) => {
-                      const da = new Date(a.row[4]).getTime();
-                      const db = new Date(b.row[4]).getTime();
-                      return sortDirection === "asc" ? da - db : db - da;
-                    });
-                } else {
-                  entries = entries.map((row, idx) => ({
-                    row,
-                    originalIndex: idx,
-                  }));
+// Apply sorting
+if (sortMode === "date") {
+  entries = entries
+    .map((row, idx) => ({ row, originalIndex: idx }))
+    .sort((a, b) => {
+      const da = new Date(a.row[4] || "").getTime();
+      const db = new Date(b.row[4] || "").getTime();
+      return sortDirection === "asc" ? da - db : db - da;
+    });
+} else {
+  entries = entries.map((row, idx) => ({
+    row,
+    originalIndex: idx,
+  }));
+}
+
+// Ensure we have at least 5 entries
+while (entries.length < 5) {
+  entries.push({
+    row: Array(5).fill(""),
+    originalIndex: entries.length,
+  });
+}
 
 
-                  
-                }
 
                 return (
                   <div
@@ -2291,8 +2330,12 @@ while (entries.length < 5) {
                           {/* {entries.map((entry, sortedIndex) => {
                             const { row, originalIndex } = entry; */}
 
-                            {entries.map((row, sortedIndex) => {
-  const originalIndex = sortedIndex;
+                            {
+                            
+                            
+entries.map((item, sortedIndex) => {
+  const row = item.row;
+  const originalIndex = item.originalIndex;
 
                             return (
                               <div
@@ -2392,7 +2435,15 @@ while (entries.length < 5) {
                                   <span>{sortedIndex + 1}</span>
                                 </div>
 
-                                {row.map((cell, colIndex) => {
+                                {/* {row.map((cell, colIndex) => { */}
+
+
+                                  {Array.isArray(row) ? (
+  row.map((cell, colIndex) => {
+
+
+
+
                                   // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
                                   const isAutoFill = row._isAutoFill === true;
 
@@ -2640,7 +2691,10 @@ while (entries.length < 5) {
                                       );
                                     }
                                   }
-                                })}
+                                })
+) : (
+  <div className="empty-row">No data</div>
+)}
                               </div>
                             );
                           })}
