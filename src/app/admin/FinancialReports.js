@@ -572,13 +572,11 @@ const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
 //     return output;
 //   };
 
-// CHANGE TO:
 
-// CHANGE FROM:
-const cleanAndReorderRows = (rows) => {
-  if (!Array.isArray(rows)) return rows;
-  // ... rest of function using rows.forEach
-};
+
+
+
+
 
 // TO:
 const cleanAndReorderRows = (rows) => {
@@ -1092,27 +1090,45 @@ const cleanAndReorderRows = (rows) => {
           })}`
         : "₱0.00";
 
-    setGridData((prev) => ({
-      ...prev,
-      [monthIndex]: prev[monthIndex].map((row, r) =>
-        r === rowIndex
-          ? row.map((cell, c) => (c === colIndex ? formatted : cell))
-          : row,
-      ),
-    }));
+      setGridData((prev) => {
+        const monthData = prev[monthIndex] || {};
+        const rowKey = `Row_${rowIndex}`;
+        const currentRow = monthData[rowKey] || ["", "", "", "", ""];
+        const updatedRow = currentRow.map((cell, c) =>
+          c === colIndex ? value : cell,
+        );
+
+        return {
+          ...prev,
+          [monthIndex]: {
+            ...monthData,
+            [rowKey]: updatedRow,
+          },
+        };
+      });
+
   };
 
   // When user focuses on amount field
   const handleAmountFocus = (monthIndex, rowIndex, colIndex, value) => {
     if (value === "₱0.00") {
-      setGridData((prev) => ({
-        ...prev,
-        [monthIndex]: prev[monthIndex].map((row, r) =>
-          r === rowIndex
-            ? row.map((cell, c) => (c === colIndex ? "₱" : cell))
-            : row,
-        ),
-      }));
+        setGridData((prev) => {
+          const monthData = prev[monthIndex] || {};
+          const rowKey = `Row_${rowIndex}`;
+          const currentRow = monthData[rowKey] || ["", "", "", "", ""];
+          const updatedRow = currentRow.map((cell, c) =>
+            c === colIndex ? "₱" : cell,
+          );
+
+          return {
+            ...prev,
+            [monthIndex]: {
+              ...monthData,
+              [rowKey]: updatedRow,
+            },
+          };
+        });
+
     }
   };
 
@@ -2829,7 +2845,8 @@ setGridData((prev) => {
 
                   // Collect from revenue grid
                   Object.values(revenueGrid).forEach((monthRows) => {
-                    monthRows.forEach((row) => {
+  Object.values(monthRows).forEach((row) => {
+
                       if (
                         row &&
                         Array.isArray(row) &&
@@ -2853,7 +2870,8 @@ setGridData((prev) => {
 
                   // Collect from expense grid
                   Object.values(expenseGrid).forEach((monthRows) => {
-                    monthRows.forEach((row) => {
+  Object.values(monthRows).forEach((row) => {
+
                       if (
                         row &&
                         Array.isArray(row) &&
