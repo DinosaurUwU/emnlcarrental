@@ -1110,7 +1110,7 @@ const cleanAndReorderRows = (rows) => {
   };
 
 
-  
+
   // When user focuses on amount field
   const handleAmountFocus = (monthIndex, rowIndex, colIndex, value) => {
     if (value === "₱0.00") {
