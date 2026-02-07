@@ -247,15 +247,29 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
   }, [gridData, activeTab]);
 
   // Helper to build a blank grid
-  const createBlankGrid = () => {
-    const blank = {};
-    months.forEach((_, i) => {
-      blank[i] = Array(5)
-        .fill()
-        .map(() => Array(5).fill(""));
-    });
-    return blank;
-  };
+  // const createBlankGrid = () => {
+  //   const blank = {};
+  //   months.forEach((_, i) => {
+  //     blank[i] = Array(5)
+  //       .fill()
+  //       .map(() => Array(5).fill(""));
+  //   });
+  //   return blank;
+  // };
+
+// CHANGE TO:
+const createBlankGrid = () => {
+  const blank = {};
+  for (let i = 0; i < 12; i++) {
+    blank[i] = {};
+    for (let j = 0; j < 5; j++) {
+      blank[i][`Row ${j}`] = Array(10).fill("");
+    }
+  }
+  return blank;
+};
+
+
 
   useEffect(() => {
     if (!gridData) return;
@@ -339,142 +353,264 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
   };
 
   // Handles typing in cells (SAFE VERSION)
-  const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-    let newValue = value;
+//   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+//     let newValue = value;
 
-    // AMOUNT COLUMN — keep ₱ visible at all times
-    if (colIndex === 1) {
-      const numeric = value.replace(/[^0-9.]/g, "");
-      newValue = `₱${numeric}`;
+//     // AMOUNT COLUMN — keep ₱ visible at all times
+//     if (colIndex === 1) {
+//       const numeric = value.replace(/[^0-9.]/g, "");
+//       newValue = `₱${numeric}`;
+//     }
+
+//     // DATE COLUMN — store raw ISO-like value (from datetime-local)
+//     if (colIndex === 4) {
+//       newValue = value;
+//     }
+
+//     setGridData((prev) => {
+//       const updated = { ...prev };
+
+//       // ensure monthRows exists
+//       const monthRows = Array.isArray(updated[monthIndex])
+//         ? [...updated[monthIndex]]
+//         : Array(5)
+//             .fill()
+//             .map(() => Array(5).fill(""));
+
+//       // clone the row safely (if missing create a row skeleton)
+//       const currentRow = Array.isArray(monthRows[rowIndex])
+//         ? [...monthRows[rowIndex]]
+//         : Array(5).fill("");
+
+//       // preserve or create metadata
+
+
+
+// const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
+// const meta = {
+//   [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
+//   [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
+//   [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
+//   [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
+//   [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
+// };
+
+
+
+//       // const meta = {
+//       //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
+//       //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
+//       //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
+//       //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
+//       //   // stable manual id so React key doesn't change
+//       //   _manualId:
+//       //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
+//       // };
+
+
+
+
+//       // manual rows NEVER get bookingId accidentally
+//       if (meta._sourceType === "manual") {
+//         meta._bookingId = null;
+//         meta._isAutoFill = false;
+//         meta._entryIndex = null;
+//       }
+
+//       // apply typed change
+//       currentRow[colIndex] = newValue;
+
+//       // reattach metadata
+//       Object.assign(currentRow, meta);
+
+//       // put cloned row back
+//       monthRows[rowIndex] = currentRow;
+//       updated[monthIndex] = monthRows;
+
+//       return updated;
+//     });
+
+//     setIsSynced(false);
+
+//     // If user edited a date (colIndex === 4) we want to re-apply sorting.
+//     // Wait a tick (non-blocking) so state commit finishes, then run sorting.
+//     if (colIndex === 4) {
+//       // schedule on next tick so updated state is applied
+//       setTimeout(() => applySorting(monthIndex), 0);
+//     }
+//   };
+
+
+const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+  let newValue = value;
+  const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
+
+  // AMOUNT COLUMN — keep ₱ visible at all times
+  if (colIndex === 1) {
+    const numeric = value.replace(/[^0-9.]/g, "");
+    newValue = `₱${numeric}`;
+  }
+
+  // DATE COLUMN — store raw ISO-like value (from datetime-local)
+  if (colIndex === 4) {
+    newValue = value;
+  }
+
+  setGridData((prev) => {
+    const updated = { ...prev };
+
+    // Ensure month data exists
+    if (!updated[monthIndex]) {
+      updated[monthIndex] = {};
     }
 
-    // DATE COLUMN — store raw ISO-like value (from datetime-local)
-    if (colIndex === 4) {
-      newValue = value;
+    // Create row key (Row 0, Row 1, etc.)
+    const rowKey = `Row ${rowIndex}`;
+
+    // Get current row or create new one
+    const currentRow = updated[monthIndex][rowKey]
+      ? [...updated[monthIndex][rowKey]]
+      : Array(10).fill("");
+
+    // preserve or create metadata with suffix
+    const meta = {
+      [`_sourceType${suffix}`]: updated[monthIndex][rowKey]?.[`_sourceType${suffix}`] || "manual",
+      [`_bookingId${suffix}`]: updated[monthIndex][rowKey]?.[`_bookingId${suffix}`] || null,
+      [`_isAutoFill${suffix}`]: updated[monthIndex][rowKey]?.[`_isAutoFill${suffix}`] || false,
+      [`_entryIndex${suffix}`]: updated[monthIndex][rowKey]?.[`_entryIndex${suffix}`] ?? null,
+      [`_manualId${suffix}`]: updated[monthIndex][rowKey]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
+    };
+
+    // manual rows NEVER get bookingId accidentally
+    if (meta[`_sourceType${suffix}`] === "manual") {
+      meta[`_bookingId${suffix}`] = null;
+      meta[`_isAutoFill${suffix}`] = false;
+      meta[`_entryIndex${suffix}`] = null;
     }
 
-    setGridData((prev) => {
-      const updated = { ...prev };
+    // apply typed change
+    currentRow[colIndex] = newValue;
 
-      // ensure monthRows exists
-      const monthRows = Array.isArray(updated[monthIndex])
-        ? [...updated[monthIndex]]
-        : Array(5)
-            .fill()
-            .map(() => Array(5).fill(""));
+    // reattach metadata
+    Object.assign(currentRow, meta);
 
-      // clone the row safely (if missing create a row skeleton)
-      const currentRow = Array.isArray(monthRows[rowIndex])
-        ? [...monthRows[rowIndex]]
-        : Array(5).fill("");
+    // put cloned row back
+    updated[monthIndex][rowKey] = currentRow;
 
-      // preserve or create metadata
-
-
-
-const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-const meta = {
-  [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
-  [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
-  [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
-  [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
-  [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
+    return updated;
+  });
 };
 
 
 
-      // const meta = {
-      //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
-      //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
-      //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
-      //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
-      //   // stable manual id so React key doesn't change
-      //   _manualId:
-      //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
-      // };
+
+//   const cleanAndReorderRows = (rows) => {
+//     if (!Array.isArray(rows)) return rows;
+
+//     const filledRows = [];
+//     const emptyRows = [];
+
+//     // rows.forEach((row) => {
+//     //   if (!row || !Array.isArray(row)) return;
+//     //   if (row.every((c) => c === "")) emptyRows.push(row);
+//     //   else filledRows.push(row);
+//     // });
 
 
 
+//     const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
 
-      // manual rows NEVER get bookingId accidentally
-      if (meta._sourceType === "manual") {
-        meta._bookingId = null;
-        meta._isAutoFill = false;
-        meta._entryIndex = null;
-      }
+// rows.forEach((row) => {
+//   if (!row || !Array.isArray(row)) return;
+  
+//   // Check if row has data (excluding metadata)
+//   const hasData = Object.keys(row).some((key) => {
+//     const val = row[key];
+//     return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
+//   });
+  
+//   if (!hasData) {
+//     emptyRows.push(row);
+//   } else {
+//     filledRows.push(row);
+//   }
+// });
 
-      // apply typed change
-      currentRow[colIndex] = newValue;
 
-      // reattach metadata
-      Object.assign(currentRow, meta);
 
-      // put cloned row back
-      monthRows[rowIndex] = currentRow;
-      updated[monthIndex] = monthRows;
+//     // Sort filled rows by date
+//     filledRows.sort((a, b) => {
+//       const da = new Date(a[4]).getTime();
+//       const db = new Date(b[4]).getTime();
+//       return sortDirection === "asc" ? da - db : db - da;
+//     });
 
-      return updated;
+//     const output = [...filledRows, ...emptyRows];
+
+//     while (output.length < 5) {
+//       output.push(Array(5).fill(""));
+//     }
+
+//     return output;
+//   };
+
+// CHANGE TO:
+
+const cleanAndReorderRows = (rows) => {
+  if (!rows || typeof rows !== "object") return {};
+
+  const filledRows = {};
+  const emptyRows = {};
+
+  Object.keys(rows).forEach((key) => {
+    const row = rows[key];
+    // Check if row has data (excluding metadata fields)
+    const hasData = Object.keys(row || {}).some((k) => {
+      const val = row[k];
+      // Skip metadata keys and empty values
+      return !k.startsWith("_") && val !== "" && val !== null && val !== undefined;
     });
 
-    setIsSynced(false);
-
-    // If user edited a date (colIndex === 4) we want to re-apply sorting.
-    // Wait a tick (non-blocking) so state commit finishes, then run sorting.
-    if (colIndex === 4) {
-      // schedule on next tick so updated state is applied
-      setTimeout(() => applySorting(monthIndex), 0);
+    if (hasData) {
+      filledRows[key] = row;
+    } else {
+      emptyRows[key] = row;
     }
-  };
-
-  const cleanAndReorderRows = (rows) => {
-    if (!Array.isArray(rows)) return rows;
-
-    const filledRows = [];
-    const emptyRows = [];
-
-    // rows.forEach((row) => {
-    //   if (!row || !Array.isArray(row)) return;
-    //   if (row.every((c) => c === "")) emptyRows.push(row);
-    //   else filledRows.push(row);
-    // });
-
-
-
-    const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-
-rows.forEach((row) => {
-  if (!row || !Array.isArray(row)) return;
-  
-  // Check if row has data (excluding metadata)
-  const hasData = Object.keys(row).some((key) => {
-    const val = row[key];
-    return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
   });
-  
-  if (!hasData) {
-    emptyRows.push(row);
-  } else {
-    filledRows.push(row);
-  }
-});
 
+  // Sort filled rows by date
+  const sortedKeys = Object.keys(filledRows).sort((a, b) => {
+    const dateA = filledRows[a]?.[4] || "";
+    const dateB = filledRows[b]?.[4] || "";
+    const da = new Date(dateA).getTime();
+    const db = new Date(dateB).getTime();
+    return sortDirection === "asc" ? da - db : db - da;
+  });
 
+  const output = {};
+  sortedKeys.forEach((key) => {
+    output[key] = filledRows[key];
+  });
 
-    // Sort filled rows by date
-    filledRows.sort((a, b) => {
-      const da = new Date(a[4]).getTime();
-      const db = new Date(b[4]).getTime();
-      return sortDirection === "asc" ? da - db : db - da;
-    });
+  // Add empty rows
+  Object.keys(emptyRows).forEach((key) => {
+    output[key] = emptyRows[key];
+  });
 
-    const output = [...filledRows, ...emptyRows];
-
-    while (output.length < 5) {
-      output.push(Array(5).fill(""));
+  // Ensure we have 5 rows
+  for (let i = 0; i < 5; i++) {
+    const rowKey = `Row ${i}`;
+    if (!output[rowKey]) {
+      output[rowKey] = Array(10).fill("");
     }
+  }
 
-    return output;
-  };
+  return output;
+};
+
+
+
+
 
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
@@ -959,12 +1095,35 @@ rows.forEach((row) => {
     }
   };
 
-  const addRow = (monthIndex) => {
-    setGridData((prev) => ({
-      ...prev,
-      [monthIndex]: [...prev[monthIndex], Array(5).fill("")],
-    }));
-  };
+  // const addRow = (monthIndex) => {
+  //   setGridData((prev) => ({
+  //     ...prev,
+  //     [monthIndex]: [...prev[monthIndex], Array(5).fill("")],
+  //   }));
+  // };
+
+// CHANGE TO:
+const addRow = (monthIndex) => {
+  setGridData((prev) => {
+    const updated = { ...prev };
+    const monthRows = [...(updated[monthIndex] || [])];
+
+    // Add 3 new empty rows
+    for (let i = 0; i < 3; i++) {
+      monthRows.push(Array(5).fill(""));
+    }
+
+    // Limit to max 50 rows
+    if (monthRows.length > 50) {
+      alert("Maximum of 50 rows per month reached.");
+      return prev;
+    }
+
+    updated[monthIndex] = monthRows;
+    return updated;
+  });
+};
+
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
@@ -1879,6 +2038,10 @@ rows.forEach((row) => {
                 // Extract current month's rows
                 let entries = gridData[monthIndex] || [];
 
+while (entries.length < 5) {
+  entries.push(Array(5).fill(""));
+}
+
                 // Apply Date Sort with original index tracking
                 if (sortMode === "date") {
                   entries = entries
@@ -1893,6 +2056,9 @@ rows.forEach((row) => {
                     row,
                     originalIndex: idx,
                   }));
+
+
+                  
                 }
 
                 return (
@@ -2122,8 +2288,12 @@ rows.forEach((row) => {
                           className="grid-scrollable"
                           style={{ backgroundColor: background }}
                         >
-                          {entries.map((entry, sortedIndex) => {
-                            const { row, originalIndex } = entry;
+                          {/* {entries.map((entry, sortedIndex) => {
+                            const { row, originalIndex } = entry; */}
+
+                            {entries.map((row, sortedIndex) => {
+  const originalIndex = sortedIndex;
+
                             return (
                               <div
                                 key={`${monthIndex}-${originalIndex}-${row._isAutoFill ? `${row._bookingId}-${row._entryIndex}` : row._manualId || `manual-${originalIndex}`}`}
@@ -2493,32 +2663,58 @@ rows.forEach((row) => {
       return;
     }
 
-                            setGridData((prev) => {
-                              const newGrid = { ...prev };
-                              const monthRows = [...newGrid[monthIndex]];
+                            // setGridData((prev) => {
+                            //   const newGrid = { ...prev };
+                            //   const monthRows = [...newGrid[monthIndex]];
 
-                              selectedRows.forEach((r) => {
-                                if (monthRows.length <= 5) {
-                                  // Just clear the row if grid has 5 or fewer
-                                  monthRows[r] = Array(
-                                    monthRows[r].length,
-                                  ).fill("");
-                                } else {
-                                  // Remove if there are extra rows
-                                  monthRows[r] = null;
-                                }
-                              });
+                            //   selectedRows.forEach((r) => {
+                            //     if (monthRows.length <= 5) {
+                            //       // Just clear the row if grid has 5 or fewer
+                            //       monthRows[r] = Array(
+                            //         monthRows[r].length,
+                            //       ).fill("");
+                            //     } else {
+                            //       // Remove if there are extra rows
+                            //       monthRows[r] = null;
+                            //     }
+                            //   });
 
-                              // Filter out removed rows
-                              newGrid[monthIndex] = monthRows.filter(Boolean);
+                            //   // Filter out removed rows
+                            //   newGrid[monthIndex] = monthRows.filter(Boolean);
 
-                              // Restore 5 rows minimum
-                              while (newGrid[monthIndex].length < 5) {
-                                newGrid[monthIndex].push(Array(5).fill(""));
-                              }
+                            //   // Restore 5 rows minimum
+                            //   while (newGrid[monthIndex].length < 5) {
+                            //     newGrid[monthIndex].push(Array(5).fill(""));
+                            //   }
 
-                              return newGrid;
-                            });
+                            //   return newGrid;
+                            // });
+
+// CHANGE TO:
+setGridData((prev) => {
+  const newGrid = { ...prev };
+  const monthRows = [...newGrid[monthIndex]];
+
+  selectedRows.forEach((r) => {
+    if (monthRows.length <= 5) {
+      monthRows[r] = Array(monthRows[r]?.length || 5).fill("");
+    } else {
+      monthRows[r] = null;
+    }
+  });
+
+  // Filter out removed rows
+  newGrid[monthIndex] = monthRows.filter(Boolean);
+
+  // Restore 5 rows minimum
+  while (newGrid[monthIndex].length < 5) {
+    newGrid[monthIndex].push(Array(5).fill(""));
+  }
+
+  return newGrid;
+});
+
+
 
                             setSelectedRows([]);
                           }}

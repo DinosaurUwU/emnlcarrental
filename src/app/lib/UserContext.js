@@ -5603,146 +5603,49 @@ Please ensure follow-ups and updates for the customer.`,
 
 
 
-// CHANGE TO:
 const saveFinancialReport = async (type, gridData) => {
   if (!adminUid) return;
 
   const year = new Date().getFullYear().toString();
-  const months = [
-    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
-  ];
-  const suffix = type === "revenue" ? "_Revenue" : "_Expense";
+  // Save under admin's user document: users/{uid}/financialReports/{type}/{year}
+  const docRef = doc(db, "users", adminUid, "financialReports", type, year);
 
-  const batch = writeBatch(db);
-
-  // Iterate through each month (0-11)
-  Object.keys(gridData).forEach((monthIndex) => {
-    const monthName = months[parseInt(monthIndex)];
-    const monthData = gridData[monthIndex];
-
-    // Delete all existing rows in this month first
-    const monthCollectionRef = collection(
-      db,
-      "users",
-      adminUid,
-      "financialReports",
-      type,
-      year,
-      monthName
-    );
-
-    // Delete all existing documents in this month subcollection
-    batch.delete(doc(months[parseInt(monthIndex)])); // Placeholder - we'll use a different approach
+  await setDoc(docRef, {
+    gridData,
+    updatedAt: serverTimestamp(),
   });
-
-  // Instead, we'll use setDoc for each row as a document
-  // New approach: Save each row as a document in the month subcollection
-  Object.keys(gridData).forEach((monthIndex) => {
-    const monthName = months[parseInt(monthIndex)];
-    const monthData = gridData[monthIndex];
-
-    // Delete existing month subcollection by deleting all docs
-    const monthRef = doc(db, "users", adminUid, "financialReports", type, year, monthName);
-    batch.set(monthRef, {
-      _monthIndex: parseInt(monthIndex),
-      _updatedAt: serverTimestamp(),
-    }, { merge: true });
-
-    // Save each row as a document
-    Object.keys(monthData).forEach((rowKey) => {
-      const rowData = monthData[rowKey];
-      // Skip metadata fields
-      if (rowKey.startsWith("_")) return;
-
-      const rowDocRef = doc(db, "users", adminUid, "financialReports", type, year, monthName, rowKey);
-      batch.set(rowDocRef, {
-        unit: rowData[0] || "",
-        amount: rowData[1] || "",
-        mop: rowData[2] || "",
-        pop: rowData[3] || "",
-        date: rowData[4] || "",
-        [`_manualId${suffix}`]: rowData[`_manualId${suffix}`] || crypto.randomUUID(),
-        [`_isAutoFill${suffix}`]: rowData[`_isAutoFill${suffix}`] || false,
-        [`_bookingId${suffix}`]: rowData[`_bookingId${suffix}`] || null,
-        [`_sourceType${suffix}`]: rowData[`_sourceType${suffix}`] || "manual",
-        [`_entryIndex${suffix}`]: rowData[`_entryIndex${suffix}`] ?? null,
-      });
-    });
-  });
-
-  await batch.commit();
-  console.log(`✅ Saved ${type} financial report with new structure`);
 };
 
 
 
-// CHANGE TO:
+
 const loadFinancialReport = async (type) => {
   if (!adminUid) return { gridData: {} };
 
   const year = new Date().getFullYear().toString();
+  const docRef = doc(db, "users", adminUid, "financialReports", type, year);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return {
+      gridData: docSnap.data().gridData || {},
+      updatedAt: docSnap.data().updatedAt,
+    };
+  }
+
+  // Return blank grid if no data
   const months = [
     "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
     "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
   ];
-  const suffix = type === "revenue" ? "_Revenue" : "_Expense";
+  const blankGrid = {};
+  months.forEach((_, i) => {
+    blankGrid[i] = Array(5).fill().map(() => Array(5).fill(""));
+  });
 
-  try {
-    const gridData = {};
-
-    // Load each month's subcollection
-    for (let i = 0; i < 12; i++) {
-      const monthName = months[i];
-      const monthCollectionRef = collection(
-        db,
-        "users",
-        adminUid,
-        "financialReports",
-        type,
-        year,
-        monthName
-      );
-
-      const snapshot = await getDocs(monthCollectionRef);
-
-      if (!snapshot.empty) {
-        const monthData = {};
-
-        snapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data();
-          // Use document ID as row key (Row_1, Row_2, etc.)
-          monthData[docSnap.id] = [
-            data.unit || "",
-            data.amount || "",
-            data.mop || "",
-            data.pop || "",
-            data.date || "",
-            // Include metadata
-            data[`_manualId${suffix}`],
-            data[`_isAutoFill${suffix}`],
-            data[`_bookingId${suffix}`],
-            data[`_sourceType${suffix}`],
-            data[`_entryIndex${suffix}`],
-          ];
-        });
-
-        gridData[i] = monthData;
-      } else {
-        // Create blank month with 5 empty rows
-        gridData[i] = {};
-        for (let j = 0; j < 5; j++) {
-          gridData[i][`Row ${j}`] = Array(10).fill("");
-        }
-      }
-    }
-
-    return { gridData };
-  } catch (error) {
-    console.error("Error loading financial report:", error);
-    return { gridData: {} };
-  }
+  return { gridData: blankGrid };
 };
+
 
 
 
