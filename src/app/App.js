@@ -16,6 +16,9 @@ import BookingPage from "./component/BookingPage";
 import InfoPage from "./component/InfoPage";
 import NotFound from "./NotFound";
 
+import { MdClose } from "react-icons/md";
+
+
 import "./styles/theme.css";
 
 // import ImportData from "./admin/importData";
@@ -367,8 +370,10 @@ const [verifyErrorMessage, setVerifyErrorMessage] = useState("");
       {showVerifyError && (
         <div className="error-overlay" onClick={closeVerifyError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
-            <div className="error-icon">❌</div>
-            <h3>Failed to Send</h3>
+            <div className="error-icon">
+      <MdClose size={32} />
+    </div>
+            <h3>Error!</h3>
             <p>{verifyErrorMessage}</p>
             <button className="error-btn" onClick={closeVerifyError}>
               OK

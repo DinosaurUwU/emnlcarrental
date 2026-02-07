@@ -6,8 +6,13 @@ import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
 import PrintContract from "./PrintContract";
 import "./RentalActivitySection.css";
+import { MdWarning, MdClose } from "react-icons/md";
 
 const RentalActivitySection = ({ subSection }) => {
+  const [showRentalWarning, setShowRentalWarning] = useState(false);
+  const [rentalWarningMessage, setRentalWarningMessage] = useState("");
+  const [showRentalError, setShowRentalError] = useState(false);
+  const [rentalErrorMessage, setRentalErrorMessage] = useState("");
   const [filePreviews, setFilePreviews] = useState({});
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
@@ -416,29 +421,28 @@ const RentalActivitySection = ({ subSection }) => {
     });
 
   // PICK-A-CAR DISPLAY
-useEffect(() => {
-  if (allUnitData.length > 0) {
-    let leastRentedUnit = null;
-    let leastTimes = Infinity;
+  useEffect(() => {
+    if (allUnitData.length > 0) {
+      let leastRentedUnit = null;
+      let leastTimes = Infinity;
 
-    allUnitData.forEach((unit) => {
-      if (!unit.hidden) {
-        const analytics = completedBookingsAnalytics?.[unit.id];  // ✅ Safe with optional chaining
-        const timesRented = analytics?.timesRented || 0;
+      allUnitData.forEach((unit) => {
+        if (!unit.hidden) {
+          const analytics = completedBookingsAnalytics?.[unit.id]; // ✅ Safe with optional chaining
+          const timesRented = analytics?.timesRented || 0;
 
-        if (timesRented < leastTimes) {
-          leastTimes = timesRented;
-          leastRentedUnit = unit.id;
+          if (timesRented < leastTimes) {
+            leastTimes = timesRented;
+            leastRentedUnit = unit.id;
+          }
         }
+      });
+
+      if (leastRentedUnit) {
+        setSelectedUnitId(leastRentedUnit);
       }
-    });
-
-    if (leastRentedUnit) {
-      setSelectedUnitId(leastRentedUnit);
     }
-  }
-}, [allUnitData]); // ✅ Only depends on allUnitData
-
+  }, [allUnitData]); // ✅ Only depends on allUnitData
 
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
   useEffect(() => {
@@ -1123,9 +1127,11 @@ useEffect(() => {
       !currentPayment.pop ||
       !currentPayment.date
     ) {
-      alert(
+      setRentalWarningMessage(
         "Please fill in all payment fields (Amount, MOP, POP, Date) before saving.",
       );
+      setShowRentalWarning(true);
+
       return;
     }
 
@@ -1379,7 +1385,11 @@ useEffect(() => {
       !currentForm.contact ||
       !currentForm.driverLicense
     ) {
-      alert("Please complete all required fields before proceeding.");
+      setRentalWarningMessage(
+        "Please complete all required fields before proceeding.",
+      );
+      setShowRentalWarning(true);
+
       return;
     }
 
@@ -1505,27 +1515,36 @@ useEffect(() => {
     setSelectedCustomerName("None");
   };
 
-useEffect(() => {
-  if (!selectedUnitId) return;
+  useEffect(() => {
+    if (!selectedUnitId) return;
 
-  const filteredUnits = allUnitData.filter(
-    (unit) =>
-      filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
-  );
+    const filteredUnits = allUnitData.filter(
+      (unit) =>
+        filterType === "ALL" || unit.carType?.toUpperCase() === filterType,
+    );
 
-  // Check if selected unit still exists and matches filterType
-  const selectedUnit = filteredUnits.find((u) => u.id === selectedUnitId);
-  
-  // Only auto-select if:
-  // 1. Selected unit no longer exists (deleted), OR
-  // 2. Selected unit no longer matches filterType
-  if (!selectedUnit && filteredUnits.length > 0) {
-    // Pick the first unit that matches filter (can be hidden or not)
-    const firstUnit = filteredUnits[0];
-    setSelectedUnitId(firstUnit.id);
-  }
-}, [allUnitData, filterType, selectedUnitId]);
+    // Check if selected unit still exists and matches filterType
+    const selectedUnit = filteredUnits.find((u) => u.id === selectedUnitId);
 
+    // Only auto-select if:
+    // 1. Selected unit no longer exists (deleted), OR
+    // 2. Selected unit no longer matches filterType
+    if (!selectedUnit && filteredUnits.length > 0) {
+      // Pick the first unit that matches filter (can be hidden or not)
+      const firstUnit = filteredUnits[0];
+      setSelectedUnitId(firstUnit.id);
+    }
+  }, [allUnitData, filterType, selectedUnitId]);
+
+  const closeRentalWarning = () => {
+    setShowRentalWarning(false);
+    setRentalWarningMessage("");
+  };
+
+  const closeRentalError = () => {
+    setShowRentalError(false);
+    setRentalErrorMessage("");
+  };
 
   return (
     <>
@@ -3909,9 +3928,11 @@ useEffect(() => {
                       !currentPayment.pop ||
                       !currentPayment.date
                     ) {
-                      alert(
+                      setRentalWarningMessage(
                         "Please fill in all payment fields (Amount, MOP, POP, Date) before saving.",
                       );
+                      setShowRentalWarning(true);
+
                       return;
                     }
 
@@ -4958,9 +4979,12 @@ useEffect(() => {
                       "Rental not found for edit. Check editRentalId:",
                       editRentalId,
                     );
-                    alert(
+
+                    setRentalErrorMessage(
                       "Error: Unable to find the rental to edit. Please try again.",
                     );
+                    setShowRentalError(true);
+
                     return;
                   }
                   setFilePreviews((prev) => ({
@@ -5138,9 +5162,11 @@ useEffect(() => {
                       !currentPayment.pop ||
                       !currentPayment.date
                     ) {
-                      alert(
+                      setRentalWarningMessage(
                         "Please fill in all payment fields (Amount, MOP, POP, Date) before saving.",
                       );
+                      setShowRentalWarning(true);
+
                       return;
                     }
 
@@ -6179,9 +6205,11 @@ useEffect(() => {
                       !currentPayment.pop ||
                       !currentPayment.date
                     ) {
-                      alert(
+                      setRentalWarningMessage(
                         "Please fill in all payment fields (Amount, MOP, POP, Date) before saving.",
                       );
+                      setShowRentalWarning(true);
+
                       return;
                     }
 
@@ -7104,6 +7132,41 @@ useEffect(() => {
         </div>
       )}
 
+      {/* ================= Rental Warning Overlay ================= */}
+      {showRentalWarning && (
+        <div className="warning-overlay" onClick={closeRentalWarning}>
+          <div
+            className="warning-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="warning-icon">
+              <MdWarning size={32} />
+            </div>
+            <h3>Attention!</h3>
+            <p>{rentalWarningMessage}</p>
+            <button className="warning-btn" onClick={closeRentalWarning}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ================= Rental Error Overlay ================= */}
+      {showRentalError && (
+        <div className="error-overlay" onClick={closeRentalError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">
+              <MdClose size={32} />
+            </div>
+            <h3>Error!</h3>
+            <p>{rentalErrorMessage}</p>
+            <button className="error-btn" onClick={closeRentalError}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
       <section className="rental-activity-section">
         <h2 className="section-title">Rental Activities</h2>
 
@@ -7682,8 +7745,8 @@ useEffect(() => {
                     const filteredUnits = allUnitData.filter(
                       (u) =>
                         // !u.hidden &&
-                        (filterType === "ALL" ||
-                          u.carType?.toUpperCase() === filterType),
+                        filterType === "ALL" ||
+                        u.carType?.toUpperCase() === filterType,
                     );
 
                     if (selectedUnitId) {
@@ -7709,7 +7772,8 @@ useEffect(() => {
                   {selectedUnitId &&
                     (() => {
                       const selectedUnit =
-                        allUnitData.find((u) => u.id === selectedUnitId) || null;
+                        allUnitData.find((u) => u.id === selectedUnitId) ||
+                        null;
 
                       if (!selectedUnit) {
                         return null;
@@ -8973,6 +9037,4 @@ useEffect(() => {
 
 // export default RentalActivitySection;
 
-
 export default React.memo(RentalActivitySection);
-

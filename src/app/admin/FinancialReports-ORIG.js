@@ -369,32 +369,15 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
         : Array(5).fill("");
 
       // preserve or create metadata
-
-
-
-const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-const meta = {
-  [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
-  [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
-  [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
-  [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
-  [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
-};
-
-
-
-      // const meta = {
-      //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
-      //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
-      //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
-      //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
-      //   // stable manual id so React key doesn't change
-      //   _manualId:
-      //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
-      // };
-
-
-
+      const meta = {
+        _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
+        _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
+        _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
+        _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
+        // stable manual id so React key doesn't change
+        _manualId:
+          monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
+      };
 
       // manual rows NEVER get bookingId accidentally
       if (meta._sourceType === "manual") {
@@ -432,33 +415,11 @@ const meta = {
     const filledRows = [];
     const emptyRows = [];
 
-    // rows.forEach((row) => {
-    //   if (!row || !Array.isArray(row)) return;
-    //   if (row.every((c) => c === "")) emptyRows.push(row);
-    //   else filledRows.push(row);
-    // });
-
-
-
-    const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-
-rows.forEach((row) => {
-  if (!row || !Array.isArray(row)) return;
-  
-  // Check if row has data (excluding metadata)
-  const hasData = Object.keys(row).some((key) => {
-    const val = row[key];
-    return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
-  });
-  
-  if (!hasData) {
-    emptyRows.push(row);
-  } else {
-    filledRows.push(row);
-  }
-});
-
-
+    rows.forEach((row) => {
+      if (!row || !Array.isArray(row)) return;
+      if (row.every((c) => c === "")) emptyRows.push(row);
+      else filledRows.push(row);
+    });
 
     // Sort filled rows by date
     filledRows.sort((a, b) => {

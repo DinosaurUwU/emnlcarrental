@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
+import { MdClose } from "react-icons/md";
 
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
@@ -35,6 +36,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
     updateReview,
     fetchReviews,
   } = useUser();
+
+  const [showAdminError, setShowAdminError] = useState(false);
+  const [adminErrorMessage, setAdminErrorMessage] = useState("");
 
   const [isAddingUnit, setIsAddingUnit] = useState(false);
   const [showSaveUnitConfirmDialog, setShowSaveUnitConfirmDialog] =
@@ -370,9 +374,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
               prev.map((t, idx) => (idx === i ? { ...t, id: result.id } : t)),
             );
           } else {
-            alert(
+            setAdminErrorMessage(
               `Failed to create review for ${testimonial.name}: ${result.error}`,
             );
+            setShowAdminError(true);
           }
         }
       }
@@ -383,7 +388,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
       // Reset files after save
       setTestimonialImageFiles(new Array(testimonials.length).fill(null));
     } catch (error) {
-      alert("Save failed: " + error.message);
+      setAdminErrorMessage("Save failed: " + error.message);
+      setShowAdminError(true);
     } finally {
       setIsSavingContent(false);
     }
@@ -706,7 +712,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
           // Image Preview
           setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() });
         } else {
-          alert("Failed to upload main image: " + uploadResult.error);
+          setAdminErrorMessage(
+            "Failed to upload main image: " + uploadResult.error,
+          );
+          setShowAdminError(true);
         }
       }
 
@@ -722,7 +731,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
         if (galleryResult.success) {
           setGalleryImages(galleryResult.newGalleryImages);
         } else {
-          alert("Failed to upload gallery images: " + galleryResult.error);
+          setAdminErrorMessage(
+            "Failed to upload gallery images: " + galleryResult.error,
+          );
+          setShowAdminError(true);
         }
       }
 
@@ -736,7 +748,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
       setIsAddingUnit(false);
       setShowUnitDetailsOverlay(false);
     } else {
-      alert("Failed to add unit: " + result.error);
+      setAdminErrorMessage("Failed to add unit: " + result.error);
+      setShowAdminError(true);
     }
     setIsSavingUnit(false);
   };
@@ -770,7 +783,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
         setTimeout(() => setShowDeleteSuccess(false), 400);
       }, 3000);
     } else {
-      alert("Delete failed: " + result.error);
+      setAdminErrorMessage("Delete failed: " + result.error);
+      setShowAdminError(true);
     }
   };
 
@@ -847,7 +861,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
         if (uploadResult.success) {
           setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
         } else {
-          alert("Failed to upload main image: " + uploadResult.error);
+          setAdminErrorMessage(
+            "Failed to upload main image: " + uploadResult.error,
+          );
+          setShowAdminError(true);
         }
       } else {
         setMainImage(editedMainImage || mainImage); // Already object
@@ -864,7 +881,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
       if (galleryResult.success) {
         setGalleryImages(galleryResult.newGalleryImages); // Now objects
       } else {
-        alert("Failed to update gallery: " + galleryResult.error);
+        setAdminErrorMessage(
+          "Failed to update gallery: " + galleryResult.error,
+        );
+        setShowAdminError(true);
       }
 
       setShowSavedSuccess(true);
@@ -984,9 +1004,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
             );
 
             if (!uploadResult.success) {
-              alert(
+              setAdminErrorMessage(
                 `Failed to upload ${page} image ${i}: ${uploadResult.error}`,
               );
+              setShowAdminError(true);
               return;
             }
           }
@@ -1016,9 +1037,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
               prev.map((t, idx) => (idx === i ? { ...t, id: result.id } : t)),
             );
           } else {
-            alert(
+            setAdminErrorMessage(
               `Failed to create review for ${testimonial.name}: ${result.error}`,
             );
+            setShowAdminError(true);
           }
         }
       }
@@ -1037,7 +1059,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
       setShowContentSavedSuccess(true);
       setIsEditingContent(false);
     } catch (error) {
-      alert("Save failed: " + error.message);
+      setAdminErrorMessage("Save failed: " + error.message);
+      setShowAdminError(true);
     } finally {
       setIsSavingContent(false);
     }
@@ -1147,11 +1170,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         } catch {
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         }
       });
@@ -1247,7 +1276,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
     }
 
     if (exists) {
-      alert("This MOP already exists.");
+      setAdminErrorMessage("This MOP already exists.");
+      setShowAdminError(true);
       return;
     }
 
@@ -1297,7 +1327,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
     }
 
     if (exists) {
-      alert("This POP type already exists.");
+      setAdminErrorMessage("This POP type already exists.");
+      setShowAdminError(true);
       return;
     }
 
@@ -1340,7 +1371,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
     }
 
     if (exists) {
-      alert("This referral source already exists.");
+      setAdminErrorMessage("This referral source already exists.");
+      setShowAdminError(true);
       return;
     }
 
@@ -1634,6 +1666,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
     });
   }, [clientsList, clientsSearchTerm]);
 
+  const closeAdminError = () => {
+    setShowAdminError(false);
+    setAdminErrorMessage("");
+  };
 
   return (
     <div className="admin-settings">
@@ -2466,9 +2502,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       }}
                     >
                       <span className="plus-sign">+</span>
-                       <span className="recommended-dimensions">
-                                    Recommended Dimensions: <strong>2873 x 1690</strong>
-                                  </span>
+                      <span className="recommended-dimensions">
+                        Recommended Dimensions: <strong>2873 x 1690</strong>
+                      </span>
                     </div>
                   </div>
                 )}
@@ -2663,9 +2699,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         }}
                       >
                         <span className="plus-sign">+</span>
-                         <span className="recommended-dimensions">
-                                    Recommended Dimensions: <strong>2873 x 1690</strong>
-                                  </span>
+                        <span className="recommended-dimensions">
+                          Recommended Dimensions: <strong>2873 x 1690</strong>
+                        </span>
                       </div>
                     )}
                   </div>
@@ -2720,8 +2756,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                   >
                                     +
                                   </span>
-                                   <span className="recommended-dimensions">
-                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  <span className="recommended-dimensions">
+                                    Recommended Dimensions:{" "}
+                                    <strong>2873 x 1690</strong>
                                   </span>
                                 </div>
                                 {isEditing && (
@@ -2769,9 +2806,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
                           } else {
                             // Placeholder for uploading new images
                             return (
-                              <div  key={index} className="image-item">
+                              <div key={index} className="image-item">
                                 <div
-                                 
                                   className="unit-gallery-placeholder"
                                   onClick={() => {
                                     if (!isEditing) {
@@ -2785,10 +2821,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                 >
                                   <span className="plus-sign">+</span>
 
- <span className="recommended-dimensions">
-                                    Recommended Dimensions: <strong>2873 x 1690</strong>
+                                  <span className="recommended-dimensions">
+                                    Recommended Dimensions:{" "}
+                                    <strong>2873 x 1690</strong>
                                   </span>
-
                                 </div>
                               </div>
                             );
@@ -4184,7 +4220,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
                               >
                                 <td>
                                   <img
-                                    src={image?.base64 || "/assets/images/default.png"}
+                                    src={
+                                      image?.base64 ||
+                                      "/assets/images/default.png"
+                                    }
                                     alt={booking.carName || "Car Image"}
                                     className="booking-car-image"
                                   />
@@ -4841,6 +4880,22 @@ const AdminSettings = ({ subSection = "overview" }) => {
             Content updated successfully!
           </span>
           <div className="sent-ongoing-progress-bar"></div>
+        </div>
+      )}
+
+      {/* ================= Admin Error Overlay ================= */}
+      {showAdminError && (
+        <div className="error-overlay" onClick={closeAdminError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">
+              <MdClose size={32} />
+            </div>
+            <h3>Error!</h3>
+            <p>{adminErrorMessage}</p>
+            <button className="error-btn" onClick={closeAdminError}>
+              OK
+            </button>
+          </div>
         </div>
       )}
     </div>

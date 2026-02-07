@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import "./Messages.css";
+import { MdCheckCircle } from "react-icons/md";
 
 const Messages = () => {
   const {
@@ -13,6 +14,9 @@ const Messages = () => {
     markMessageAsRead,
     sendMessage,
   } = useUser();
+
+  const [showMessageSuccess, setShowMessageSuccess] = useState(false);
+  const [messageSuccessMessage, setMessageSuccessMessage] = useState("");
 
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [closing, setClosing] = useState(false);
@@ -101,8 +105,15 @@ const Messages = () => {
 
     sendMessage(contactInfo);
 
-    alert("Your reply has been sent!");
+    setMessageSuccessMessage("Your reply has been sent!");
+    setShowMessageSuccess(true);
+
     setReplyText("");
+  };
+
+  const closeMessageSuccess = () => {
+    setShowMessageSuccess(false);
+    setMessageSuccessMessage("");
   };
 
   return (
@@ -765,6 +776,25 @@ const Messages = () => {
                 : `${deletedMessageCount} Messages Deleted!`}
             </span>
             <div className="progress-bar"></div>
+          </div>
+        )}
+
+        {/* ================= Message Success Overlay ================= */}
+        {showMessageSuccess && (
+          <div className="success-overlay" onClick={closeMessageSuccess}>
+            <div
+              className="success-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="success-icon">
+                <MdCheckCircle size={32} />
+              </div>
+              <h3>Success!</h3>
+              <p>{messageSuccessMessage}</p>
+              <button className="success-btn" onClick={closeMessageSuccess}>
+                OK
+              </button>
+            </div>
           </div>
         )}
       </div>

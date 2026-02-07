@@ -6,6 +6,10 @@ import { auth, provider } from "../../lib/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { useUser } from "../../lib/UserContext";
 
+import { MdClose } from "react-icons/md";
+
+
+
 const images = [
   "/assets/images/image1.png",
   "/assets/images/about.png",
@@ -202,8 +206,10 @@ const Login = () => {
       {showErrorOverlay && (
         <div className="error-overlay" onClick={closeErrorOverlay}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
-            <div className="error-icon">❌</div>
-            <h3>Sign-In Failed</h3>
+           <div className="error-icon">
+      <MdClose size={32} />
+    </div>
+            <h3>Error!</h3>
             <p>{errorMessage}</p>
             <button className="error-btn" onClick={closeErrorOverlay}>
               OK

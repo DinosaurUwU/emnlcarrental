@@ -8,6 +8,8 @@ import React, {
 } from "react";
 import { useUser } from "../lib/UserContext";
 import BookingPage from "./BookingPage";
+import { MdClose } from "react-icons/md";
+
 
 const BookingContext = createContext();
 
@@ -358,8 +360,10 @@ const BookingProviderInner = ({ children }) => {
       {showVerifyError && (
         <div className="error-overlay" onClick={closeVerifyError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
-            <div className="error-icon">❌</div>
-            <h3>Failed to Send</h3>
+            <div className="error-icon">
+      <MdClose size={32} />
+    </div>
+            <h3>Error!</h3>
             <p>{verifyErrorMessage}</p>
             <button className="error-btn" onClick={closeVerifyError}>
               OK

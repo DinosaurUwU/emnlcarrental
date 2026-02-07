@@ -6,7 +6,8 @@ import { useUser } from "../lib/UserContext";
 import { auth } from "../lib/firebase";
 
 import "./Profile.css";
-import { MdMoreVert } from "react-icons/md";
+import { MdMoreVert, MdClose, MdWarning, MdCheckCircle } from "react-icons/md";
+
 
 const Profile = ({ openBooking }) => {
   const pathname = usePathname();
@@ -51,6 +52,9 @@ const [profileErrorMessage, setProfileErrorMessage] = useState("");
 
 const [showProfileWarning, setShowProfileWarning] = useState(false);
 const [profileWarningMessage, setProfileWarningMessage] = useState("");
+
+const [showProfileSuccess, setShowProfileSuccess] = useState(false);
+const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
 
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -752,7 +756,9 @@ setShowProfileWarning(true);
 
     sendMessage(contactInfo);
 
-    alert("Your reply has been sent!");
+   setProfileSuccessMessage("Message sent successfully!");
+setShowProfileSuccess(true);
+
     setReplyText("");
   };
 
@@ -764,6 +770,11 @@ setShowProfileWarning(true);
 const closeProfileWarning = () => {
   setShowProfileWarning(false);
   setProfileWarningMessage("");
+};
+
+const closeProfileSuccess = () => {
+  setShowProfileSuccess(false);
+  setProfileSuccessMessage("");
 };
 
   return (
@@ -3797,8 +3808,10 @@ const closeProfileWarning = () => {
       {showProfileError && (
         <div className="error-overlay" onClick={closeProfileError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
-            <div className="error-icon">❌</div>
-            <h3>Update Failed</h3>
+            <div className="error-icon">
+      <MdClose size={32} />
+    </div>
+            <h3>Error!</h3>
             <p>{profileErrorMessage}</p>
             <button className="error-btn" onClick={closeProfileError}>
               OK
@@ -3811,8 +3824,10 @@ const closeProfileWarning = () => {
       {showProfileWarning && (
         <div className="warning-overlay" onClick={closeProfileWarning}>
           <div className="warning-container" onClick={(e) => e.stopPropagation()}>
-            <div className="warning-icon">⚠️</div>
-            <h3>Invalid File</h3>
+           <div className="warning-icon">
+      <MdWarning size={32} />
+    </div>
+            <h3>Attention!</h3>
             <p>{profileWarningMessage}</p>
             <button className="warning-btn" onClick={closeProfileWarning}>
               OK
@@ -3821,6 +3836,21 @@ const closeProfileWarning = () => {
         </div>
       )}
 
+      {/* ================= Profile Success Overlay ================= */}
+      {showProfileSuccess && (
+        <div className="success-overlay" onClick={closeProfileSuccess}>
+          <div className="success-container" onClick={(e) => e.stopPropagation()}>
+            <div className="success-icon">
+      <MdCheckCircle size={32} />
+    </div>
+            <h3>Success!</h3>
+            <p>{profileSuccessMessage}</p>
+            <button className="success-btn" onClick={closeProfileSuccess}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
 
     </div>

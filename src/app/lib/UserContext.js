@@ -52,7 +52,6 @@ import { useRouter } from "next/navigation";
 
 const fbProvider = new FacebookAuthProvider();
 
-
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
@@ -152,41 +151,42 @@ export const UserProvider = ({ children }) => {
   };
 
   const signInWithFacebook = async () => {
-  try {
-    const result = await signInWithPopup(auth, fbProvider);
-    console.log("✅ Facebook login success:", result.user);
-    return { success: true, user: result.user };
-  } catch (error) {
-    console.error("❌ Facebook Sign-In Error:", error);
-    return { success: false, error };
-  }
-};
-
+    try {
+      const result = await signInWithPopup(auth, fbProvider);
+      console.log("✅ Facebook login success:", result.user);
+      return { success: true, user: result.user };
+    } catch (error) {
+      console.error("❌ Facebook Sign-In Error:", error);
+      return { success: false, error };
+    }
+  };
 
   // SAVE GUEST USER BOOKING FORM AFTER LOGIN
   useEffect(() => {
-  if (user && user.emailVerified) {
-    // Check for pending booking data
-    const pendingBookingData = localStorage.getItem("pendingBookingData");
-    
-    if (pendingBookingData) {
-      try {
-        const data = JSON.parse(pendingBookingData);
-        
-        // Store in localStorage with user-specific key
-        localStorage.setItem(`pendingBookingData_${user.uid}`, pendingBookingData);
-        
-        // Clear the general pending data
-        localStorage.removeItem("pendingBookingData");
-        
-        console.log("📝 Pending booking data restored for user:", user.uid);
-      } catch (error) {
-        console.error("Error parsing pending booking data:", error);
+    if (user && user.emailVerified) {
+      // Check for pending booking data
+      const pendingBookingData = localStorage.getItem("pendingBookingData");
+
+      if (pendingBookingData) {
+        try {
+          const data = JSON.parse(pendingBookingData);
+
+          // Store in localStorage with user-specific key
+          localStorage.setItem(
+            `pendingBookingData_${user.uid}`,
+            pendingBookingData,
+          );
+
+          // Clear the general pending data
+          localStorage.removeItem("pendingBookingData");
+
+          console.log("📝 Pending booking data restored for user:", user.uid);
+        } catch (error) {
+          console.error("Error parsing pending booking data:", error);
+        }
       }
     }
-  }
-}, [user]);
-
+  }, [user]);
 
   // Load ALL settings on mount (MOP, POP/POE, referralSources)
   useEffect(() => {
@@ -373,20 +373,20 @@ export const UserProvider = ({ children }) => {
   };
 
   // REALTIME FETCH UNITS COLLECTION
-useEffect(() => {
-  const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
-    const allFetchedUnits = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
+      const allFetchedUnits = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    setAllUnitData(allFetchedUnits);
-    const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
-    setUnitData(filteredUnits);
-  });
+      setAllUnitData(allFetchedUnits);
+      const filteredUnits = allFetchedUnits.filter((unit) => !unit.hidden);
+      setUnitData(filteredUnits);
+    });
 
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
   // useEffect(() => {
   //   const unsubscribe = onSnapshot(collection(db, "units"), (snapshot) => {
@@ -434,142 +434,180 @@ useEffect(() => {
   };
 
   // REAL-TIME SYNC BOOKINGS TO USERS
-useEffect(() => {
-  // Only run when someone is logged in
-  if (!user?.uid || !adminUid) {
-    return;
-  }
-
-  let unsubscribeUsers;
-
-  // Sync bookings to a specific user
-  const syncBookingsToUser = async (userId, userEmail) => {
-    try {
-      const adminActiveRef = collection(db, "users", adminUid, "activeBookings");
-      const bookingQuery = query(adminActiveRef, where("email", "==", userEmail));
-      const bookingSnapshot = await getDocs(bookingQuery);
-
-      if (!bookingSnapshot.empty) {
-        const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
-          const bookingData = docSnap.data();
-
-          const userBookingData = {
-            ...bookingData,
-            createdBy: userId,
-            syncedFromAdmin: true,
-            syncedAt: serverTimestamp(),
-          };
-
-          // Save booking under user's activeRentals
-          const userRentalRef = doc(db, "users", userId, "activeRentals", docSnap.id);
-          await setDoc(userRentalRef, userBookingData);
-
-          // Update admin's copy so cancelRental still works
-          const adminBookingRef = doc(db, "users", adminUid, "activeBookings", docSnap.id);
-          await updateDoc(adminBookingRef, { createdBy: userId });
-
-          console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
-        });
-
-        await Promise.all(copyPromises);
-        console.log(`✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`);
-      } else {
-        console.log(`ℹ️ No admin bookings found for ${userEmail}`);
-      }
-    } catch (err) {
-      console.error("❌ Error syncing bookings to user:", err);
+  useEffect(() => {
+    // Only run when someone is logged in
+    if (!user?.uid || !adminUid) {
+      return;
     }
-  };
 
-  const setupSmartSync = async () => {
-    console.log("🔄 Setting up smart booking sync for:", user.role, user.email);
+    let unsubscribeUsers;
 
-    if (user.role === "admin") {
-      // ADMIN MODE - Watch for new users being added
-      console.log("👑 Admin mode: Watching for new users");
+    // Sync bookings to a specific user
+    const syncBookingsToUser = async (userId, userEmail) => {
+      try {
+        const adminActiveRef = collection(
+          db,
+          "users",
+          adminUid,
+          "activeBookings",
+        );
+        const bookingQuery = query(
+          adminActiveRef,
+          where("email", "==", userEmail),
+        );
+        const bookingSnapshot = await getDocs(bookingQuery);
 
-      const usersRef = collection(db, "users");
-      const qUsers = query(usersRef, where("role", "==", "user"));
+        if (!bookingSnapshot.empty) {
+          const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
+            const bookingData = docSnap.data();
 
-      unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
-        const changes = snapshot.docChanges();
-        for (const change of changes) {
-          if (change.type === "added") {
-            const newUser = change.doc.data();
-            const newUserId = change.doc.id;
-            const newUserEmail = newUser.email?.trim().toLowerCase();
+            const userBookingData = {
+              ...bookingData,
+              createdBy: userId,
+              syncedFromAdmin: true,
+              syncedAt: serverTimestamp(),
+            };
 
-            console.log("👤 New user detected:", newUserEmail);
-            if (newUserEmail) {
-              await syncBookingsToUser(newUserId, newUserEmail);
+            // Save booking under user's activeRentals
+            const userRentalRef = doc(
+              db,
+              "users",
+              userId,
+              "activeRentals",
+              docSnap.id,
+            );
+            await setDoc(userRentalRef, userBookingData);
+
+            // Update admin's copy so cancelRental still works
+            const adminBookingRef = doc(
+              db,
+              "users",
+              adminUid,
+              "activeBookings",
+              docSnap.id,
+            );
+            await updateDoc(adminBookingRef, { createdBy: userId });
+
+            console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
+          });
+
+          await Promise.all(copyPromises);
+          console.log(
+            `✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`,
+          );
+        } else {
+          console.log(`ℹ️ No admin bookings found for ${userEmail}`);
+        }
+      } catch (err) {
+        console.error("❌ Error syncing bookings to user:", err);
+      }
+    };
+
+    const setupSmartSync = async () => {
+      console.log(
+        "🔄 Setting up smart booking sync for:",
+        user.role,
+        user.email,
+      );
+
+      if (user.role === "admin") {
+        // ADMIN MODE - Watch for new users being added
+        console.log("👑 Admin mode: Watching for new users");
+
+        const usersRef = collection(db, "users");
+        const qUsers = query(usersRef, where("role", "==", "user"));
+
+        unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
+          const changes = snapshot.docChanges();
+          for (const change of changes) {
+            if (change.type === "added") {
+              const newUser = change.doc.data();
+              const newUserId = change.doc.id;
+              const newUserEmail = newUser.email?.trim().toLowerCase();
+
+              console.log("👤 New user detected:", newUserEmail);
+              if (newUserEmail) {
+                await syncBookingsToUser(newUserId, newUserEmail);
+              }
             }
           }
-        }
-      });
+        });
 
-      // REMOVED: adminActiveBookings listener (not needed)
-      // User mode already handles sync when user logs in
-      
-    } else {
-      // USER MODE - Check for existing admin bookings on login
-      console.log("👤 User mode: Checking for existing admin bookings");
+        // REMOVED: adminActiveBookings listener (not needed)
+        // User mode already handles sync when user logs in
+      } else {
+        // USER MODE - Check for existing admin bookings on login
+        console.log("👤 User mode: Checking for existing admin bookings");
 
-      if (lastSyncedUid === user.uid) {
-        console.log("⏭️ User already synced, skipping");
-        return;
-      }
-
-      try {
-        const adminActiveRef = collection(db, "users", adminUid, "activeBookings");
-        const emailToSearch = user.email?.trim().toLowerCase();
-        const q = query(adminActiveRef, where("email", "==", emailToSearch));
-
-        console.log("🔍 User searching for bookings with email:", emailToSearch);
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          console.log("✅ No admin bookings found for this user");
-          setLastSyncedUid(user.uid);
+        if (lastSyncedUid === user.uid) {
+          console.log("⏭️ User already synced, skipping");
           return;
         }
 
-        const copyPromises = snapshot.docs.map(async (docSnap) => {
-          const bookingData = docSnap.data();
+        try {
+          const adminActiveRef = collection(
+            db,
+            "users",
+            adminUid,
+            "activeBookings",
+          );
+          const emailToSearch = user.email?.trim().toLowerCase();
+          const q = query(adminActiveRef, where("email", "==", emailToSearch));
 
-          const userBookingData = {
-            ...bookingData,
-            createdBy: user.uid,
-            syncedFromAdmin: true,
-            syncedAt: serverTimestamp(),
-          };
+          console.log(
+            "🔍 User searching for bookings with email:",
+            emailToSearch,
+          );
+          const snapshot = await getDocs(q);
 
-          const userRentalRef = doc(db, "users", user.uid, "activeRentals", docSnap.id);
-          await setDoc(userRentalRef, userBookingData);
+          if (snapshot.empty) {
+            console.log("✅ No admin bookings found for this user");
+            setLastSyncedUid(user.uid);
+            return;
+          }
 
-          console.log("✅ User synced booking:", docSnap.id);
-        });
+          const copyPromises = snapshot.docs.map(async (docSnap) => {
+            const bookingData = docSnap.data();
 
-        await Promise.all(copyPromises);
-        console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
-        setLastSyncedUid(user.uid);
-      } catch (error) {
-        console.error("❌ User sync error:", error);
+            const userBookingData = {
+              ...bookingData,
+              createdBy: user.uid,
+              syncedFromAdmin: true,
+              syncedAt: serverTimestamp(),
+            };
+
+            const userRentalRef = doc(
+              db,
+              "users",
+              user.uid,
+              "activeRentals",
+              docSnap.id,
+            );
+            await setDoc(userRentalRef, userBookingData);
+
+            console.log("✅ User synced booking:", docSnap.id);
+          });
+
+          await Promise.all(copyPromises);
+          console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
+          setLastSyncedUid(user.uid);
+        } catch (error) {
+          console.error("❌ User sync error:", error);
+        }
       }
-    }
-  };
+    };
 
-  // Start
-  setupSmartSync();
+    // Start
+    setupSmartSync();
 
-  // Cleanup
-  return () => {
-    if (unsubscribeUsers) {
-      console.log("🧹 Cleaning up user listener");
-      unsubscribeUsers();
-    }
-  };
-}, [user?.uid, user?.role, adminUid, lastSyncedUid]);
-
+    // Cleanup
+    return () => {
+      if (unsubscribeUsers) {
+        console.log("🧹 Cleaning up user listener");
+        unsubscribeUsers();
+      }
+    };
+  }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
 
   // useEffect(() => {
   //   // Only run when someone is logged in
@@ -1698,45 +1736,51 @@ Call them now to check if they want to extend. If no response, call them when re
     handleEmailVerification();
   }, []);
 
-
   // REALTIME BLOCKED USERS LISTENER
-useEffect(() => {
-  // Listener for blocked users (KEEP - shows overlay immediately)
-  const blockedUserQuery = query(
-    collection(db, "users"),
-    where("role", "==", "user"),
-    where("blocked", "==", true),
-  );
-  const unsubscribeBlocked = onSnapshot(blockedUserQuery, (snapshot) => {
-    const blocked = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setBlockedUsers(blocked);
-  });
+  useEffect(() => {
+    // Listener for blocked users (KEEP - shows overlay immediately)
+    const blockedUserQuery = query(
+      collection(db, "users"),
+      where("role", "==", "user"),
+      where("blocked", "==", true),
+    );
+    const unsubscribeBlocked = onSnapshot(blockedUserQuery, (snapshot) => {
+      const blocked = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBlockedUsers(blocked);
+    });
 
-  // Fetch admin accounts and active users ONCE (not real-time)
-  const fetchAccounts = async () => {
-    const usersRef = collection(db, "users");
+    // Fetch admin accounts and active users ONCE (not real-time)
+    const fetchAccounts = async () => {
+      const usersRef = collection(db, "users");
 
-    // Admin accounts
-    const adminQuery = query(usersRef, where("role", "==", "admin"));
-    const adminSnap = await getDocs(adminQuery);
-    setAdminAccounts(adminSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      // Admin accounts
+      const adminQuery = query(usersRef, where("role", "==", "admin"));
+      const adminSnap = await getDocs(adminQuery);
+      setAdminAccounts(
+        adminSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      );
 
-    // Active users
-    const activeQuery = query(usersRef, where("role", "==", "user"), where("blocked", "==", false));
-    const activeSnap = await getDocs(activeQuery);
-    setUserAccounts(activeSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  };
+      // Active users
+      const activeQuery = query(
+        usersRef,
+        where("role", "==", "user"),
+        where("blocked", "==", false),
+      );
+      const activeSnap = await getDocs(activeQuery);
+      setUserAccounts(
+        activeSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      );
+    };
 
-  fetchAccounts();
+    fetchAccounts();
 
-  return () => {
-    unsubscribeBlocked();
-  };
-}, []);
-
+    return () => {
+      unsubscribeBlocked();
+    };
+  }, []);
 
   // useEffect(() => {
   //   // Listener for admins
@@ -1969,28 +2013,27 @@ useEffect(() => {
   };
 
   // LISTEN FOR THEME CHANGES FROM FIRESTORE (appConfig)
-useEffect(() => {
-  if (!user) {
-    setTheme("default");
-    document.documentElement.setAttribute("data-theme", "default");
-    return;
-  }
-
-  const fetchTheme = async () => {
-    const settingsRef = doc(db, "config", "appSettings");
-    const snapshot = await getDoc(settingsRef);
-    if (snapshot.exists()) {
-      const data = snapshot.data();
-      if (data.theme) {
-        setTheme(data.theme);
-        document.documentElement.setAttribute("data-theme", data.theme);
-      }
+  useEffect(() => {
+    if (!user) {
+      setTheme("default");
+      document.documentElement.setAttribute("data-theme", "default");
+      return;
     }
-  };
 
-  fetchTheme();
-}, [user]);
+    const fetchTheme = async () => {
+      const settingsRef = doc(db, "config", "appSettings");
+      const snapshot = await getDoc(settingsRef);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.theme) {
+          setTheme(data.theme);
+          document.documentElement.setAttribute("data-theme", data.theme);
+        }
+      }
+    };
 
+    fetchTheme();
+  }, [user]);
 
   // useEffect(() => {
   //   if (!user) {
@@ -3525,9 +3568,15 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
     } catch (error) {
       console.error("🔥 Error deleting user account:", error);
       if (error.code === "auth/requires-recent-login") {
-        alert("Please log in again to delete your account.");
+        showActionOverlay({
+          message: "Please log in again to delete your account.",
+          type: "warning",
+        });
       } else {
-        alert("Failed to delete account. Please try again.");
+        showActionOverlay({
+          message: "Failed to delete account. Please try again.",
+          type: "warning",
+        });
       }
     }
   };
@@ -4936,154 +4985,178 @@ Please ensure follow-ups and updates for the customer.`,
   };
 
   // (ADMIN) LISTEN TO BOOKINGS CHANGES FOR ANALYTICS & CALENDAR
-useEffect(() => {
-  if (!adminUid) return;
+  useEffect(() => {
+    if (!adminUid) return;
 
-  const statusColorMap = {
-    Completed: "#28a74650",
-    Pending: "#ffc107",
-    Active: "#28a745",
-  };
+    const statusColorMap = {
+      Completed: "#28a74650",
+      Pending: "#ffc107",
+      Active: "#28a745",
+    };
 
-  const completedRef = collection(db, "users", adminUid, "completedBookings");
-  const activeRef = collection(db, "users", adminUid, "activeBookings");
+    const completedRef = collection(db, "users", adminUid, "completedBookings");
+    const activeRef = collection(db, "users", adminUid, "activeBookings");
 
-  // Keep track of processed document IDs
-  const processedCompleted = new Set();
-  const processedActive = new Set();
+    // Keep track of processed document IDs
+    const processedCompleted = new Set();
+    const processedActive = new Set();
 
-  // LISTEN TO COMPLETED BOOKINGS (incremental only)
-  const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
-    const changes = snapshot.docChanges();
+    // LISTEN TO COMPLETED BOOKINGS (incremental only)
+    const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
+      const changes = snapshot.docChanges();
 
-    changes.forEach((change) => {
-      if (change.type === "added") {
-        const data = change.doc.data();
-        if (data.status !== "Completed") return;
+      changes.forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data();
+          if (data.status !== "Completed") return;
 
-        const docId = change.doc.id;
-        if (processedCompleted.has(docId)) return; // Skip duplicates
-        processedCompleted.add(docId);
+          const docId = change.doc.id;
+          if (processedCompleted.has(docId)) return; // Skip duplicates
+          processedCompleted.add(docId);
 
-        // Process ONLY the new document
-        const plateNo = data.plateNo || "UNKNOWN_UNIT";
-        const carType = data.carType || "UNKNOWN";
-        const carName = data.carName || plateNo;
-        const totalRevenue = Number(data.totalPaid) || 0;
-        const durationSec = Number(data.totalDurationInSeconds) || 0;
+          // Process ONLY the new document
+          const plateNo = data.plateNo || "UNKNOWN_UNIT";
+          const carType = data.carType || "UNKNOWN";
+          const carName = data.carName || plateNo;
+          const totalRevenue = Number(data.totalPaid) || 0;
+          const durationSec = Number(data.totalDurationInSeconds) || 0;
 
-        if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime)) return;
+          if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime))
+            return;
 
-        let rentalEnd;
-        if (data.endTimestamp?.seconds) {
-          rentalEnd = new Date(data.endTimestamp.seconds * 1000);
-        } else if (data.endDate && data.endTime) {
-          const [year, month, day] = data.endDate.split("-");
-          const [hour, minute] = data.endTime.split(":");
-          rentalEnd = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
-        } else {
-          return;
-        }
-
-        // Update analyticsMap with new data
-        setCompletedBookingsAnalytics((prevMap) => {
-          const newMap = { ...prevMap };
-          if (!newMap[plateNo]) {
-            newMap[plateNo] = { carName, carType, unitImage: data.unitImage || "" };
+          let rentalEnd;
+          if (data.endTimestamp?.seconds) {
+            rentalEnd = new Date(data.endTimestamp.seconds * 1000);
+          } else if (data.endDate && data.endTime) {
+            const [year, month, day] = data.endDate.split("-");
+            const [hour, minute] = data.endTime.split(":");
+            rentalEnd = new Date(
+              Number(year),
+              Number(month) - 1,
+              Number(day),
+              Number(hour),
+              Number(minute),
+            );
+          } else {
+            return;
           }
 
-          const dayKey = rentalEnd.toISOString().slice(0, 10);
-          const monthKey = rentalEnd.toISOString().slice(0, 7);
-          const yearKey = rentalEnd.getFullYear().toString();
-          const keys = [dayKey, monthKey, yearKey];
-
-          keys.forEach((key) => {
-            if (!newMap[plateNo][key]) {
-              newMap[plateNo][key] = { revenue: 0, hours: 0, timesRented: 0, bookings: [] };
+          // Update analyticsMap with new data
+          setCompletedBookingsAnalytics((prevMap) => {
+            const newMap = { ...prevMap };
+            if (!newMap[plateNo]) {
+              newMap[plateNo] = {
+                carName,
+                carType,
+                unitImage: data.unitImage || "",
+              };
             }
-            newMap[plateNo][key].revenue += totalRevenue;
-            newMap[plateNo][key].hours += durationSec / 3600;
-            newMap[plateNo][key].timesRented += 1;
-            newMap[plateNo][key].bookings.push({ id: docId, ...data });
+
+            const dayKey = rentalEnd.toISOString().slice(0, 10);
+            const monthKey = rentalEnd.toISOString().slice(0, 7);
+            const yearKey = rentalEnd.getFullYear().toString();
+            const keys = [dayKey, monthKey, yearKey];
+
+            keys.forEach((key) => {
+              if (!newMap[plateNo][key]) {
+                newMap[plateNo][key] = {
+                  revenue: 0,
+                  hours: 0,
+                  timesRented: 0,
+                  bookings: [],
+                };
+              }
+              newMap[plateNo][key].revenue += totalRevenue;
+              newMap[plateNo][key].hours += durationSec / 3600;
+              newMap[plateNo][key].timesRented += 1;
+              newMap[plateNo][key].bookings.push({ id: docId, ...data });
+            });
+
+            return newMap;
           });
 
-          return newMap;
-        });
-
-        // Add to calendar
-        if (data.startTimestamp?.seconds) {
-          const start = new Date(data.startTimestamp.seconds * 1000);
-          setCalendarEventsSafe((prev) => [
-            ...prev,
-            {
-              title: `Completed: ${carName}`,
-              start: start.toISOString(),
-              end: rentalEnd.toISOString(),
-              fullData: data,
-              backgroundColor: statusColorMap["Completed"],
-              borderColor: "#00000020",
-              textColor: "#fff",
-              source: "completed",
-            },
-          ]);
+          // Add to calendar
+          if (data.startTimestamp?.seconds) {
+            const start = new Date(data.startTimestamp.seconds * 1000);
+            setCalendarEventsSafe((prev) => [
+              ...prev,
+              {
+                title: `Completed: ${carName}`,
+                start: start.toISOString(),
+                end: rentalEnd.toISOString(),
+                fullData: data,
+                backgroundColor: statusColorMap["Completed"],
+                borderColor: "#00000020",
+                textColor: "#fff",
+                source: "completed",
+              },
+            ]);
+          }
         }
-      }
+      });
     });
-  });
 
-  // LISTEN TO ACTIVE BOOKINGS (incremental only)
-  const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
-    const changes = snapshot.docChanges();
+    // LISTEN TO ACTIVE BOOKINGS (incremental only)
+    const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
+      const changes = snapshot.docChanges();
 
-    changes.forEach((change) => {
-      if (change.type === "added" || change.type === "modified") {
-        const data = change.doc.data();
-        if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime) return;
+      changes.forEach((change) => {
+        if (change.type === "added" || change.type === "modified") {
+          const data = change.doc.data();
+          if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
+            return;
 
-        const docId = change.doc.id;
-        const start = new Date(data.startTimestamp.seconds * 1000);
-        const [year, month, day] = data.endDate.split("-");
-        const [hour, minute] = data.endTime.split(":");
-        const end = data.endTimestamp?.seconds
-          ? new Date(data.endTimestamp.seconds * 1000)
-          : new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+          const docId = change.doc.id;
+          const start = new Date(data.startTimestamp.seconds * 1000);
+          const [year, month, day] = data.endDate.split("-");
+          const [hour, minute] = data.endTime.split(":");
+          const end = data.endTimestamp?.seconds
+            ? new Date(data.endTimestamp.seconds * 1000)
+            : new Date(
+                Number(year),
+                Number(month) - 1,
+                Number(day),
+                Number(hour),
+                Number(minute),
+              );
 
-        const carName = data.carName || "Unknown Car";
-        const status = data.status?.charAt(0).toUpperCase() + data.status?.slice(1).toLowerCase() || "Unknown";
+          const carName = data.carName || "Unknown Car";
+          const status =
+            data.status?.charAt(0).toUpperCase() +
+              data.status?.slice(1).toLowerCase() || "Unknown";
 
-        setCalendarEventsSafe((prev) => {
-          const filtered = prev.filter((e) => e.fullData?.id !== docId);
-          return [
-            ...filtered,
-            {
-              title: `${status}: ${carName}`,
-              start: start.toISOString(),
-              end: end.toISOString(),
-              fullData: data,
-              backgroundColor: statusColorMap[status] || "#6c757d",
-              borderColor: "#00000020",
-              textColor: "#fff",
-              source: status.toLowerCase(),
-            },
-          ];
-        });
-      }
+          setCalendarEventsSafe((prev) => {
+            const filtered = prev.filter((e) => e.fullData?.id !== docId);
+            return [
+              ...filtered,
+              {
+                title: `${status}: ${carName}`,
+                start: start.toISOString(),
+                end: end.toISOString(),
+                fullData: data,
+                backgroundColor: statusColorMap[status] || "#6c757d",
+                borderColor: "#00000020",
+                textColor: "#fff",
+                source: status.toLowerCase(),
+              },
+            ];
+          });
+        }
 
-      if (change.type === "removed") {
-        const docId = change.doc.id;
-        setCalendarEventsSafe((prev) =>
-          prev.filter((e) => e.fullData?.id !== docId)
-        );
-      }
+        if (change.type === "removed") {
+          const docId = change.doc.id;
+          setCalendarEventsSafe((prev) =>
+            prev.filter((e) => e.fullData?.id !== docId),
+          );
+        }
+      });
     });
-  });
 
-  return () => {
-    unsubscribeCompleted();
-    unsubscribeActive();
-  };
-}, [adminUid]);
-
+    return () => {
+      unsubscribeCompleted();
+      unsubscribeActive();
+    };
+  }, [adminUid]);
 
   // useEffect(() => {
   //   if (!adminUid) return;
@@ -5480,50 +5553,207 @@ useEffect(() => {
     return converted;
   };
 
-  // Save grid data
-  const saveFinancialReport = async (type, gridData) => {
-    try {
-      if (!user || user.role !== "admin") return;
+  // // Save grid data
+  // const saveFinancialReport = async (type, gridData) => {
+  //   try {
+  //     if (!user || user.role !== "admin") return;
 
-      const reportRef = doc(db, `users/${user.uid}/financialReports/${type}`);
-      const dataToSave = convertGridForFirestore(gridData); // flatten
-      await setDoc(
-        reportRef,
-        { gridData: dataToSave, updatedAt: serverTimestamp() },
-        { merge: true },
+  //     const reportRef = doc(db, `users/${user.uid}/financialReports/${type}`);
+  //     const dataToSave = convertGridForFirestore(gridData); // flatten
+  //     await setDoc(
+  //       reportRef,
+  //       { gridData: dataToSave, updatedAt: serverTimestamp() },
+  //       { merge: true },
+  //     );
+  //     console.log(`✅ Saved ${type} financial report to Firestore`);
+  //   } catch (error) {
+  //     console.error("❌ Error saving financial report:", error);
+  //   }
+  // };
+
+  // // Load grid data
+  // const loadFinancialReport = async (type) => {
+  //   try {
+  //     if (!user || user.role !== "admin")
+  //       return { gridData: {}, updatedAt: null };
+
+  //     const reportRef = doc(db, `users/${user.uid}/financialReports/${type}`);
+  //     const snap = await getDoc(reportRef);
+
+  //     if (snap.exists()) {
+  //       console.log(`📦 Loaded ${type} financial report from Firestore`);
+  //       const data = snap.data();
+  //       const rawGrid = data.gridData || {};
+  //       return {
+  //         gridData: convertGridFromFirestore(rawGrid),
+  //         updatedAt: data.updatedAt || null,
+  //       };
+  //     } else {
+  //       console.log(`⚠️ No ${type} financial report found`);
+  //       return { gridData: {}, updatedAt: null };
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ Error loading financial reports:", error);
+  //     return { gridData: {}, updatedAt: null };
+  //   }
+  // };
+
+
+
+
+
+
+// CHANGE TO:
+const saveFinancialReport = async (type, gridData) => {
+  if (!adminUid) return;
+
+  const year = new Date().getFullYear().toString();
+  const months = [
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+  ];
+  const suffix = type === "revenue" ? "_Revenue" : "_Expense";
+
+  const batch = writeBatch(db);
+
+  // Iterate through each month (0-11)
+  Object.keys(gridData).forEach((monthIndex) => {
+    const monthName = months[parseInt(monthIndex)];
+    const monthData = gridData[monthIndex];
+
+    // Delete all existing rows in this month first
+    const monthCollectionRef = collection(
+      db,
+      "users",
+      adminUid,
+      "financialReports",
+      type,
+      year,
+      monthName
+    );
+
+    // Delete all existing documents in this month subcollection
+    batch.delete(doc(months[parseInt(monthIndex)])); // Placeholder - we'll use a different approach
+  });
+
+  // Instead, we'll use setDoc for each row as a document
+  // New approach: Save each row as a document in the month subcollection
+  Object.keys(gridData).forEach((monthIndex) => {
+    const monthName = months[parseInt(monthIndex)];
+    const monthData = gridData[monthIndex];
+
+    // Delete existing month subcollection by deleting all docs
+    const monthRef = doc(db, "users", adminUid, "financialReports", type, year, monthName);
+    batch.set(monthRef, {
+      _monthIndex: parseInt(monthIndex),
+      _updatedAt: serverTimestamp(),
+    }, { merge: true });
+
+    // Save each row as a document
+    Object.keys(monthData).forEach((rowKey) => {
+      const rowData = monthData[rowKey];
+      // Skip metadata fields
+      if (rowKey.startsWith("_")) return;
+
+      const rowDocRef = doc(db, "users", adminUid, "financialReports", type, year, monthName, rowKey);
+      batch.set(rowDocRef, {
+        unit: rowData[0] || "",
+        amount: rowData[1] || "",
+        mop: rowData[2] || "",
+        pop: rowData[3] || "",
+        date: rowData[4] || "",
+        [`_manualId${suffix}`]: rowData[`_manualId${suffix}`] || crypto.randomUUID(),
+        [`_isAutoFill${suffix}`]: rowData[`_isAutoFill${suffix}`] || false,
+        [`_bookingId${suffix}`]: rowData[`_bookingId${suffix}`] || null,
+        [`_sourceType${suffix}`]: rowData[`_sourceType${suffix}`] || "manual",
+        [`_entryIndex${suffix}`]: rowData[`_entryIndex${suffix}`] ?? null,
+      });
+    });
+  });
+
+  await batch.commit();
+  console.log(`✅ Saved ${type} financial report with new structure`);
+};
+
+
+
+// CHANGE TO:
+const loadFinancialReport = async (type) => {
+  if (!adminUid) return { gridData: {} };
+
+  const year = new Date().getFullYear().toString();
+  const months = [
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+  ];
+  const suffix = type === "revenue" ? "_Revenue" : "_Expense";
+
+  try {
+    const gridData = {};
+
+    // Load each month's subcollection
+    for (let i = 0; i < 12; i++) {
+      const monthName = months[i];
+      const monthCollectionRef = collection(
+        db,
+        "users",
+        adminUid,
+        "financialReports",
+        type,
+        year,
+        monthName
       );
-      console.log(`✅ Saved ${type} financial report to Firestore`);
-    } catch (error) {
-      console.error("❌ Error saving financial report:", error);
-    }
-  };
 
-  // Load grid data
-  const loadFinancialReport = async (type) => {
-    try {
-      if (!user || user.role !== "admin")
-        return { gridData: {}, updatedAt: null };
+      const snapshot = await getDocs(monthCollectionRef);
 
-      const reportRef = doc(db, `users/${user.uid}/financialReports/${type}`);
-      const snap = await getDoc(reportRef);
+      if (!snapshot.empty) {
+        const monthData = {};
 
-      if (snap.exists()) {
-        console.log(`📦 Loaded ${type} financial report from Firestore`);
-        const data = snap.data();
-        const rawGrid = data.gridData || {};
-        return {
-          gridData: convertGridFromFirestore(rawGrid),
-          updatedAt: data.updatedAt || null,
-        };
+        snapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data();
+          // Use document ID as row key (Row_1, Row_2, etc.)
+          monthData[docSnap.id] = [
+            data.unit || "",
+            data.amount || "",
+            data.mop || "",
+            data.pop || "",
+            data.date || "",
+            // Include metadata
+            data[`_manualId${suffix}`],
+            data[`_isAutoFill${suffix}`],
+            data[`_bookingId${suffix}`],
+            data[`_sourceType${suffix}`],
+            data[`_entryIndex${suffix}`],
+          ];
+        });
+
+        gridData[i] = monthData;
       } else {
-        console.log(`⚠️ No ${type} financial report found`);
-        return { gridData: {}, updatedAt: null };
+        // Create blank month with 5 empty rows
+        gridData[i] = {};
+        for (let j = 0; j < 5; j++) {
+          gridData[i][`Row ${j}`] = Array(10).fill("");
+        }
       }
-    } catch (error) {
-      console.error("❌ Error loading financial reports:", error);
-      return { gridData: {}, updatedAt: null };
     }
-  };
+
+    return { gridData };
+  } catch (error) {
+    console.error("Error loading financial report:", error);
+    return { gridData: {} };
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 
   // Function to upload image to images collection
   const uploadImageToFirestore = async (

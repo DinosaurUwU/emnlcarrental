@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "./lib/UserContext";
 import LandingPage from "./LandingPage";
 import BookingPage from "./component/BookingPage";
+import { MdClose } from "react-icons/md";
+
 
 
 function Home() {
@@ -13,6 +15,10 @@ function Home() {
     setShowVerifyOverlay,
     sendVerificationEmail,
   } = useUser();
+
+  const [showHomeError, setShowHomeError] = useState(false);
+const [homeErrorMessage, setHomeErrorMessage] = useState("");
+
   const [verifyTargetEmail, setVerifyTargetEmail] = useState("");
   const [showVerifyInstructions, setShowVerifyInstructions] = useState(false);
 
@@ -98,6 +104,12 @@ function Home() {
   };
 
   const closeBooking = () => setIsBookingOpen(false);
+
+  
+const closeHomeError = () => {
+  setShowHomeError(false);
+  setHomeErrorMessage("");
+};
 
   return (
     <>
@@ -276,7 +288,10 @@ function Home() {
                     setVerifyTargetEmail(res.email);
                     setShowVerifyInstructions(true);
                   } else {
-                    alert("Failed to send verification email. Try again.");
+
+setHomeErrorMessage("Failed to send verification email. Please try again.");
+setShowHomeError(true);
+
                   }
                 }}
               >
@@ -292,6 +307,23 @@ function Home() {
           </div>
         </div>
       )}
+
+            {/* ================= Home Error Overlay ================= */}
+      {showHomeError && (
+        <div className="error-overlay" onClick={closeHomeError}>
+          <div className="error-container" onClick={(e) => e.stopPropagation()}>
+            <div className="error-icon">
+              <MdClose size={32} />
+            </div>
+            <h3>Error!</h3>
+            <p>{homeErrorMessage}</p>
+            <button className="error-btn" onClick={closeHomeError}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {showVerifyInstructions && (
         <div className="admin-booking-confirm-overlay">

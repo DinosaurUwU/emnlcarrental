@@ -10,12 +10,10 @@ import {
   MdEmail,
   MdPhone,
   MdChat,
-  MdDescription,
-  MdDirectionsCar,
-  MdPerson,
-  MdPolicy,
-  MdDriveEta,
+  MdClose,
 } from "react-icons/md";
+
+
 import {
   FaQuestion,
   FaCar,
@@ -23,6 +21,7 @@ import {
   FaFileAlt,
   FaCarSide,
 } from "react-icons/fa";
+
 
 // Simple parallax reference
 let infoTitleRef = null;
@@ -3096,8 +3095,10 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
       {showInfoPageError && (
         <div className="error-overlay" onClick={closeInfoPageError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
-            <div className="error-icon">❌</div>
-            <h3>Save Failed</h3>
+            <div className="error-icon">
+      <MdClose size={32} />
+    </div>
+            <h3>Error!</h3>
             <p>{infoPageErrorMessage}</p>
             <button className="error-btn" onClick={closeInfoPageError}>
               OK

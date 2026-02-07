@@ -6,6 +6,9 @@ import Footer from "../component/Footer";
 import CompanyMap from "../CompanyMap";
 import "./Contact.css";
 import "react-phone-input-2/lib/style.css";
+import { MdCheckCircle } from "react-icons/md";
+
+
 
 const countries = [
   { code: "af", name: "Afghanistan", dialCode: "+93" },
@@ -217,6 +220,9 @@ function Contact({ openBooking }) {
   const { user, setUser, sendMessage, fetchAdminUid, fetchImageFromFirestore } =
     useUser();
 
+    const [showContactSuccess, setShowContactSuccess] = useState(false);
+const [contactSuccessMessage, setContactSuccessMessage] = useState("");
+
   const fullName = user?.name || user?.displayName || "";
   const nameParts = fullName.trim().split(" ");
 
@@ -344,7 +350,8 @@ function Contact({ openBooking }) {
 
     sendMessage(contactInfo);
     setMessage("");
-    alert("Message sent successfully!");
+    setContactSuccessMessage("Message sent successfully!");
+setShowContactSuccess(true);
   };
 
 
@@ -352,6 +359,11 @@ function Contact({ openBooking }) {
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()),
   );
+
+  const closeContactSuccess = () => {
+  setShowContactSuccess(false);
+  setContactSuccessMessage("");
+};
 
   return (
     <div className="contactPage-container">
@@ -480,8 +492,26 @@ function Contact({ openBooking }) {
         </div>
       </div>
 
+            {/* ================= Contact Success Overlay ================= */}
+      {showContactSuccess && (
+        <div className="success-overlay" onClick={closeContactSuccess}>
+          <div className="success-container" onClick={(e) => e.stopPropagation()}>
+            <div className="success-icon">
+      <MdCheckCircle size={32} />
+    </div>
+            <h3>Success!</h3>
+            <p>{contactSuccessMessage}</p>
+            <button className="success-btn" onClick={closeContactSuccess}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <CompanyMap />
       <Footer />
+
     </div>
   );
 }
