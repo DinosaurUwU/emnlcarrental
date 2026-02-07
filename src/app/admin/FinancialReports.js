@@ -178,9 +178,12 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
   //   loadBothTabs();
   // }, []);
 
-    useEffect(() => {
+  useEffect(() => {
+    if (!currentYear) return;
+    
     const loadBothTabs = async () => {
       isHydratingRef.current = true;
+      console.log("📅 Loading data for year:", currentYear);
 
       const revenueData = await loadFinancialReport("revenue", currentYear);
       const expenseData = await loadFinancialReport("expense", currentYear);
@@ -195,6 +198,7 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
 
     loadBothTabs();
   }, [currentYear]);
+
 
 
 

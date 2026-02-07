@@ -5605,11 +5605,11 @@ Please ensure follow-ups and updates for the customer.`,
 // Use: users/{adminUid}/financialReports/{type}/{year}/gridData
 // Example: users/xxx/financialReports/revenue/2026/gridData
 
-const saveFinancialReport = async (type, gridData) => {
-  if (!adminUid) return;
+const saveFinancialReport = async (type, gridData, year) => {
+  if (!adminUid || !type) return;
 
-  const year = new Date().getFullYear().toString();
-  const docRef = doc(db, "users", adminUid, "financialReports", type, year, "gridData");
+  const reportYear = year || new Date().getFullYear().toString();
+  const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
 
   // Convert object format to Firestore-compatible format
   const firestoreData = {};
@@ -5633,11 +5633,23 @@ const saveFinancialReport = async (type, gridData) => {
 
 
 
-const loadFinancialReport = async (type) => {
-  if (!adminUid) return { gridData: {} };
+const loadFinancialReport = async (type, year) => {
+  console.log("LOAD FINANCIAL REPORT INPUTS:", {
+    type,
+    year,
+    adminUid,
+    adminUidType: typeof adminUid,
+    dbExists: !!db,
+    dbType: typeof db
+  });
+  
+  if (!adminUid || !type || !db) {
+    console.log("RETURNING EARLY due to missing params");
+    return { gridData: {} };
+  }
 
-  const year = new Date().getFullYear().toString();
-  const docRef = doc(db, "users", adminUid, "financialReports", type, year, "gridData");
+  const reportYear = year || new Date().getFullYear().toString();
+  const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
   const docSnap = await getDoc(docRef);  // ← Use docRef here
 
   if (docSnap.exists()) {
