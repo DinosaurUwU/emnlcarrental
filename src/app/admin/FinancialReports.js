@@ -1254,6 +1254,7 @@ const cleanAndReorderRows = (rows) => {
         }
       });
 
+      
       // Debug final booking IDs
       const finalIds = [];
       Object.keys(newGrid).forEach((mIndex) => {
