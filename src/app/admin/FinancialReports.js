@@ -101,6 +101,9 @@ const [yearDataLoaded, setYearDataLoaded] = useState({});
     "DECEMBER",
   ];
 
+  const monthYearButtonRef = useRef(null);
+
+
   const headerColor = activeTab === "revenue" ? "#28a745" : "#dc3545";
   const background =
     activeTab === "revenue"
@@ -1456,57 +1459,84 @@ const ensureArray = (value) => {
 };
 
 
-// Month/Year Dropdown Portal
 const MonthYearDropdown = () => {
   if (typeof document === "undefined") return null;
   
+  const [position, setPosition] = useState(null); // Start with null
+  
+  useEffect(() => {
+    const updatePosition = () => {
+      const buttonRect = monthYearButtonRef.current?.getBoundingClientRect();
+      if (buttonRect) {
+        setPosition({
+          top: buttonRect.top + window.scrollY + 40,
+          left: buttonRect.left + (buttonRect.width / 2),
+        });
+      }
+    };
+    
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition);
+    
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition);
+    };
+  }, []);
+  
+  // Don't render anything until position is calculated
+  if (!position) return null;
+  
   return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      onClick={() => setShowMonthYearDropdown(false)}
-    >
+    <>
+      {/* Backdrop */}
       <div
         style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9998,
+        }}
+        onClick={() => setShowMonthYearDropdown(false)}
+      />
+      
+      {/* Dropdown - Now has correct position from the start */}
+      <div
+        style={{
+          position: "fixed",
+          top: position.top,
+          left: position.left,
+          transform: "translateX(-50%)",
           backgroundColor: "white",
-          borderRadius: "12px",
-          padding: "20px",
-          minWidth: "280px",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          zIndex: 9999,
+          padding: "10px",
+          minWidth: "200px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ fontWeight: "bold", marginBottom: "15px", textAlign: "center", fontSize: "1.1rem" }}>
-          Select Month & Year
-        </div>
-        
         {/* Month grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "15px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px", marginBottom: "10px" }}>
           {months.map((month, idx) => (
             <button
               key={month}
               onClick={() => {
-                setCurrentMonth(idx);
+                setSelectedMonthIndex(idx);
                 setShowMonthYearDropdown(false);
               }}
               style={{
-                padding: "10px 4px",
-                fontSize: "0.8rem",
+                padding: "6px 4px",
+                fontSize: "0.7rem",
                 fontWeight: idx === selectedMonthIndex ? "bold" : "normal",
-                backgroundColor: idx === selectedMonthIndex ? "#28a745" : "#f5f5f5",
+                backgroundColor: idx === selectedMonthIndex ? "#28a745" : "transparent",
                 color: idx === selectedMonthIndex ? "white" : "black",
                 border: "none",
-                borderRadius: "6px",
+                borderRadius: "4px",
                 cursor: "pointer",
               }}
             >
@@ -1515,15 +1545,13 @@ const MonthYearDropdown = () => {
           ))}
         </div>
         
-        {/* Year select */}
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ fontSize: "0.85rem", color: "#666", display: "block", marginBottom: "5px" }}>Year:</label>
+        <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
           <select
             value={currentYear}
             onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "1rem" }}
+            style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #ccc" }}
           >
-            {Array.from({ length: 11 }, (_, i) => currentYear - 5 + i).map((year) => (
+            {yearOptions.map((year) => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
@@ -1533,22 +1561,24 @@ const MonthYearDropdown = () => {
           onClick={() => setShowMonthYearDropdown(false)}
           style={{
             width: "100%",
-            padding: "10px",
+            marginTop: "10px",
+            padding: "6px",
             backgroundColor: "#dc3545",
             color: "white",
             border: "none",
-            borderRadius: "6px",
+            borderRadius: "4px",
             cursor: "pointer",
-            fontSize: "1rem",
           }}
         >
-          Cancel
+          Close
         </button>
       </div>
-    </div>,
+    </>,
     document.body
   );
 };
+
+
 
 
 
@@ -2597,19 +2627,75 @@ while (entries.length < 5) {
                           </div>
                         </div> */}
 
- <div
-        onClick={() => setShowMonthYearDropdown(!showMonthYearDropdown)}
-        style={{
-          cursor: "pointer",
-          padding: "8px 16px",
-          borderRadius: "6px",
-          backgroundColor: showMonthYearDropdown ? "#e9ecef" : "transparent",
-          fontWeight: "bolder",
-          fontSize: "1.2rem",
-        }}
-      >
-        {months[selectedMonthIndex].toUpperCase()} {currentYear} ▼
-      </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "10px",
+                              width: "100%",
+                              maxWidth: "350px",
+                              margin: "0 auto",
+                              position: "relative",
+                            }}
+                          >
+                            <button
+                              onClick={goToPrevMonth}
+                              className="month-toggle"
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                opacity: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <img src="/assets/prv-btn.png" alt="Previous" style={{ width: "20px", height: "30px" }} />
+                            </button>
+
+                                                       <div
+                              ref={monthYearButtonRef}
+                              onClick={() => setShowMonthYearDropdown(!showMonthYearDropdown)}
+                              style={{
+                                letterSpacing: "0.5px",
+                                fontWeight: "bolder",
+                                fontSize: "1.5rem",
+                                textAlign: "center",
+                                flex: "0 0 auto",
+                                minWidth: "180px",
+                                cursor: "pointer",
+                                padding: "5px 10px",
+                                borderRadius: "5px",
+                                userSelect: "none",
+                                WebkitUserSelect: "none",  
+                                backgroundColor: showMonthYearDropdown ? "var(--accent-color)" : "transparent",
+                              }}
+                            >
+                              {months[selectedMonthIndex].toUpperCase()} {currentYear}
+                            </div>
+
+
+                            <button
+                              onClick={goToNextMonth}
+                              className="month-toggle"
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                opacity: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <img src="/assets/nxt-btn.png" alt="Next" style={{ width: "20px", height: "30px" }} />
+                            </button>
+                          </div>
+
 
                         <div
                           style={{
