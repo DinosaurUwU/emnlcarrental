@@ -2501,6 +2501,9 @@ while (entries.length < 5) {
                             </button>
                           </div>
                         </div> */}
+
+
+
                           <div
                             style={{
                               display: "flex",
@@ -2511,8 +2514,10 @@ while (entries.length < 5) {
                               maxWidth: "300px",
                               margin: "0 auto",
                               position: "relative",
+                              zIndex: 1001,
                             }}
                           >
+                            {/* Previous button */}
                             <button
                               onClick={goToPrevMonth}
                               className="month-toggle"
@@ -2520,21 +2525,13 @@ while (entries.length < 5) {
                                 background: "transparent",
                                 border: "none",
                                 cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
                                 flexShrink: 0,
                               }}
                             >
-                              <img
-                                src="/assets/prv-btn.png"
-                                alt="Previous Month"
-                                style={{ width: "20px", height: "30px" }}
-                              />
+                              <img src="/assets/prv-btn.png" alt="Previous" style={{ width: "20px", height: "30px" }} />
                             </button>
 
-                            {/* CLICKABLE MONTH/YEAR */}
+                            {/* Clickable Month/Year */}
                             <div
                               onClick={() => setShowMonthYearDropdown(!showMonthYearDropdown)}
                               style={{
@@ -2550,11 +2547,11 @@ while (entries.length < 5) {
                                 backgroundColor: showMonthYearDropdown ? "#f0f0f0" : "transparent",
                               }}
                             >
-                              {months[selectedMonthIndex].toUpperCase()}{" "}
-                              {currentYear}
+                              {months[selectedMonthIndex].toUpperCase()} {currentYear}
                               <span style={{ marginLeft: "8px", fontSize: "0.8rem" }}>▼</span>
                             </div>
 
+                            {/* Next button */}
                             <button
                               onClick={goToNextMonth}
                               className="month-toggle"
@@ -2562,21 +2559,13 @@ while (entries.length < 5) {
                                 background: "transparent",
                                 border: "none",
                                 cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
                                 flexShrink: 0,
                               }}
                             >
-                              <img
-                                src="/assets/nxt-btn.png"
-                                alt="Next Month"
-                                style={{ width: "20px", height: "30px" }}
-                              />
+                              <img src="/assets/nxt-btn.png" alt="Next" style={{ width: "20px", height: "30px" }} />
                             </button>
 
-                            {/* DROPDOWN */}
+                            {/* Dropdown - HIGHER Z-INDEX */}
                             {showMonthYearDropdown && (
                               <div
                                 style={{
@@ -2589,26 +2578,18 @@ while (entries.length < 5) {
                                   border: "1px solid #ccc",
                                   borderRadius: "8px",
                                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                                  zIndex: 1000,
+                                  zIndex: 1002,
                                   padding: "10px",
                                   minWidth: "200px",
+                                  overflow: "visible",
                                 }}
                               >
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "repeat(3, 1fr)",
-                                    gap: "5px",
-                                    marginBottom: "10px",
-                                  }}
-                                >
+                                {/* Month grid */}
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px", marginBottom: "10px" }}>
                                   {months.map((month, idx) => (
                                     <button
                                       key={month}
-                                      onClick={() => {
-                                        setCurrentMonth(idx);
-                                        setShowMonthYearDropdown(false);
-                                      }}
+                                      onClick={() => { setCurrentMonth(idx); setShowMonthYearDropdown(false); }}
                                       style={{
                                         padding: "6px 4px",
                                         fontSize: "0.7rem",
@@ -2625,18 +2606,14 @@ while (entries.length < 5) {
                                   ))}
                                 </div>
                                 
+                                {/* Year select */}
                                 <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
                                   <select
                                     value={currentYear}
                                     onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                                    style={{
-                                      width: "100%",
-                                      padding: "6px",
-                                      borderRadius: "4px",
-                                      border: "1px solid #ccc",
-                                    }}
+                                    style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #ccc" }}
                                   >
-                                    {yearOptions.map((year) => (
+                                    {Array.from({ length: 11 }, (_, i) => currentYear - 5 + i).map((year) => (
                                       <option key={year} value={year}>{year}</option>
                                     ))}
                                   </select>
@@ -2661,12 +2638,11 @@ while (entries.length < 5) {
                             )}
                           </div>
 
+                          {/* Outside click closes */}
                           {showMonthYearDropdown && (
-                            <div
-                              style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-                              onClick={() => setShowMonthYearDropdown(false)}
-                            />
+                            <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }} onClick={() => setShowMonthYearDropdown(false)} />
                           )}
+
 
 
 
