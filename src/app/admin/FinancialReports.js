@@ -168,24 +168,6 @@ const FinancialReports = () => {
     }
   }, [serverChangeCounter]);
 
-  // useEffect(() => {
-  //   const loadBothTabs = async () => {
-  //     isHydratingRef.current = true;
-
-  //     const revenueData = await loadFinancialReport("revenue");
-  //     const expenseData = await loadFinancialReport("expense");
-
-  //     setRevenueGrid(revenueData.gridData);
-  //     setExpenseGrid(expenseData.gridData);
-  //     setGridData(revenueData.gridData);
-
-  //     lastSavedGridRef.current = revenueData.gridData;
-  //     isHydratingRef.current = false;
-  //   };
-
-  //   loadBothTabs();
-  // }, []);
-
   // DEBUG: Track what happens
   useEffect(() => {
     console.log("=== YEAR CHANGE DETECTED ===");
@@ -438,15 +420,6 @@ const FinancialReports = () => {
     }
   }, [activeTab, currentYear]);
 
-  // MANUAL Keep tab-specific grids in sync
-  // useEffect(() => {
-  //   if (activeTab === "revenue") {
-  //     setRevenueGrid(gridData);
-  //   } else {
-  //     setExpenseGrid(gridData);
-  //   }
-  // }, [gridData, activeTab]);
-
   // MANUAL Keep tab-specific grids in sync - MERGE, don't overwrite!
   useEffect(() => {
     if (activeTab === "revenue") {
@@ -463,17 +436,6 @@ const FinancialReports = () => {
       }));
     }
   }, [gridData, activeTab, currentYear]); // Added currentYear to deps
-
-  // Helper to build a blank grid
-  // const createBlankGrid = () => {
-  //   const blank = {};
-  //   months.forEach((_, i) => {
-  //     blank[i] = Array(5)
-  //       .fill()
-  //       .map(() => Array(5).fill(""));
-  //   });
-  //   return blank;
-  // };
 
   const createBlankGrid = () => {
     const blank = {};
@@ -492,7 +454,7 @@ const FinancialReports = () => {
   useEffect(() => {
     if (!gridData) return;
 
-    // 🚫 DO NOT auto-create grid during transient resets
+    // DO NOT auto-create grid during transient resets
     if (
       Object.keys(gridData).length === 0 &&
       lastSavedGridRef.current &&
@@ -569,14 +531,6 @@ const FinancialReports = () => {
     }
   };
 
-  // const applySorting = (monthIndex) => {
-  //   setGridData((prev) => {
-  //     const updated = { ...prev };
-  //     updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || []);
-  //     return updated;
-  //   });
-  // };
-
   const applySorting = (monthIndex) => {
     setGridData((prev) => {
       const updated = { ...prev };
@@ -585,89 +539,7 @@ const FinancialReports = () => {
     });
   };
 
-  // Handles typing in cells (SAFE VERSION)
-  //   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-  //     let newValue = value;
-
-  //     // AMOUNT COLUMN — keep ₱ visible at all times
-  //     if (colIndex === 1) {
-  //       const numeric = value.replace(/[^0-9.]/g, "");
-  //       newValue = `₱${numeric}`;
-  //     }
-
-  //     // DATE COLUMN — store raw ISO-like value (from datetime-local)
-  //     if (colIndex === 4) {
-  //       newValue = value;
-  //     }
-
-  //     setGridData((prev) => {
-  //       const updated = { ...prev };
-
-  //       // ensure monthRows exists
-  //       const monthRows = Array.isArray(updated[monthIndex])
-  //         ? [...updated[monthIndex]]
-  //         : Array(5)
-  //             .fill()
-  //             .map(() => Array(5).fill(""));
-
-  //       // clone the row safely (if missing create a row skeleton)
-  //       const currentRow = Array.isArray(monthRows[rowIndex])
-  //         ? [...monthRows[rowIndex]]
-  //         : Array(5).fill("");
-
-  //       // preserve or create metadata
-
-  // const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-  // const meta = {
-  //   [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
-  //   [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
-  //   [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
-  //   [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
-  //   [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
-  // };
-
-  //       // const meta = {
-  //       //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
-  //       //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
-  //       //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
-  //       //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
-  //       //   // stable manual id so React key doesn't change
-  //       //   _manualId:
-  //       //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
-  //       // };
-
-  //       // manual rows NEVER get bookingId accidentally
-  //       if (meta._sourceType === "manual") {
-  //         meta._bookingId = null;
-  //         meta._isAutoFill = false;
-  //         meta._entryIndex = null;
-  //       }
-
-  //       // apply typed change
-  //       currentRow[colIndex] = newValue;
-
-  //       // reattach metadata
-  //       Object.assign(currentRow, meta);
-
-  //       // put cloned row back
-  //       monthRows[rowIndex] = currentRow;
-  //       updated[monthIndex] = monthRows;
-
-  //       return updated;
-  //     });
-
-  //     setIsSynced(false);
-
-  //     // If user edited a date (colIndex === 4) we want to re-apply sorting.
-  //     // Wait a tick (non-blocking) so state commit finishes, then run sorting.
-  //     if (colIndex === 4) {
-  //       // schedule on next tick so updated state is applied
-  //       setTimeout(() => applySorting(monthIndex), 0);
-  //     }
-  //   };
-
-  
-
+  // Handles typing in cells
   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     let newValue = value;
 
@@ -690,15 +562,13 @@ const FinancialReports = () => {
         updated[monthIndex] = {};
       }
 
-// Safe row key creation with null check
-const numericIndex = rowIndex 
-  ? (typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-      ? parseInt(rowIndex.replace("Row_", ""))
-      : parseInt(rowIndex))
-  : 0;
-const rowKey = `Row_${numericIndex}`;
-
-
+      // Safe row key creation with null check
+      const numericIndex = rowIndex
+        ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+          ? parseInt(rowIndex.replace("Row_", ""))
+          : parseInt(rowIndex)
+        : 0;
+      const rowKey = `Row_${numericIndex}`;
 
       // Get current row or create new one
       const currentRow = updated[monthIndex][rowKey]
@@ -741,53 +611,6 @@ const rowKey = `Row_${numericIndex}`;
     }
   };
 
-  //   const cleanAndReorderRows = (rows) => {
-  //     if (!Array.isArray(rows)) return rows;
-
-  //     const filledRows = [];
-  //     const emptyRows = [];
-
-  //     // rows.forEach((row) => {
-  //     //   if (!row || !Array.isArray(row)) return;
-  //     //   if (row.every((c) => c === "")) emptyRows.push(row);
-  //     //   else filledRows.push(row);
-  //     // });
-
-  //     const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-
-  // rows.forEach((row) => {
-  //   if (!row || !Array.isArray(row)) return;
-
-  //   // Check if row has data (excluding metadata)
-  //   const hasData = Object.keys(row).some((key) => {
-  //     const val = row[key];
-  //     return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
-  //   });
-
-  //   if (!hasData) {
-  //     emptyRows.push(row);
-  //   } else {
-  //     filledRows.push(row);
-  //   }
-  // });
-
-  //     // Sort filled rows by date
-  //     filledRows.sort((a, b) => {
-  //       const da = new Date(a[4]).getTime();
-  //       const db = new Date(b[4]).getTime();
-  //       return sortDirection === "asc" ? da - db : db - da;
-  //     });
-
-  //     const output = [...filledRows, ...emptyRows];
-
-  //     while (output.length < 5) {
-  //       output.push(Array(5).fill(""));
-  //     }
-
-  //     return output;
-  //   };
-
-  // TO:
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
 
@@ -1296,9 +1119,10 @@ const rowKey = `Row_${numericIndex}`;
 
     setGridData((prev) => {
       const monthData = prev[monthIndex] || {};
-      const rowKey = typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-    ? rowIndex
-    : `Row_${rowIndex}`;
+      const rowKey =
+        typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+          ? rowIndex
+          : `Row_${rowIndex}`;
       const currentRow = monthData[rowKey] || ["", "", "", "", ""];
       const updatedRow = currentRow.map((cell, c) =>
         c === colIndex ? value : cell,
@@ -1319,9 +1143,10 @@ const rowKey = `Row_${numericIndex}`;
     if (value === "₱0.00") {
       setGridData((prev) => {
         const monthData = prev[monthIndex] || {};
-        const rowKey = typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-    ? rowIndex
-    : `Row_${rowIndex}`;
+        const rowKey =
+          typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+            ? rowIndex
+            : `Row_${rowIndex}`;
         const currentRow = monthData[rowKey] || ["", "", "", "", ""];
         const updatedRow = currentRow.map((cell, c) =>
           c === colIndex ? "₱" : cell,
@@ -1338,14 +1163,6 @@ const rowKey = `Row_${numericIndex}`;
     }
   };
 
-  // const addRow = (monthIndex) => {
-  //   setGridData((prev) => ({
-  //     ...prev,
-  //     [monthIndex]: [...prev[monthIndex], Array(5).fill("")],
-  //   }));
-  // };
-
-  // CHANGE TO:
   const addRow = (monthIndex) => {
     setGridData((prev) => {
       const updated = { ...prev };
@@ -2421,14 +2238,6 @@ const rowKey = `Row_${numericIndex}`;
               {visibleMonths.map((month, index) => {
                 const monthIndex = months.indexOf(month);
 
-                // // Get current month's rows as array
-                // let entries = gridData[monthIndex] || [];
-
-                // // Ensure it's an array
-                // if (!Array.isArray(entries)) {
-                //   entries = Object.values(entries);
-                // }
-
                 // Get current month's rows as object
                 let entries = gridData[monthIndex] || {};
 
@@ -2437,31 +2246,20 @@ const rowKey = `Row_${numericIndex}`;
                   entries = {};
                 }
 
-                 // Explicitly sort rows by key to guarantee order
+                // Explicitly sort rows by key to guarantee order
                 const rowKeys = ["Row_0", "Row_1", "Row_2", "Row_3", "Row_4"];
                 const sortedEntries = rowKeys
-                  .map(key => ({ key, row: entries[key] }))
-                  .filter(item => item.row !== undefined);
+                  .map((key) => ({ key, row: entries[key] }))
+                  .filter((item) => item.row !== undefined);
 
-
-                                // Apply sorting to the sorted entries
+                // Apply sorting to the sorted entries
                 if (sortMode === "date") {
-                  sortedEntries
-                    .sort((a, b) => {
-                      const da = new Date(a.row[4] || "").getTime();
-                      const db = new Date(b.row[4] || "").getTime();
-                      return sortDirection === "asc" ? da - db : db - da;
-                    });
+                  sortedEntries.sort((a, b) => {
+                    const da = new Date(a.row[4] || "").getTime();
+                    const db = new Date(b.row[4] || "").getTime();
+                    return sortDirection === "asc" ? da - db : db - da;
+                  });
                 }
-
-
-                // // Ensure we have at least 5 entries
-                // while (entries.length < 5) {
-                //   entries.push({
-                //     row: Array(5).fill(""),
-                //     originalIndex: entries.length,
-                //   });
-                // }
 
                 return (
                   <div
@@ -2556,74 +2354,6 @@ const rowKey = `Row_${numericIndex}`;
                         </div>
 
                         {/* Bottom row: prev/next buttons + big centered month + year */}
-                        {/* <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "10px",
-                            padding: "0 0px 0px 14px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <button
-                              onClick={goToPrevMonth}
-                              className="month-toggle"
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <img
-                                src="/assets/prv-btn.png"
-                                alt="Previous Month"
-                                style={{ width: "20px", height: "30px" }}
-                              />
-                            </button>
-                            <div
-                              style={{
-                                letterSpacing: "0.5px",
-                                fontWeight: "bolder",
-                                fontSize: "1.5rem",
-                                textAlign: "center",
-                                flex: 1,
-                              }}
-                            >
-                              {months[selectedMonthIndex].toUpperCase()}{" "}
-                              {currentYear}
-                            </div>
-                            <button
-                              onClick={goToNextMonth}
-                              className="month-toggle"
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <img
-                                src="/assets/nxt-btn.png"
-                                alt="Next Month"
-                                style={{ width: "20px", height: "30px" }}
-                              />
-                            </button>
-                          </div>
-                        </div> */}
 
                         <div
                           style={{
@@ -2771,18 +2501,14 @@ const rowKey = `Row_${numericIndex}`;
                           className="grid-scrollable"
                           style={{ backgroundColor: background }}
                         >
-
-
                           {sortedEntries.map((item, sortedIndex) => {
-                                                        const row = item.row;
+                            const row = item.row;
                             const originalIndex = item.originalIndex;
-
 
                             return (
                               <div
                                 key={`${monthIndex}-${item.key}`}
                                 className={`grid-row ${selectedRows.includes(item.key) ? "selected" : ""}`}
-                               
                                 style={{
                                   cursor: row._isAutoFill
                                     ? "pointer"
@@ -2851,9 +2577,7 @@ const rowKey = `Row_${numericIndex}`;
                                 <div className="grid-cell row-number-cell">
                                   <input
                                     type="checkbox"
-                                    checked={selectedRows.includes(
-                                      item.key,
-                                    )}
+                                    checked={selectedRows.includes(item.key)}
                                     disabled={row._isAutoFill === true}
                                     style={
                                       row._isAutoFill
@@ -2868,16 +2592,12 @@ const rowKey = `Row_${numericIndex}`;
                                       setSelectedRows((prev) =>
                                         e.target.checked
                                           ? [...prev, item.key]
-                                          : prev.filter(
-                                              (i) => i !== item.key,
-                                            ),
+                                          : prev.filter((i) => i !== item.key),
                                       );
                                     }}
                                   />
                                   <span>{sortedIndex + 1}</span>
                                 </div>
-
-                                {/* {row.map((cell, colIndex) => { */}
 
                                 {Array.isArray(row) ? (
                                   row.map((cell, colIndex) => {
@@ -3064,7 +2784,7 @@ const rowKey = `Row_${numericIndex}`;
                                             onChange={(e) =>
                                               handleCellChange(
                                                 monthIndex,
-                                                originalIndex,
+                                                item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
@@ -3072,7 +2792,7 @@ const rowKey = `Row_${numericIndex}`;
                                             onFocus={(e) =>
                                               handleAmountFocus(
                                                 monthIndex,
-                                                originalIndex,
+                                                item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
@@ -3080,7 +2800,7 @@ const rowKey = `Row_${numericIndex}`;
                                             onBlur={(e) =>
                                               handleAmountBlur(
                                                 monthIndex,
-                                                originalIndex,
+                                                item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
@@ -3109,13 +2829,13 @@ const rowKey = `Row_${numericIndex}`;
                                             onChange={(e) =>
                                               handleCellChange(
                                                 monthIndex,
-                                                originalIndex,
+                                                item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
                                             }
                                             className="grid-cell"
-                                            placeholder={`Cell ${originalIndex + 1}-${colIndex + 1}`}
+                                            placeholder={`Cell ${parseInt(item.key.replace("Row_", "")) + 1}-${colIndex + 1}`}
                                             disabled={isAutoFill}
                                             style={
                                               row._isAutoFill
@@ -3147,9 +2867,6 @@ const rowKey = `Row_${numericIndex}`;
 
                         <button
                           onClick={() => {
-                            // if (selectedRows.length === 0)
-                            //   return alert("No rows selected.");
-
                             if (selectedRows.length === 0) {
                               setFinancialWarningMessage(
                                 "No rows selected. Please select at least one row to proceed.",
@@ -3158,34 +2875,6 @@ const rowKey = `Row_${numericIndex}`;
                               return;
                             }
 
-                            // setGridData((prev) => {
-                            //   const newGrid = { ...prev };
-                            //   const monthRows = [...newGrid[monthIndex]];
-
-                            //   selectedRows.forEach((r) => {
-                            //     if (monthRows.length <= 5) {
-                            //       // Just clear the row if grid has 5 or fewer
-                            //       monthRows[r] = Array(
-                            //         monthRows[r].length,
-                            //       ).fill("");
-                            //     } else {
-                            //       // Remove if there are extra rows
-                            //       monthRows[r] = null;
-                            //     }
-                            //   });
-
-                            //   // Filter out removed rows
-                            //   newGrid[monthIndex] = monthRows.filter(Boolean);
-
-                            //   // Restore 5 rows minimum
-                            //   while (newGrid[monthIndex].length < 5) {
-                            //     newGrid[monthIndex].push(Array(5).fill(""));
-                            //   }
-
-                            //   return newGrid;
-                            // });
-
-                            // CHANGE TO:
                             setGridData((prev) => {
                               const newGrid = { ...prev };
                               const monthRows = [...newGrid[monthIndex]];
