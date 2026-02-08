@@ -7,8 +7,6 @@ import XLSX from "xlsx-js-style";
 import { MdWarning } from "react-icons/md";
 import { createPortal } from "react-dom";
 
-
-
 const FinancialReports = () => {
   const {
     unitData,
@@ -35,12 +33,7 @@ const FinancialReports = () => {
   } = useUser();
 
   const [showFinancialWarning, setShowFinancialWarning] = useState(false);
-const [financialWarningMessage, setFinancialWarningMessage] = useState("");
-
-
-
-
-
+  const [financialWarningMessage, setFinancialWarningMessage] = useState("");
 
   const [activeTab, setActiveTab] = useState("revenue");
   const [zoomLevel, setZoomLevel] = useState(100);
@@ -48,11 +41,8 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0–11
 
-
-const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
-const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
-
-
+  const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
+  const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
   const [savingStatus, setSavingStatus] = useState(false); // true = saving, false = idle
   const [lastSavedAt, setLastSavedAt] = useState(null);
@@ -67,8 +57,8 @@ const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
   const lastSavedGridRef = useRef(null);
 
   const [gridData, setGridData] = useState({});
-const yearDataLoadedRef = useRef({});
-const [yearDataLoaded, setYearDataLoaded] = useState({});
+  const yearDataLoadedRef = useRef({});
+  const [yearDataLoaded, setYearDataLoaded] = useState({});
   const [showAllMonths, setShowAllMonths] = useState(false);
 
   const [selectedRowToDelete, setSelectedRowToDelete] = useState(0);
@@ -102,7 +92,6 @@ const [yearDataLoaded, setYearDataLoaded] = useState({});
   ];
 
   const monthYearButtonRef = useRef(null);
-
 
   const headerColor = activeTab === "revenue" ? "#28a745" : "#dc3545";
   const background =
@@ -198,177 +187,183 @@ const [yearDataLoaded, setYearDataLoaded] = useState({});
   // }, []);
 
   // DEBUG: Track what happens
-useEffect(() => {
-  console.log("=== YEAR CHANGE DETECTED ===");
-  console.log("currentYear:", currentYear);
-  console.log("activeTab:", activeTab);
-  console.log("yearDataLoadedRef.current:", yearDataLoadedRef.current);
-  console.log("revenueGrid keys:", Object.keys(revenueGrid));
-  console.log("expenseGrid keys:", Object.keys(expenseGrid));
-  console.log("gridData keys:", Object.keys(gridData));
-}, [currentYear]);
-
+  useEffect(() => {
+    console.log("=== YEAR CHANGE DETECTED ===");
+    console.log("currentYear:", currentYear);
+    console.log("activeTab:", activeTab);
+    console.log("yearDataLoadedRef.current:", yearDataLoadedRef.current);
+    console.log("revenueGrid keys:", Object.keys(revenueGrid));
+    console.log("expenseGrid keys:", Object.keys(expenseGrid));
+    console.log("gridData keys:", Object.keys(gridData));
+  }, [currentYear]);
 
   useEffect(() => {
-  if (!currentYear) return;
-  
-  const loadBothTabs = async () => {
-    isHydratingRef.current = true;
-    console.log("📅 Loading data for year:", currentYear);
+    if (!currentYear) return;
 
-    const yearKey = `${currentYear}_${activeTab}`;
-    console.log("📊 Checking yearDataLoadedRef.current:", yearDataLoadedRef.current);
-    console.log("📊 yearKey:", yearKey);
-    console.log("📊 Is loaded?", yearDataLoadedRef.current[yearKey]);
-    
-    if (!yearDataLoadedRef.current[yearKey]) {
-      console.log("📥 Fetching from Firestore for", currentYear, activeTab);
-      const revenueData = await loadFinancialReport("revenue", currentYear);
-      const expenseData = await loadFinancialReport("expense", currentYear);
+    const loadBothTabs = async () => {
+      isHydratingRef.current = true;
+      console.log("📅 Loading data for year:", currentYear);
 
-      // Use LOCAL variables for the fetched data
-      const newRevenueData = revenueData.gridData;
-      const newExpenseData = expenseData.gridData;
+      const yearKey = `${currentYear}_${activeTab}`;
+      console.log(
+        "📊 Checking yearDataLoadedRef.current:",
+        yearDataLoadedRef.current,
+      );
+      console.log("📊 yearKey:", yearKey);
+      console.log("📊 Is loaded?", yearDataLoadedRef.current[yearKey]);
 
-      // Store in state (async, but we use locals below)
-      setRevenueGrid(prev => ({
-        ...prev,
-        [currentYear]: newRevenueData
-      }));
-      setExpenseGrid(prev => ({
-        ...prev,
-        [currentYear]: newExpenseData
-      }));
-      
-      // Update REF (not state) - immediate effect
-      yearDataLoadedRef.current = {
-        ...yearDataLoadedRef.current,
-        [`${currentYear}_revenue`]: true,
-        [`${currentYear}_expense`]: true
-      };
-      
-      // Also update state for UI if needed
-      setYearDataLoaded(yearDataLoadedRef.current);
+      if (!yearDataLoadedRef.current[yearKey]) {
+        console.log("📥 Fetching from Firestore for", currentYear, activeTab);
+        const revenueData = await loadFinancialReport("revenue", currentYear);
+        const expenseData = await loadFinancialReport("expense", currentYear);
 
-      console.log("✅ Updated yearDataLoadedRef:", yearDataLoadedRef.current);
+        // Use LOCAL variables for the fetched data
+        const newRevenueData = revenueData.gridData;
+        const newExpenseData = expenseData.gridData;
 
-      // Set current view using LOCAL variables
-      if (activeTab === "revenue") {
-        setGridData(newRevenueData || createBlankGrid());
-        lastSavedGridRef.current = newRevenueData || createBlankGrid();
-      } else {
-        setGridData(newExpenseData || createBlankGrid());
-        lastSavedGridRef.current = newExpenseData || createBlankGrid();
-      }
-        } else {
-      console.log("📤 Checking cache for", currentYear, activeTab);
-      
-      // For cached years, use the data from state
-      const cachedRevenue = revenueGrid[currentYear];
-      const cachedExpense = expenseGrid[currentYear];
-      
-      console.log("📊 cachedRevenue exists?", !!cachedRevenue);
-      console.log("📊 cachedExpense exists?", !!cachedExpense);
-      
-      // Check if cached data actually exists and has content
-      const hasCachedData = activeTab === "revenue" 
-        ? cachedRevenue && Object.keys(cachedRevenue).length > 0
-        : cachedExpense && Object.keys(cachedExpense).length > 0;
-      
-      console.log("📊 hasCachedData?", hasCachedData);
-      
-      if (hasCachedData) {
-        console.log("✅ Using cached data for", currentYear, activeTab);
+        // Store in state (async, but we use locals below)
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [currentYear]: newRevenueData,
+        }));
+        setExpenseGrid((prev) => ({
+          ...prev,
+          [currentYear]: newExpenseData,
+        }));
+
+        // Update REF (not state) - immediate effect
+        yearDataLoadedRef.current = {
+          ...yearDataLoadedRef.current,
+          [`${currentYear}_revenue`]: true,
+          [`${currentYear}_expense`]: true,
+        };
+
+        // Also update state for UI if needed
+        setYearDataLoaded(yearDataLoadedRef.current);
+
+        console.log("✅ Updated yearDataLoadedRef:", yearDataLoadedRef.current);
+
+        // Set current view using LOCAL variables
         if (activeTab === "revenue") {
-          setGridData(cachedRevenue);
-          lastSavedGridRef.current = cachedRevenue;
+          setGridData(newRevenueData || createBlankGrid());
+          lastSavedGridRef.current = newRevenueData || createBlankGrid();
         } else {
-          setGridData(cachedExpense);
-          lastSavedGridRef.current = cachedExpense;
+          setGridData(newExpenseData || createBlankGrid());
+          lastSavedGridRef.current = newExpenseData || createBlankGrid();
         }
       } else {
-        console.log("⚠️ Cache says 'loaded' but data missing! Fetching from Firestore...");
-        
-        // Fetch fresh data since cache is incomplete
-        if (activeTab === "revenue") {
-          const revenueData = await loadFinancialReport("revenue", currentYear);
-          const dataToUse = revenueData.gridData || createBlankGrid();
-          setRevenueGrid(prev => ({
-            ...prev,
-            [currentYear]: dataToUse
-          }));
-          setGridData(dataToUse);
-          lastSavedGridRef.current = dataToUse;
+        console.log("📤 Checking cache for", currentYear, activeTab);
+
+        // For cached years, use the data from state
+        const cachedRevenue = revenueGrid[currentYear];
+        const cachedExpense = expenseGrid[currentYear];
+
+        console.log("📊 cachedRevenue exists?", !!cachedRevenue);
+        console.log("📊 cachedExpense exists?", !!cachedExpense);
+
+        // Check if cached data actually exists and has content
+        const hasCachedData =
+          activeTab === "revenue"
+            ? cachedRevenue && Object.keys(cachedRevenue).length > 0
+            : cachedExpense && Object.keys(cachedExpense).length > 0;
+
+        console.log("📊 hasCachedData?", hasCachedData);
+
+        if (hasCachedData) {
+          console.log("✅ Using cached data for", currentYear, activeTab);
+          if (activeTab === "revenue") {
+            setGridData(cachedRevenue);
+            lastSavedGridRef.current = cachedRevenue;
+          } else {
+            setGridData(cachedExpense);
+            lastSavedGridRef.current = cachedExpense;
+          }
         } else {
-          const expenseData = await loadFinancialReport("expense", currentYear);
-          const dataToUse = expenseData.gridData || createBlankGrid();
-          setExpenseGrid(prev => ({
-            ...prev,
-            [currentYear]: dataToUse
-          }));
-          setGridData(dataToUse);
-          lastSavedGridRef.current = dataToUse;
+          console.log(
+            "⚠️ Cache says 'loaded' but data missing! Fetching from Firestore...",
+          );
+
+          // Fetch fresh data since cache is incomplete
+          if (activeTab === "revenue") {
+            const revenueData = await loadFinancialReport(
+              "revenue",
+              currentYear,
+            );
+            const dataToUse = revenueData.gridData || createBlankGrid();
+            setRevenueGrid((prev) => ({
+              ...prev,
+              [currentYear]: dataToUse,
+            }));
+            setGridData(dataToUse);
+            lastSavedGridRef.current = dataToUse;
+          } else {
+            const expenseData = await loadFinancialReport(
+              "expense",
+              currentYear,
+            );
+            const dataToUse = expenseData.gridData || createBlankGrid();
+            setExpenseGrid((prev) => ({
+              ...prev,
+              [currentYear]: dataToUse,
+            }));
+            setGridData(dataToUse);
+            lastSavedGridRef.current = dataToUse;
+          }
         }
       }
-    }
 
+      isHydratingRef.current = false;
+    };
 
-    isHydratingRef.current = false;
-  };
+    loadBothTabs();
+  }, [currentYear, activeTab]); // REMOVED yearDataLoaded from deps
 
-  loadBothTabs();
-}, [currentYear, activeTab]); // REMOVED yearDataLoaded from deps
+  useEffect(() => {
+    if (
+      !autoSaveEnabled ||
+      Object.keys(gridData).length === 0 ||
+      isSavingAuto ||
+      JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+    )
+      return;
 
+    lastSavedGridRef.current = gridData;
+    setIsSavingAuto(true);
 
+    (async () => {
+      try {
+        setSavingStatus(true);
 
+        // Update the year-specific state before saving
+        if (activeTab === "revenue") {
+          setRevenueGrid((prev) => ({
+            ...prev,
+            [currentYear]: gridData,
+          }));
+        } else {
+          setExpenseGrid((prev) => ({
+            ...prev,
+            [currentYear]: gridData,
+          }));
+        }
 
+        await saveFinancialReport(activeTab, gridData, currentYear);
 
-
-useEffect(() => {
-  if (
-    !autoSaveEnabled ||
-    Object.keys(gridData).length === 0 ||
-    isSavingAuto ||
-    JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-  )
-    return;
-
-  lastSavedGridRef.current = gridData;
-  setIsSavingAuto(true);
-
-  (async () => {
-    try {
-      setSavingStatus(true);
-      
-      // Update the year-specific state before saving
-      if (activeTab === "revenue") {
-        setRevenueGrid(prev => ({
-          ...prev,
-          [currentYear]: gridData
-        }));
-      } else {
-        setExpenseGrid(prev => ({
-          ...prev,
-          [currentYear]: gridData
-        }));
+        const now = new Date();
+        setLastSavedAt(now);
+        setIsSynced(true);
+        setHasServerChange(false);
+        justSaved.current = true;
+        setTimeout(() => (justSaved.current = false), 1000);
+        console.log(
+          `✅ Auto-saved ${activeTab} financial report for ${currentYear}`,
+        );
+      } finally {
+        setSavingStatus(false);
+        setIsSavingAuto(false);
       }
-      
-      await saveFinancialReport(activeTab, gridData, currentYear);
-
-      const now = new Date();
-      setLastSavedAt(now);
-      setIsSynced(true);
-      setHasServerChange(false);
-      justSaved.current = true;
-      setTimeout(() => (justSaved.current = false), 1000);
-      console.log(`✅ Auto-saved ${activeTab} financial report for ${currentYear}`);
-    } finally {
-      setSavingStatus(false);
-      setIsSavingAuto(false);
-    }
-  })();
-}, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
-
+    })();
+  }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
 
   const formatDateTime = (dateObj) => {
     if (!dateObj) return "No Saved Data Yet";
@@ -386,21 +381,27 @@ useEffect(() => {
     if (activeTab === "revenue") {
       // Read from state (should be populated from year-switching useEffect)
       const yearData = revenueGrid[currentYear];
-      
+
       // Check if yearData actually exists
       if (yearData && Object.keys(yearData).length > 0) {
-        console.log("✅ Tab switch: Using cached data for", currentYear, activeTab);
+        console.log(
+          "✅ Tab switch: Using cached data for",
+          currentYear,
+          activeTab,
+        );
         setGridData(yearData);
         lastSavedGridRef.current = yearData;
       } else {
-        console.log("⚠️ Tab switch: No cached data, fetching from Firestore...");
+        console.log(
+          "⚠️ Tab switch: No cached data, fetching from Firestore...",
+        );
         // If not in state yet, load from Firestore
         const loadTabData = async () => {
           const revenueData = await loadFinancialReport("revenue", currentYear);
           const dataToUse = revenueData.gridData || createBlankGrid();
-          setRevenueGrid(prev => ({
+          setRevenueGrid((prev) => ({
             ...prev,
-            [currentYear]: dataToUse
+            [currentYear]: dataToUse,
           }));
           setGridData(dataToUse);
           lastSavedGridRef.current = dataToUse;
@@ -409,19 +410,25 @@ useEffect(() => {
       }
     } else {
       const yearData = expenseGrid[currentYear];
-      
+
       if (yearData && Object.keys(yearData).length > 0) {
-        console.log("✅ Tab switch: Using cached data for", currentYear, activeTab);
+        console.log(
+          "✅ Tab switch: Using cached data for",
+          currentYear,
+          activeTab,
+        );
         setGridData(yearData);
         lastSavedGridRef.current = yearData;
       } else {
-        console.log("⚠️ Tab switch: No cached data, fetching from Firestore...");
+        console.log(
+          "⚠️ Tab switch: No cached data, fetching from Firestore...",
+        );
         const loadTabData = async () => {
           const expenseData = await loadFinancialReport("expense", currentYear);
           const dataToUse = expenseData.gridData || createBlankGrid();
-          setExpenseGrid(prev => ({
+          setExpenseGrid((prev) => ({
             ...prev,
-            [currentYear]: dataToUse
+            [currentYear]: dataToUse,
           }));
           setGridData(dataToUse);
           lastSavedGridRef.current = dataToUse;
@@ -430,9 +437,6 @@ useEffect(() => {
       }
     }
   }, [activeTab, currentYear]);
-
-
-
 
   // MANUAL Keep tab-specific grids in sync
   // useEffect(() => {
@@ -443,24 +447,22 @@ useEffect(() => {
   //   }
   // }, [gridData, activeTab]);
 
-
-    // MANUAL Keep tab-specific grids in sync - MERGE, don't overwrite!
+  // MANUAL Keep tab-specific grids in sync - MERGE, don't overwrite!
   useEffect(() => {
     if (activeTab === "revenue") {
       // Only update the specific year, preserve other years
-      setRevenueGrid(prev => ({
+      setRevenueGrid((prev) => ({
         ...prev,
-        [currentYear]: gridData
+        [currentYear]: gridData,
       }));
     } else {
       // Only update the specific year, preserve other years
-      setExpenseGrid(prev => ({
+      setExpenseGrid((prev) => ({
         ...prev,
-        [currentYear]: gridData
+        [currentYear]: gridData,
       }));
     }
   }, [gridData, activeTab, currentYear]); // Added currentYear to deps
-
 
   // Helper to build a blank grid
   // const createBlankGrid = () => {
@@ -473,23 +475,19 @@ useEffect(() => {
   //   return blank;
   // };
 
-const createBlankGrid = () => {
-  const blank = {};
-  for (let i = 0; i < 12; i++) {
-    blank[i] = {
-      Row_0: ["", "", "", "", ""],
-      Row_1: ["", "", "", "", ""],
-      Row_2: ["", "", "", "", ""],
-      Row_3: ["", "", "", "", ""],
-      Row_4: ["", "", "", "", ""],
-    };
-  }
-  return blank;
-};
-
-
-
-
+  const createBlankGrid = () => {
+    const blank = {};
+    for (let i = 0; i < 12; i++) {
+      blank[i] = {
+        Row_0: ["", "", "", "", ""],
+        Row_1: ["", "", "", "", ""],
+        Row_2: ["", "", "", "", ""],
+        Row_3: ["", "", "", "", ""],
+        Row_4: ["", "", "", "", ""],
+      };
+    }
+    return blank;
+  };
 
   useEffect(() => {
     if (!gridData) return;
@@ -521,8 +519,7 @@ const createBlankGrid = () => {
     try {
       setSavingStatus(true);
       // await saveFinancialReport(activeTab, gridData);
-await saveFinancialReport(activeTab, gridData, currentYear);
-
+      await saveFinancialReport(activeTab, gridData, currentYear);
 
       const now = new Date();
       setLastSavedAt(now);
@@ -551,9 +548,10 @@ await saveFinancialReport(activeTab, gridData, currentYear);
 
       // const { gridData, updatedAt } = await loadFinancialReport(activeTab);
 
-      const { gridData, updatedAt } = await loadFinancialReport(activeTab, currentYear);
-
-
+      const { gridData, updatedAt } = await loadFinancialReport(
+        activeTab,
+        currentYear,
+      );
 
       setGridData(gridData);
       setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
@@ -580,279 +578,260 @@ await saveFinancialReport(activeTab, gridData, currentYear);
   // };
 
   const applySorting = (monthIndex) => {
-  setGridData((prev) => {
-    const updated = { ...prev };
-    updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
-    return updated;
-  });
-};
+    setGridData((prev) => {
+      const updated = { ...prev };
+      updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
+      return updated;
+    });
+  };
 
   // Handles typing in cells (SAFE VERSION)
-//   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-//     let newValue = value;
+  //   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+  //     let newValue = value;
 
-//     // AMOUNT COLUMN — keep ₱ visible at all times
-//     if (colIndex === 1) {
-//       const numeric = value.replace(/[^0-9.]/g, "");
-//       newValue = `₱${numeric}`;
-//     }
+  //     // AMOUNT COLUMN — keep ₱ visible at all times
+  //     if (colIndex === 1) {
+  //       const numeric = value.replace(/[^0-9.]/g, "");
+  //       newValue = `₱${numeric}`;
+  //     }
 
-//     // DATE COLUMN — store raw ISO-like value (from datetime-local)
-//     if (colIndex === 4) {
-//       newValue = value;
-//     }
+  //     // DATE COLUMN — store raw ISO-like value (from datetime-local)
+  //     if (colIndex === 4) {
+  //       newValue = value;
+  //     }
 
-//     setGridData((prev) => {
-//       const updated = { ...prev };
+  //     setGridData((prev) => {
+  //       const updated = { ...prev };
 
-//       // ensure monthRows exists
-//       const monthRows = Array.isArray(updated[monthIndex])
-//         ? [...updated[monthIndex]]
-//         : Array(5)
-//             .fill()
-//             .map(() => Array(5).fill(""));
+  //       // ensure monthRows exists
+  //       const monthRows = Array.isArray(updated[monthIndex])
+  //         ? [...updated[monthIndex]]
+  //         : Array(5)
+  //             .fill()
+  //             .map(() => Array(5).fill(""));
 
-//       // clone the row safely (if missing create a row skeleton)
-//       const currentRow = Array.isArray(monthRows[rowIndex])
-//         ? [...monthRows[rowIndex]]
-//         : Array(5).fill("");
+  //       // clone the row safely (if missing create a row skeleton)
+  //       const currentRow = Array.isArray(monthRows[rowIndex])
+  //         ? [...monthRows[rowIndex]]
+  //         : Array(5).fill("");
 
-//       // preserve or create metadata
+  //       // preserve or create metadata
 
+  // const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
+  // const meta = {
+  //   [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
+  //   [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
+  //   [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
+  //   [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
+  //   [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
+  // };
 
+  //       // const meta = {
+  //       //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
+  //       //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
+  //       //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
+  //       //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
+  //       //   // stable manual id so React key doesn't change
+  //       //   _manualId:
+  //       //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
+  //       // };
 
-// const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-// const meta = {
-//   [`_sourceType${suffix}`]: monthRows[rowIndex]?.[`_sourceType${suffix}`] || "manual",
-//   [`_bookingId${suffix}`]: monthRows[rowIndex]?.[`_bookingId${suffix}`] || null,
-//   [`_isAutoFill${suffix}`]: monthRows[rowIndex]?.[`_isAutoFill${suffix}`] || false,
-//   [`_entryIndex${suffix}`]: monthRows[rowIndex]?.[`_entryIndex${suffix}`] ?? null,
-//   [`_manualId${suffix}`]: monthRows[rowIndex]?.[`_manualId${suffix}`] || `manual-${crypto.randomUUID()}`,
-// };
+  //       // manual rows NEVER get bookingId accidentally
+  //       if (meta._sourceType === "manual") {
+  //         meta._bookingId = null;
+  //         meta._isAutoFill = false;
+  //         meta._entryIndex = null;
+  //       }
 
+  //       // apply typed change
+  //       currentRow[colIndex] = newValue;
 
+  //       // reattach metadata
+  //       Object.assign(currentRow, meta);
 
-//       // const meta = {
-//       //   _sourceType: monthRows[rowIndex]?._sourceType || "manual", // "auto" or "manual"
-//       //   _bookingId: monthRows[rowIndex]?._bookingId || null, // auto rows will have this
-//       //   _isAutoFill: monthRows[rowIndex]?._isAutoFill || false,
-//       //   _entryIndex: monthRows[rowIndex]?._entryIndex ?? null,
-//       //   // stable manual id so React key doesn't change
-//       //   _manualId:
-//       //     monthRows[rowIndex]?._manualId || `manual-${crypto.randomUUID()}`,
-//       // };
+  //       // put cloned row back
+  //       monthRows[rowIndex] = currentRow;
+  //       updated[monthIndex] = monthRows;
 
+  //       return updated;
+  //     });
 
+  //     setIsSynced(false);
 
+  //     // If user edited a date (colIndex === 4) we want to re-apply sorting.
+  //     // Wait a tick (non-blocking) so state commit finishes, then run sorting.
+  //     if (colIndex === 4) {
+  //       // schedule on next tick so updated state is applied
+  //       setTimeout(() => applySorting(monthIndex), 0);
+  //     }
+  //   };
 
-//       // manual rows NEVER get bookingId accidentally
-//       if (meta._sourceType === "manual") {
-//         meta._bookingId = null;
-//         meta._isAutoFill = false;
-//         meta._entryIndex = null;
-//       }
+  const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+    let newValue = value;
 
-//       // apply typed change
-//       currentRow[colIndex] = newValue;
-
-//       // reattach metadata
-//       Object.assign(currentRow, meta);
-
-//       // put cloned row back
-//       monthRows[rowIndex] = currentRow;
-//       updated[monthIndex] = monthRows;
-
-//       return updated;
-//     });
-
-//     setIsSynced(false);
-
-//     // If user edited a date (colIndex === 4) we want to re-apply sorting.
-//     // Wait a tick (non-blocking) so state commit finishes, then run sorting.
-//     if (colIndex === 4) {
-//       // schedule on next tick so updated state is applied
-//       setTimeout(() => applySorting(monthIndex), 0);
-//     }
-//   };
-
-
-const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-  let newValue = value;
-
-  // AMOUNT COLUMN
-  if (colIndex === 1) {
-    const numeric = value.replace(/[^0-9.]/g, "");
-    newValue = `₱${numeric}`;
-  }
-
-  // DATE COLUMN
-  if (colIndex === 4) {
-    newValue = value;
-  }
-
-  setGridData((prev) => {
-    const updated = { ...prev };
-
-    // Ensure month exists
-    if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
-      updated[monthIndex] = {};
+    // AMOUNT COLUMN
+    if (colIndex === 1) {
+      const numeric = value.replace(/[^0-9.]/g, "");
+      newValue = `₱${numeric}`;
     }
 
-    // Use Row_0, Row_1, etc. format
-    const rowKey = `Row_${rowIndex}`;
-
-    // Get current row or create new one
-    const currentRow = updated[monthIndex][rowKey]
-      ? [...updated[monthIndex][rowKey]]
-      : ["", "", "", "", ""];
-
-    // Metadata
-    const meta = {
-      _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
-      _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
-      _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
-      _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
-      _manualId: updated[monthIndex][rowKey]?._manualId || `manual-${crypto.randomUUID()}`,
-    };
-
-    if (meta._sourceType === "manual") {
-      meta._bookingId = null;
-      meta._isAutoFill = false;
-      meta._entryIndex = null;
+    // DATE COLUMN
+    if (colIndex === 4) {
+      newValue = value;
     }
 
-    // Apply change
-    currentRow[colIndex] = newValue;
+    setGridData((prev) => {
+      const updated = { ...prev };
 
-    // Reattach metadata
-    Object.assign(currentRow, meta);
+      // Ensure month exists
+      if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
+        updated[monthIndex] = {};
+      }
 
-    // Put row back
-    updated[monthIndex][rowKey] = currentRow;
-
-    return updated;
-  });
-
-  setIsSynced(false);
-
-  if (colIndex === 4) {
-    setTimeout(() => applySorting(monthIndex), 0);
-  }
-};
+// Safe row key creation with null check
+const numericIndex = rowIndex 
+  ? (typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+      ? parseInt(rowIndex.replace("Row_", ""))
+      : parseInt(rowIndex))
+  : 0;
+const rowKey = `Row_${numericIndex}`;
 
 
 
+      // Get current row or create new one
+      const currentRow = updated[monthIndex][rowKey]
+        ? [...updated[monthIndex][rowKey]]
+        : ["", "", "", "", ""];
 
+      // Metadata
+      const meta = {
+        _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
+        _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
+        _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
+        _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
+        _manualId:
+          updated[monthIndex][rowKey]?._manualId ||
+          `manual-${crypto.randomUUID()}`,
+      };
 
+      if (meta._sourceType === "manual") {
+        meta._bookingId = null;
+        meta._isAutoFill = false;
+        meta._entryIndex = null;
+      }
 
-//   const cleanAndReorderRows = (rows) => {
-//     if (!Array.isArray(rows)) return rows;
+      // Apply change
+      currentRow[colIndex] = newValue;
 
-//     const filledRows = [];
-//     const emptyRows = [];
+      // Reattach metadata
+      Object.assign(currentRow, meta);
 
-//     // rows.forEach((row) => {
-//     //   if (!row || !Array.isArray(row)) return;
-//     //   if (row.every((c) => c === "")) emptyRows.push(row);
-//     //   else filledRows.push(row);
-//     // });
+      // Put row back
+      updated[monthIndex][rowKey] = currentRow;
 
+      return updated;
+    });
 
+    setIsSynced(false);
 
-//     const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
-
-// rows.forEach((row) => {
-//   if (!row || !Array.isArray(row)) return;
-  
-//   // Check if row has data (excluding metadata)
-//   const hasData = Object.keys(row).some((key) => {
-//     const val = row[key];
-//     return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
-//   });
-  
-//   if (!hasData) {
-//     emptyRows.push(row);
-//   } else {
-//     filledRows.push(row);
-//   }
-// });
-
-
-
-//     // Sort filled rows by date
-//     filledRows.sort((a, b) => {
-//       const da = new Date(a[4]).getTime();
-//       const db = new Date(b[4]).getTime();
-//       return sortDirection === "asc" ? da - db : db - da;
-//     });
-
-//     const output = [...filledRows, ...emptyRows];
-
-//     while (output.length < 5) {
-//       output.push(Array(5).fill(""));
-//     }
-
-//     return output;
-//   };
-
-
-
-
-
-
-
-// TO:
-const cleanAndReorderRows = (rows) => {
-  if (!rows || typeof rows !== "object") return {};
-  
-  // Convert object to array for processing
-  const rowsArray = Object.keys(rows).map((key) => ({
-    key,
-    data: rows[key],
-  }));
-
-  const filledRows = [];
-  const emptyRows = [];
-
-  rowsArray.forEach(({ data }) => {
-    if (!data || !Array.isArray(data)) return;
-    if (data.some((c) => c !== "" && c !== null && c !== undefined)) {
-      filledRows.push(data);
-    } else {
-      emptyRows.push(data);
+    if (colIndex === 4) {
+      setTimeout(() => applySorting(monthIndex), 0);
     }
-  });
+  };
 
-  // Sort filled rows by date
-  filledRows.sort((a, b) => {
-    const da = new Date(a[4] || "").getTime();
-    const db = new Date(b[4] || "").getTime();
-    return sortDirection === "asc" ? da - db : db - da;
-  });
+  //   const cleanAndReorderRows = (rows) => {
+  //     if (!Array.isArray(rows)) return rows;
 
-  // Reconstruct as object
-  const result = {};
-  filledRows.forEach((row, idx) => {
-    result[`Row_${idx}`] = row;
-  });
-  emptyRows.forEach((row, idx) => {
-    result[`Row_${filledRows.length + idx}`] = row;
-  });
+  //     const filledRows = [];
+  //     const emptyRows = [];
 
-  // Ensure we have 5 rows
-  for (let i = 0; i < 5; i++) {
-    if (!result[`Row_${i}`]) {
-      result[`Row_${i}`] = ["", "", "", "", ""];
+  //     // rows.forEach((row) => {
+  //     //   if (!row || !Array.isArray(row)) return;
+  //     //   if (row.every((c) => c === "")) emptyRows.push(row);
+  //     //   else filledRows.push(row);
+  //     // });
+
+  //     const suffix = activeTab === "revenue" ? "_Revenue" : "_Expense";
+
+  // rows.forEach((row) => {
+  //   if (!row || !Array.isArray(row)) return;
+
+  //   // Check if row has data (excluding metadata)
+  //   const hasData = Object.keys(row).some((key) => {
+  //     const val = row[key];
+  //     return val !== "" && val !== null && val !== undefined && !key.startsWith("_");
+  //   });
+
+  //   if (!hasData) {
+  //     emptyRows.push(row);
+  //   } else {
+  //     filledRows.push(row);
+  //   }
+  // });
+
+  //     // Sort filled rows by date
+  //     filledRows.sort((a, b) => {
+  //       const da = new Date(a[4]).getTime();
+  //       const db = new Date(b[4]).getTime();
+  //       return sortDirection === "asc" ? da - db : db - da;
+  //     });
+
+  //     const output = [...filledRows, ...emptyRows];
+
+  //     while (output.length < 5) {
+  //       output.push(Array(5).fill(""));
+  //     }
+
+  //     return output;
+  //   };
+
+  // TO:
+  const cleanAndReorderRows = (rows) => {
+    if (!rows || typeof rows !== "object") return {};
+
+    // Convert object to array for processing
+    const rowsArray = Object.keys(rows).map((key) => ({
+      key,
+      data: rows[key],
+    }));
+
+    const filledRows = [];
+    const emptyRows = [];
+
+    rowsArray.forEach(({ data }) => {
+      if (!data || !Array.isArray(data)) return;
+      if (data.some((c) => c !== "" && c !== null && c !== undefined)) {
+        filledRows.push(data);
+      } else {
+        emptyRows.push(data);
+      }
+    });
+
+    // Sort filled rows by date
+    filledRows.sort((a, b) => {
+      const da = new Date(a[4] || "").getTime();
+      const db = new Date(b[4] || "").getTime();
+      return sortDirection === "asc" ? da - db : db - da;
+    });
+
+    // Reconstruct as object
+    const result = {};
+    filledRows.forEach((row, idx) => {
+      result[`Row_${idx}`] = row;
+    });
+    emptyRows.forEach((row, idx) => {
+      result[`Row_${filledRows.length + idx}`] = row;
+    });
+
+    // Ensure we have 5 rows
+    for (let i = 0; i < 5; i++) {
+      if (!result[`Row_${i}`]) {
+        result[`Row_${i}`] = ["", "", "", "", ""];
+      }
     }
-  }
 
-  return result;
-};
-
-
-
-
-
+    return result;
+  };
 
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
@@ -1271,7 +1250,6 @@ const cleanAndReorderRows = (rows) => {
         }
       });
 
-
       // Debug final booking IDs
       const finalIds = [];
       Object.keys(newGrid).forEach((mIndex) => {
@@ -1301,7 +1279,6 @@ const cleanAndReorderRows = (rows) => {
       });
   }, [gridData, activeTab, currentYear]);
 
-
   // Format properly on blur
   const handleAmountBlur = (monthIndex, rowIndex, colIndex, value) => {
     const numeric = value.replace(/[^0-9.]/g, "");
@@ -1315,12 +1292,37 @@ const cleanAndReorderRows = (rows) => {
           })}`
         : "₱0.00";
 
+    setGridData((prev) => {
+      const monthData = prev[monthIndex] || {};
+      const rowKey = typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+    ? rowIndex
+    : `Row_${rowIndex}`;
+      const currentRow = monthData[rowKey] || ["", "", "", "", ""];
+      const updatedRow = currentRow.map((cell, c) =>
+        c === colIndex ? value : cell,
+      );
+
+      return {
+        ...prev,
+        [monthIndex]: {
+          ...monthData,
+          [rowKey]: updatedRow,
+        },
+      };
+    });
+  };
+
+  // When user focuses on amount field
+  const handleAmountFocus = (monthIndex, rowIndex, colIndex, value) => {
+    if (value === "₱0.00") {
       setGridData((prev) => {
         const monthData = prev[monthIndex] || {};
-        const rowKey = `Row_${rowIndex}`;
+        const rowKey = typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+    ? rowIndex
+    : `Row_${rowIndex}`;
         const currentRow = monthData[rowKey] || ["", "", "", "", ""];
         const updatedRow = currentRow.map((cell, c) =>
-          c === colIndex ? value : cell,
+          c === colIndex ? "₱" : cell,
         );
 
         return {
@@ -1331,31 +1333,6 @@ const cleanAndReorderRows = (rows) => {
           },
         };
       });
-
-  };
-
-
-
-  // When user focuses on amount field
-  const handleAmountFocus = (monthIndex, rowIndex, colIndex, value) => {
-    if (value === "₱0.00") {
-        setGridData((prev) => {
-          const monthData = prev[monthIndex] || {};
-          const rowKey = `Row_${rowIndex}`;
-          const currentRow = monthData[rowKey] || ["", "", "", "", ""];
-          const updatedRow = currentRow.map((cell, c) =>
-            c === colIndex ? "₱" : cell,
-          );
-
-          return {
-            ...prev,
-            [monthIndex]: {
-              ...monthData,
-              [rowKey]: updatedRow,
-            },
-          };
-        });
-
     }
   };
 
@@ -1366,28 +1343,27 @@ const cleanAndReorderRows = (rows) => {
   //   }));
   // };
 
-// CHANGE TO:
-const addRow = (monthIndex) => {
-  setGridData((prev) => {
-    const updated = { ...prev };
-    const monthRows = [...(updated[monthIndex] || [])];
+  // CHANGE TO:
+  const addRow = (monthIndex) => {
+    setGridData((prev) => {
+      const updated = { ...prev };
+      const monthRows = [...(updated[monthIndex] || [])];
 
-    // Add 3 new empty rows
-    for (let i = 0; i < 3; i++) {
-      monthRows.push(Array(5).fill(""));
-    }
+      // Add 3 new empty rows
+      for (let i = 0; i < 3; i++) {
+        monthRows.push(Array(5).fill(""));
+      }
 
-    // Limit to max 50 rows
-    if (monthRows.length > 50) {
-      alert("Maximum of 50 rows per month reached.");
-      return prev;
-    }
+      // Limit to max 50 rows
+      if (monthRows.length > 50) {
+        alert("Maximum of 50 rows per month reached.");
+        return prev;
+      }
 
-    updated[monthIndex] = monthRows;
-    return updated;
-  });
-};
-
+      updated[monthIndex] = monthRows;
+      return updated;
+    });
+  };
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
@@ -1445,142 +1421,152 @@ const addRow = (monthIndex) => {
   };
 
   const closeFinancialWarning = () => {
-  setShowFinancialWarning(false);
-  setFinancialWarningMessage("");
-};
+    setShowFinancialWarning(false);
+    setFinancialWarningMessage("");
+  };
 
-// Add this near the top of FinancialReports.js, after the imports
-const ensureArray = (value) => {
-  if (Array.isArray(value)) return value;
-  if (typeof value === "object" && value !== null) {
-    return Object.values(value);
-  }
-  return Array(5).fill("");
-};
+  // Add this near the top of FinancialReports.js, after the imports
+  const ensureArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "object" && value !== null) {
+      return Object.values(value);
+    }
+    return Array(5).fill("");
+  };
 
+  const MonthYearDropdown = () => {
+    if (typeof document === "undefined") return null;
 
-const MonthYearDropdown = () => {
-  if (typeof document === "undefined") return null;
-  
-  const [position, setPosition] = useState(null); // Start with null
-  
-  useEffect(() => {
-    const updatePosition = () => {
-      const buttonRect = monthYearButtonRef.current?.getBoundingClientRect();
-      if (buttonRect) {
-        setPosition({
-          top: buttonRect.top + window.scrollY + 40,
-          left: buttonRect.left + (buttonRect.width / 2),
-        });
-      }
-    };
-    
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition);
-    
-    return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition);
-    };
-  }, []);
-  
-  // Don't render anything until position is calculated
-  if (!position) return null;
-  
-  return createPortal(
-    <>
-      {/* Backdrop */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 9998,
-        }}
-        onClick={() => setShowMonthYearDropdown(false)}
-      />
-      
-      {/* Dropdown - Now has correct position from the start */}
-      <div
-        style={{
-          position: "fixed",
-          top: position.top,
-          left: position.left,
-          transform: "translateX(-50%)",
-          backgroundColor: "white",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          zIndex: 9999,
-          padding: "10px",
-          minWidth: "200px",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Month grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px", marginBottom: "10px" }}>
-          {months.map((month, idx) => (
-            <button
-              key={month}
-              onClick={() => {
-                setSelectedMonthIndex(idx);
-                setShowMonthYearDropdown(false);
-              }}
+    const [position, setPosition] = useState(null); // Start with null
+
+    useEffect(() => {
+      const updatePosition = () => {
+        const buttonRect = monthYearButtonRef.current?.getBoundingClientRect();
+        if (buttonRect) {
+          setPosition({
+            top: buttonRect.top + window.scrollY + 40,
+            left: buttonRect.left + buttonRect.width / 2,
+          });
+        }
+      };
+
+      updatePosition();
+      window.addEventListener("resize", updatePosition);
+      window.addEventListener("scroll", updatePosition);
+
+      return () => {
+        window.removeEventListener("resize", updatePosition);
+        window.removeEventListener("scroll", updatePosition);
+      };
+    }, []);
+
+    // Don't render anything until position is calculated
+    if (!position) return null;
+
+    return createPortal(
+      <>
+        {/* Backdrop */}
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9998,
+          }}
+          onClick={() => setShowMonthYearDropdown(false)}
+        />
+
+        {/* Dropdown - Now has correct position from the start */}
+        <div
+          style={{
+            position: "fixed",
+            top: position.top,
+            left: position.left,
+            transform: "translateX(-50%)",
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            zIndex: 9999,
+            padding: "10px",
+            minWidth: "200px",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Month grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "5px",
+              marginBottom: "10px",
+            }}
+          >
+            {months.map((month, idx) => (
+              <button
+                key={month}
+                onClick={() => {
+                  setSelectedMonthIndex(idx);
+                  setShowMonthYearDropdown(false);
+                }}
+                style={{
+                  padding: "6px 4px",
+                  fontSize: "0.7rem",
+                  fontWeight: idx === selectedMonthIndex ? "bold" : "normal",
+                  backgroundColor:
+                    idx === selectedMonthIndex ? "#28a745" : "transparent",
+                  color: idx === selectedMonthIndex ? "white" : "black",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                {month.substring(0, 3)}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
+            <select
+              value={currentYear}
+              onChange={(e) => setCurrentYear(parseInt(e.target.value))}
               style={{
-                padding: "6px 4px",
-                fontSize: "0.7rem",
-                fontWeight: idx === selectedMonthIndex ? "bold" : "normal",
-                backgroundColor: idx === selectedMonthIndex ? "#28a745" : "transparent",
-                color: idx === selectedMonthIndex ? "white" : "black",
-                border: "none",
+                width: "100%",
+                padding: "6px",
                 borderRadius: "4px",
-                cursor: "pointer",
+                border: "1px solid #ccc",
               }}
             >
-              {month.substring(0, 3)}
-            </button>
-          ))}
-        </div>
-        
-        <div style={{ borderTop: "1px solid #eee", paddingTop: "10px" }}>
-          <select
-            value={currentYear}
-            onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-            style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #ccc" }}
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={() => setShowMonthYearDropdown(false)}
+            style={{
+              width: "100%",
+              marginTop: "10px",
+              padding: "6px",
+              backgroundColor: "#dc3545",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
           >
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+            Close
+          </button>
         </div>
-
-        <button
-          onClick={() => setShowMonthYearDropdown(false)}
-          style={{
-            width: "100%",
-            marginTop: "10px",
-            padding: "6px",
-            backgroundColor: "#dc3545",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Close
-        </button>
-      </div>
-    </>,
-    document.body
-  );
-};
-
-
-
-
+      </>,
+      document.body,
+    );
+  };
 
   return (
     <div className="financial-reports">
@@ -2277,10 +2263,13 @@ const MonthYearDropdown = () => {
         </div>
       )}
 
-            {/* ================= Financial Warning Overlay ================= */}
+      {/* ================= Financial Warning Overlay ================= */}
       {showFinancialWarning && (
         <div className="warning-overlay" onClick={closeFinancialWarning}>
-          <div className="warning-container" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="warning-container"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="warning-icon">
               <MdWarning size={32} />
             </div>
@@ -2292,7 +2281,6 @@ const MonthYearDropdown = () => {
           </div>
         </div>
       )}
-
 
       <h2>Financial Reports</h2>
 
@@ -2431,39 +2419,47 @@ const MonthYearDropdown = () => {
               {visibleMonths.map((month, index) => {
                 const monthIndex = months.indexOf(month);
 
-// Get current month's rows as array
-let entries = gridData[monthIndex] || [];
+                // // Get current month's rows as array
+                // let entries = gridData[monthIndex] || [];
 
-// Ensure it's an array
-if (!Array.isArray(entries)) {
-  entries = Object.values(entries);
-}
+                // // Ensure it's an array
+                // if (!Array.isArray(entries)) {
+                //   entries = Object.values(entries);
+                // }
 
-// Apply sorting
-if (sortMode === "date") {
-  entries = entries
-    .map((row, idx) => ({ row, originalIndex: idx }))
-    .sort((a, b) => {
-      const da = new Date(a.row[4] || "").getTime();
-      const db = new Date(b.row[4] || "").getTime();
-      return sortDirection === "asc" ? da - db : db - da;
-    });
-} else {
-  entries = entries.map((row, idx) => ({
-    row,
-    originalIndex: idx,
-  }));
-}
+                // Get current month's rows as object
+                let entries = gridData[monthIndex] || {};
 
-// Ensure we have at least 5 entries
-while (entries.length < 5) {
-  entries.push({
-    row: Array(5).fill(""),
-    originalIndex: entries.length,
-  });
-}
+                // Ensure it's an object and sort rows by Row_0 → Row_4 order
+                if (typeof entries !== "object" || entries === null) {
+                  entries = {};
+                }
+
+                 // Explicitly sort rows by key to guarantee order
+                const rowKeys = ["Row_0", "Row_1", "Row_2", "Row_3", "Row_4"];
+                const sortedEntries = rowKeys
+                  .map(key => ({ key, row: entries[key] }))
+                  .filter(item => item.row !== undefined);
 
 
+                                // Apply sorting to the sorted entries
+                if (sortMode === "date") {
+                  sortedEntries
+                    .sort((a, b) => {
+                      const da = new Date(a.row[4] || "").getTime();
+                      const db = new Date(b.row[4] || "").getTime();
+                      return sortDirection === "asc" ? da - db : db - da;
+                    });
+                }
+
+
+                // // Ensure we have at least 5 entries
+                // while (entries.length < 5) {
+                //   entries.push({
+                //     row: Array(5).fill(""),
+                //     originalIndex: entries.length,
+                //   });
+                // }
 
                 return (
                   <div
@@ -2627,75 +2623,86 @@ while (entries.length < 5) {
                           </div>
                         </div> */}
 
-                          <div
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "10px",
+                            width: "100%",
+                            maxWidth: "350px",
+                            margin: "0 auto",
+                            position: "relative",
+                          }}
+                        >
+                          <button
+                            onClick={goToPrevMonth}
+                            className="month-toggle"
                             style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              opacity: 1,
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "space-between",
-                              gap: "10px",
-                              width: "100%",
-                              maxWidth: "350px",
-                              margin: "0 auto",
-                              position: "relative",
+                              justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
-                            <button
-                              onClick={goToPrevMonth}
-                              className="month-toggle"
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <img src="/assets/prv-btn.png" alt="Previous" style={{ width: "20px", height: "30px" }} />
-                            </button>
+                            <img
+                              src="/assets/prv-btn.png"
+                              alt="Previous"
+                              style={{ width: "20px", height: "30px" }}
+                            />
+                          </button>
 
-                                                       <div
-                              ref={monthYearButtonRef}
-                              onClick={() => setShowMonthYearDropdown(!showMonthYearDropdown)}
-                              style={{
-                                letterSpacing: "0.5px",
-                                fontWeight: "bolder",
-                                fontSize: "1.5rem",
-                                textAlign: "center",
-                                flex: "0 0 auto",
-                                minWidth: "180px",
-                                cursor: "pointer",
-                                padding: "5px 10px",
-                                borderRadius: "5px",
-                                userSelect: "none",
-                                WebkitUserSelect: "none",  
-                                backgroundColor: showMonthYearDropdown ? "var(--accent-color)" : "transparent",
-                              }}
-                            >
-                              {months[selectedMonthIndex].toUpperCase()} {currentYear}
-                            </div>
-
-
-                            <button
-                              onClick={goToNextMonth}
-                              className="month-toggle"
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                opacity: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <img src="/assets/nxt-btn.png" alt="Next" style={{ width: "20px", height: "30px" }} />
-                            </button>
+                          <div
+                            ref={monthYearButtonRef}
+                            onClick={() =>
+                              setShowMonthYearDropdown(!showMonthYearDropdown)
+                            }
+                            style={{
+                              letterSpacing: "0.5px",
+                              fontWeight: "bolder",
+                              fontSize: "1.5rem",
+                              textAlign: "center",
+                              flex: "0 0 auto",
+                              minWidth: "180px",
+                              cursor: "pointer",
+                              padding: "5px 10px",
+                              borderRadius: "5px",
+                              userSelect: "none",
+                              WebkitUserSelect: "none",
+                              backgroundColor: showMonthYearDropdown
+                                ? "var(--accent-color)"
+                                : "transparent",
+                            }}
+                          >
+                            {months[selectedMonthIndex].toUpperCase()}{" "}
+                            {currentYear}
                           </div>
 
+                          <button
+                            onClick={goToNextMonth}
+                            className="month-toggle"
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              opacity: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src="/assets/nxt-btn.png"
+                              alt="Next"
+                              style={{ width: "20px", height: "30px" }}
+                            />
+                          </button>
+                        </div>
 
                         <div
                           style={{
@@ -2762,20 +2769,18 @@ while (entries.length < 5) {
                           className="grid-scrollable"
                           style={{ backgroundColor: background }}
                         >
-                          {/* {entries.map((entry, sortedIndex) => {
-                            const { row, originalIndex } = entry; */}
 
-                            {
-                            
-                            
-entries.map((item, sortedIndex) => {
-  const row = item.row;
-  const originalIndex = item.originalIndex;
+
+                          {sortedEntries.map((item, sortedIndex) => {
+                                                        const row = item.row;
+                            const originalIndex = item.originalIndex;
+
 
                             return (
                               <div
-                                key={`${monthIndex}-${originalIndex}-${row._isAutoFill ? `${row._bookingId}-${row._entryIndex}` : row._manualId || `manual-${originalIndex}`}`}
-                                className={`grid-row ${selectedRows.includes(originalIndex) ? "selected" : ""}`}
+                                key={`${monthIndex}-${item.key}`}
+                                className={`grid-row ${selectedRows.includes(item.key) ? "selected" : ""}`}
+                               
                                 style={{
                                   cursor: row._isAutoFill
                                     ? "pointer"
@@ -2845,7 +2850,7 @@ entries.map((item, sortedIndex) => {
                                   <input
                                     type="checkbox"
                                     checked={selectedRows.includes(
-                                      originalIndex,
+                                      item.key,
                                     )}
                                     disabled={row._isAutoFill === true}
                                     style={
@@ -2860,9 +2865,9 @@ entries.map((item, sortedIndex) => {
                                     onChange={(e) => {
                                       setSelectedRows((prev) =>
                                         e.target.checked
-                                          ? [...prev, originalIndex]
+                                          ? [...prev, item.key]
                                           : prev.filter(
-                                              (i) => i !== originalIndex,
+                                              (i) => i !== item.key,
                                             ),
                                       );
                                     }}
@@ -2872,217 +2877,165 @@ entries.map((item, sortedIndex) => {
 
                                 {/* {row.map((cell, colIndex) => { */}
 
+                                {Array.isArray(row) ? (
+                                  row.map((cell, colIndex) => {
+                                    // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
+                                    const isAutoFill = row._isAutoFill === true;
 
-                                  {Array.isArray(row) ? (
-  row.map((cell, colIndex) => {
-
-
-
-
-                                  // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
-                                  const isAutoFill = row._isAutoFill === true;
-
-                                  // UNIT column (dropdown from unitData)
-                                  if (colIndex === 0) {
-                                    return (
-                                      <select
-                                        key={colIndex}
-                                        value={cell}
-                                        disabled={isAutoFill}
-                                        style={
-                                          isAutoFill
-                                            ? {
-                                                opacity: 1,
-                                                cursor: "not-allowed",
-                                                pointerEvents: "none",
-                                              }
-                                            : {}
-                                        }
-                                        onChange={(e) =>
-                                          handleCellChange(
-                                            monthIndex,
-                                            originalIndex,
-                                            colIndex,
-                                            e.target.value,
-                                          )
-                                        }
-                                        className="grid-cell"
-                                      >
-                                        <option value="">Select Unit</option>
-                                        {allUnitData.map((unit) => (
-                                          <option
-                                            key={unit.id}
-                                            value={unit.name}
-                                          >
-                                            {unit.name}
-                                          </option>
-                                        ))}
-                                        <option value="Person">Person</option>
-                                        <option value="Organization">
-                                          Organization
-                                        </option>
-                                      </select>
-                                    );
-                                  }
-
-                                  // MOP column (dropdown)
-                                  if (colIndex === 2) {
-                                    return (
-                                      <select
-                                        key={colIndex}
-                                        value={cell}
-                                        onChange={(e) =>
-                                          handleCellChange(
-                                            monthIndex,
-                                            originalIndex,
-                                            colIndex,
-                                            e.target.value,
-                                          )
-                                        }
-                                        className="grid-cell"
-                                        disabled={isAutoFill}
-                                        style={
-                                          isAutoFill
-                                            ? {
-                                                opacity: 1,
-                                                cursor: "not-allowed",
-                                                pointerEvents: "none",
-                                              }
-                                            : {}
-                                        }
-                                      >
-                                        <option value="">Select MOP</option>
-                                        {mopTypes.map((type) => (
-                                          <option key={type} value={type}>
-                                            {type}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    );
-                                  }
-
-                                  // POP column (dropdown)
-                                  else if (colIndex === 3) {
-                                    const isRevenue = activeTab === "revenue";
-                                    const label = isRevenue ? "POP" : "POE";
-
-                                    const options = isRevenue
-                                      ? popTypesRevenue
-                                      : popTypesExpense;
-
-                                    return (
-                                      <select
-                                        key={colIndex}
-                                        value={cell}
-                                        onChange={(e) =>
-                                          handleCellChange(
-                                            monthIndex,
-                                            originalIndex,
-                                            colIndex,
-                                            e.target.value,
-                                          )
-                                        }
-                                        className="grid-cell"
-                                        disabled={isAutoFill}
-                                        style={
-                                          isAutoFill
-                                            ? {
-                                                opacity: 1,
-                                                cursor: "not-allowed",
-                                                pointerEvents: "none",
-                                              }
-                                            : {}
-                                        }
-                                      >
-                                        <option value="">{`Select ${label}`}</option>
-                                        {options.map((opt) => (
-                                          <option key={opt} value={opt}>
-                                            {opt}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    );
-                                  }
-
-                                  // DATE column
-                                  else if (colIndex === 4) {
-                                    return (
-                                      <input
-                                        key={colIndex}
-                                        type="datetime-local"
-                                        className="grid-cell"
-                                        value={(() => {
-                                          if (!cell) return "";
-                                          const parsed = new Date(cell);
-                                          if (isNaN(parsed.getTime()))
-                                            return "";
-                                          const offset =
-                                            parsed.getTimezoneOffset();
-                                          const localDate = new Date(
-                                            parsed.getTime() - offset * 60000,
-                                          );
-                                          return localDate
-                                            .toISOString()
-                                            .slice(0, 16);
-                                        })()}
-                                        onChange={(e) =>
-                                          handleCellChange(
-                                            monthIndex,
-                                            originalIndex,
-                                            colIndex,
-                                            e.target.value,
-                                          )
-                                        }
-                                        onBlur={() => applySorting(monthIndex)}
-                                        disabled={isAutoFill}
-                                        style={
-                                          isAutoFill
-                                            ? {
-                                                opacity: 1,
-                                                cursor: "not-allowed",
-                                                pointerEvents: "none",
-                                              }
-                                            : {}
-                                        }
-                                      />
-                                    );
-                                  }
-
-                                  // UNIT or AMOUNT columns
-                                  else {
-                                    if (colIndex === 1) {
-                                      // AMOUNT INPUT — number-only while typing, format on blur
+                                    // UNIT column (dropdown from unitData)
+                                    if (colIndex === 0) {
                                       return (
-                                        <input
+                                        <select
                                           key={colIndex}
-                                          type="text"
-                                          value={cell || "₱0.00"}
+                                          value={cell}
+                                          disabled={isAutoFill}
+                                          style={
+                                            isAutoFill
+                                              ? {
+                                                  opacity: 1,
+                                                  cursor: "not-allowed",
+                                                  pointerEvents: "none",
+                                                }
+                                              : {}
+                                          }
                                           onChange={(e) =>
                                             handleCellChange(
                                               monthIndex,
-                                              originalIndex,
+                                              item.key,
                                               colIndex,
                                               e.target.value,
                                             )
                                           }
-                                          onFocus={(e) =>
-                                            handleAmountFocus(
+                                          className="grid-cell"
+                                        >
+                                          <option value="">Select Unit</option>
+                                          {allUnitData.map((unit) => (
+                                            <option
+                                              key={unit.id}
+                                              value={unit.name}
+                                            >
+                                              {unit.name}
+                                            </option>
+                                          ))}
+                                          <option value="Person">Person</option>
+                                          <option value="Organization">
+                                            Organization
+                                          </option>
+                                        </select>
+                                      );
+                                    }
+
+                                    // MOP column (dropdown)
+                                    if (colIndex === 2) {
+                                      return (
+                                        <select
+                                          key={colIndex}
+                                          value={cell}
+                                          onChange={(e) =>
+                                            handleCellChange(
                                               monthIndex,
-                                              originalIndex,
+                                              item.key,
                                               colIndex,
                                               e.target.value,
                                             )
                                           }
-                                          onBlur={(e) =>
-                                            handleAmountBlur(
+                                          className="grid-cell"
+                                          disabled={isAutoFill}
+                                          style={
+                                            isAutoFill
+                                              ? {
+                                                  opacity: 1,
+                                                  cursor: "not-allowed",
+                                                  pointerEvents: "none",
+                                                }
+                                              : {}
+                                          }
+                                        >
+                                          <option value="">Select MOP</option>
+                                          {mopTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                              {type}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      );
+                                    }
+
+                                    // POP column (dropdown)
+                                    else if (colIndex === 3) {
+                                      const isRevenue = activeTab === "revenue";
+                                      const label = isRevenue ? "POP" : "POE";
+
+                                      const options = isRevenue
+                                        ? popTypesRevenue
+                                        : popTypesExpense;
+
+                                      return (
+                                        <select
+                                          key={colIndex}
+                                          value={cell}
+                                          onChange={(e) =>
+                                            handleCellChange(
                                               monthIndex,
-                                              originalIndex,
+                                              item.key,
                                               colIndex,
                                               e.target.value,
                                             )
                                           }
-                                          className="grid-cell text-right"
-                                          placeholder="₱0.00"
+                                          className="grid-cell"
+                                          disabled={isAutoFill}
+                                          style={
+                                            isAutoFill
+                                              ? {
+                                                  opacity: 1,
+                                                  cursor: "not-allowed",
+                                                  pointerEvents: "none",
+                                                }
+                                              : {}
+                                          }
+                                        >
+                                          <option value="">{`Select ${label}`}</option>
+                                          {options.map((opt) => (
+                                            <option key={opt} value={opt}>
+                                              {opt}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      );
+                                    }
+
+                                    // DATE column
+                                    else if (colIndex === 4) {
+                                      return (
+                                        <input
+                                          key={colIndex}
+                                          type="datetime-local"
+                                          className="grid-cell"
+                                          value={(() => {
+                                            if (!cell) return "";
+                                            const parsed = new Date(cell);
+                                            if (isNaN(parsed.getTime()))
+                                              return "";
+                                            const offset =
+                                              parsed.getTimezoneOffset();
+                                            const localDate = new Date(
+                                              parsed.getTime() - offset * 60000,
+                                            );
+                                            return localDate
+                                              .toISOString()
+                                              .slice(0, 16);
+                                          })()}
+                                          onChange={(e) =>
+                                            handleCellChange(
+                                              monthIndex,
+                                              item.key,
+                                              colIndex,
+                                              e.target.value,
+                                            )
+                                          }
+                                          onBlur={() =>
+                                            applySorting(monthIndex)
+                                          }
                                           disabled={isAutoFill}
                                           style={
                                             isAutoFill
@@ -3095,41 +3048,90 @@ entries.map((item, sortedIndex) => {
                                           }
                                         />
                                       );
-                                    } else {
-                                      // UNIT INPUT
-                                      return (
-                                        <input
-                                          key={colIndex}
-                                          type="text"
-                                          value={cell}
-                                          onChange={(e) =>
-                                            handleCellChange(
-                                              monthIndex,
-                                              originalIndex,
-                                              colIndex,
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="grid-cell"
-                                          placeholder={`Cell ${originalIndex + 1}-${colIndex + 1}`}
-                                          disabled={isAutoFill}
-                                          style={
-                                            row._isAutoFill
-                                              ? {
-                                                  cursor: "not-allowed",
-                                                  opacity: 1,
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                        />
-                                      );
                                     }
-                                  }
-                                })
-) : (
-  <div className="empty-row">No data</div>
-)}
+
+                                    // UNIT or AMOUNT columns
+                                    else {
+                                      if (colIndex === 1) {
+                                        // AMOUNT INPUT — number-only while typing, format on blur
+                                        return (
+                                          <input
+                                            key={colIndex}
+                                            type="text"
+                                            value={cell || "₱0.00"}
+                                            onChange={(e) =>
+                                              handleCellChange(
+                                                monthIndex,
+                                                originalIndex,
+                                                colIndex,
+                                                e.target.value,
+                                              )
+                                            }
+                                            onFocus={(e) =>
+                                              handleAmountFocus(
+                                                monthIndex,
+                                                originalIndex,
+                                                colIndex,
+                                                e.target.value,
+                                              )
+                                            }
+                                            onBlur={(e) =>
+                                              handleAmountBlur(
+                                                monthIndex,
+                                                originalIndex,
+                                                colIndex,
+                                                e.target.value,
+                                              )
+                                            }
+                                            className="grid-cell text-right"
+                                            placeholder="₱0.00"
+                                            disabled={isAutoFill}
+                                            style={
+                                              isAutoFill
+                                                ? {
+                                                    opacity: 1,
+                                                    cursor: "not-allowed",
+                                                    pointerEvents: "none",
+                                                  }
+                                                : {}
+                                            }
+                                          />
+                                        );
+                                      } else {
+                                        // UNIT INPUT
+                                        return (
+                                          <input
+                                            key={colIndex}
+                                            type="text"
+                                            value={cell}
+                                            onChange={(e) =>
+                                              handleCellChange(
+                                                monthIndex,
+                                                originalIndex,
+                                                colIndex,
+                                                e.target.value,
+                                              )
+                                            }
+                                            className="grid-cell"
+                                            placeholder={`Cell ${originalIndex + 1}-${colIndex + 1}`}
+                                            disabled={isAutoFill}
+                                            style={
+                                              row._isAutoFill
+                                                ? {
+                                                    cursor: "not-allowed",
+                                                    opacity: 1,
+                                                    pointerEvents: "none",
+                                                  }
+                                                : {}
+                                            }
+                                          />
+                                        );
+                                      }
+                                    }
+                                  })
+                                ) : (
+                                  <div className="empty-row">No data</div>
+                                )}
                               </div>
                             );
                           })}
@@ -3146,11 +3148,13 @@ entries.map((item, sortedIndex) => {
                             // if (selectedRows.length === 0)
                             //   return alert("No rows selected.");
 
- if (selectedRows.length === 0) {
-      setFinancialWarningMessage("No rows selected. Please select at least one row to proceed.");
-      setShowFinancialWarning(true);
-      return;
-    }
+                            if (selectedRows.length === 0) {
+                              setFinancialWarningMessage(
+                                "No rows selected. Please select at least one row to proceed.",
+                              );
+                              setShowFinancialWarning(true);
+                              return;
+                            }
 
                             // setGridData((prev) => {
                             //   const newGrid = { ...prev };
@@ -3179,31 +3183,31 @@ entries.map((item, sortedIndex) => {
                             //   return newGrid;
                             // });
 
-// CHANGE TO:
-setGridData((prev) => {
-  const newGrid = { ...prev };
-  const monthRows = [...newGrid[monthIndex]];
+                            // CHANGE TO:
+                            setGridData((prev) => {
+                              const newGrid = { ...prev };
+                              const monthRows = [...newGrid[monthIndex]];
 
-  selectedRows.forEach((r) => {
-    if (monthRows.length <= 5) {
-      monthRows[r] = Array(monthRows[r]?.length || 5).fill("");
-    } else {
-      monthRows[r] = null;
-    }
-  });
+                              selectedRows.forEach((r) => {
+                                if (monthRows.length <= 5) {
+                                  monthRows[r] = Array(
+                                    monthRows[r]?.length || 5,
+                                  ).fill("");
+                                } else {
+                                  monthRows[r] = null;
+                                }
+                              });
 
-  // Filter out removed rows
-  newGrid[monthIndex] = monthRows.filter(Boolean);
+                              // Filter out removed rows
+                              newGrid[monthIndex] = monthRows.filter(Boolean);
 
-  // Restore 5 rows minimum
-  while (newGrid[monthIndex].length < 5) {
-    newGrid[monthIndex].push(Array(5).fill(""));
-  }
+                              // Restore 5 rows minimum
+                              while (newGrid[monthIndex].length < 5) {
+                                newGrid[monthIndex].push(Array(5).fill(""));
+                              }
 
-  return newGrid;
-});
-
-
+                              return newGrid;
+                            });
 
                             setSelectedRows([]);
                           }}
@@ -3264,8 +3268,7 @@ setGridData((prev) => {
 
                   // Collect from revenue grid
                   Object.values(revenueGrid).forEach((monthRows) => {
-  Object.values(monthRows).forEach((row) => {
-
+                    Object.values(monthRows).forEach((row) => {
                       if (
                         row &&
                         Array.isArray(row) &&
@@ -3289,8 +3292,7 @@ setGridData((prev) => {
 
                   // Collect from expense grid
                   Object.values(expenseGrid).forEach((monthRows) => {
-  Object.values(monthRows).forEach((row) => {
-
+                    Object.values(monthRows).forEach((row) => {
                       if (
                         row &&
                         Array.isArray(row) &&
@@ -3392,6 +3394,5 @@ setGridData((prev) => {
 };
 
 export default FinancialReports;
-
 
 // export default React.memo(FinancialReports);

@@ -40,3 +40,239 @@ body {
   --supporting-color: #0d4d1a;
   --light-color: #f9f9f9;
 }
+
+
+
+
+/* ================= Error Overlay ================= */
+.error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+}
+
+.error-container {
+  width: 380px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.error-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #dc3545;
+}
+
+.error-container h3 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #dc3545;
+  margin: 0 0 12px 0;
+}
+
+.error-container p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.error-btn {
+  width: 100%;
+  max-width: 180px;
+  border: 2px solid #074609;
+  background-color: #fff;
+  color: #074609;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.error-btn:hover {
+  background-color: #074609;
+  color: #fff;
+  box-shadow: 0 0px 10px var(--accent-color);
+}
+
+
+/* Warning Overlay (Yellow) */
+.warning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.warning-container {
+  width: 380px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.warning-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 193, 7, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #856404;
+}
+
+.warning-container h3 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #856404;
+  margin: 0 0 12px 0;
+}
+
+.warning-container p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.warning-btn {
+  width: 100%;
+  max-width: 180px;
+  border: 2px solid #074609;
+  background-color: #fff;
+  color: #074609;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.warning-btn:hover {
+  background-color: #074609;
+  color: #fff;
+  box-shadow: 0 0px 10px var(--accent-color);
+}
+
+
+/* Success Overlay (Green) */
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.success-container {
+  width: 380px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(40, 167, 69, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #28a745;
+}
+
+.success-container h3 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #28a745;
+  margin: 0 0 12px 0;
+}
+
+.success-container p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.success-btn {
+  width: 100%;
+  max-width: 180px;
+  border: 2px solid #074609;
+  background-color: #fff;
+  color: #074609;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.success-btn:hover {
+  background-color: #074609;
+  color: #fff;
+  box-shadow: 0 0px 10px var(--accent-color);
+}
