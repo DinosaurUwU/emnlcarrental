@@ -666,6 +666,7 @@ const FinancialReports = () => {
   //     }
   //   };
 
+  
   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     let newValue = value;
 
