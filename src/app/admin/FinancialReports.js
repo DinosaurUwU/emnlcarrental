@@ -92,24 +92,6 @@ const FinancialReports = () => {
       console.error("❌ Error clearing localStorage:", error);
     }
   };
-
-    // Check if grid data has actual content (not just blank structure)
-  const hasActualData = (data) => {
-    if (!data || Object.keys(data).length === 0) return false;
-    
-    return Object.keys(data).some(monthKey => {
-      const monthData = data[monthKey];
-      if (!monthData || Object.keys(monthData).length === 0) return false;
-      
-      // Check if any cell has actual data (not empty string)
-      return Object.keys(monthData).some(cellKey => {
-        const cells = monthData[cellKey];
-        if (!Array.isArray(cells)) return false;
-        return cells.some(cell => cell !== "" && cell !== null && cell !== undefined);
-      });
-    });
-  };
-
   
   // Function to save ALL pending localStorage data to Firestore (for Save Button)
   const saveAllPendingToFirestore = async () => {
@@ -129,17 +111,6 @@ const FinancialReports = () => {
     for (const key of pendingKeys) {
       try {
         const data = JSON.parse(localStorage.getItem(key));
-        
-        // SKIP if no actual data (only blank grid structure)
-        if (!hasActualData(data)) {
-          console.log(`⏭️ Skipping ${key} - no actual data, just blank grid`);
-          clearLocalStorage(
-            key.replace(LOCAL_STORAGE_KEY + "_", "").split("_")[0],
-            parseInt(key.replace(LOCAL_STORAGE_KEY + "_", "").split("_")[1])
-          );
-          continue;
-        }
-        
         // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
         const tab = parts[0];
@@ -170,7 +141,6 @@ const FinancialReports = () => {
     setHasServerChange(false);
     setSavingStatus(false);
   };
-
 
 
 
@@ -537,14 +507,11 @@ useEffect(() => {
       setIsSynced(true);
       setLastSavedAt(new Date());
     } else {
-      // Autosave OFF: Save to localStorage temporarily ONLY if has actual data
-      if (hasActualData(gridData)) {
-        saveToLocalStorage(activeTab, currentYear, gridData);
-        lastSavedGridRef.current = gridData;
-        setIsSynced(false); // Mark as unsaved to Firestore
-      }
+      // Autosave OFF: Save to localStorage temporarily
+      saveToLocalStorage(activeTab, currentYear, gridData);
+      lastSavedGridRef.current = gridData;
+      setIsSynced(false); // Mark as unsaved to Firestore
     }
-
   }, [gridData, activeTab, currentYear, autoSaveEnabled]);
 
 
