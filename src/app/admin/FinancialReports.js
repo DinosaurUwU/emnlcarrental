@@ -184,10 +184,171 @@ const isFirstRenderRef = useRef(true);  // Skip first render
     console.log("gridData keys:", Object.keys(gridData));
   }, [currentYear]);
 
-  useEffect(() => {
-    if (!currentYear) return;
+  
 
-    const loadBothTabs = async () => {
+  // useEffect(() => {
+  //   if (!currentYear) return;
+
+  //   const loadBothTabs = async () => {
+  //     isHydratingRef.current = true;
+  //     console.log("📅 Loading data for year:", currentYear);
+
+  //     const yearKey = `${currentYear}_${activeTab}`;
+  //     console.log(
+  //       "📊 Checking yearDataLoadedRef.current:",
+  //       yearDataLoadedRef.current,
+  //     );
+  //     console.log("📊 yearKey:", yearKey);
+  //     console.log("📊 Is loaded?", yearDataLoadedRef.current[yearKey]);
+
+  //     if (!yearDataLoadedRef.current[yearKey]) {
+  //       console.log("📥 Fetching from Firestore for", currentYear, activeTab);
+  //       const revenueData = await loadFinancialReport("revenue", currentYear);
+  //       const expenseData = await loadFinancialReport("expense", currentYear);
+
+  //       // Use LOCAL variables for the fetched data
+  //       const newRevenueData = revenueData.gridData;
+  //       const newExpenseData = expenseData.gridData;
+
+  //       // Store in state (async, but we use locals below)
+  //       setRevenueGrid((prev) => ({
+  //         ...prev,
+  //         [currentYear]: newRevenueData,
+  //       }));
+  //       setExpenseGrid((prev) => ({
+  //         ...prev,
+  //         [currentYear]: newExpenseData,
+  //       }));
+
+  //       // Update REF (not state) - immediate effect
+  //       yearDataLoadedRef.current = {
+  //         ...yearDataLoadedRef.current,
+  //         [`${currentYear}_revenue`]: true,
+  //         [`${currentYear}_expense`]: true,
+  //       };
+
+  //       // Also update state for UI if needed
+  //       setYearDataLoaded(yearDataLoadedRef.current);
+
+  //       console.log("✅ Updated yearDataLoadedRef:", yearDataLoadedRef.current);
+
+  //       // Set current view using LOCAL variables
+  //       if (activeTab === "revenue") {
+  //         setGridData(newRevenueData || createBlankGrid());
+  //         lastSavedGridRef.current = newRevenueData || createBlankGrid();
+  //       } else {
+  //         setGridData(newExpenseData || createBlankGrid());
+  //         lastSavedGridRef.current = newExpenseData || createBlankGrid();
+  //       }
+  //     } 
+      
+  //     // else {
+  //     //   console.log("📤 Checking cache for", currentYear, activeTab);
+
+  //     //   // For cached years, use the data from state
+  //     //   const cachedRevenue = revenueGrid[currentYear];
+  //     //   const cachedExpense = expenseGrid[currentYear];
+
+  //     //   console.log("📊 cachedRevenue exists?", !!cachedRevenue);
+  //     //   console.log("📊 cachedExpense exists?", !!cachedExpense);
+
+  //     //   // Check if cached data actually exists and has content
+  //     //   const hasCachedData =
+  //     //     activeTab === "revenue"
+  //     //       ? cachedRevenue && Object.keys(cachedRevenue).length > 0
+  //     //       : cachedExpense && Object.keys(cachedExpense).length > 0;
+
+  //     //   console.log("📊 hasCachedData?", hasCachedData);
+
+  //     //   if (hasCachedData) {
+  //     //     console.log("✅ Using cached data for", currentYear, activeTab);
+  //     //     if (activeTab === "revenue") {
+  //     //       setGridData(cachedRevenue);
+  //     //       lastSavedGridRef.current = cachedRevenue;
+  //     //     } else {
+  //     //       setGridData(cachedExpense);
+  //     //       lastSavedGridRef.current = cachedExpense;
+  //     //     }
+  //     //   } else 
+
+
+  //       else {
+  // console.log("📤 Checking cache for", currentYear, activeTab);
+
+  // // For cached years, use the data from state
+  // const cachedData = activeTab === "revenue" 
+  //   ? revenueGrid[currentYear] 
+  //   : expenseGrid[currentYear];
+
+  // console.log("📊 cachedData exists?", !!cachedData);
+
+  // // Check if this SPECIFIC tab's data exists in state
+  // const hasTabData = cachedData && Object.keys(cachedData).length > 0;
+
+  // console.log("📊 hasTabData?", hasTabData);
+
+  // if (hasTabData) {
+  //   console.log("✅ Using cached data for", currentYear, activeTab);
+  //   setGridData(cachedData);
+  //   lastSavedGridRef.current = cachedData;
+  // } else
+          
+          
+  //         {
+  //         console.log(
+  //           "⚠️ Cache says 'loaded' but data missing! Fetching from Firestore...",
+  //         );
+
+  //         // Fetch fresh data since cache is incomplete
+  //         if (activeTab === "revenue") {
+  //           const revenueData = await loadFinancialReport(
+  //             "revenue",
+  //             currentYear,
+  //           );
+  //           const dataToUse = revenueData.gridData || createBlankGrid();
+  //           setRevenueGrid((prev) => ({
+  //             ...prev,
+  //             [currentYear]: dataToUse,
+  //           }));
+  //           setGridData(dataToUse);
+  //           lastSavedGridRef.current = dataToUse;
+  //         } else {
+  //           const expenseData = await loadFinancialReport(
+  //             "expense",
+  //             currentYear,
+  //           );
+  //           const dataToUse = expenseData.gridData || createBlankGrid();
+  //           setExpenseGrid((prev) => ({
+  //             ...prev,
+  //             [currentYear]: dataToUse,
+  //           }));
+  //           setGridData(dataToUse);
+  //           lastSavedGridRef.current = dataToUse;
+  //         }
+  //       }
+  //     }
+
+  //     isHydratingRef.current = false;
+  //   };
+
+  //   loadBothTabs();
+  // }, [currentYear, activeTab]);
+
+
+
+
+
+  
+useEffect(() => {
+  if (!currentYear) return;
+
+  console.log("📅 YEAR useEffect TRIGGERED:");
+  console.log("  activeTab:", activeTab);
+  console.log("  gridData keys:", Object.keys(gridData));
+  console.log("  revenueGrid[2026]:", revenueGrid[2026] ? "HAS DATA" : "EMPTY");
+  console.log("  expenseGrid[2026]:", expenseGrid[2026] ? "HAS DATA" : "EMPTY");
+
+  const loadBothTabs = async () => {
       isHydratingRef.current = true;
       console.log("📅 Loading data for year:", currentYear);
 
@@ -330,7 +491,8 @@ const isFirstRenderRef = useRef(true);  // Skip first render
     };
 
     loadBothTabs();
-  }, [currentYear, activeTab]); // REMOVED yearDataLoaded from deps
+  }, [currentYear, activeTab]);
+
 
   useEffect(() => {
     if (
@@ -455,8 +617,14 @@ const isFirstRenderRef = useRef(true);  // Skip first render
 
 
 useEffect(() => {
+  console.log("🎯 SYNC useEffect RUNNING:");
+  console.log("  activeTab:", activeTab);
+  console.log("  gridData keys:", Object.keys(gridData));
+  console.log("  gridData['1']:", gridData["1"] ? "has feb data" : "empty");
+
   // Skip first render
   if (isFirstRenderRef.current) {
+    console.log("  → Skipping first render");
     isFirstRenderRef.current = false;
     prevGridDataRef.current = gridData;
     return;
@@ -465,18 +633,20 @@ useEffect(() => {
   // Skip if gridData became empty (tab switch scenario)
   const prevGridData = prevGridDataRef.current;
   if (prevGridData && Object.keys(prevGridData).length > 0 && Object.keys(gridData).length === 0) {
-    // gridData became empty - skip sync, likely tab switch
-    console.log("⏭️ Skipping sync - gridData is empty (tab switch detected)");
+    console.log("  → Skipping sync - gridData became empty (tab switch detected)");
     return;
   }
 
   // Normal sync
   if (activeTab === "revenue") {
+    console.log("  → Setting revenueGrid[2026] to current gridData");
+    console.log("  → revenueGrid[2026] BEFORE update:", revenueGrid[2026] ? "HAS DATA" : "EMPTY");
     setRevenueGrid((prev) => ({
       ...prev,
       [currentYear]: gridData,
     }));
   } else {
+    console.log("  → Setting expenseGrid[2026] to current gridData");
     setExpenseGrid((prev) => ({
       ...prev,
       [currentYear]: gridData,
@@ -486,6 +656,41 @@ useEffect(() => {
   // Update previous gridData
   prevGridDataRef.current = gridData;
 }, [gridData, activeTab, currentYear]);
+
+
+
+// useEffect(() => {
+//   // Skip first render
+//   if (isFirstRenderRef.current) {
+//     isFirstRenderRef.current = false;
+//     prevGridDataRef.current = gridData;
+//     return;
+//   }
+
+//   // Skip if gridData became empty (tab switch scenario)
+//   const prevGridData = prevGridDataRef.current;
+//   if (prevGridData && Object.keys(prevGridData).length > 0 && Object.keys(gridData).length === 0) {
+//     // gridData became empty - skip sync, likely tab switch
+//     console.log("⏭️ Skipping sync - gridData is empty (tab switch detected)");
+//     return;
+//   }
+
+//   // Normal sync
+//   if (activeTab === "revenue") {
+//     setRevenueGrid((prev) => ({
+//       ...prev,
+//       [currentYear]: gridData,
+//     }));
+//   } else {
+//     setExpenseGrid((prev) => ({
+//       ...prev,
+//       [currentYear]: gridData,
+//     }));
+//   }
+
+//   // Update previous gridData
+//   prevGridDataRef.current = gridData;
+// }, [gridData, activeTab, currentYear]);
 
 
 
