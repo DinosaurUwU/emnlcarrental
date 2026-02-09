@@ -140,6 +140,7 @@ const FinancialReports = () => {
       }
     }
     
+    
     // Refresh current view
     const result = await loadFinancialReport(activeTab, currentYear);
     const freshData = result.gridData || createBlankGrid();
