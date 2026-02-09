@@ -92,13 +92,21 @@ const FinancialReports = () => {
       console.error("❌ Error clearing localStorage:", error);
     }
   };
-  
-  // Function to save ALL pending localStorage data to Firestore (for Save Button)
+
+    // Check if data has actual content
+  const hasActualData = (data) => {
+    return Object.values(data || {}).some(month => 
+      Object.values(month || {}).some(cells => 
+        Array.isArray(cells) && cells.some(cell => cell !== "")
+      )
+    );
+  };
+
+    // Function to save ALL pending localStorage data to Firestore (for Save Button)
   const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
     const pendingKeys = [];
     
-    // Collect all localStorage keys
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(LOCAL_STORAGE_KEY)) {
@@ -111,7 +119,15 @@ const FinancialReports = () => {
     for (const key of pendingKeys) {
       try {
         const data = JSON.parse(localStorage.getItem(key));
-        // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
+        
+        // SKIP if no actual data
+        if (!hasActualData(data)) {
+          console.log(`⏭️ Skipping ${key} - no data`);
+          const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+          clearLocalStorage(parts[0], parseInt(parts[1]));
+          continue;
+        }
+        
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
         const tab = parts[0];
         const year = parseInt(parts[1]);
@@ -124,7 +140,7 @@ const FinancialReports = () => {
       }
     }
     
-    // Refresh current view from Firestore
+    // Refresh current view
     const result = await loadFinancialReport(activeTab, currentYear);
     const freshData = result.gridData || createBlankGrid();
     if (activeTab === "revenue") {
@@ -135,12 +151,62 @@ const FinancialReports = () => {
     setGridData(freshData);
     lastSavedGridRef.current = freshData;
     
-    const now = new Date();
-    setLastSavedAt(now);
+    setLastSavedAt(new Date());
     setIsSynced(true);
     setHasServerChange(false);
     setSavingStatus(false);
   };
+
+
+  
+  // // Function to save ALL pending localStorage data to Firestore (for Save Button)
+  // const saveAllPendingToFirestore = async () => {
+  //   setSavingStatus(true);
+  //   const pendingKeys = [];
+    
+  //   // Collect all localStorage keys
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     if (key.startsWith(LOCAL_STORAGE_KEY)) {
+  //       pendingKeys.push(key);
+  //     }
+  //   }
+    
+  //   console.log(`📤 Found ${pendingKeys.length} pending items to save to Firestore`);
+    
+  //   for (const key of pendingKeys) {
+  //     try {
+  //       const data = JSON.parse(localStorage.getItem(key));
+  //       // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
+  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //       const tab = parts[0];
+  //       const year = parseInt(parts[1]);
+        
+  //       console.log(`📤 Saving ${tab}/${year} to Firestore...`);
+  //       await saveFinancialReport(tab, data, year);
+  //       clearLocalStorage(tab, year);
+  //     } catch (error) {
+  //       console.error(`❌ Error saving ${key} to Firestore:`, error);
+  //     }
+  //   }
+    
+  //   // Refresh current view from Firestore
+  //   const result = await loadFinancialReport(activeTab, currentYear);
+  //   const freshData = result.gridData || createBlankGrid();
+  //   if (activeTab === "revenue") {
+  //     setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+  //   } else {
+  //     setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+  //   }
+  //   setGridData(freshData);
+  //   lastSavedGridRef.current = freshData;
+    
+  //   const now = new Date();
+  //   setLastSavedAt(now);
+  //   setIsSynced(true);
+  //   setHasServerChange(false);
+  //   setSavingStatus(false);
+  // };
 
 
 
@@ -161,6 +227,7 @@ const FinancialReports = () => {
 
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
+  
   const lastSavedGridRef = useRef(null);
 
   const prevGridDataRef = useRef(null); // Track previous gridData
