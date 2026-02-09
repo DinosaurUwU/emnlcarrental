@@ -171,209 +171,285 @@ const FinancialReports = () => {
     }
   }, [serverChangeCounter]);
 
-  // DEBUG: Track what happens
-  useEffect(() => {
-    console.log("=== YEAR CHANGE DETECTED ===");
-    console.log("currentYear:", currentYear);
-    console.log("activeTab:", activeTab);
-    console.log("yearDataLoadedRef.current:", yearDataLoadedRef.current);
-    console.log("revenueGrid keys:", Object.keys(revenueGrid));
-    console.log("expenseGrid keys:", Object.keys(expenseGrid));
-    console.log("gridData keys:", Object.keys(gridData));
-  }, [currentYear]);
+  // useEffect(() => {
+  //   if (!currentYear) return;
 
- 
+  //   const loadBothTabs = async () => {
+  //     isHydratingRef.current = true;
 
-  useEffect(() => {
-    if (!currentYear) return;
+  //     const yearKey = `${currentYear}_${activeTab}`;
 
-    console.log("📅 YEAR useEffect TRIGGERED:");
-    console.log("  activeTab:", activeTab);
-    console.log("  gridData keys:", Object.keys(gridData));
-    console.log(
-      "  revenueGrid[2026]:",
-      revenueGrid[2026] ? "HAS DATA" : "EMPTY",
+  //     if (!yearDataLoadedRef.current[yearKey]) {
+  //       const revenueData = await loadFinancialReport("revenue", currentYear);
+  //       const expenseData = await loadFinancialReport("expense", currentYear);
+
+  //       // Use LOCAL variables for the fetched data
+  //       const newRevenueData = revenueData.gridData;
+  //       const newExpenseData = expenseData.gridData;
+
+  //       // Store in state (async, but we use locals below)
+  //       setRevenueGrid((prev) => ({
+  //         ...prev,
+  //         [currentYear]: newRevenueData,
+  //       }));
+  //       setExpenseGrid((prev) => ({
+  //         ...prev,
+  //         [currentYear]: newExpenseData,
+  //       }));
+
+  //       // Update REF (not state) - immediate effect
+  //       yearDataLoadedRef.current = {
+  //         ...yearDataLoadedRef.current,
+  //         [`${currentYear}_revenue`]: true,
+  //         [`${currentYear}_expense`]: true,
+  //       };
+
+  //       // Also update state for UI if needed
+  //       setYearDataLoaded(yearDataLoadedRef.current);
+
+  //       // Set current view using LOCAL variables
+  //       if (activeTab === "revenue") {
+  //         setGridData(newRevenueData || createBlankGrid());
+  //         lastSavedGridRef.current = newRevenueData || createBlankGrid();
+  //       } else {
+  //         setGridData(newExpenseData || createBlankGrid());
+  //         lastSavedGridRef.current = newExpenseData || createBlankGrid();
+  //       }
+  //     } else {
+  //       // For cached years, use the data from state
+  //       const cachedData =
+  //         activeTab === "revenue"
+  //           ? revenueGrid[currentYear]
+  //           : expenseGrid[currentYear];
+
+  //       // Check if this SPECIFIC tab's data exists in state
+  //       const hasTabData = cachedData && Object.keys(cachedData).length > 0;
+
+  //       if (hasTabData) {
+  //         setGridData(cachedData);
+  //         lastSavedGridRef.current = cachedData;
+  //       } else {
+  //         if (activeTab === "revenue") {
+  //           const revenueData = await loadFinancialReport(
+  //             "revenue",
+  //             currentYear,
+  //           );
+  //           const dataToUse = revenueData.gridData || createBlankGrid();
+
+  //           // Functional update - verify we're preserving other years
+  //           setRevenueGrid((prev) => {
+  //             const updated = { ...prev, [currentYear]: dataToUse };
+
+  //             return updated;
+  //           });
+  //           setGridData(dataToUse);
+  //           lastSavedGridRef.current = dataToUse;
+  //         } else {
+  //           const expenseData = await loadFinancialReport(
+  //             "expense",
+  //             currentYear,
+  //           );
+  //           const dataToUse = expenseData.gridData || createBlankGrid();
+
+  //           // Functional update - verify we're preserving other years
+  //           setExpenseGrid((prev) => {
+  //             const updated = { ...prev, [currentYear]: dataToUse };
+
+  //             return updated;
+  //           });
+  //           setGridData(dataToUse);
+  //           lastSavedGridRef.current = dataToUse;
+  //         }
+  //       }
+  //     }
+
+  //     isHydratingRef.current = false;
+  //   };
+
+  //   loadBothTabs();
+  // }, [currentYear, activeTab]);
+
+  // useEffect(() => {
+  //   if (
+  //     !autoSaveEnabled ||
+  //     Object.keys(gridData).length === 0 ||
+  //     isSavingAuto ||
+  //     JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+  //   )
+  //     return;
+
+  //   lastSavedGridRef.current = gridData;
+  //   setIsSavingAuto(true);
+
+  //   (async () => {
+  //     try {
+  //       setSavingStatus(true);
+
+  //       // Update the year-specific state before saving
+  //       if (activeTab === "revenue") {
+  //         setRevenueGrid((prev) => ({
+  //           ...prev,
+  //           [currentYear]: gridData,
+  //         }));
+  //       } else {
+  //         setExpenseGrid((prev) => ({
+  //           ...prev,
+  //           [currentYear]: gridData,
+  //         }));
+  //       }
+
+  //       await saveFinancialReport(activeTab, gridData, currentYear);
+
+  //       const now = new Date();
+  //       setLastSavedAt(now);
+  //       setIsSynced(true);
+  //       setHasServerChange(false);
+  //       justSaved.current = true;
+  //       setTimeout(() => (justSaved.current = false), 1000);
+  //     } finally {
+  //       setSavingStatus(false);
+  //       setIsSavingAuto(false);
+  //     }
+  //   })();
+  // }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+
+
+
+useEffect(() => {
+  if (!currentYear) return;
+
+  const yearKey = `${currentYear}_${activeTab}`;
+  console.log(`📅 Loading ${activeTab}/${currentYear}...`);
+
+  // Get cached data for THIS specific tab and year
+  const cachedData = activeTab === "revenue" 
+    ? revenueGrid[currentYear] 
+    : expenseGrid[currentYear];
+
+  // ALWAYS use fresh data from Firestore to prevent cross-tab pollution
+  // Remove the cachedData check entirely
+  const loadData = async () => {
+    try {
+      const result = await loadFinancialReport(activeTab, currentYear);
+      const data = result.gridData || createBlankGrid();
+      
+      // Save to tab-specific state
+      if (activeTab === "revenue") {
+        setRevenueGrid((prev) => ({ ...prev, [currentYear]: data }));
+      } else {
+        setExpenseGrid((prev) => ({ ...prev, [currentYear]: data }));
+      }
+      
+      // Update current view
+      setGridData(data);
+      lastSavedGridRef.current = data;
+      
+      console.log(`✅ Loaded ${activeTab}/${currentYear} from Firestore`);
+    } catch (error) {
+      console.error("❌ Error loading data:", error);
+    }
+  };
+
+  loadData();
+}, [currentYear, activeTab]); // REMOVED revenueGrid and expenseGrid from deps!
+
+
+
+
+// SEPARATE useEffect for saving data when user edits
+useEffect(() => {
+  if (!gridData || Object.keys(gridData).length === 0) return;
+
+  // Only save if this is for the CURRENT tab and year
+  // This prevents data from leaking to other tabs/years
+  console.log(`💾 Saving ${activeTab}/${currentYear} data...`);
+  console.log(`  gridData has Feb:`, gridData["1"] ? "YES" : "NO");
+
+  // Save to persistent state (tab-specific, year-specific)
+  if (activeTab === "revenue") {
+    setRevenueGrid((prev) => {
+      const updated = { ...prev, [currentYear]: gridData };
+      console.log(`  Saving to revenueGrid[${currentYear}]`);
+      return updated;
+    });
+  } else {
+    setExpenseGrid((prev) => {
+      const updated = { ...prev, [currentYear]: gridData };
+      console.log(`  Saving to expenseGrid[${currentYear}]`);
+      return updated;
+    });
+  }
+
+  // Save to Firestore (tab-specific, year-specific)
+  saveFinancialReport(activeTab, gridData, currentYear);
+  lastSavedGridRef.current = gridData;
+}, [gridData, activeTab, currentYear]);
+
+
+
+
+
+
+
+// DEBUG: Single clean logging to track tab switching and data persistence
+const lastLogRef = useRef(null);
+
+useEffect(() => {
+  const logKey = `${activeTab}-${currentYear}`;
+  
+  // Skip if already logged this state
+  if (lastLogRef.current === logKey) return;
+  lastLogRef.current = logKey;
+
+  console.log("═".repeat(30));
+  console.log(`🔄 TAB: ${activeTab.toUpperCase()} | YEAR: ${currentYear}`);
+  console.log("═".repeat(30));
+
+  // Check REVENUE tab data
+  const revenueData = revenueGrid[currentYear];
+  if (revenueData) {
+    const feb = revenueData["1"];
+    const hasFebData = feb && Object.keys(feb).some(k => 
+      Array.isArray(feb[k]) && feb[k].some(cell => cell !== "")
     );
-    console.log(
-      "  expenseGrid[2026]:",
-      expenseGrid[2026] ? "HAS DATA" : "EMPTY",
+    console.log(`📊 REVENUE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
+  } else {
+    console.log(`📊 REVENUE: not loaded`);
+  }
+
+  // Check EXPENSE tab data
+  const expenseData = expenseGrid[currentYear];
+  if (expenseData) {
+    const feb = expenseData["1"];
+    const hasFebData = feb && Object.keys(feb).some(k => 
+      Array.isArray(feb[k]) && feb[k].some(cell => cell !== "")
     );
+    console.log(`💸 EXPENSE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
+  } else {
+    console.log(`💸 EXPENSE: not loaded`);
+  }
 
-    const loadBothTabs = async () => {
-      isHydratingRef.current = true;
-      console.log("📅 Loading data for year:", currentYear);
+  // Check CURRENT view
+  const currentFeb = gridData["1"];
+  if (currentFeb) {
+    const hasCurrentData = Object.keys(currentFeb).some(k => 
+      Array.isArray(currentFeb[k]) && currentFeb[k].some(cell => cell !== "")
+    );
+    console.log(`📱 CURRENT (${activeTab}): ${hasCurrentData ? "HAS DATA" : "empty/blank"}`);
+  } else {
+    console.log(`📱 CURRENT (${activeTab}): no feb data`);
+  }
 
-      const yearKey = `${currentYear}_${activeTab}`;
-      console.log(
-        "📊 Checking yearDataLoadedRef.current:",
-        yearDataLoadedRef.current,
-      );
-      console.log("📊 yearKey:", yearKey);
-      console.log("📊 Is loaded?", yearDataLoadedRef.current[yearKey]);
+  console.log("═".repeat(30));
+}, [activeTab, currentYear, revenueGrid, expenseGrid, gridData]);
 
-      if (!yearDataLoadedRef.current[yearKey]) {
-        console.log("📥 Fetching from Firestore for", currentYear, activeTab);
-        const revenueData = await loadFinancialReport("revenue", currentYear);
-        const expenseData = await loadFinancialReport("expense", currentYear);
 
-        // Use LOCAL variables for the fetched data
-        const newRevenueData = revenueData.gridData;
-        const newExpenseData = expenseData.gridData;
 
-        // Store in state (async, but we use locals below)
-        setRevenueGrid((prev) => ({
-          ...prev,
-          [currentYear]: newRevenueData,
-        }));
-        setExpenseGrid((prev) => ({
-          ...prev,
-          [currentYear]: newExpenseData,
-        }));
 
-        // Update REF (not state) - immediate effect
-        yearDataLoadedRef.current = {
-          ...yearDataLoadedRef.current,
-          [`${currentYear}_revenue`]: true,
-          [`${currentYear}_expense`]: true,
-        };
 
-        // Also update state for UI if needed
-        setYearDataLoaded(yearDataLoadedRef.current);
 
-        console.log("✅ Updated yearDataLoadedRef:", yearDataLoadedRef.current);
 
-        // Set current view using LOCAL variables
-        if (activeTab === "revenue") {
-          setGridData(newRevenueData || createBlankGrid());
-          lastSavedGridRef.current = newRevenueData || createBlankGrid();
-        } else {
-          setGridData(newExpenseData || createBlankGrid());
-          lastSavedGridRef.current = newExpenseData || createBlankGrid();
-        }
-      }
-
-     
-      else {
-        console.log("📤 Checking cache for", currentYear, activeTab);
-
-        // For cached years, use the data from state
-        const cachedData =
-          activeTab === "revenue"
-            ? revenueGrid[currentYear]
-            : expenseGrid[currentYear];
-
-        console.log("📊 cachedData exists?", !!cachedData);
-
-        // Check if this SPECIFIC tab's data exists in state
-        const hasTabData = cachedData && Object.keys(cachedData).length > 0;
-
-        console.log("📊 hasTabData?", hasTabData);
-
-        if (hasTabData) {
-          console.log("✅ Using cached data for", currentYear, activeTab);
-          setGridData(cachedData);
-          lastSavedGridRef.current = cachedData;
-        } else {
-          console.log(
-            "⚠️ Cache says 'loaded' but data missing! Fetching from Firestore...",
-          );
-
-          if (activeTab === "revenue") {
-            const revenueData = await loadFinancialReport(
-              "revenue",
-              currentYear,
-            );
-            const dataToUse = revenueData.gridData || createBlankGrid();
-
-            // Functional update - verify we're preserving other years
-            setRevenueGrid((prev) => {
-              const updated = { ...prev, [currentYear]: dataToUse };
-              console.log(
-                "  → Year useEffect: revenueGrid[2026] after update:",
-                updated[2026] ? "HAS DATA" : "EMPTY",
-              );
-              console.log(
-                "  → Year useEffect: revenueGrid has years:",
-                Object.keys(updated),
-              );
-              return updated;
-            });
-            setGridData(dataToUse);
-            lastSavedGridRef.current = dataToUse;
-          } else {
-            const expenseData = await loadFinancialReport(
-              "expense",
-              currentYear,
-            );
-            const dataToUse = expenseData.gridData || createBlankGrid();
-
-            // Functional update - verify we're preserving other years
-            setExpenseGrid((prev) => {
-              const updated = { ...prev, [currentYear]: dataToUse };
-              console.log(
-                "  → Year useEffect: expenseGrid[2026] after update:",
-                updated[2026] ? "HAS DATA" : "EMPTY",
-              );
-              return updated;
-            });
-            setGridData(dataToUse);
-            lastSavedGridRef.current = dataToUse;
-          }
-        }
-      }
-
-      isHydratingRef.current = false;
-    };
-
-    loadBothTabs();
-  }, [currentYear, activeTab]);
-
-  useEffect(() => {
-    if (
-      !autoSaveEnabled ||
-      Object.keys(gridData).length === 0 ||
-      isSavingAuto ||
-      JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-    )
-      return;
-
-    lastSavedGridRef.current = gridData;
-    setIsSavingAuto(true);
-
-    (async () => {
-      try {
-        setSavingStatus(true);
-
-        // Update the year-specific state before saving
-        if (activeTab === "revenue") {
-          setRevenueGrid((prev) => ({
-            ...prev,
-            [currentYear]: gridData,
-          }));
-        } else {
-          setExpenseGrid((prev) => ({
-            ...prev,
-            [currentYear]: gridData,
-          }));
-        }
-
-        await saveFinancialReport(activeTab, gridData, currentYear);
-
-        const now = new Date();
-        setLastSavedAt(now);
-        setIsSynced(true);
-        setHasServerChange(false);
-        justSaved.current = true;
-        setTimeout(() => (justSaved.current = false), 1000);
-        console.log(
-          `✅ Auto-saved ${activeTab} financial report for ${currentYear}`,
-        );
-      } finally {
-        setSavingStatus(false);
-        setIsSavingAuto(false);
-      }
-    })();
-  }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
 
   const formatDateTime = (dateObj) => {
     if (!dateObj) return "No Saved Data Yet";
@@ -386,77 +462,9 @@ const FinancialReports = () => {
     });
   };
 
-  // // 🟢 MANUAL When switching tabs, load its saved grid for the current year
-  // useEffect(() => {
-  //   if (activeTab === "revenue") {
-  //     // Read from state (should be populated from year-switching useEffect)
-  //     const yearData = revenueGrid[currentYear];
-
-  //     // Check if yearData actually exists
-  //     if (yearData && Object.keys(yearData).length > 0) {
-  //       console.log(
-  //         "✅ Tab switch: Using cached data for",
-  //         currentYear,
-  //         activeTab,
-  //       );
-  //       setGridData(yearData);
-  //       lastSavedGridRef.current = yearData;
-  //     } else {
-  //       console.log(
-  //         "⚠️ Tab switch: No cached data, fetching from Firestore...",
-  //       );
-  //       // If not in state yet, load from Firestore
-  //       const loadTabData = async () => {
-  //         const revenueData = await loadFinancialReport("revenue", currentYear);
-  //         const dataToUse = revenueData.gridData || createBlankGrid();
-  //         setRevenueGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: dataToUse,
-  //         }));
-  //         setGridData(dataToUse);
-  //         lastSavedGridRef.current = dataToUse;
-  //       };
-  //       loadTabData();
-  //     }
-  //   } else {
-  //     const yearData = expenseGrid[currentYear];
-
-  //     if (yearData && Object.keys(yearData).length > 0) {
-  //       console.log(
-  //         "✅ Tab switch: Using cached data for",
-  //         currentYear,
-  //         activeTab,
-  //       );
-  //       setGridData(yearData);
-  //       lastSavedGridRef.current = yearData;
-  //     } else {
-  //       console.log(
-  //         "⚠️ Tab switch: No cached data, fetching from Firestore...",
-  //       );
-  //       const loadTabData = async () => {
-  //         const expenseData = await loadFinancialReport("expense", currentYear);
-  //         const dataToUse = expenseData.gridData || createBlankGrid();
-  //         setExpenseGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: dataToUse,
-  //         }));
-  //         setGridData(dataToUse);
-  //         lastSavedGridRef.current = dataToUse;
-  //       };
-  //       loadTabData();
-  //     }
-  //   }
-  // }, [activeTab, currentYear]);
-
   useEffect(() => {
-    console.log("🎯 SYNC useEffect RUNNING:");
-    console.log("  activeTab:", activeTab);
-    console.log("  gridData keys:", Object.keys(gridData));
-    console.log("  gridData['1']:", gridData["1"] ? "has feb data" : "empty");
-
     // Skip first render
     if (isFirstRenderRef.current) {
-      console.log("  → Skipping first render");
       isFirstRenderRef.current = false;
       prevGridDataRef.current = gridData;
       return;
@@ -469,47 +477,20 @@ const FinancialReports = () => {
       Object.keys(prevGridData).length > 0 &&
       Object.keys(gridData).length === 0
     ) {
-      console.log(
-        "  → Skipping sync - gridData became empty (tab switch detected)",
-      );
       return;
     }
 
-    // // Normal sync
-    // if (activeTab === "revenue") {
-    //   console.log("  → Setting revenueGrid[2026] to current gridData");
-    //   console.log("  → revenueGrid[2026] BEFORE update:", revenueGrid[2026] ? "HAS DATA" : "EMPTY");
-    //   setRevenueGrid((prev) => ({
-    //     ...prev,
-    //     [currentYear]: gridData,
-    //   }));
-    // } else {
-    //   console.log("  → Setting expenseGrid[2026] to current gridData");
-    //   setExpenseGrid((prev) => ({
-    //     ...prev,
-    //     [currentYear]: gridData,
-    //   }));
-    // }
-
     // Normal sync - use functional updates to ensure consistency
     if (activeTab === "revenue") {
-      console.log("  → Setting revenueGrid[2026] to current gridData");
       setRevenueGrid((prev) => {
         const updated = { ...prev, [currentYear]: gridData };
-        console.log(
-          "  → revenueGrid[2026] AFTER functional update:",
-          updated[2026] ? "HAS DATA" : "EMPTY",
-        );
+
         return updated;
       });
     } else {
-      console.log("  → Setting expenseGrid[2026] to current gridData");
       setExpenseGrid((prev) => {
         const updated = { ...prev, [currentYear]: gridData };
-        console.log(
-          "  → expenseGrid[2026] AFTER functional update:",
-          updated[2026] ? "HAS DATA" : "EMPTY",
-        );
+
         return updated;
       });
     }
@@ -517,56 +498,6 @@ const FinancialReports = () => {
     // Update previous gridData
     prevGridDataRef.current = gridData;
   }, [gridData, activeTab, currentYear]);
-
-  // useEffect(() => {
-  //   // Skip first render
-  //   if (isFirstRenderRef.current) {
-  //     isFirstRenderRef.current = false;
-  //     prevGridDataRef.current = gridData;
-  //     return;
-  //   }
-
-  //   // Skip if gridData became empty (tab switch scenario)
-  //   const prevGridData = prevGridDataRef.current;
-  //   if (prevGridData && Object.keys(prevGridData).length > 0 && Object.keys(gridData).length === 0) {
-  //     // gridData became empty - skip sync, likely tab switch
-  //     console.log("⏭️ Skipping sync - gridData is empty (tab switch detected)");
-  //     return;
-  //   }
-
-  //   // Normal sync
-  //   if (activeTab === "revenue") {
-  //     setRevenueGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: gridData,
-  //     }));
-  //   } else {
-  //     setExpenseGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: gridData,
-  //     }));
-  //   }
-
-  //   // Update previous gridData
-  //   prevGridDataRef.current = gridData;
-  // }, [gridData, activeTab, currentYear]);
-
-  // // MANUAL Keep tab-specific grids in sync - MERGE, don't overwrite!
-  // useEffect(() => {
-  //   if (activeTab === "revenue") {
-  //     // Only update the specific year, preserve other years
-  //     setRevenueGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: gridData,
-  //     }));
-  //   } else {
-  //     // Only update the specific year, preserve other years
-  //     setExpenseGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: gridData,
-  //     }));
-  //   }
-  // }, [gridData, activeTab, currentYear]); // Added currentYear to deps
 
   const createBlankGrid = () => {
     const blank = {};
@@ -621,10 +552,6 @@ const FinancialReports = () => {
 
       justSaved.current = true; // Set flag to skip next counter increment
       setTimeout(() => (justSaved.current = false), 1000); // Reset after 1 second
-
-      console.log(
-        `✅ Manually saved ${activeTab} financial report to Firestore`,
-      );
     } finally {
       setSavingStatus(false);
     }
@@ -652,9 +579,6 @@ const FinancialReports = () => {
       setIsSynced(true);
       setHasServerChange(false);
       // optional: reset server indicator text, or other UI-only flags
-      console.log(
-        `✅ Manually loaded ${activeTab} financial report from Firestore`,
-      );
     } catch (err) {
       console.error("❌ Error during manual load:", err);
     } finally {
@@ -1044,9 +968,6 @@ const FinancialReports = () => {
     if (cancelTrigger) {
       try {
         const deletedBookingId = String(cancelTrigger);
-        console.log(
-          `🚨 Booking cancellation triggered for ID: ${deletedBookingId}`,
-        );
 
         const newGrid =
           structuredClone?.(revenueGrid) ||
@@ -1059,7 +980,6 @@ const FinancialReports = () => {
             if (row?._isAutoFill) beforeIds.push(row._bookingId);
           });
         });
-        console.log("📋 Booking IDs before deletion:", beforeIds);
 
         // Remove only rows matching that bookingId
         Object.keys(newGrid).forEach((mIndex) => {
@@ -1073,14 +993,10 @@ const FinancialReports = () => {
           const removedCount = beforeCount - afterCount;
 
           if (removedCount > 0)
-            console.log(
-              `🗑️ Removed ${removedCount} row(s) from month index ${mIndex} for bookingId: ${deletedBookingId}`,
-            );
-
-          // keep structure
-          while (newGrid[mIndex].length < 5) {
-            newGrid[mIndex].push(Array(5).fill(""));
-          }
+            // keep structure
+            while (newGrid[mIndex].length < 5) {
+              newGrid[mIndex].push(Array(5).fill(""));
+            }
         });
 
         // Debug remaining
@@ -1090,7 +1006,6 @@ const FinancialReports = () => {
             if (row?._isAutoFill) remainingIds.push(row._bookingId);
           });
         });
-        console.log("✅ Booking IDs remaining after deletion:", remainingIds);
 
         setRevenueGrid(newGrid);
         if (activeTab === "revenue") {
@@ -1106,12 +1021,6 @@ const FinancialReports = () => {
     if (!autoFillTrigger || !paymentEntries) return;
 
     try {
-      console.log(
-        "🧩 AutoFill Triggered:",
-        typeof autoFillTrigger,
-        autoFillTrigger,
-      );
-
       const newGrid =
         structuredClone?.(revenueGrid) ||
         JSON.parse(JSON.stringify(revenueGrid));
@@ -1135,9 +1044,6 @@ const FinancialReports = () => {
           // Validate date to prevent invalid Date objects
           const date = new Date(entry.date);
           if (isNaN(date.getTime())) {
-            console.warn(
-              `⚠️ Skipping invalid date for booking ${bookingId}, entry ${entryIndex}: ${entry.date}`,
-            );
             return;
           }
 
@@ -1213,7 +1119,6 @@ const FinancialReports = () => {
           if (row?._isAutoFill) finalIds.push(row._bookingId);
         });
       });
-      console.log("📊 Final booking IDs after rebuild:", finalIds);
 
       setRevenueGrid(newGrid);
       if (activeTab === "revenue") {
@@ -1227,23 +1132,14 @@ const FinancialReports = () => {
 
   // DEBUG: Track ALL tabs data on every change
   useEffect(() => {
-    console.log("═══════════════════════════════════════════");
-    console.log(
-      `🔄 RENDER/TRIGGER - Active Tab: ${activeTab.toUpperCase()}, Year: ${currentYear}`,
-    );
-    console.log("───────────────────────────────────────────");
-
     // Show REVENUE tab data for current month
     const revenueMonthData = revenueGrid[currentYear];
     if (revenueMonthData) {
       const febRevenue = revenueMonthData["1"]; // February (index 1)
       if (febRevenue) {
-        console.log("📊 REVENUE TAB - FEBRUARY:", febRevenue);
       } else {
-        console.log("📊 REVENUE TAB - FEBRUARY: (empty or missing)");
       }
     } else {
-      console.log("📊 REVENUE TAB: (no data loaded)");
     }
 
     // Show EXPENSE tab data for current month
@@ -1251,44 +1147,20 @@ const FinancialReports = () => {
     if (expenseMonthData) {
       const febExpense = expenseMonthData["1"]; // February (index 1)
       if (febExpense) {
-        console.log("💸 EXPENSE TAB - FEBRUARY:", febExpense);
       } else {
-        console.log("💸 EXPENSE TAB - FEBRUARY: (empty or missing)");
       }
     } else {
-      console.log("💸 EXPENSE TAB: (no data loaded)");
     }
 
     // Show CURRENT view gridData
     if (gridData && Object.keys(gridData).length > 0) {
       const currentMonthData = gridData["1"];
       if (currentMonthData) {
-        console.log(
-          `📱 CURRENT VIEW (${activeTab.toUpperCase()}) - FEBRUARY:`,
-          currentMonthData,
-        );
       } else {
-        console.log(
-          `📱 CURRENT VIEW (${activeTab.toUpperCase()}) - FEBRUARY: (empty)`,
-        );
       }
     } else {
-      console.log(`📱 CURRENT VIEW (${activeTab.toUpperCase()}): (empty)`);
     }
-
-    console.log("═══════════════════════════════════════════");
   }, [gridData, activeTab, currentYear, revenueGrid, expenseGrid]);
-
-  // // DEBUG
-  // useEffect(() => {
-  //   console.log(`🧾 ${activeTab.toUpperCase()} GRID - Year ${currentYear}:`);
-  //   // Only show January (index 0)
-  //   Object.entries(gridData)
-  //     .filter(([monthIndex]) => monthIndex === "1")
-  //     .forEach(([monthIndex, rows]) => {
-  //       console.log(`${months[monthIndex]} ${currentYear}:`, rows);
-  //     });
-  // }, [gridData, activeTab, currentYear]);
 
   // Format properly on blur
   const handleAmountBlur = (monthIndex, rowIndex, colIndex, value) => {
@@ -2702,16 +2574,10 @@ const FinancialReports = () => {
                                 }}
                                 onClick={() => {
                                   if (row._isAutoFill) {
-                                    console.log(
-                                      "Clicked autofill row, _bookingId:",
-                                      row._bookingId,
-                                    );
-
                                     // Find in activeBookings (array)
                                     let booking = activeBookings.find(
                                       (b) => b.id === row._bookingId,
                                     );
-                                    console.log("Found in active:", booking);
 
                                     // If not found, search in completedBookingsAnalytics (object)
                                     if (!booking) {
@@ -2736,10 +2602,6 @@ const FinancialReports = () => {
                                               (b) => b.id === row._bookingId,
                                             );
                                             if (booking) {
-                                              console.log(
-                                                "Found in completed:",
-                                                booking,
-                                              );
                                               break;
                                             }
                                           }
@@ -2752,10 +2614,6 @@ const FinancialReports = () => {
                                       setSelectedBooking(booking);
                                       setShowDetailsOverlay(true);
                                     } else {
-                                      console.log(
-                                        "No booking found for _bookingId:",
-                                        row._bookingId,
-                                      );
                                     }
                                   }
                                 }}
