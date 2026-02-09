@@ -53,6 +53,143 @@ const FinancialReports = () => {
 
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
+
+
+
+
+
+  // Local Storage Keys
+  const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
+  
+  // Local Storage Helpers
+  const saveToLocalStorage = (tab, year, data) => {
+    try {
+      const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
+      localStorage.setItem(key, JSON.stringify(data));
+      console.log(`💾 Saved ${tab}/${year} to localStorage`);
+    } catch (error) {
+      console.error("❌ Error saving to localStorage:", error);
+    }
+  };
+  
+  const loadFromLocalStorage = (tab, year) => {
+    try {
+      const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error("❌ Error loading from localStorage:", error);
+      return null;
+    }
+  };
+  
+  const clearLocalStorage = (tab, year) => {
+    try {
+      const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
+      localStorage.removeItem(key);
+      console.log(`🗑️ Cleared ${tab}/${year} from localStorage`);
+    } catch (error) {
+      console.error("❌ Error clearing localStorage:", error);
+    }
+  };
+
+    // Check if grid data has actual content (not just blank structure)
+  const hasActualData = (data) => {
+    if (!data || Object.keys(data).length === 0) return false;
+    
+    return Object.keys(data).some(monthKey => {
+      const monthData = data[monthKey];
+      if (!monthData || Object.keys(monthData).length === 0) return false;
+      
+      // Check if any cell has actual data (not empty string)
+      return Object.keys(monthData).some(cellKey => {
+        const cells = monthData[cellKey];
+        if (!Array.isArray(cells)) return false;
+        return cells.some(cell => cell !== "" && cell !== null && cell !== undefined);
+      });
+    });
+  };
+
+  
+  // Function to save ALL pending localStorage data to Firestore (for Save Button)
+  const saveAllPendingToFirestore = async () => {
+    setSavingStatus(true);
+    const pendingKeys = [];
+    
+    // Collect all localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(LOCAL_STORAGE_KEY)) {
+        pendingKeys.push(key);
+      }
+    }
+    
+    console.log(`📤 Found ${pendingKeys.length} pending items to save to Firestore`);
+    
+    for (const key of pendingKeys) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        
+        // SKIP if no actual data (only blank grid structure)
+        if (!hasActualData(data)) {
+          console.log(`⏭️ Skipping ${key} - no actual data, just blank grid`);
+          clearLocalStorage(
+            key.replace(LOCAL_STORAGE_KEY + "_", "").split("_")[0],
+            parseInt(key.replace(LOCAL_STORAGE_KEY + "_", "").split("_")[1])
+          );
+          continue;
+        }
+        
+        // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
+        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+        const tab = parts[0];
+        const year = parseInt(parts[1]);
+        
+        console.log(`📤 Saving ${tab}/${year} to Firestore...`);
+        await saveFinancialReport(tab, data, year);
+        clearLocalStorage(tab, year);
+      } catch (error) {
+        console.error(`❌ Error saving ${key} to Firestore:`, error);
+      }
+    }
+    
+    // Refresh current view from Firestore
+    const result = await loadFinancialReport(activeTab, currentYear);
+    const freshData = result.gridData || createBlankGrid();
+    if (activeTab === "revenue") {
+      setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+    } else {
+      setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+    }
+    setGridData(freshData);
+    lastSavedGridRef.current = freshData;
+    
+    const now = new Date();
+    setLastSavedAt(now);
+    setIsSynced(true);
+    setHasServerChange(false);
+    setSavingStatus(false);
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [isSavingAuto, setIsSavingAuto] = useState(false);
   const lastSavedGridRef = useRef(null);
 
@@ -327,12 +464,21 @@ useEffect(() => {
     ? revenueGrid[currentYear] 
     : expenseGrid[currentYear];
 
-  // ALWAYS use fresh data from Firestore to prevent cross-tab pollution
-  // Remove the cachedData check entirely
+
   const loadData = async () => {
     try {
-      const result = await loadFinancialReport(activeTab, currentYear);
-      const data = result.gridData || createBlankGrid();
+      let data;
+      
+      // First check localStorage for unsaved changes
+      const localData = loadFromLocalStorage(activeTab, currentYear);
+      if (localData && Object.keys(localData).length > 0) {
+        console.log(`📂 Found unsaved data in localStorage for ${activeTab}/${currentYear}`);
+        data = localData;
+      } else {
+        // Load from Firestore if no local data
+        const result = await loadFinancialReport(activeTab, currentYear);
+        data = result.gridData || createBlankGrid();
+      }
       
       // Save to tab-specific state
       if (activeTab === "revenue") {
@@ -345,11 +491,12 @@ useEffect(() => {
       setGridData(data);
       lastSavedGridRef.current = data;
       
-      console.log(`✅ Loaded ${activeTab}/${currentYear} from Firestore`);
+      console.log(`✅ Loaded ${activeTab}/${currentYear} from ${localData ? "localStorage" : "Firestore"}`);
     } catch (error) {
       console.error("❌ Error loading data:", error);
     }
   };
+
 
   loadData();
 }, [currentYear, activeTab]); // REMOVED revenueGrid and expenseGrid from deps!
@@ -357,34 +504,48 @@ useEffect(() => {
 
 
 
-// SEPARATE useEffect for saving data when user edits
-useEffect(() => {
-  if (!gridData || Object.keys(gridData).length === 0) return;
+  // SEPARATE useEffect for saving data when user edits
+  useEffect(() => {
+    if (!gridData || Object.keys(gridData).length === 0) return;
 
-  // Only save if this is for the CURRENT tab and year
-  // This prevents data from leaking to other tabs/years
-  console.log(`💾 Saving ${activeTab}/${currentYear} data...`);
-  console.log(`  gridData has Feb:`, gridData["1"] ? "YES" : "NO");
+    // Only save if this is for the CURRENT tab and year
+    // This prevents data from leaking to other tabs/years
+    console.log(`💾 Saving ${activeTab}/${currentYear} data...`);
+    console.log(`  gridData has Feb:`, gridData["1"] ? "YES" : "NO");
+    console.log(`  autoSaveEnabled: ${autoSaveEnabled}`);
 
-  // Save to persistent state (tab-specific, year-specific)
-  if (activeTab === "revenue") {
-    setRevenueGrid((prev) => {
-      const updated = { ...prev, [currentYear]: gridData };
-      console.log(`  Saving to revenueGrid[${currentYear}]`);
-      return updated;
-    });
-  } else {
-    setExpenseGrid((prev) => {
-      const updated = { ...prev, [currentYear]: gridData };
-      console.log(`  Saving to expenseGrid[${currentYear}]`);
-      return updated;
-    });
-  }
+    // Save to persistent state (tab-specific, year-specific)
+    if (activeTab === "revenue") {
+      setRevenueGrid((prev) => {
+        const updated = { ...prev, [currentYear]: gridData };
+        console.log(`  Saving to revenueGrid[${currentYear}]`);
+        return updated;
+      });
+    } else {
+      setExpenseGrid((prev) => {
+        const updated = { ...prev, [currentYear]: gridData };
+        console.log(`  Saving to expenseGrid[${currentYear}]`);
+        return updated;
+      });
+    }
 
-  // Save to Firestore (tab-specific, year-specific)
-  saveFinancialReport(activeTab, gridData, currentYear);
-  lastSavedGridRef.current = gridData;
-}, [gridData, activeTab, currentYear]);
+    // CONDITIONAL: Save to Firestore OR LocalStorage based on autoSaveEnabled
+    if (autoSaveEnabled) {
+      // Autosave ON: Save directly to Firestore
+      saveFinancialReport(activeTab, gridData, currentYear);
+      lastSavedGridRef.current = gridData;
+      setIsSynced(true);
+      setLastSavedAt(new Date());
+    } else {
+      // Autosave OFF: Save to localStorage temporarily ONLY if has actual data
+      if (hasActualData(gridData)) {
+        saveToLocalStorage(activeTab, currentYear, gridData);
+        lastSavedGridRef.current = gridData;
+        setIsSynced(false); // Mark as unsaved to Firestore
+      }
+    }
+
+  }, [gridData, activeTab, currentYear, autoSaveEnabled]);
 
 
 
@@ -2387,7 +2548,7 @@ useEffect(() => {
                             ) : (
                               <div
                                 className="save-pill"
-                                onClick={handleManualSave}
+                                onClick={saveAllPendingToFirestore}
                                 style={{
                                   opacity: autoSaveEnabled
                                     ? 0.4
