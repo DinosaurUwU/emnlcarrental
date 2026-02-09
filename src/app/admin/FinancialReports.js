@@ -252,34 +252,7 @@ const FinancialReports = () => {
         }
       }
 
-      // else {
-      //   console.log("📤 Checking cache for", currentYear, activeTab);
-
-      //   // For cached years, use the data from state
-      //   const cachedRevenue = revenueGrid[currentYear];
-      //   const cachedExpense = expenseGrid[currentYear];
-
-      //   console.log("📊 cachedRevenue exists?", !!cachedRevenue);
-      //   console.log("📊 cachedExpense exists?", !!cachedExpense);
-
-      //   // Check if cached data actually exists and has content
-      //   const hasCachedData =
-      //     activeTab === "revenue"
-      //       ? cachedRevenue && Object.keys(cachedRevenue).length > 0
-      //       : cachedExpense && Object.keys(cachedExpense).length > 0;
-
-      //   console.log("📊 hasCachedData?", hasCachedData);
-
-      //   if (hasCachedData) {
-      //     console.log("✅ Using cached data for", currentYear, activeTab);
-      //     if (activeTab === "revenue") {
-      //       setGridData(cachedRevenue);
-      //       lastSavedGridRef.current = cachedRevenue;
-      //     } else {
-      //       setGridData(cachedExpense);
-      //       lastSavedGridRef.current = cachedExpense;
-      //     }
-      //   } else
+     
       else {
         console.log("📤 Checking cache for", currentYear, activeTab);
 
@@ -304,33 +277,6 @@ const FinancialReports = () => {
           console.log(
             "⚠️ Cache says 'loaded' but data missing! Fetching from Firestore...",
           );
-
-          // // Fetch fresh data since cache is incomplete
-          // if (activeTab === "revenue") {
-          //   const revenueData = await loadFinancialReport(
-          //     "revenue",
-          //     currentYear,
-          //   );
-          //   const dataToUse = revenueData.gridData || createBlankGrid();
-          //   setRevenueGrid((prev) => ({
-          //     ...prev,
-          //     [currentYear]: dataToUse,
-          //   }));
-          //   setGridData(dataToUse);
-          //   lastSavedGridRef.current = dataToUse;
-          // } else {
-          //   const expenseData = await loadFinancialReport(
-          //     "expense",
-          //     currentYear,
-          //   );
-          //   const dataToUse = expenseData.gridData || createBlankGrid();
-          //   setExpenseGrid((prev) => ({
-          //     ...prev,
-          //     [currentYear]: dataToUse,
-          //   }));
-          //   setGridData(dataToUse);
-          //   lastSavedGridRef.current = dataToUse;
-          // }
 
           if (activeTab === "revenue") {
             const revenueData = await loadFinancialReport(
