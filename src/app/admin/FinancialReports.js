@@ -143,6 +143,7 @@ const FinancialReports = () => {
 
 
 
+    
 
     // Refresh current view
     const result = await loadFinancialReport(activeTab, currentYear);
