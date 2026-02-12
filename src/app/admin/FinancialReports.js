@@ -275,37 +275,30 @@ const FinancialReports = () => {
 
 
   
-
-  // DEBUG: Log all localStorage data with RAW values
+  // DEBUG: Log REVENUE data only
   useEffect(() => {
     console.log("📦 LOCALSTORAGE RAW DATA:");
     console.log("═".repeat(30));
     
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      
-      if (key.startsWith(LOCAL_STORAGE_KEY)) {
-        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-        const tab = parts[0];
-        const year = parseInt(parts[1]);
-        
+    const revenueYears = [2025, 2026];
+    console.log("📁 REVENUE:");
+    
+    revenueYears.forEach(year => {
+      const key = `emnlcarrental_financial_reports_revenue_${year}`;
+      const data = localStorage.getItem(key);
+      console.log(`  ${year}: localStorage.getItem("${key}") =`, data);
+      if (data) {
         try {
-          const data = JSON.parse(localStorage.getItem(key));
-          const monthsWithData = Object.keys(data).filter(m => {
-            const monthData = data[m];
-            return Object.values(monthData || {}).some(cells => 
-              Array.isArray(cells) && cells.some(cell => cell !== "")
-            );
-          });
-          console.log(`📁 ${tab}/${year}: months=${monthsWithData.join(",")}`);
-        } catch (error) {
-          console.log(`📁 ${tab}/${year}: ERROR parsing`);
+          const parsed = JSON.parse(data);
+          console.log(`  ${year}:`, parsed);
+        } catch (e) {
+          console.log(`  ${year}: ERROR - ${e.message}`);
         }
       }
-    }
+    });
     
     console.log("═".repeat(30));
-  }, [activeTab, currentYear]);
+  }, [activeTab, currentYear, gridData]);
 
 
 
@@ -316,9 +309,35 @@ const FinancialReports = () => {
 
 
 
+
+
+
+
+
+
+
+  // useEffect(() => {
+  // if (!currentYear) return;
+  
 
   useEffect(() => {
-  if (!currentYear) return;
+    console.log("🔍 SAVE EFFECT TRIGGERED:", { activeTab, currentYear, gridDataKeys: Object.keys(gridData) });
+    
+    if (
+      Object.keys(gridData).length === 0 ||
+      isSavingAuto ||
+      JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+    ) {
+      console.log("🔍 SAVE EFFECT: early return", { 
+        gridDataEmpty: Object.keys(gridData).length === 0,
+        isSavingAuto,
+        sameAsLast: JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+      });
+      return;
+    }
+    
+    console.log("🔍 SAVE EFFECT: proceeding to save...");
+
 
   const loadBothTabs = async () => {
     isHydratingRef.current = true;
@@ -445,6 +464,7 @@ useEffect(() => {
       }
 
       await saveFinancialReport(activeTab, gridData, currentYear);
+      
 
       const now = new Date();
       setLastSavedAt(now);
