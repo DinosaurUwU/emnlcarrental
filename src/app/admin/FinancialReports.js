@@ -291,7 +291,13 @@ const FinancialReports = () => {
         
         try {
           const data = JSON.parse(localStorage.getItem(key));
-          console.log(`📁 ${tab}/${year}:`, data);
+          const monthsWithData = Object.keys(data).filter(m => {
+            const monthData = data[m];
+            return Object.values(monthData || {}).some(cells => 
+              Array.isArray(cells) && cells.some(cell => cell !== "")
+            );
+          });
+          console.log(`📁 ${tab}/${year}: months=${monthsWithData.join(",")}`);
         } catch (error) {
           console.log(`📁 ${tab}/${year}: ERROR parsing`);
         }
@@ -300,6 +306,7 @@ const FinancialReports = () => {
     
     console.log("═".repeat(30));
   }, [activeTab, currentYear]);
+
 
 
 
