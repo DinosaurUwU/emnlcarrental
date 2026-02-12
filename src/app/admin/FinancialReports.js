@@ -53,14 +53,9 @@ const FinancialReports = () => {
 
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
-
-
-
-
-
   // Local Storage Keys
   const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
-  
+
   // Local Storage Helpers
   const saveToLocalStorage = (tab, year, data) => {
     try {
@@ -71,7 +66,7 @@ const FinancialReports = () => {
       console.error("❌ Error saving to localStorage:", error);
     }
   };
-  
+
   const loadFromLocalStorage = (tab, year) => {
     try {
       const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
@@ -82,7 +77,7 @@ const FinancialReports = () => {
       return null;
     }
   };
-  
+
   const clearLocalStorage = (tab, year) => {
     try {
       const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
@@ -93,33 +88,35 @@ const FinancialReports = () => {
     }
   };
 
-    // Check if data has actual content
+  // Check if data has actual content
   const hasActualData = (data) => {
-    return Object.values(data || {}).some(month => 
-      Object.values(month || {}).some(cells => 
-        Array.isArray(cells) && cells.some(cell => cell !== "")
-      )
+    return Object.values(data || {}).some((month) =>
+      Object.values(month || {}).some(
+        (cells) => Array.isArray(cells) && cells.some((cell) => cell !== ""),
+      ),
     );
   };
 
-    // Function to save ALL pending localStorage data to Firestore (for Save Button)
+  // Function to save ALL pending localStorage data to Firestore (for Save Button)
   const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
     const pendingKeys = [];
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(LOCAL_STORAGE_KEY)) {
         pendingKeys.push(key);
       }
     }
-    
-    console.log(`📤 Found ${pendingKeys.length} pending items to save to Firestore`);
-    
+
+    console.log(
+      `📤 Found ${pendingKeys.length} pending items to save to Firestore`,
+    );
+
     for (const key of pendingKeys) {
       try {
         const data = JSON.parse(localStorage.getItem(key));
-        
+
         // SKIP if no actual data
         if (!hasActualData(data)) {
           console.log(`⏭️ Skipping ${key} - no data`);
@@ -127,11 +124,11 @@ const FinancialReports = () => {
           clearLocalStorage(parts[0], parseInt(parts[1]));
           continue;
         }
-        
+
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
         const tab = parts[0];
         const year = parseInt(parts[1]);
-        
+
         console.log(`📤 Saving ${tab}/${year} to Firestore...`);
         await saveFinancialReport(tab, data, year);
         clearLocalStorage(tab, year);
@@ -139,19 +136,6 @@ const FinancialReports = () => {
         console.error(`❌ Error saving ${key} to Firestore:`, error);
       }
     }
-    
-
-
-    
-
-
-    
-
-  
-
-
-
-
 
     // Refresh current view
     const result = await loadFinancialReport(activeTab, currentYear);
@@ -163,84 +147,15 @@ const FinancialReports = () => {
     }
     setGridData(freshData);
     lastSavedGridRef.current = freshData;
-    
+
     setLastSavedAt(new Date());
     setIsSynced(true);
     setHasServerChange(false);
     setSavingStatus(false);
   };
 
-
-  
-  // // Function to save ALL pending localStorage data to Firestore (for Save Button)
-  // const saveAllPendingToFirestore = async () => {
-  //   setSavingStatus(true);
-  //   const pendingKeys = [];
-    
-  //   // Collect all localStorage keys
-  //   for (let i = 0; i < localStorage.length; i++) {
-  //     const key = localStorage.key(i);
-  //     if (key.startsWith(LOCAL_STORAGE_KEY)) {
-  //       pendingKeys.push(key);
-  //     }
-  //   }
-    
-  //   console.log(`📤 Found ${pendingKeys.length} pending items to save to Firestore`);
-    
-  //   for (const key of pendingKeys) {
-  //     try {
-  //       const data = JSON.parse(localStorage.getItem(key));
-  //       // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
-  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-  //       const tab = parts[0];
-  //       const year = parseInt(parts[1]);
-        
-  //       console.log(`📤 Saving ${tab}/${year} to Firestore...`);
-  //       await saveFinancialReport(tab, data, year);
-  //       clearLocalStorage(tab, year);
-  //     } catch (error) {
-  //       console.error(`❌ Error saving ${key} to Firestore:`, error);
-  //     }
-  //   }
-    
-  //   // Refresh current view from Firestore
-  //   const result = await loadFinancialReport(activeTab, currentYear);
-  //   const freshData = result.gridData || createBlankGrid();
-  //   if (activeTab === "revenue") {
-  //     setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
-  //   } else {
-  //     setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
-  //   }
-  //   setGridData(freshData);
-  //   lastSavedGridRef.current = freshData;
-    
-  //   const now = new Date();
-  //   setLastSavedAt(now);
-  //   setIsSynced(true);
-  //   setHasServerChange(false);
-  //   setSavingStatus(false);
-  // };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   const [isSavingAuto, setIsSavingAuto] = useState(false);
-  
+
   const lastSavedGridRef = useRef(null);
 
   const prevGridDataRef = useRef(null); // Track previous gridData
@@ -358,201 +273,56 @@ const FinancialReports = () => {
     }
   }, [serverChangeCounter]);
 
-  // useEffect(() => {
-  //   if (!currentYear) return;
+  useEffect(() => {
+    if (!currentYear) return;
 
-  //   const loadBothTabs = async () => {
-  //     isHydratingRef.current = true;
+    const yearKey = `${currentYear}_${activeTab}`;
+    console.log(`📅 Loading ${activeTab}/${currentYear}...`);
 
-  //     const yearKey = `${currentYear}_${activeTab}`;
+    // Get cached data for THIS specific tab and year
+    const cachedData =
+      activeTab === "revenue"
+        ? revenueGrid[currentYear]
+        : expenseGrid[currentYear];
 
-  //     if (!yearDataLoadedRef.current[yearKey]) {
-  //       const revenueData = await loadFinancialReport("revenue", currentYear);
-  //       const expenseData = await loadFinancialReport("expense", currentYear);
+    const loadData = async () => {
+      try {
+        let data;
 
-  //       // Use LOCAL variables for the fetched data
-  //       const newRevenueData = revenueData.gridData;
-  //       const newExpenseData = expenseData.gridData;
+        // First check localStorage for unsaved changes
+        const localData = loadFromLocalStorage(activeTab, currentYear);
+        if (localData && Object.keys(localData).length > 0) {
+          console.log(
+            `📂 Found unsaved data in localStorage for ${activeTab}/${currentYear}`,
+          );
+          data = localData;
+        } else {
+          // Load from Firestore if no local data
+          const result = await loadFinancialReport(activeTab, currentYear);
+          data = result.gridData || createBlankGrid();
+        }
 
-  //       // Store in state (async, but we use locals below)
-  //       setRevenueGrid((prev) => ({
-  //         ...prev,
-  //         [currentYear]: newRevenueData,
-  //       }));
-  //       setExpenseGrid((prev) => ({
-  //         ...prev,
-  //         [currentYear]: newExpenseData,
-  //       }));
+        // Save to tab-specific state
+        if (activeTab === "revenue") {
+          setRevenueGrid((prev) => ({ ...prev, [currentYear]: data }));
+        } else {
+          setExpenseGrid((prev) => ({ ...prev, [currentYear]: data }));
+        }
 
-  //       // Update REF (not state) - immediate effect
-  //       yearDataLoadedRef.current = {
-  //         ...yearDataLoadedRef.current,
-  //         [`${currentYear}_revenue`]: true,
-  //         [`${currentYear}_expense`]: true,
-  //       };
+        // Update current view
+        setGridData(data);
+        lastSavedGridRef.current = data;
 
-  //       // Also update state for UI if needed
-  //       setYearDataLoaded(yearDataLoadedRef.current);
-
-  //       // Set current view using LOCAL variables
-  //       if (activeTab === "revenue") {
-  //         setGridData(newRevenueData || createBlankGrid());
-  //         lastSavedGridRef.current = newRevenueData || createBlankGrid();
-  //       } else {
-  //         setGridData(newExpenseData || createBlankGrid());
-  //         lastSavedGridRef.current = newExpenseData || createBlankGrid();
-  //       }
-  //     } else {
-  //       // For cached years, use the data from state
-  //       const cachedData =
-  //         activeTab === "revenue"
-  //           ? revenueGrid[currentYear]
-  //           : expenseGrid[currentYear];
-
-  //       // Check if this SPECIFIC tab's data exists in state
-  //       const hasTabData = cachedData && Object.keys(cachedData).length > 0;
-
-  //       if (hasTabData) {
-  //         setGridData(cachedData);
-  //         lastSavedGridRef.current = cachedData;
-  //       } else {
-  //         if (activeTab === "revenue") {
-  //           const revenueData = await loadFinancialReport(
-  //             "revenue",
-  //             currentYear,
-  //           );
-  //           const dataToUse = revenueData.gridData || createBlankGrid();
-
-  //           // Functional update - verify we're preserving other years
-  //           setRevenueGrid((prev) => {
-  //             const updated = { ...prev, [currentYear]: dataToUse };
-
-  //             return updated;
-  //           });
-  //           setGridData(dataToUse);
-  //           lastSavedGridRef.current = dataToUse;
-  //         } else {
-  //           const expenseData = await loadFinancialReport(
-  //             "expense",
-  //             currentYear,
-  //           );
-  //           const dataToUse = expenseData.gridData || createBlankGrid();
-
-  //           // Functional update - verify we're preserving other years
-  //           setExpenseGrid((prev) => {
-  //             const updated = { ...prev, [currentYear]: dataToUse };
-
-  //             return updated;
-  //           });
-  //           setGridData(dataToUse);
-  //           lastSavedGridRef.current = dataToUse;
-  //         }
-  //       }
-  //     }
-
-  //     isHydratingRef.current = false;
-  //   };
-
-  //   loadBothTabs();
-  // }, [currentYear, activeTab]);
-
-  // useEffect(() => {
-  //   if (
-  //     !autoSaveEnabled ||
-  //     Object.keys(gridData).length === 0 ||
-  //     isSavingAuto ||
-  //     JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-  //   )
-  //     return;
-
-  //   lastSavedGridRef.current = gridData;
-  //   setIsSavingAuto(true);
-
-  //   (async () => {
-  //     try {
-  //       setSavingStatus(true);
-
-  //       // Update the year-specific state before saving
-  //       if (activeTab === "revenue") {
-  //         setRevenueGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: gridData,
-  //         }));
-  //       } else {
-  //         setExpenseGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: gridData,
-  //         }));
-  //       }
-
-  //       await saveFinancialReport(activeTab, gridData, currentYear);
-
-  //       const now = new Date();
-  //       setLastSavedAt(now);
-  //       setIsSynced(true);
-  //       setHasServerChange(false);
-  //       justSaved.current = true;
-  //       setTimeout(() => (justSaved.current = false), 1000);
-  //     } finally {
-  //       setSavingStatus(false);
-  //       setIsSavingAuto(false);
-  //     }
-  //   })();
-  // }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
-
-
-
-
-useEffect(() => {
-  if (!currentYear) return;
-
-  const yearKey = `${currentYear}_${activeTab}`;
-  console.log(`📅 Loading ${activeTab}/${currentYear}...`);
-
-  // Get cached data for THIS specific tab and year
-  const cachedData = activeTab === "revenue" 
-    ? revenueGrid[currentYear] 
-    : expenseGrid[currentYear];
-
-
-  const loadData = async () => {
-    try {
-      let data;
-      
-      // First check localStorage for unsaved changes
-      const localData = loadFromLocalStorage(activeTab, currentYear);
-      if (localData && Object.keys(localData).length > 0) {
-        console.log(`📂 Found unsaved data in localStorage for ${activeTab}/${currentYear}`);
-        data = localData;
-      } else {
-        // Load from Firestore if no local data
-        const result = await loadFinancialReport(activeTab, currentYear);
-        data = result.gridData || createBlankGrid();
+        console.log(
+          `✅ Loaded ${activeTab}/${currentYear} from ${localData ? "localStorage" : "Firestore"}`,
+        );
+      } catch (error) {
+        console.error("❌ Error loading data:", error);
       }
-      
-      // Save to tab-specific state
-      if (activeTab === "revenue") {
-        setRevenueGrid((prev) => ({ ...prev, [currentYear]: data }));
-      } else {
-        setExpenseGrid((prev) => ({ ...prev, [currentYear]: data }));
-      }
-      
-      // Update current view
-      setGridData(data);
-      lastSavedGridRef.current = data;
-      
-      console.log(`✅ Loaded ${activeTab}/${currentYear} from ${localData ? "localStorage" : "Firestore"}`);
-    } catch (error) {
-      console.error("❌ Error loading data:", error);
-    }
-  };
+    };
 
-
-  loadData();
-}, [currentYear, activeTab]); // REMOVED revenueGrid and expenseGrid from deps!
-
-
-
+    loadData();
+  }, [currentYear, activeTab]);
 
   // SEPARATE useEffect for saving data when user edits
   useEffect(() => {
@@ -594,70 +364,65 @@ useEffect(() => {
     }
   }, [gridData, activeTab, currentYear, autoSaveEnabled]);
 
+  // DEBUG: Single clean logging to track tab switching and data persistence
+  const lastLogRef = useRef(null);
 
+  useEffect(() => {
+    const logKey = `${activeTab}-${currentYear}`;
 
+    // Skip if already logged this state
+    if (lastLogRef.current === logKey) return;
+    lastLogRef.current = logKey;
 
+    console.log("═".repeat(30));
+    console.log(`🔄 TAB: ${activeTab.toUpperCase()} | YEAR: ${currentYear}`);
+    console.log("═".repeat(30));
 
+    // Check REVENUE tab data
+    const revenueData = revenueGrid[currentYear];
+    if (revenueData) {
+      const feb = revenueData["1"];
+      const hasFebData =
+        feb &&
+        Object.keys(feb).some(
+          (k) => Array.isArray(feb[k]) && feb[k].some((cell) => cell !== ""),
+        );
+      console.log(`📊 REVENUE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
+    } else {
+      console.log(`📊 REVENUE: not loaded`);
+    }
 
+    // Check EXPENSE tab data
+    const expenseData = expenseGrid[currentYear];
+    if (expenseData) {
+      const feb = expenseData["1"];
+      const hasFebData =
+        feb &&
+        Object.keys(feb).some(
+          (k) => Array.isArray(feb[k]) && feb[k].some((cell) => cell !== ""),
+        );
+      console.log(`💸 EXPENSE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
+    } else {
+      console.log(`💸 EXPENSE: not loaded`);
+    }
 
-// DEBUG: Single clean logging to track tab switching and data persistence
-const lastLogRef = useRef(null);
+    // Check CURRENT view
+    const currentFeb = gridData["1"];
+    if (currentFeb) {
+      const hasCurrentData = Object.keys(currentFeb).some(
+        (k) =>
+          Array.isArray(currentFeb[k]) &&
+          currentFeb[k].some((cell) => cell !== ""),
+      );
+      console.log(
+        `📱 CURRENT (${activeTab}): ${hasCurrentData ? "HAS DATA" : "empty/blank"}`,
+      );
+    } else {
+      console.log(`📱 CURRENT (${activeTab}): no feb data`);
+    }
 
-useEffect(() => {
-  const logKey = `${activeTab}-${currentYear}`;
-  
-  // Skip if already logged this state
-  if (lastLogRef.current === logKey) return;
-  lastLogRef.current = logKey;
-
-  console.log("═".repeat(30));
-  console.log(`🔄 TAB: ${activeTab.toUpperCase()} | YEAR: ${currentYear}`);
-  console.log("═".repeat(30));
-
-  // Check REVENUE tab data
-  const revenueData = revenueGrid[currentYear];
-  if (revenueData) {
-    const feb = revenueData["1"];
-    const hasFebData = feb && Object.keys(feb).some(k => 
-      Array.isArray(feb[k]) && feb[k].some(cell => cell !== "")
-    );
-    console.log(`📊 REVENUE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
-  } else {
-    console.log(`📊 REVENUE: not loaded`);
-  }
-
-  // Check EXPENSE tab data
-  const expenseData = expenseGrid[currentYear];
-  if (expenseData) {
-    const feb = expenseData["1"];
-    const hasFebData = feb && Object.keys(feb).some(k => 
-      Array.isArray(feb[k]) && feb[k].some(cell => cell !== "")
-    );
-    console.log(`💸 EXPENSE: ${hasFebData ? "HAS DATA" : "empty/blank"}`);
-  } else {
-    console.log(`💸 EXPENSE: not loaded`);
-  }
-
-  // Check CURRENT view
-  const currentFeb = gridData["1"];
-  if (currentFeb) {
-    const hasCurrentData = Object.keys(currentFeb).some(k => 
-      Array.isArray(currentFeb[k]) && currentFeb[k].some(cell => cell !== "")
-    );
-    console.log(`📱 CURRENT (${activeTab}): ${hasCurrentData ? "HAS DATA" : "empty/blank"}`);
-  } else {
-    console.log(`📱 CURRENT (${activeTab}): no feb data`);
-  }
-
-  console.log("═".repeat(30));
-}, [activeTab, currentYear, revenueGrid, expenseGrid, gridData]);
-
-
-
-
-
-
-
+    console.log("═".repeat(30));
+  }, [activeTab, currentYear, revenueGrid, expenseGrid, gridData]);
 
   const formatDateTime = (dateObj) => {
     if (!dateObj) return "No Saved Data Yet";
@@ -2575,7 +2340,6 @@ useEffect(() => {
                             </span>
                           </div>
 
-
                           {/* Save icon / spinner */}
                           <div
                             style={{
@@ -3340,3 +3104,196 @@ useEffect(() => {
 export default FinancialReports;
 
 // export default React.memo(FinancialReports);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// // Function to save ALL pending localStorage data to Firestore (for Save Button)
+// const saveAllPendingToFirestore = async () => {
+//   setSavingStatus(true);
+//   const pendingKeys = [];
+
+//   // Collect all localStorage keys
+//   for (let i = 0; i < localStorage.length; i++) {
+//     const key = localStorage.key(i);
+//     if (key.startsWith(LOCAL_STORAGE_KEY)) {
+//       pendingKeys.push(key);
+//     }
+//   }
+
+//   console.log(`📤 Found ${pendingKeys.length} pending items to save to Firestore`);
+
+//   for (const key of pendingKeys) {
+//     try {
+//       const data = JSON.parse(localStorage.getItem(key));
+//       // Extract tab and year from key pattern: emnlcarrental_financial_reports_revenue_2025
+//       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+//       const tab = parts[0];
+//       const year = parseInt(parts[1]);
+
+//       console.log(`📤 Saving ${tab}/${year} to Firestore...`);
+//       await saveFinancialReport(tab, data, year);
+//       clearLocalStorage(tab, year);
+//     } catch (error) {
+//       console.error(`❌ Error saving ${key} to Firestore:`, error);
+//     }
+//   }
+
+//   // Refresh current view from Firestore
+//   const result = await loadFinancialReport(activeTab, currentYear);
+//   const freshData = result.gridData || createBlankGrid();
+//   if (activeTab === "revenue") {
+//     setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+//   } else {
+//     setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+//   }
+//   setGridData(freshData);
+//   lastSavedGridRef.current = freshData;
+
+//   const now = new Date();
+//   setLastSavedAt(now);
+//   setIsSynced(true);
+//   setHasServerChange(false);
+//   setSavingStatus(false);
+// };
+
+// useEffect(() => {
+//   if (!currentYear) return;
+
+//   const loadBothTabs = async () => {
+//     isHydratingRef.current = true;
+
+//     const yearKey = `${currentYear}_${activeTab}`;
+
+//     if (!yearDataLoadedRef.current[yearKey]) {
+//       const revenueData = await loadFinancialReport("revenue", currentYear);
+//       const expenseData = await loadFinancialReport("expense", currentYear);
+
+//       // Use LOCAL variables for the fetched data
+//       const newRevenueData = revenueData.gridData;
+//       const newExpenseData = expenseData.gridData;
+
+//       // Store in state (async, but we use locals below)
+//       setRevenueGrid((prev) => ({
+//         ...prev,
+//         [currentYear]: newRevenueData,
+//       }));
+//       setExpenseGrid((prev) => ({
+//         ...prev,
+//         [currentYear]: newExpenseData,
+//       }));
+
+//       // Update REF (not state) - immediate effect
+//       yearDataLoadedRef.current = {
+//         ...yearDataLoadedRef.current,
+//         [`${currentYear}_revenue`]: true,
+//         [`${currentYear}_expense`]: true,
+//       };
+
+//       // Also update state for UI if needed
+//       setYearDataLoaded(yearDataLoadedRef.current);
+
+//       // Set current view using LOCAL variables
+//       if (activeTab === "revenue") {
+//         setGridData(newRevenueData || createBlankGrid());
+//         lastSavedGridRef.current = newRevenueData || createBlankGrid();
+//       } else {
+//         setGridData(newExpenseData || createBlankGrid());
+//         lastSavedGridRef.current = newExpenseData || createBlankGrid();
+//       }
+//     } else {
+//       // For cached years, use the data from state
+//       const cachedData =
+//         activeTab === "revenue"
+//           ? revenueGrid[currentYear]
+//           : expenseGrid[currentYear];
+
+//       // Check if this SPECIFIC tab's data exists in state
+//       const hasTabData = cachedData && Object.keys(cachedData).length > 0;
+
+//       if (hasTabData) {
+//         setGridData(cachedData);
+//         lastSavedGridRef.current = cachedData;
+//       } else {
+//         if (activeTab === "revenue") {
+//           const revenueData = await loadFinancialReport(
+//             "revenue",
+//             currentYear,
+//           );
+//           const dataToUse = revenueData.gridData || createBlankGrid();
+
+//           // Functional update - verify we're preserving other years
+//           setRevenueGrid((prev) => {
+//             const updated = { ...prev, [currentYear]: dataToUse };
+
+//             return updated;
+//           });
+//           setGridData(dataToUse);
+//           lastSavedGridRef.current = dataToUse;
+//         } else {
+//           const expenseData = await loadFinancialReport(
+//             "expense",
+//             currentYear,
+//           );
+//           const dataToUse = expenseData.gridData || createBlankGrid();
+
+//           // Functional update - verify we're preserving other years
+//           setExpenseGrid((prev) => {
+//             const updated = { ...prev, [currentYear]: dataToUse };
+
+//             return updated;
+//           });
+//           setGridData(dataToUse);
+//           lastSavedGridRef.current = dataToUse;
+//         }
+//       }
+//     }
+
+//     isHydratingRef.current = false;
+//   };
+
+//   loadBothTabs();
+// }, [currentYear, activeTab]);
+
+// useEffect(() => {
+//   if (
+//     !autoSaveEnabled ||
+//     Object.keys(gridData).length === 0 ||
+//     isSavingAuto ||
+//     JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+//   )
+//     return;
+
+//   lastSavedGridRef.current = gridData;
+//   setIsSavingAuto(true);
+
+//   (async () => {
+//     try {
+//       setSavingStatus(true);
+
+//       // Update the year-specific state before saving
+//       if (activeTab === "revenue") {
+//         setRevenueGrid((prev) => ({
+//           ...prev,
+//           [currentYear]: gridData,
+//         }));
+//       } else {
+//         setExpenseGrid((prev) => ({
+//           ...prev,
+//           [currentYear]: gridData,
+//         }));
+//       }
+
+//       await saveFinancialReport(activeTab, gridData, currentYear);
+
+//       const now = new Date();
+//       setLastSavedAt(now);
+//       setIsSynced(true);
+//       setHasServerChange(false);
+//       justSaved.current = true;
+//       setTimeout(() => (justSaved.current = false), 1000);
+//     } finally {
+//       setSavingStatus(false);
+//       setIsSavingAuto(false);
+//     }
+//   })();
+// }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
