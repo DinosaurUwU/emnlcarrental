@@ -310,34 +310,8 @@ const FinancialReports = () => {
 
 
 
-
-
-
-
-
-
-  // useEffect(() => {
-  // if (!currentYear) return;
-  
-
-  useEffect(() => {
-    console.log("🔍 SAVE EFFECT TRIGGERED:", { activeTab, currentYear, gridDataKeys: Object.keys(gridData) });
-    
-    if (
-      Object.keys(gridData).length === 0 ||
-      isSavingAuto ||
-      JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-    ) {
-      console.log("🔍 SAVE EFFECT: early return", { 
-        gridDataEmpty: Object.keys(gridData).length === 0,
-        isSavingAuto,
-        sameAsLast: JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-      });
-      return;
-    }
-    
-    console.log("🔍 SAVE EFFECT: proceeding to save...");
-
+useEffect(() => {
+  if (!currentYear) return;
 
   const loadBothTabs = async () => {
     isHydratingRef.current = true;
@@ -438,8 +412,9 @@ useEffect(() => {
   if (
     !autoSaveEnabled ||
     Object.keys(gridData).length === 0 ||
-    isSavingAuto ||
-    JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+    isSavingAuto
+    // isSavingAuto ||
+    // JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
   )
     return;
 
@@ -464,7 +439,6 @@ useEffect(() => {
       }
 
       await saveFinancialReport(activeTab, gridData, currentYear);
-      
 
       const now = new Date();
       setLastSavedAt(now);
@@ -478,6 +452,7 @@ useEffect(() => {
     }
   })();
 }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
 
 
 
