@@ -97,6 +97,62 @@ const FinancialReports = () => {
     );
   };
 
+    // Load ALL transaction data from Firestore + localStorage
+  const loadAllTransactionData = async () => {
+    const allData = {};
+    
+    // Available years range
+    const availableYears = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+    
+    // Load revenue and expense for each year from Firestore
+    for (const year of availableYears) {
+      try {
+        // Load revenue
+        const revenueResult = await loadFinancialReport("revenue", year);
+        if (revenueResult.gridData && hasActualData(revenueResult.gridData)) {
+          allData[year] = { ...(allData[year] || {}), ...revenueResult.gridData };
+          console.log(`📥 Loaded revenue/${year} from Firestore`);
+        }
+        
+        // Load expense
+        const expenseResult = await loadFinancialReport("expense", year);
+        if (expenseResult.gridData && hasActualData(expenseResult.gridData)) {
+          allData[year] = { ...(allData[year] || {}), ...expenseResult.gridData };
+          console.log(`📥 Loaded expense/${year} from Firestore`);
+        }
+      } catch (error) {
+        console.error(`❌ Error loading ${year}:`, error);
+      }
+    }
+    
+    // Also check localStorage for pending data
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      if (key.startsWith(LOCAL_STORAGE_KEY)) {
+        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+        const tab = parts[0];
+        const year = parseInt(parts[1]);
+        
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          
+          if (hasActualData(data)) {
+            // localStorage takes priority over Firestore
+            allData[year] = { ...(allData[year] || {}), ...data };
+            console.log(`📥 Loaded ${tab}/${year} from localStorage (pending)`);
+          }
+        } catch (error) {
+          console.error("Error parsing localStorage:", error);
+        }
+      }
+    }
+    
+    console.log(`✅ Transaction tab loaded years:`, Object.keys(allData));
+    return allData;
+  };
+
+
   // Function to save ALL pending localStorage data to Firestore (for Save Button)
   const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
@@ -273,7 +329,45 @@ const FinancialReports = () => {
     }
   }, [serverChangeCounter]);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
+  // =====================================================
+  // TRANSACTION TAB: Load ALL years from Firestore + localStorage
+  // =====================================================
+  if (activeTab === "transaction") {
+    console.log(`📅 Loading TRANSACTION tab - ALL years combined`);
+    
+    const loadTransaction = async () => {
+      const allData = await loadAllTransactionData();
+      setGridData(allData);
+      lastSavedGridRef.current = allData;
+    };
+    
+    loadTransaction();
+    return; // Exit early - don't run normal loading
+  }
+  // =====================================================
+
+
+
     if (!currentYear) return;
 
     const yearKey = `${currentYear}_${activeTab}`;
@@ -324,6 +418,9 @@ const FinancialReports = () => {
     loadData();
   }, [currentYear, activeTab]);
 
+
+
+  
   // SEPARATE useEffect for saving data when user edits
   useEffect(() => {
     if (!gridData || Object.keys(gridData).length === 0) return;
@@ -363,6 +460,20 @@ const FinancialReports = () => {
       setIsSynced(false); // Mark as unsaved to Firestore
     }
   }, [gridData, activeTab, currentYear, autoSaveEnabled]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // DEBUG: Single clean logging to track tab switching and data persistence
   const lastLogRef = useRef(null);
