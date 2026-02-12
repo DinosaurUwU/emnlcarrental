@@ -67,15 +67,20 @@ const FinancialReports = () => {
   //   }
   // };
 
-    const saveToLocalStorage = (tab, year, data) => {
+  const saveToLocalStorage = (tab, year, data) => {
     try {
       const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
       localStorage.setItem(key, JSON.stringify(data));
+      
+      // Read back and parse to show as object
+      const savedData = localStorage.getItem(key);
       console.log(`💾 Saved ${tab}/${year} to localStorage`);
+      console.log(`📦 DATA in Local Storage, "${key}":`, JSON.parse(savedData));
     } catch (error) {
       console.error("❌ Error saving to localStorage:", error);
     }
   };
+
 
 
   const loadFromLocalStorage = (tab, year) => {
@@ -285,29 +290,6 @@ const FinancialReports = () => {
   }, [serverChangeCounter]);
 
 
-  
-  // DEBUG: Log REVENUE data only
-  useEffect(() => {
-    console.log("📦 LOCALSTORAGE RAW DATA:");
-    console.log("═".repeat(30));
-    
-    const key = "emnlcarrental_financial_reports_revenue_2026";
-    console.log("📁 REVENUE:");
-    
-    const data = localStorage.getItem(key);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        console.log(`  2026:`, parsed);
-      } catch (e) {
-        console.log(`  2026: ERROR - ${e.message}`);
-      }
-    }
-    
-    console.log("═".repeat(30));
-  }, [activeTab, currentYear, gridData]);
-
-
 
 
 
@@ -375,39 +357,116 @@ useEffect(() => {
       if (hasTabData) {
         setGridData(cachedData);
         lastSavedGridRef.current = cachedData;
-      } else {
-        if (activeTab === "revenue") {
-          const revenueData = await loadFinancialReport(
-            "revenue",
-            currentYear,
-          );
-          const dataToUse = revenueData.gridData || createBlankGrid();
 
-          // Functional update - verify we're preserving other years
-          setRevenueGrid((prev) => {
-            const updated = { ...prev, [currentYear]: dataToUse };
+                } else {
+          if (activeTab === "revenue") {
+            // Load from Firestore
+            const firestoreData = await loadFinancialReport("revenue", currentYear);
+            const firestoreGrid = firestoreData.gridData || {};
+            
+            // Load from localStorage
+            const localData = loadFromLocalStorage("revenue", currentYear);
+            
+            // MERGE: LocalStorage takes priority, but keep Firestore data too
+            const mergedData = { ...firestoreGrid };
+            
+            // For each month in localStorage, merge rows
+            if (localData) {
+              Object.keys(localData).forEach(monthIndex => {
+                const localMonth = localData[monthIndex] || {};
+                const firestoreMonth = firestoreGrid[monthIndex] || {};
+                
+                mergedData[monthIndex] = { ...firestoreMonth };
+                
+                // Add/update rows from localStorage
+                Object.keys(localMonth).forEach(rowKey => {
+                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                });
+              });
+            }
+            
+            const dataToUse = mergedData;
 
-            return updated;
-          });
-          setGridData(dataToUse);
-          lastSavedGridRef.current = dataToUse;
-        } else {
-          const expenseData = await loadFinancialReport(
-            "expense",
-            currentYear,
-          );
-          const dataToUse = expenseData.gridData || createBlankGrid();
+            // Functional update - verify we're preserving other years
+            setRevenueGrid((prev) => {
+              const updated = { ...prev, [currentYear]: dataToUse };
 
-          // Functional update - verify we're preserving other years
-          setExpenseGrid((prev) => {
-            const updated = { ...prev, [currentYear]: dataToUse };
+              return updated;
+            });
+            setGridData(dataToUse);
+            lastSavedGridRef.current = dataToUse;
+          } else {
+            // Load from Firestore
+            const firestoreData = await loadFinancialReport("expense", currentYear);
+            const firestoreGrid = firestoreData.gridData || {};
+            
+            // Load from localStorage
+            const localData = loadFromLocalStorage("expense", currentYear);
+            
+            // MERGE: LocalStorage takes priority, but keep Firestore data too
+            const mergedData = { ...firestoreGrid };
+            
+            // For each month in localStorage, merge rows
+            if (localData) {
+              Object.keys(localData).forEach(monthIndex => {
+                const localMonth = localData[monthIndex] || {};
+                const firestoreMonth = firestoreGrid[monthIndex] || {};
+                
+                mergedData[monthIndex] = { ...firestoreMonth };
+                
+                // Add/update rows from localStorage
+                Object.keys(localMonth).forEach(rowKey => {
+                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                });
+              });
+            }
+            
+            const dataToUse = mergedData;
 
-            return updated;
-          });
-          setGridData(dataToUse);
-          lastSavedGridRef.current = dataToUse;
+            // Functional update - verify we're preserving other years
+            setExpenseGrid((prev) => {
+              const updated = { ...prev, [currentYear]: dataToUse };
+
+              return updated;
+            });
+            setGridData(dataToUse);
+            lastSavedGridRef.current = dataToUse;
+          }
         }
-      }
+
+      // } else {
+      //   if (activeTab === "revenue") {
+      //     const revenueData = await loadFinancialReport(
+      //       "revenue",
+      //       currentYear,
+      //     );
+      //     const dataToUse = revenueData.gridData || createBlankGrid();
+
+      //     // Functional update - verify we're preserving other years
+      //     setRevenueGrid((prev) => {
+      //       const updated = { ...prev, [currentYear]: dataToUse };
+
+      //       return updated;
+      //     });
+      //     setGridData(dataToUse);
+      //     lastSavedGridRef.current = dataToUse;
+      //   } else {
+      //     const expenseData = await loadFinancialReport(
+      //       "expense",
+      //       currentYear,
+      //     );
+      //     const dataToUse = expenseData.gridData || createBlankGrid();
+
+      //     // Functional update - verify we're preserving other years
+      //     setExpenseGrid((prev) => {
+      //       const updated = { ...prev, [currentYear]: dataToUse };
+
+      //       return updated;
+      //     });
+      //     setGridData(dataToUse);
+      //     lastSavedGridRef.current = dataToUse;
+      //   }
+      // }
     }
 
     isHydratingRef.current = false;
