@@ -56,8 +56,18 @@ const FinancialReports = () => {
   // Local Storage Keys
   const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
 
-  // Local Storage Helpers
-  const saveToLocalStorage = (tab, year, data) => {
+  // // Local Storage Helpers
+  // const saveToLocalStorage = (tab, year, data) => {
+  //   try {
+  //     const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
+  //     localStorage.setItem(key, JSON.stringify(data));
+  //     console.log(`💾 Saved ${tab}/${year} to localStorage`);
+  //   } catch (error) {
+  //     console.error("❌ Error saving to localStorage:", error);
+  //   }
+  // };
+
+    const saveToLocalStorage = (tab, year, data) => {
     try {
       const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
       localStorage.setItem(key, JSON.stringify(data));
@@ -66,6 +76,7 @@ const FinancialReports = () => {
       console.error("❌ Error saving to localStorage:", error);
     }
   };
+
 
   const loadFromLocalStorage = (tab, year) => {
     try {
@@ -280,25 +291,22 @@ const FinancialReports = () => {
     console.log("📦 LOCALSTORAGE RAW DATA:");
     console.log("═".repeat(30));
     
-    const revenueYears = [2025, 2026];
+    const key = "emnlcarrental_financial_reports_revenue_2026";
     console.log("📁 REVENUE:");
     
-    revenueYears.forEach(year => {
-      const key = `emnlcarrental_financial_reports_revenue_${year}`;
-      const data = localStorage.getItem(key);
-      console.log(`  ${year}: localStorage.getItem("${key}") =`, data);
-      if (data) {
-        try {
-          const parsed = JSON.parse(data);
-          console.log(`  ${year}:`, parsed);
-        } catch (e) {
-          console.log(`  ${year}: ERROR - ${e.message}`);
-        }
+    const data = localStorage.getItem(key);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        console.log(`  2026:`, parsed);
+      } catch (e) {
+        console.log(`  2026: ERROR - ${e.message}`);
       }
-    });
+    }
     
     console.log("═".repeat(30));
   }, [activeTab, currentYear, gridData]);
+
 
 
 
@@ -452,6 +460,17 @@ useEffect(() => {
     }
   })();
 }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+  // Auto-save to localStorage when gridData changes
+  useEffect(() => {
+    if (!gridData || Object.keys(gridData).length === 0) return;
+    
+    // Skip during initial hydration
+    if (isHydratingRef.current) return;
+    
+    saveToLocalStorage(activeTab, currentYear, gridData);
+    
+  }, [gridData, activeTab, currentYear]);
 
 
 
