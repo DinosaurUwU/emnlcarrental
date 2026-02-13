@@ -53,6 +53,12 @@ const FinancialReports = () => {
 
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
+    const [isTabLoading, setIsTabLoading] = useState(false);
+
+      const currentTabRef = useRef(activeTab);
+
+
+
   // Local Storage Keys
   const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
 
@@ -319,6 +325,9 @@ useEffect(() => {
   const loadBothTabs = async () => {
     isHydratingRef.current = true;
 
+    currentTabRef.current = activeTab; // Track which tab we're loading for
+    setIsTabLoading(true);
+
     const yearKey = `${currentYear}_${activeTab}`;
 
     if (!yearDataLoadedRef.current[yearKey]) {
@@ -366,7 +375,14 @@ useEffect(() => {
         lastSavedGridRef.current = transactionData;
       }
 
-    } else {
+     } else {
+      // Check if we're still on the same tab (prevents race conditions)
+      if (currentTabRef.current !== activeTab) {
+        console.log(`⏭️ Skipping - tab changed from ${currentTabRef.current} to ${activeTab}`);
+        return;
+      }
+
+
       // For cached years, use the data from state
       const cachedData =
         activeTab === "revenue"
@@ -638,6 +654,7 @@ useEffect(() => {
     }
 
     isHydratingRef.current = false;
+    setIsTabLoading(false);
   };
 
   loadBothTabs();
@@ -1786,7 +1803,9 @@ useEffect(() => {
   };
 
   return (
+    
     <div className="financial-reports">
+      
       {isImageModalOpen && modalImage && (
         <div
           className="admin-image-modal-overlay"
