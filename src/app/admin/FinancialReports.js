@@ -184,8 +184,7 @@ const FinancialReports = () => {
   //   setSavingStatus(false);
   // };
 
-
-    const saveAllPendingToFirestore = async () => {
+  const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
     const pendingKeys = [];
     const savedYears = new Set(); // Track which years were saved
@@ -195,7 +194,7 @@ const FinancialReports = () => {
       const key = localStorage.key(i);
       if (key.startsWith(LOCAL_STORAGE_KEY)) {
         pendingKeys.push(key);
-        
+
         // Extract tab and year from key
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
         if (parts.length >= 2) {
@@ -237,11 +236,11 @@ const FinancialReports = () => {
 
     // Reload ALL saved tabs and years (not just activeTab/currentYear)
     console.log("🔄 Reloading all saved data from Firestore...");
-    
+
     // Reload current active tab/year first
     const currentResult = await loadFinancialReport(activeTab, currentYear);
     const currentFreshData = currentResult.gridData || createBlankGrid();
-    
+
     if (activeTab === "revenue") {
       setRevenueGrid((prev) => ({
         ...prev,
@@ -259,7 +258,7 @@ const FinancialReports = () => {
     // Reload all other saved years and tabs
     for (const year of savedYears) {
       if (year === currentYear) continue; // Already reloaded
-      
+
       if (savedTabs.has("revenue")) {
         const revenueResult = await loadFinancialReport("revenue", year);
         setRevenueGrid((prev) => ({
@@ -267,7 +266,7 @@ const FinancialReports = () => {
           [year]: revenueResult.gridData || {},
         }));
       }
-      
+
       if (savedTabs.has("expense")) {
         const expenseResult = await loadFinancialReport("expense", year);
         setExpenseGrid((prev) => ({
@@ -281,10 +280,9 @@ const FinancialReports = () => {
     setIsSynced(true);
     setHasServerChange(false);
     setSavingStatus(false);
-    
+
     console.log("✅ All data saved and reloaded from Firestore!");
   };
-
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
 
@@ -359,10 +357,7 @@ const FinancialReports = () => {
   const [showManualLoadConfirm, setShowManualLoadConfirm] = useState(false);
   const [showManualLoadMenu, setShowManualLoadMenu] = useState(false);
 
-
   const [manualLoadOption, setManualLoadOption] = useState(null); // "month", "year", "allyears"
-
-
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -821,7 +816,7 @@ const FinancialReports = () => {
 
       // Get blank grid structure
       const blankGrid = createBlankGrid();
-      
+
       // Merge: only keep current month data from Firestore, rest blank
       const monthOnlyData = { ...blankGrid };
       if (gridData && gridData[selectedMonthIndex]) {
@@ -832,12 +827,22 @@ const FinancialReports = () => {
       if (activeTab === "revenue") {
         setRevenueGrid((prev) => ({
           ...prev,
-          [currentYear]: { ...prev[currentYear], [selectedMonthIndex]: monthOnlyData[selectedMonthIndex] || blankGrid[selectedMonthIndex] },
+          [currentYear]: {
+            ...prev[currentYear],
+            [selectedMonthIndex]:
+              monthOnlyData[selectedMonthIndex] ||
+              blankGrid[selectedMonthIndex],
+          },
         }));
       } else {
         setExpenseGrid((prev) => ({
           ...prev,
-          [currentYear]: { ...prev[currentYear], [selectedMonthIndex]: monthOnlyData[selectedMonthIndex] || blankGrid[selectedMonthIndex] },
+          [currentYear]: {
+            ...prev[currentYear],
+            [selectedMonthIndex]:
+              monthOnlyData[selectedMonthIndex] ||
+              blankGrid[selectedMonthIndex],
+          },
         }));
       }
 
@@ -887,7 +892,7 @@ const FinancialReports = () => {
 
       for (const year of yearOptions) {
         const { gridData } = await loadFinancialReport(activeTab, year);
-        
+
         if (activeTab === "revenue") {
           setRevenueGrid((prev) => ({
             ...prev,
@@ -917,9 +922,6 @@ const FinancialReports = () => {
       setSavingStatus(false);
     }
   };
-
-
-
 
   const applySorting = (monthIndex) => {
     setGridData((prev) => {
@@ -1295,19 +1297,21 @@ const FinancialReports = () => {
   //   setIsSynced(false);
   // };
 
-
-  
-
   const handleResetGrid = () => {
     // Step 1: Clear ONLY the selected month from localStorage
-    const currentLocalStorage = loadFromLocalStorage(activeTab, currentYear) || {};
+    const currentLocalStorage =
+      loadFromLocalStorage(activeTab, currentYear) || {};
     delete currentLocalStorage[selectedMonthIndex]; // Use selectedMonthIndex
     saveToLocalStorage(activeTab, currentYear, currentLocalStorage);
-    
+
     // Step 2: Get blank month data using createBlankGrid() structure
     const blankGrid = createBlankGrid();
-    const blankMonthData = blankGrid[selectedMonthIndex] || Array(5).fill(null).map(() => Array(5).fill(""));
-    
+    const blankMonthData =
+      blankGrid[selectedMonthIndex] ||
+      Array(5)
+        .fill(null)
+        .map(() => Array(5).fill(""));
+
     // Step 3: Update state - only reset the selected month, keep other months
     if (activeTab === "revenue") {
       setRevenueGrid((prev) => {
@@ -1330,24 +1334,16 @@ const FinancialReports = () => {
         return updated;
       });
     }
-    
+
     // Step 4: Update gridData to show the reset month
     setGridData((prev) => {
       const updated = { ...prev };
       updated[selectedMonthIndex] = blankMonthData;
       return updated;
     });
-    
+
     setIsSynced(false);
   };
-
-
-
-
-
-
-
-
 
   // Autofill payments when context changes
   useEffect(() => {
@@ -1662,43 +1658,40 @@ const FinancialReports = () => {
   // };
 
   const addRow = (monthIndex) => {
+    console.log("=== addRow FUNCTION ENTERED ===");
+    console.log("monthIndex:", monthIndex);
+    console.log("BEFORE update - gridData[monthIndex]:", gridData[monthIndex]);
+
     setGridData((prev) => {
+      console.log("=== INSIDE setGridData ===");
+      console.log("prev[monthIndex]:", prev[monthIndex]);
+
       const updated = { ...prev };
-      
-      // Ensure month exists
-      if (!updated[monthIndex]) {
-        updated[monthIndex] = {};
-      }
-      
       const monthRows = { ...updated[monthIndex] };
-      
-      // Find the next available numeric row key ONLY
+
       const existingNumericKeys = Object.keys(monthRows)
-        .filter((key) => !isNaN(Number(key)) && key.startsWith("Row_")) // Only Row_ keys
+        .filter((key) => key.startsWith("Row_"))
         .map((key) => Number(key.replace("Row_", "")));
-      
-      const nextKeyNum = existingNumericKeys.length > 0 ? Math.max(...existingNumericKeys) + 1 : 0;
+
+      console.log("existingNumericKeys:", existingNumericKeys);
+
+      const nextKeyNum =
+        existingNumericKeys.length > 0
+          ? Math.max(...existingNumericKeys) + 1
+          : 0;
       const nextKey = `Row_${nextKeyNum}`;
-      
-      console.log(`➕ Adding new row at key: ${nextKey}`);
-      
-      // Add 1 new empty row
+
+      console.log("➕ Adding new row at key:", nextKey);
+
       monthRows[nextKey] = Array(5).fill("");
-      
-      // Limit to max 50 rows
-      if (Object.keys(monthRows).length > 50) {
-        alert("Maximum of 50 rows per month reached.");
-        return prev;
-      }
-      
+      console.log("✅ monthRows AFTER adding:", monthRows);
+
       updated[monthIndex] = monthRows;
+      console.log("✅ updated[monthIndex] AFTER:", updated[monthIndex]);
+
       return updated;
     });
   };
-
-
-
-
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
@@ -2063,15 +2056,13 @@ const FinancialReports = () => {
         </div>
       )}
 
-
-
       {showResetConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3 className="confirm-header">Reset Grid?</h3>
-                        <p className="confirm-text">
-                            This will clear all data in {months[selectedMonthIndex]} {currentYear}. Continue?
-
+            <p className="confirm-text">
+              This will clear all data in {months[selectedMonthIndex]}{" "}
+              {currentYear}. Continue?
             </p>
 
             <div className="confirm-buttons">
@@ -2707,33 +2698,34 @@ const FinancialReports = () => {
               </div>
 
               <div className="g1-item-ml">
-                <div className="manual-load-dropdown" style={{ position: "relative" }}>
-                  <button onClick={() => setShowManualLoadMenu(!showManualLoadMenu)}>
+                <div
+                  className="manual-load-dropdown"
+                  style={{ position: "relative" }}
+                >
+                  <button
+                    onClick={() => setShowManualLoadMenu(!showManualLoadMenu)}
+                  >
                     Manual Load ▾
                   </button>
                   {showManualLoadMenu && (
-                    <div
-                      className="manual-load-options"
-                    >
+                    <div className="manual-load-options">
                       <button
-                      className="mlo-buttons"
+                        className="mlo-buttons"
                         onClick={() => {
                           setShowManualLoadMenu(false);
                           setManualLoadOption("month");
                           setShowManualLoadConfirm(true);
                         }}
-
                       >
                         📅 {months[selectedMonthIndex]} {currentYear}
                       </button>
                       <button
-                      className="mlo-buttons"
+                        className="mlo-buttons"
                         onClick={() => {
                           setShowManualLoadMenu(false);
                           setManualLoadOption("year");
                           setShowManualLoadConfirm(true);
                         }}
-
                       >
                         📊 YEAR {currentYear}
                       </button>
@@ -2741,9 +2733,6 @@ const FinancialReports = () => {
                   )}
                 </div>
               </div>
-
-
-
 
               <div className="g1-item-sm">
                 <button onClick={toggleShowAll}>
@@ -2823,8 +2812,17 @@ const FinancialReports = () => {
                   entries = {};
                 }
 
-                // Explicitly sort rows by key to guarantee order
-                const rowKeys = ["Row_0", "Row_1", "Row_2", "Row_3", "Row_4"];
+                // // Explicitly sort rows by key to guarantee order
+                // const rowKeys = ["Row_0", "Row_1", "Row_2", "Row_3", "Row_4"];
+                // Dynamically get all row keys and sort them numerically
+                const rowKeys = Object.keys(entries)
+                  .filter((key) => key.startsWith("Row_"))
+                  .sort((a, b) => {
+                    const numA = parseInt(a.replace("Row_", ""), 10);
+                    const numB = parseInt(b.replace("Row_", ""), 10);
+                    return numA - numB;
+                  });
+
                 const sortedEntries = rowKeys
                   .map((key) => ({ key, row: entries[key] }))
                   .filter((item) => item.row !== undefined);
@@ -3062,8 +3060,39 @@ const FinancialReports = () => {
                           style={{ borderBottom: `2px solid ${borderColor}` }}
                         >
                           <div className="grid-header-cell row-number-header">
-                            #
+                            <input
+                              type="checkbox"
+                              checked={
+                                sortedEntries.length > 0 &&
+                                sortedEntries.every((item) =>
+                                  selectedRows.includes(item.key),
+                                )
+                              }
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  // Select all visible rows
+                                  const allRowKeys = sortedEntries.map(
+                                    (item) => item.key,
+                                  );
+                                  setSelectedRows((prev) => [
+                                    ...new Set([...prev, ...allRowKeys]),
+                                  ]);
+                                } else {
+                                  // Deselect all visible rows
+                                  const allRowKeys = sortedEntries.map(
+                                    (item) => item.key,
+                                  );
+                                  setSelectedRows((prev) =>
+                                    prev.filter(
+                                      (key) => !allRowKeys.includes(key),
+                                    ),
+                                  );
+                                }
+                              }}
+                              style={{ cursor: "pointer" }}
+                            />
                           </div>
+
                           <div className="grid-header-cell">UNIT</div>
                           <div className="grid-header-cell">AMOUNT</div>
                           <div className="grid-header-cell">MOP</div>
@@ -3462,15 +3491,19 @@ const FinancialReports = () => {
                       </div>
 
                       <div className="grid-controls">
-<button 
-  onClick={() => {
-    console.log("🎯 Button clicked - monthIndex:", monthIndex, "activeTab:", activeTab);
-    addRow(monthIndex);
-  }}
->
-  + Row
-</button>
-
+                        <button
+                          onClick={() => {
+                            console.log(
+                              "🎯 Button clicked - monthIndex:",
+                              monthIndex,
+                              "activeTab:",
+                              activeTab,
+                            );
+                            addRow(monthIndex);
+                          }}
+                        >
+                          + Row
+                        </button>
 
                         <button
                           onClick={() => {
@@ -3482,29 +3515,39 @@ const FinancialReports = () => {
                               return;
                             }
 
-                              setGridData((prev) => {
-                                const newGrid = { ...prev };
-                                
-                                // Ensure month exists
-                                if (!newGrid[monthIndex]) {
-                                  newGrid[monthIndex] = {};
-                                }
-                                
-                                const monthRows = { ...newGrid[monthIndex] };
-                                
-                                // Clear selected rows (keep the row, just empty it)
-                                selectedRows.forEach((r) => {
+                            setGridData((prev) => {
+                              const newGrid = { ...prev };
+
+                              // Ensure month exists
+                              if (!newGrid[monthIndex]) {
+                                newGrid[monthIndex] = {};
+                              }
+
+                              const monthRows = { ...newGrid[monthIndex] };
+
+                              // For Row_0 to Row_4: only clear data, keep the row
+                              // For Row_5+: actually delete the row entirely
+                              selectedRows.forEach((r) => {
+                                const rowNum = parseInt(
+                                  r.replace("Row_", ""),
+                                  10,
+                                );
+
+                                if (rowNum < 5) {
+                                  // First 5 rows: only clear the data, keep the row
                                   monthRows[r] = Array(5).fill("");
-                                });
-                                
-                                newGrid[monthIndex] = monthRows;
-                                
-                                return newGrid;
+                                } else {
+                                  // Row_5 and above: delete the entire row
+                                  delete monthRows[r];
+                                }
                               });
 
-                              setSelectedRows([]);
+                              newGrid[monthIndex] = monthRows;
 
+                              return newGrid;
+                            });
 
+                            setSelectedRows([]);
                           }}
                         >
                           🗑 Delete Selected Rows
@@ -3763,7 +3806,6 @@ const FinancialReports = () => {
                 )}
               </tbody> */}
 
-
               <tbody>
                 {isTabLoading ? (
                   <tr>
@@ -3991,9 +4033,6 @@ const FinancialReports = () => {
                   })()
                 )}
               </tbody>
-
-
-
             </table>
           </div>
         </div>
