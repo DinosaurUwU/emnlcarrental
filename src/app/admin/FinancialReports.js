@@ -127,21 +127,89 @@ const FinancialReports = () => {
     );
   };
 
-  // Function to save ALL pending localStorage data to Firestore (for Save Button)
-  const saveAllPendingToFirestore = async () => {
+  // // Function to save ALL pending localStorage data to Firestore
+  // const saveAllPendingToFirestore = async () => {
+  //   setSavingStatus(true);
+  //   const pendingKeys = [];
+
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     if (key.startsWith(LOCAL_STORAGE_KEY)) {
+  //       pendingKeys.push(key);
+  //     }
+  //   }
+
+  //   console.log(
+  //     `📤 Found ${pendingKeys.length} pending items to save to Firestore`,
+  //   );
+
+  //   for (const key of pendingKeys) {
+  //     try {
+  //       const data = JSON.parse(localStorage.getItem(key));
+
+  //       // SKIP if no actual data
+  //       if (!hasActualData(data)) {
+  //         console.log(`⏭️ Skipping ${key} - no data`);
+  //         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //         clearLocalStorage(parts[0], parseInt(parts[1]));
+  //         continue;
+  //       }
+
+  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //       const tab = parts[0];
+  //       const year = parseInt(parts[1]);
+
+  //       console.log(`📤 Saving ${tab}/${year} to Firestore...`);
+  //       await saveFinancialReport(tab, data, year);
+  //       clearLocalStorage(tab, year);
+  //     } catch (error) {
+  //       console.error(`❌ Error saving ${key} to Firestore:`, error);
+  //     }
+  //   }
+
+  //   // Refresh current view
+  //   const result = await loadFinancialReport(activeTab, currentYear);
+  //   const freshData = result.gridData || createBlankGrid();
+  //   if (activeTab === "revenue") {
+  //     setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+  //   } else {
+  //     setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+  //   }
+  //   setGridData(freshData);
+  //   lastSavedGridRef.current = freshData;
+
+  //   setLastSavedAt(new Date());
+  //   setIsSynced(true);
+  //   setHasServerChange(false);
+  //   setSavingStatus(false);
+  // };
+
+
+    const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
     const pendingKeys = [];
+    const savedYears = new Set(); // Track which years were saved
+    const savedTabs = new Set(); // Track which tabs were saved
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(LOCAL_STORAGE_KEY)) {
         pendingKeys.push(key);
+        
+        // Extract tab and year from key
+        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+        if (parts.length >= 2) {
+          savedTabs.add(parts[0]);
+          savedYears.add(parseInt(parts[1]));
+        }
       }
     }
 
     console.log(
       `📤 Found ${pendingKeys.length} pending items to save to Firestore`,
     );
+    console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
+    console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
 
     for (const key of pendingKeys) {
       try {
@@ -167,22 +235,56 @@ const FinancialReports = () => {
       }
     }
 
-    // Refresh current view
-    const result = await loadFinancialReport(activeTab, currentYear);
-    const freshData = result.gridData || createBlankGrid();
+    // Reload ALL saved tabs and years (not just activeTab/currentYear)
+    console.log("🔄 Reloading all saved data from Firestore...");
+    
+    // Reload current active tab/year first
+    const currentResult = await loadFinancialReport(activeTab, currentYear);
+    const currentFreshData = currentResult.gridData || createBlankGrid();
+    
     if (activeTab === "revenue") {
-      setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+      setRevenueGrid((prev) => ({
+        ...prev,
+        [currentYear]: currentFreshData,
+      }));
     } else {
-      setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+      setExpenseGrid((prev) => ({
+        ...prev,
+        [currentYear]: currentFreshData,
+      }));
     }
-    setGridData(freshData);
-    lastSavedGridRef.current = freshData;
+    setGridData(currentFreshData);
+    lastSavedGridRef.current = currentFreshData;
+
+    // Reload all other saved years and tabs
+    for (const year of savedYears) {
+      if (year === currentYear) continue; // Already reloaded
+      
+      if (savedTabs.has("revenue")) {
+        const revenueResult = await loadFinancialReport("revenue", year);
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [year]: revenueResult.gridData || {},
+        }));
+      }
+      
+      if (savedTabs.has("expense")) {
+        const expenseResult = await loadFinancialReport("expense", year);
+        setExpenseGrid((prev) => ({
+          ...prev,
+          [year]: expenseResult.gridData || {},
+        }));
+      }
+    }
 
     setLastSavedAt(new Date());
     setIsSynced(true);
     setHasServerChange(false);
     setSavingStatus(false);
+    
+    console.log("✅ All data saved and reloaded from Firestore!");
   };
+
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
 
