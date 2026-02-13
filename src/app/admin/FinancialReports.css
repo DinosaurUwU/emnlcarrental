@@ -159,6 +159,41 @@
   gap: 8px;
 }
 
+
+
+
+
+.manual-load-dropdown {
+  position: relative;
+}
+
+
+.manual-load-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white; 
+  border-radius: 5px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 100px;
+}
+
+.manual-load-options .mlo-buttons{
+  width: 100%;
+  padding: 10px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0 !important;
+}
+
+
+
+
+
+
+
 .g1-item-sm button {
   width: 100%;
   background-color: #d2e6f5 !important;

@@ -1941,15 +1941,14 @@ const FinancialReports = () => {
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3 className="confirm-header">
-              {manualLoadOption === "month" && `Load ${months[selectedMonthIndex]} ${currentYear}?`}
-              {manualLoadOption === "year" && `Load All Months ${currentYear}?`}
-              {manualLoadOption === "allyears" && `Load All Years (${activeTab})?`}
+              {manualLoadOption === "month"
+                ? `Load ${months[selectedMonthIndex]} ${currentYear} (${activeTab})?`
+                : `Load YEAR ${currentYear} (${activeTab})?`}
             </h3>
             <p className="confirm-text">
-              This will replace the current grid with data from Firestore.
-              {manualLoadOption === "month" && ` Only ${months[selectedMonthIndex]} ${currentYear} will be loaded.`}
-              {manualLoadOption === "year" && ` All 12 months for ${currentYear} will be loaded.`}
-              {manualLoadOption === "allyears" && ` All years for ${activeTab} will be loaded.`}
+              {manualLoadOption === "month"
+                ? `This will replace ${months[selectedMonthIndex]} ${currentYear} (${activeTab}) with data from Firestore.`
+                : `This will replace YEAR ${currentYear} (${activeTab}) with data from Firestore.`}
             </p>
             <div className="confirm-buttons">
               <button
@@ -1966,16 +1965,14 @@ const FinancialReports = () => {
                   try {
                     if (manualLoadOption === "month") {
                       await performManualLoadMonth();
-                    } else if (manualLoadOption === "year") {
+                    } else {
                       await performManualLoadYear();
-                    } else if (manualLoadOption === "allyears") {
-                      await performManualLoadAllYears();
                     }
 
                     setActionOverlay({
                       isVisible: true,
                       type: "success",
-                      message: "Loaded financial report from Firestore.",
+                      message: "Loaded from Firestore.",
                     });
 
                     setTimeout(() => {
@@ -1990,13 +1987,11 @@ const FinancialReports = () => {
                     }, 2500);
                   } catch (err) {
                     console.error("❌ Manual load failed:", err);
-
                     setActionOverlay({
                       isVisible: true,
                       type: "error",
                       message: "Failed to load from Firestore.",
                     });
-
                     setTimeout(() => {
                       setHideCancelAnimation(true);
                       setTimeout(() => {
@@ -2018,7 +2013,6 @@ const FinancialReports = () => {
               >
                 Yes, Load
               </button>
-
               <button
                 className="confirm-btn cancel"
                 onClick={() => setShowManualLoadConfirm(false)}
@@ -2029,6 +2023,7 @@ const FinancialReports = () => {
           </div>
         </div>
       )}
+
 
 
       {showResetConfirm && (
@@ -2680,78 +2675,34 @@ const FinancialReports = () => {
                   {showManualLoadMenu && (
                     <div
                       className="manual-load-options"
-                      style={{
-                        position: "absolute",
-                        top: "100%",
-                        right: 0,
-                        backgroundColor: "white",
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        zIndex: 1000,
-                        minWidth: "200px",
-                      }}
                     >
                       <button
+                      className="mlo-buttons"
                         onClick={() => {
                           setShowManualLoadMenu(false);
                           setManualLoadOption("month");
                           setShowManualLoadConfirm(true);
                         }}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          padding: "10px",
-                          border: "none",
-                          background: "none",
-                          textAlign: "left",
-                          cursor: "pointer",
-                        }}
+
                       >
-                        📅 {months[selectedMonthIndex]} {currentYear} Only
+                        📅 {months[selectedMonthIndex]} {currentYear}
                       </button>
                       <button
+                      className="mlo-buttons"
                         onClick={() => {
                           setShowManualLoadMenu(false);
                           setManualLoadOption("year");
                           setShowManualLoadConfirm(true);
                         }}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          padding: "10px",
-                          border: "none",
-                          borderTop: "1px solid #eee",
-                          background: "none",
-                          textAlign: "left",
-                          cursor: "pointer",
-                        }}
+
                       >
-                        📊 All Months {currentYear}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowManualLoadMenu(false);
-                          setManualLoadOption("allyears");
-                          setShowManualLoadConfirm(true);
-                        }}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          padding: "10px",
-                          border: "none",
-                          borderTop: "1px solid #eee",
-                          background: "none",
-                          textAlign: "left",
-                          cursor: "pointer",
-                        }}
-                      >
-                        🗂️ All Years ({activeTab})
+                        📊 YEAR {currentYear}
                       </button>
                     </div>
                   )}
                 </div>
               </div>
+
 
 
 
