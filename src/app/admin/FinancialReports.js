@@ -1166,16 +1166,69 @@ const FinancialReports = () => {
     XLSX.writeFile(wb, fileName);
   };
 
+  // const handleResetGrid = () => {
+  //   const blankGrid = createBlankGrid();
+  //   setGridData(blankGrid);
+  //   if (activeTab === "revenue") {
+  //     setRevenueGrid(blankGrid);
+  //   } else {
+  //     setExpenseGrid(blankGrid);
+  //   }
+  //   setIsSynced(false);
+  // };
+
+
+  
+
   const handleResetGrid = () => {
+    // Step 1: Clear ONLY this month from localStorage
+    const currentLocalStorage = loadFromLocalStorage(activeTab, currentYear) || {};
+    delete currentLocalStorage[currentMonth]; // Remove only current month
+    saveToLocalStorage(activeTab, currentYear, currentLocalStorage);
+    
+    // Step 2: Get blank month data using createBlankGrid() structure
     const blankGrid = createBlankGrid();
-    setGridData(blankGrid);
+    const blankMonthData = blankGrid[currentMonth] || Array(5).fill(null).map(() => Array(5).fill(""));
+    
+    // Step 3: Update state - only reset the current month, keep other months
     if (activeTab === "revenue") {
-      setRevenueGrid(blankGrid);
+      setRevenueGrid((prev) => {
+        const updated = { ...prev };
+        // Ensure the year exists
+        if (!updated[currentYear]) {
+          updated[currentYear] = {};
+        }
+        updated[currentYear][currentMonth] = blankMonthData;
+        return updated;
+      });
     } else {
-      setExpenseGrid(blankGrid);
+      setExpenseGrid((prev) => {
+        const updated = { ...prev };
+        // Ensure the year exists
+        if (!updated[currentYear]) {
+          updated[currentYear] = {};
+        }
+        updated[currentYear][currentMonth] = blankMonthData;
+        return updated;
+      });
     }
+    
+    // Step 4: Update gridData to show the reset month
+    setGridData((prev) => {
+      const updated = { ...prev };
+      updated[currentMonth] = blankMonthData;
+      return updated;
+    });
+    
     setIsSynced(false);
   };
+
+
+
+
+
+
+
 
   // Autofill payments when context changes
   useEffect(() => {
@@ -1850,9 +1903,10 @@ const FinancialReports = () => {
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3 className="confirm-header">Reset Grid?</h3>
-            <p className="confirm-text">
-              This will clear all data in the current grid. Continue?
+                        <p className="confirm-text">
+              This will clear all data in {months[currentMonth]} {currentYear}. Continue?
             </p>
+
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
