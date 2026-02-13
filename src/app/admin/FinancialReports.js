@@ -357,6 +357,12 @@ const FinancialReports = () => {
   });
 
   const [showManualLoadConfirm, setShowManualLoadConfirm] = useState(false);
+  const [showManualLoadMenu, setShowManualLoadMenu] = useState(false);
+
+
+  const [manualLoadOption, setManualLoadOption] = useState(null); // "month", "year", "allyears"
+
+
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -778,30 +784,142 @@ const FinancialReports = () => {
     setShowManualLoadConfirm(true);
   };
 
-  const performManualLoad = async () => {
-    try {
-      setShowManualLoadConfirm(false);
-      setSavingStatus(true);
+  // const performManualLoad = async () => {
+  //   try {
+  //     setShowManualLoadConfirm(false);
+  //     setSavingStatus(true);
 
-      // const { gridData, updatedAt } = await loadFinancialReport(activeTab);
+  //     // const { gridData, updatedAt } = await loadFinancialReport(activeTab);
+
+  //     const { gridData, updatedAt } = await loadFinancialReport(
+  //       activeTab,
+  //       currentYear,
+  //     );
+
+  //     setGridData(gridData);
+  //     setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
+
+  //     setIsSynced(true);
+  //     setHasServerChange(false);
+  //     // optional: reset server indicator text, or other UI-only flags
+  //   } catch (err) {
+  //     console.error("❌ Error during manual load:", err);
+  //   } finally {
+  //     setSavingStatus(false);
+  //   }
+  // };
+
+  // Load only the current month
+  const performManualLoadMonth = async () => {
+    try {
+      setSavingStatus(true);
 
       const { gridData, updatedAt } = await loadFinancialReport(
         activeTab,
         currentYear,
       );
 
-      setGridData(gridData);
-      setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
+      // Get blank grid structure
+      const blankGrid = createBlankGrid();
+      
+      // Merge: only keep current month data from Firestore, rest blank
+      const monthOnlyData = { ...blankGrid };
+      if (gridData && gridData[selectedMonthIndex]) {
+        monthOnlyData[selectedMonthIndex] = gridData[selectedMonthIndex];
+      }
 
+      setGridData(monthOnlyData);
+      if (activeTab === "revenue") {
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [currentYear]: { ...prev[currentYear], [selectedMonthIndex]: monthOnlyData[selectedMonthIndex] || blankGrid[selectedMonthIndex] },
+        }));
+      } else {
+        setExpenseGrid((prev) => ({
+          ...prev,
+          [currentYear]: { ...prev[currentYear], [selectedMonthIndex]: monthOnlyData[selectedMonthIndex] || blankGrid[selectedMonthIndex] },
+        }));
+      }
+
+      setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
       setIsSynced(true);
       setHasServerChange(false);
-      // optional: reset server indicator text, or other UI-only flags
     } catch (err) {
-      console.error("❌ Error during manual load:", err);
+      console.error("❌ Error loading month:", err);
     } finally {
       setSavingStatus(false);
     }
   };
+
+  // Load entire year
+  const performManualLoadYear = async () => {
+    try {
+      setSavingStatus(true);
+
+      const { gridData, updatedAt } = await loadFinancialReport(
+        activeTab,
+        currentYear,
+      );
+
+      const freshData = gridData || createBlankGrid();
+
+      setGridData(freshData);
+      if (activeTab === "revenue") {
+        setRevenueGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+      } else {
+        setExpenseGrid((prev) => ({ ...prev, [currentYear]: freshData }));
+      }
+
+      setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
+      setIsSynced(true);
+      setHasServerChange(false);
+    } catch (err) {
+      console.error("❌ Error loading year:", err);
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
+  // Load all years for current tab
+  const performManualLoadAllYears = async () => {
+    try {
+      setSavingStatus(true);
+
+      for (const year of yearOptions) {
+        const { gridData } = await loadFinancialReport(activeTab, year);
+        
+        if (activeTab === "revenue") {
+          setRevenueGrid((prev) => ({
+            ...prev,
+            [year]: gridData || {},
+          }));
+        } else {
+          setExpenseGrid((prev) => ({
+            ...prev,
+            [year]: gridData || {},
+          }));
+        }
+      }
+
+      // Also reload current view
+      const { gridData, updatedAt } = await loadFinancialReport(
+        activeTab,
+        currentYear,
+      );
+      setGridData(gridData || createBlankGrid());
+      setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
+
+      setIsSynced(true);
+      setHasServerChange(false);
+    } catch (err) {
+      console.error("❌ Error loading all years:", err);
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
+
+
 
   const applySorting = (monthIndex) => {
     setGridData((prev) => {
@@ -1181,16 +1299,16 @@ const FinancialReports = () => {
   
 
   const handleResetGrid = () => {
-    // Step 1: Clear ONLY this month from localStorage
+    // Step 1: Clear ONLY the selected month from localStorage
     const currentLocalStorage = loadFromLocalStorage(activeTab, currentYear) || {};
-    delete currentLocalStorage[currentMonth]; // Remove only current month
+    delete currentLocalStorage[selectedMonthIndex]; // Use selectedMonthIndex
     saveToLocalStorage(activeTab, currentYear, currentLocalStorage);
     
     // Step 2: Get blank month data using createBlankGrid() structure
     const blankGrid = createBlankGrid();
-    const blankMonthData = blankGrid[currentMonth] || Array(5).fill(null).map(() => Array(5).fill(""));
+    const blankMonthData = blankGrid[selectedMonthIndex] || Array(5).fill(null).map(() => Array(5).fill(""));
     
-    // Step 3: Update state - only reset the current month, keep other months
+    // Step 3: Update state - only reset the selected month, keep other months
     if (activeTab === "revenue") {
       setRevenueGrid((prev) => {
         const updated = { ...prev };
@@ -1198,7 +1316,7 @@ const FinancialReports = () => {
         if (!updated[currentYear]) {
           updated[currentYear] = {};
         }
-        updated[currentYear][currentMonth] = blankMonthData;
+        updated[currentYear][selectedMonthIndex] = blankMonthData;
         return updated;
       });
     } else {
@@ -1208,7 +1326,7 @@ const FinancialReports = () => {
         if (!updated[currentYear]) {
           updated[currentYear] = {};
         }
-        updated[currentYear][currentMonth] = blankMonthData;
+        updated[currentYear][selectedMonthIndex] = blankMonthData;
         return updated;
       });
     }
@@ -1216,12 +1334,13 @@ const FinancialReports = () => {
     // Step 4: Update gridData to show the reset month
     setGridData((prev) => {
       const updated = { ...prev };
-      updated[currentMonth] = blankMonthData;
+      updated[selectedMonthIndex] = blankMonthData;
       return updated;
     });
     
     setIsSynced(false);
   };
+
 
 
 
@@ -1821,10 +1940,16 @@ const FinancialReports = () => {
       {showManualLoadConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
-            <h3 className="confirm-header">Load from Firestore?</h3>
+            <h3 className="confirm-header">
+              {manualLoadOption === "month" && `Load ${months[selectedMonthIndex]} ${currentYear}?`}
+              {manualLoadOption === "year" && `Load All Months ${currentYear}?`}
+              {manualLoadOption === "allyears" && `Load All Years (${activeTab})?`}
+            </h3>
             <p className="confirm-text">
-              This will replace the current grid with the version from
-              Firestore. Continue?
+              This will replace the current grid with data from Firestore.
+              {manualLoadOption === "month" && ` Only ${months[selectedMonthIndex]} ${currentYear} will be loaded.`}
+              {manualLoadOption === "year" && ` All 12 months for ${currentYear} will be loaded.`}
+              {manualLoadOption === "allyears" && ` All years for ${activeTab} will be loaded.`}
             </p>
             <div className="confirm-buttons">
               <button
@@ -1839,7 +1964,13 @@ const FinancialReports = () => {
                   });
 
                   try {
-                    await performManualLoad();
+                    if (manualLoadOption === "month") {
+                      await performManualLoadMonth();
+                    } else if (manualLoadOption === "year") {
+                      await performManualLoadYear();
+                    } else if (manualLoadOption === "allyears") {
+                      await performManualLoadAllYears();
+                    }
 
                     setActionOverlay({
                       isVisible: true,
@@ -1899,12 +2030,14 @@ const FinancialReports = () => {
         </div>
       )}
 
+
       {showResetConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3 className="confirm-header">Reset Grid?</h3>
                         <p className="confirm-text">
-              This will clear all data in {months[currentMonth]} {currentYear}. Continue?
+                            This will clear all data in {months[selectedMonthIndex]} {currentYear}. Continue?
+
             </p>
 
             <div className="confirm-buttons">
@@ -2540,8 +2673,87 @@ const FinancialReports = () => {
               </div>
 
               <div className="g1-item-ml">
-                <button onClick={handleManualLoad}>Manual Load</button>
+                <div className="manual-load-dropdown" style={{ position: "relative" }}>
+                  <button onClick={() => setShowManualLoadMenu(!showManualLoadMenu)}>
+                    Manual Load ▾
+                  </button>
+                  {showManualLoadMenu && (
+                    <div
+                      className="manual-load-options"
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        right: 0,
+                        backgroundColor: "white",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        zIndex: 1000,
+                        minWidth: "200px",
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setShowManualLoadMenu(false);
+                          setManualLoadOption("month");
+                          setShowManualLoadConfirm(true);
+                        }}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "10px",
+                          border: "none",
+                          background: "none",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
+                      >
+                        📅 {months[selectedMonthIndex]} {currentYear} Only
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowManualLoadMenu(false);
+                          setManualLoadOption("year");
+                          setShowManualLoadConfirm(true);
+                        }}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "10px",
+                          border: "none",
+                          borderTop: "1px solid #eee",
+                          background: "none",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
+                      >
+                        📊 All Months {currentYear}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowManualLoadMenu(false);
+                          setManualLoadOption("allyears");
+                          setShowManualLoadConfirm(true);
+                        }}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "10px",
+                          border: "none",
+                          borderTop: "1px solid #eee",
+                          background: "none",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
+                      >
+                        🗂️ All Years ({activeTab})
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
+
+
 
               <div className="g1-item-sm">
                 <button onClick={toggleShowAll}>
