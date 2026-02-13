@@ -4,8 +4,12 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import "./FinancialReports.css";
 import XLSX from "xlsx-js-style";
-import { MdWarning } from "react-icons/md";
+import { MdWarning, MdDownload, MdRefresh, MdDelete, MdCalendarToday, MdAnalytics } from "react-icons/md";
+
+
+
 import { createPortal } from "react-dom";
+
 
 const FinancialReports = () => {
   const {
@@ -356,6 +360,9 @@ const FinancialReports = () => {
 
   const [showManualLoadConfirm, setShowManualLoadConfirm] = useState(false);
   const [showManualLoadMenu, setShowManualLoadMenu] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
 
   const [manualLoadOption, setManualLoadOption] = useState(null); // "month", "year", "allyears"
 
@@ -2101,6 +2108,87 @@ const FinancialReports = () => {
         </div>
       )}
 
+      {showDeleteConfirm && (
+  <div className="overlay-delete">
+    <div className="confirm-modal">
+      <h3 className="confirm-header">Delete Selected Rows?</h3>
+      <p className="confirm-text">
+        This will delete <strong>{selectedRows.length}</strong> selected row(s) in{" "}
+        {months[selectedMonthIndex]} {currentYear}. For rows 1-5, only the data will be 
+        cleared. For rows 6 and above, the entire row will be removed. Continue?
+      </p>
+
+      <div className="confirm-buttons">
+        <button
+          className="confirm-btn delete"
+          onClick={() => {
+            setShowDeleteConfirm(false);
+            
+            setGridData((prev) => {
+              const newGrid = { ...prev };
+
+              // Ensure month exists
+              if (!newGrid[selectedMonthIndex]) {
+  newGrid[selectedMonthIndex] = {};
+}
+
+              const monthRows = { ...newGrid[selectedMonthIndex] };
+
+              // For Row_0 to Row_4: only clear data, keep the row
+              // For Row_5+: actually delete the row entirely
+              selectedRows.forEach((r) => {
+                const rowNum = parseInt(
+                  r.replace("Row_", ""),
+                  10,
+                );
+
+                if (rowNum < 5) {
+                  // First 5 rows: only clear the data, keep the row
+                  monthRows[r] = Array(5).fill("");
+                } else {
+                  // Row_5 and above: delete the entire row
+                  delete monthRows[r];
+                }
+              });
+
+              newGrid[selectedMonthIndex] = monthRows;
+
+              return newGrid;
+            });
+
+            setSelectedRows([]);
+            
+            setActionOverlay({
+              isVisible: true,
+              type: "warning",
+              message: `${selectedRows.length} row(s) deleted successfully.`,
+            });
+            setTimeout(() => {
+              setHideCancelAnimation(true);
+              setTimeout(() => {
+                setActionOverlay((prev) => ({
+                  ...prev,
+                  isVisible: false,
+                }));
+                setHideCancelAnimation(false);
+              }, 400);
+            }, 2500);
+          }}
+        >
+          Yes, Delete
+        </button>
+        <button
+          className="confirm-btn cancel"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
@@ -2717,7 +2805,9 @@ const FinancialReports = () => {
                           setShowManualLoadConfirm(true);
                         }}
                       >
-                        📅 {months[selectedMonthIndex]} {currentYear}
+                       <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+    <MdCalendarToday /> {months[selectedMonthIndex]} {currentYear}
+  </span>
                       </button>
                       <button
                         className="mlo-buttons"
@@ -2727,7 +2817,9 @@ const FinancialReports = () => {
                           setShowManualLoadConfirm(true);
                         }}
                       >
-                        📊 YEAR {currentYear}
+                        <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+    <MdAnalytics  /> YEAR {currentYear}
+  </span>
                       </button>
                     </div>
                   )}
@@ -2782,15 +2874,22 @@ const FinancialReports = () => {
 
               {/* Column 2: Export Button */}
               <div className="group-right export-block">
-                <button className="export-btn" onClick={handleExport}>
-                  📤 Export
-                </button>
-                <button
-                  className="reset-btn"
-                  onClick={() => setShowResetConfirm(true)}
-                >
-                  🔄 Reset Grid
-                </button>
+<button className="export-btn" onClick={handleExport}>
+  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+    <MdDownload /> Export
+  </span>
+</button>
+<button
+  className="reset-btn"
+  onClick={() => setShowResetConfirm(true)}
+>
+  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+    <MdRefresh /> Reset Grid
+  </span>
+</button>
+
+
+
               </div>
             </div>
           </div>
@@ -3491,67 +3590,57 @@ const FinancialReports = () => {
                       </div>
 
                       <div className="grid-controls">
-                        <button
-                          onClick={() => {
-                            console.log(
-                              "🎯 Button clicked - monthIndex:",
-                              monthIndex,
-                              "activeTab:",
-                              activeTab,
-                            );
-                            addRow(monthIndex);
-                          }}
-                        >
-                          + Row
-                        </button>
+<button
+  onClick={() => {
+    console.log(
+      "🎯 Button clicked - monthIndex:",
+      monthIndex,
+      "activeTab:",
+      activeTab,
+    );
+    addRow(monthIndex);
+  }}
+  style={{
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  + Row
+</button>
 
-                        <button
-                          onClick={() => {
-                            if (selectedRows.length === 0) {
-                              setFinancialWarningMessage(
-                                "No rows selected. Please select at least one row to proceed.",
-                              );
-                              setShowFinancialWarning(true);
-                              return;
-                            }
 
-                            setGridData((prev) => {
-                              const newGrid = { ...prev };
+<button
+  onClick={() => {
+    if (selectedRows.length === 0) {
+      setFinancialWarningMessage(
+        "No rows selected. Please select at least one row to proceed.",
+      );
+      setShowFinancialWarning(true);
+      return;
+    }
 
-                              // Ensure month exists
-                              if (!newGrid[monthIndex]) {
-                                newGrid[monthIndex] = {};
-                              }
+    setShowDeleteConfirm(true);
+  }}
+  style={{
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+    <MdDelete /> Delete Rows
+  </span>
+</button>
 
-                              const monthRows = { ...newGrid[monthIndex] };
-
-                              // For Row_0 to Row_4: only clear data, keep the row
-                              // For Row_5+: actually delete the row entirely
-                              selectedRows.forEach((r) => {
-                                const rowNum = parseInt(
-                                  r.replace("Row_", ""),
-                                  10,
-                                );
-
-                                if (rowNum < 5) {
-                                  // First 5 rows: only clear the data, keep the row
-                                  monthRows[r] = Array(5).fill("");
-                                } else {
-                                  // Row_5 and above: delete the entire row
-                                  delete monthRows[r];
-                                }
-                              });
-
-                              newGrid[monthIndex] = monthRows;
-
-                              return newGrid;
-                            });
-
-                            setSelectedRows([]);
-                          }}
-                        >
-                          🗑 Delete Selected Rows
-                        </button>
                       </div>
                     </div>
                   </div>
