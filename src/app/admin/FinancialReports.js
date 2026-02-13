@@ -1084,9 +1084,14 @@ const FinancialReports = () => {
       try {
         const deletedBookingId = String(cancelTrigger);
 
+        // const newGrid =
+        //   structuredClone?.(revenueGrid) ||
+        //   JSON.parse(JSON.stringify(revenueGrid));
+
+        const currentYearData = revenueGrid[currentYear] || {};
         const newGrid =
-          structuredClone?.(revenueGrid) ||
-          JSON.parse(JSON.stringify(revenueGrid));
+          structuredClone?.(currentYearData) ||
+          JSON.parse(JSON.stringify(currentYearData));
 
         // Debug: show all bookingIds before deletion
         const beforeIds = [];
@@ -1122,7 +1127,16 @@ const FinancialReports = () => {
           });
         });
 
-        setRevenueGrid(newGrid);
+        // setRevenueGrid(newGrid);
+        // if (activeTab === "revenue") {
+        //   setGridData(newGrid);
+        // }
+
+        // Update ONLY the current year in revenueGrid
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [currentYear]: newGrid,
+        }));
         if (activeTab === "revenue") {
           setGridData(newGrid);
         }
@@ -1135,10 +1149,17 @@ const FinancialReports = () => {
     // CASE 2: Handle normal rebuild from autofill trigger
     if (!autoFillTrigger || !paymentEntries) return;
 
+    // try {
+    //   const newGrid =
+    //     structuredClone?.(revenueGrid) ||
+    //     JSON.parse(JSON.stringify(revenueGrid));
+
     try {
+      // Clone ONLY the current year's data, not the entire revenueGrid
+      const currentYearData = revenueGrid[currentYear] || {};
       const newGrid =
-        structuredClone?.(revenueGrid) ||
-        JSON.parse(JSON.stringify(revenueGrid));
+        structuredClone?.(currentYearData) ||
+        JSON.parse(JSON.stringify(currentYearData));
 
       // Ensure all months exist
       months.forEach((_, i) => {
@@ -1235,10 +1256,19 @@ const FinancialReports = () => {
         });
       });
 
-      setRevenueGrid(newGrid);
+      // setRevenueGrid(newGrid);
+      // if (activeTab === "revenue") {
+      //   setGridData(newGrid);
+      // }
+      // Update ONLY the current year in revenueGrid
+      setRevenueGrid((prev) => ({
+        ...prev,
+        [currentYear]: newGrid,
+      }));
       if (activeTab === "revenue") {
         setGridData(newGrid);
       }
+
       setIsSynced(false);
     } catch (err) {
       console.error("❌ Error in autofill rebuild:", err);
@@ -2294,6 +2324,7 @@ const FinancialReports = () => {
           >
             REVENUE
           </button>
+
           <button
             data-type="expense"
             className={`tab-button ${activeTab === "expense" ? "active" : ""}`}
@@ -3160,176 +3191,453 @@ const FinancialReports = () => {
                         : "▼"
                       : "▼"}
                   </th>
-                  <th>Description</th>
                   <th>Amount</th>
+                  <th>Unit</th>
+                  <th>Description</th>
                 </tr>
               </thead>
 
-              <tbody>
-                {(() => {
-                  const transactions = [];
-
-                  // For transaction tab, use gridData (which has all localStorage data)
-                  // gridData.revenue and gridData.expense are arrays of transaction objects
-                  if (activeTab === "transaction" && gridData.revenue) {
-                    // gridData.revenue is already an array of {year, month, rowKey, data}
-                    gridData.revenue.forEach((tx) => {
-                      transactions.push({
-                        date: tx.data[4] || "",
-                        mop: tx.data[2] || "",
-                        type: "Revenue",
-                        description:
-                          tx.data[3] ||
-                          "" +
-                            (tx.data._isAutoFill
-                              ? ` (${tx.data[0] || "Unknown"})`
-                              : ""),
-                        amount: tx.data[1] || "",
-                      });
-                    });
-                  } else {
-                    // Original logic for non-transaction tabs
-                    Object.values(revenueGrid).forEach((monthRows) => {
-                      Object.values(monthRows).forEach((row) => {
-                        if (
-                          row &&
-                          Array.isArray(row) &&
-                          row.some((cell) => cell !== "")
-                        ) {
-                          transactions.push({
-                            date: row[4] || "",
-                            mop: row[2] || "",
-                            type: "Revenue",
-                            description:
-                              row[3] ||
-                              "" +
-                                (row._isAutoFill
-                                  ? ` (${row[0] || "Unknown"})`
-                                  : ""),
-                            amount: row[1] || "",
-                          });
+              {/* <tbody>
+                {isTabLoading ? (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      style={{ textAlign: "center", padding: "40px" }}
+                    >
+                      <div
+                        className="spinner"
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          border: "4px solid #ccc",
+                          borderTop: `4px solid #FF8C00`,
+                          borderRadius: "50%",
+                          animation: "spin 1s linear infinite",
+                          margin: "0 auto",
+                        }}
+                      />
+                      <style>{`
+                        @keyframes spin {
+                          to { transform: rotate(360deg); }
                         }
+                      `}</style>
+                    </td>
+                  </tr>
+                ) : (
+                  (() => {
+                    const transactions = [];
+
+                    // For transaction tab, use gridData (which has all localStorage data)
+                    // gridData.revenue and gridData.expense are arrays of transaction objects
+                    if (activeTab === "transaction" && gridData.revenue) {
+                      // gridData.revenue is already an array of {year, month, rowKey, data}
+                      gridData.revenue.forEach((tx) => {
+                        transactions.push({
+                          date: tx.data[4] || "",
+                          mop: tx.data[2] || "",
+                          type: "Revenue",
+                          amount: tx.data[1] || "",
+                          unit: tx.data[0] || "",
+                          description:
+                            tx.data[3] ||
+                            "" +
+                              (tx.data._isAutoFill
+                                ? ` (${tx.data[0] || "Unknown"})`
+                                : ""),
+                        });
                       });
-                    });
-                  }
-
-                  // Collect from expense grid
-                  if (activeTab === "transaction" && gridData.expense) {
-                    // gridData.expense is already an array of {year, month, rowKey, data}
-                    gridData.expense.forEach((tx) => {
-                      transactions.push({
-                        date: tx.data[4] || "",
-                        mop: tx.data[2] || "",
-                        type: "Expense",
-                        description:
-                          tx.data[3] ||
-                          "" +
-                            (tx.data._isAutoFill
-                              ? ` (${tx.data[0] || "Unknown"})`
-                              : ""),
-                        amount: tx.data[1] || "",
-                      });
-                    });
-                  } else {
-                    // Original logic for non-transaction tabs
-                    Object.values(expenseGrid).forEach((monthRows) => {
-                      Object.values(monthRows).forEach((row) => {
-                        if (
-                          row &&
-                          Array.isArray(row) &&
-                          row.some((cell) => cell !== "")
-                        ) {
-                          transactions.push({
-                            date: row[4] || "",
-                            mop: row[2] || "",
-                            type: "Expense",
-                            description:
-                              row[3] ||
-                              "" +
-                                (row._isAutoFill
-                                  ? ` (${row[0] || "Unknown"})`
-                                  : ""),
-                            amount: row[1] || "",
-                          });
-                        }
-                      });
-                    });
-                  }
-
-                  // Helper to format date
-                  const formatDate = (dateStr) => {
-                    if (!dateStr) return "No Date";
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return d.toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    });
-                  };
-
-                  const sortedTransactions = [...transactions].sort((a, b) => {
-                    const hasDateA =
-                      a.date && !isNaN(new Date(a.date).getTime());
-                    const hasDateB =
-                      b.date && !isNaN(new Date(b.date).getTime());
-
-                    if (hasDateA && !hasDateB) return -1;
-                    if (!hasDateA && hasDateB) return 1;
-                    if (!hasDateA && !hasDateB) return 0;
-
-                    let valA, valB;
-                    if (sortColumn === "date") {
-                      valA = new Date(a.date).getTime();
-                      valB = new Date(b.date).getTime();
-                    } else if (sortColumn === "type") {
-                      valA = a.type;
-                      valB = b.type;
-                    }
-
-                    if (sortDirection === "asc") {
-                      if (valA < valB) return -1;
-                      if (valA > valB) return 1;
-                      // Equal, secondary sort
-                      if (sortColumn === "date") {
-                        return a.type < b.type ? -1 : a.type > b.type ? 1 : 0;
-                      } else {
-                        const dateA = new Date(a.date).getTime();
-                        const dateB = new Date(b.date).getTime();
-                        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
-                      }
                     } else {
-                      if (valA > valB) return -1;
-                      if (valA < valB) return 1;
-                      // Equal, secondary sort
-                      if (sortColumn === "date") {
-                        return a.type > b.type ? -1 : a.type < b.type ? 1 : 0;
-                      } else {
-                        const dateA = new Date(a.date).getTime();
-                        const dateB = new Date(b.date).getTime();
-                        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
-                      }
+                      // Original logic for non-transaction tabs
+                      Object.values(revenueGrid).forEach((monthRows) => {
+                        Object.values(monthRows).forEach((row) => {
+                          if (
+                            row &&
+                            Array.isArray(row) &&
+                            row.some((cell) => cell !== "")
+                          ) {
+                            transactions.push({
+                              date: row[4] || "",
+                              mop: row[2] || "",
+                              type: "Revenue",
+                              description:
+                                row[3] ||
+                                "" +
+                                  (row._isAutoFill
+                                    ? ` (${row[0] || "Unknown"})`
+                                    : ""),
+                              amount: row[1] || "",
+                            });
+                          }
+                        });
+                      });
                     }
-                  });
 
-                  return sortedTransactions.map((txn, index) => (
-                    <tr key={`txn-${index}`} className={txn.type.toLowerCase()}>
-                      <td>{formatDate(txn.date)}</td>
-                      <td>{txn.mop || "No MOP"}</td>
-                      <td>{txn.type}</td>
-                      <td>{txn.description || "No Description"}</td>
-                      <td>{txn.amount || "No Amount"}</td>
-                    </tr>
-                  ));
-                })()}
+                    // Collect from expense grid
+                    if (activeTab === "transaction" && gridData.expense) {
+                      // gridData.expense is already an array of {year, month, rowKey, data}
+                      gridData.expense.forEach((tx) => {
+                        transactions.push({
+                          date: tx.data[4] || "",
+                          mop: tx.data[2] || "",
+                          type: "Expense",
+                          amount: tx.data[1] || "",
+                          unit: tx.data[0] || "",
+                          description:
+                            tx.data[3] ||
+                            "" +
+                              (tx.data._isAutoFill
+                                ? ` (${tx.data[0] || "Unknown"})`
+                                : ""),
+                        });
+                      });
+                    } else {
+                      // Original logic for non-transaction tabs
+                      Object.values(expenseGrid).forEach((monthRows) => {
+                        Object.values(monthRows).forEach((row) => {
+                          if (
+                            row &&
+                            Array.isArray(row) &&
+                            row.some((cell) => cell !== "")
+                          ) {
+                            transactions.push({
+                              date: row[4] || "",
+                              mop: row[2] || "",
+                              type: "Expense",
+                              description:
+                                row[3] ||
+                                "" +
+                                  (row._isAutoFill
+                                    ? ` (${row[0] || "Unknown"})`
+                                    : ""),
+                              amount: row[1] || "",
+                            });
+                          }
+                        });
+                      });
+                    }
+
+                    // Helper to format date
+                    const formatDate = (dateStr) => {
+                      if (!dateStr) return "No Date";
+                      const d = new Date(dateStr);
+                      if (isNaN(d.getTime())) return dateStr;
+                      return d.toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      });
+                    };
+
+                    const sortedTransactions = [...transactions].sort(
+                      (a, b) => {
+                        const hasDateA =
+                          a.date && !isNaN(new Date(a.date).getTime());
+                        const hasDateB =
+                          b.date && !isNaN(new Date(b.date).getTime());
+
+                        if (hasDateA && !hasDateB) return -1;
+                        if (!hasDateA && hasDateB) return 1;
+                        if (!hasDateA && !hasDateB) return 0;
+
+                        let valA, valB;
+                        if (sortColumn === "date") {
+                          valA = new Date(a.date).getTime();
+                          valB = new Date(b.date).getTime();
+                        } else if (sortColumn === "type") {
+                          valA = a.type;
+                          valB = b.type;
+                        }
+
+                        if (sortDirection === "asc") {
+                          if (valA < valB) return -1;
+                          if (valA > valB) return 1;
+                          // Equal, secondary sort
+                          if (sortColumn === "date") {
+                            return a.type < b.type
+                              ? -1
+                              : a.type > b.type
+                                ? 1
+                                : 0;
+                          } else {
+                            const dateA = new Date(a.date).getTime();
+                            const dateB = new Date(b.date).getTime();
+                            return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+                          }
+                        } else {
+                          if (valA > valB) return -1;
+                          if (valA < valB) return 1;
+                          // Equal, secondary sort
+                          if (sortColumn === "date") {
+                            return a.type > b.type
+                              ? -1
+                              : a.type < b.type
+                                ? 1
+                                : 0;
+                          } else {
+                            const dateA = new Date(a.date).getTime();
+                            const dateB = new Date(b.date).getTime();
+                            return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+                          }
+                        }
+                      },
+                    );
+
+                    return sortedTransactions.map((txn, index) => (
+                      <tr
+                        key={`txn-${index}`}
+                        className={txn.type.toLowerCase()}
+                      >
+                        <td>{formatDate(txn.date)}</td>
+                        <td>{txn.mop || "No MOP"}</td>
+                        <td>{txn.type}</td>
+                        <td>{txn.amount || "No Amount"}</td>
+                        <td>{txn.unit || "-"}</td>
+                        <td>{txn.description || "No Description"}</td>
+                      </tr>
+                    ));
+                  })()
+                )}
+              </tbody> */}
+
+
+              <tbody>
+                {isTabLoading ? (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      style={{ textAlign: "center", padding: "40px" }}
+                    >
+                      <div
+                        className="spinner"
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          border: "4px solid #ccc",
+                          borderTop: `4px solid #FF8C00`,
+                          borderRadius: "50%",
+                          animation: "spin 1s linear infinite",
+                          margin: "0 auto",
+                        }}
+                      />
+                      <style>{`
+                        @keyframes spin {
+                          to { transform: rotate(360deg); }
+                        }
+                      `}</style>
+                    </td>
+                  </tr>
+                ) : (
+                  (() => {
+                    const transactions = [];
+
+                    // For transaction tab, use gridData (which has all localStorage data)
+                    // gridData.revenue and gridData.expense are arrays of transaction objects
+                    if (activeTab === "transaction" && gridData.revenue) {
+                      // gridData.revenue is already an array of {year, month, rowKey, data}
+                      gridData.revenue.forEach((tx) => {
+                        transactions.push({
+                          date: tx.data[4] || "",
+                          mop: tx.data[2] || "",
+                          type: "Revenue",
+                          amount: tx.data[1] || "",
+                          unit: tx.data[0] || "",
+                          description:
+                            tx.data[3] ||
+                            "" +
+                              (tx.data._isAutoFill
+                                ? ` (${tx.data[0] || "Unknown"})`
+                                : ""),
+                        });
+                      });
+                    } else {
+                      // Original logic for non-transaction tabs
+                      Object.values(revenueGrid).forEach((monthRows) => {
+                        Object.values(monthRows).forEach((row) => {
+                          if (
+                            row &&
+                            Array.isArray(row) &&
+                            row.some((cell) => cell !== "")
+                          ) {
+                            transactions.push({
+                              date: row[4] || "",
+                              mop: row[2] || "",
+                              type: "Revenue",
+                              description:
+                                row[3] ||
+                                "" +
+                                  (row._isAutoFill
+                                    ? ` (${row[0] || "Unknown"})`
+                                    : ""),
+                              amount: row[1] || "",
+                            });
+                          }
+                        });
+                      });
+                    }
+
+                    // Collect from expense grid
+                    if (activeTab === "transaction" && gridData.expense) {
+                      // gridData.expense is already an array of {year, month, rowKey, data}
+                      gridData.expense.forEach((tx) => {
+                        transactions.push({
+                          date: tx.data[4] || "",
+                          mop: tx.data[2] || "",
+                          type: "Expense",
+                          amount: tx.data[1] || "",
+                          unit: tx.data[0] || "",
+                          description:
+                            tx.data[3] ||
+                            "" +
+                              (tx.data._isAutoFill
+                                ? ` (${tx.data[0] || "Unknown"})`
+                                : ""),
+                        });
+                      });
+                    } else {
+                      // Original logic for non-transaction tabs
+                      Object.values(expenseGrid).forEach((monthRows) => {
+                        Object.values(monthRows).forEach((row) => {
+                          if (
+                            row &&
+                            Array.isArray(row) &&
+                            row.some((cell) => cell !== "")
+                          ) {
+                            transactions.push({
+                              date: row[4] || "",
+                              mop: row[2] || "",
+                              type: "Expense",
+                              description:
+                                row[3] ||
+                                "" +
+                                  (row._isAutoFill
+                                    ? ` (${row[0] || "Unknown"})`
+                                    : ""),
+                              amount: row[1] || "",
+                            });
+                          }
+                        });
+                      });
+                    }
+
+                    // Helper to format date
+                    const formatDate = (dateStr) => {
+                      if (!dateStr) return "No Date";
+                      const d = new Date(dateStr);
+                      if (isNaN(d.getTime())) return dateStr;
+                      return d.toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      });
+                    };
+
+                    // Check if transactions is empty
+                    if (transactions.length === 0) {
+                      return (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            style={{
+                              textAlign: "center",
+                              padding: "40px",
+                              color: "#666",
+                            }}
+                          >
+                            <p style={{ marginBottom: "10px" }}>
+                              No transactions found
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#999" }}>
+                              Add revenue or expense entries to see them here
+                            </p>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    const sortedTransactions = [...transactions].sort(
+                      (a, b) => {
+                        const hasDateA =
+                          a.date && !isNaN(new Date(a.date).getTime());
+                        const hasDateB =
+                          b.date && !isNaN(new Date(b.date).getTime());
+
+                        if (hasDateA && !hasDateB) return -1;
+                        if (!hasDateA && hasDateB) return 1;
+                        if (!hasDateA && !hasDateB) return 0;
+
+                        let valA, valB;
+                        if (sortColumn === "date") {
+                          valA = new Date(a.date).getTime();
+                          valB = new Date(b.date).getTime();
+                        } else if (sortColumn === "type") {
+                          valA = a.type;
+                          valB = b.type;
+                        }
+
+                        if (sortDirection === "asc") {
+                          if (valA < valB) return -1;
+                          if (valA > valB) return 1;
+                          // Equal, secondary sort
+                          if (sortColumn === "date") {
+                            return a.type < b.type
+                              ? -1
+                              : a.type > b.type
+                                ? 1
+                                : 0;
+                          } else {
+                            const dateA = new Date(a.date).getTime();
+                            const dateB = new Date(b.date).getTime();
+                            return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+                          }
+                        } else {
+                          if (valA > valB) return -1;
+                          if (valA < valB) return 1;
+                          // Equal, secondary sort
+                          if (sortColumn === "date") {
+                            return a.type > b.type
+                              ? -1
+                              : a.type < b.type
+                                ? 1
+                                : 0;
+                          } else {
+                            const dateA = new Date(a.date).getTime();
+                            const dateB = new Date(b.date).getTime();
+                            return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+                          }
+                        }
+                      },
+                    );
+
+                    return sortedTransactions.map((txn, index) => (
+                      <tr
+                        key={`txn-${index}`}
+                        className={txn.type.toLowerCase()}
+                      >
+                        <td>{formatDate(txn.date)}</td>
+                        <td>{txn.mop || "No MOP"}</td>
+                        <td>{txn.type}</td>
+                        <td>{txn.amount || "No Amount"}</td>
+                        <td>{txn.unit || "-"}</td>
+                        <td>{txn.description || "No Description"}</td>
+                      </tr>
+                    ));
+                  })()
+                )}
               </tbody>
+
+
+
             </table>
           </div>
         </div>
       )}
+
       {showMonthYearDropdown && <MonthYearDropdown />}
     </div>
   );
