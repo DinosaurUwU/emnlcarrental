@@ -2826,6 +2826,7 @@ const FinancialReports = () => {
                 </div>
               </div>
 
+
               <div className="g1-item-sm">
                 <button onClick={toggleShowAll}>
                   {showAllMonths ? "Show Current Only" : "Show All Months"}
