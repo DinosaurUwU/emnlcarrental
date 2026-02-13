@@ -53,11 +53,9 @@ const FinancialReports = () => {
 
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
-    const [isTabLoading, setIsTabLoading] = useState(false);
+  const [isTabLoading, setIsTabLoading] = useState(false);
 
-      const currentTabRef = useRef(activeTab);
-
-
+  const currentTabRef = useRef(activeTab);
 
   // Local Storage Keys
   const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
@@ -76,7 +74,7 @@ const FinancialReports = () => {
   const saveToLocalStorage = (tab, year, data) => {
     try {
       const key = `${LOCAL_STORAGE_KEY}_${tab}_${year}`;
-      
+
       // For revenue/expense tabs, save only that tab's data
       let dataToSave;
       if (tab === "revenue" && data.revenue) {
@@ -87,9 +85,9 @@ const FinancialReports = () => {
         // For transaction tab or direct data, save as-is
         dataToSave = data;
       }
-      
+
       localStorage.setItem(key, JSON.stringify(dataToSave));
-      
+
       // Read back and parse to show as object
       const savedData = localStorage.getItem(key);
       console.log(`💾 Saved ${tab}/${year} to localStorage`);
@@ -98,9 +96,6 @@ const FinancialReports = () => {
       console.error("❌ Error saving to localStorage:", error);
     }
   };
-
-
-
 
   const loadFromLocalStorage = (tab, year) => {
     try {
@@ -308,445 +303,418 @@ const FinancialReports = () => {
     }
   }, [serverChangeCounter]);
 
+  useEffect(() => {
+    if (!currentYear) return;
 
+    const loadBothTabs = async () => {
+      isHydratingRef.current = true;
 
+      const targetTab = activeTab;
+      currentTabRef.current = targetTab; // Track which tab we're loading for
+      setIsTabLoading(true);
 
+      const yearKey = `${currentYear}_${targetTab}`;
 
+      if (!yearDataLoadedRef.current[yearKey]) {
+        const revenueData = await loadFinancialReport("revenue", currentYear);
+        const expenseData = await loadFinancialReport("expense", currentYear);
 
+        // Use LOCAL variables for the fetched data
+        const newRevenueData = revenueData.gridData;
+        const newExpenseData = expenseData.gridData;
 
-
-
-
-
-
-useEffect(() => {
-  if (!currentYear) return;
-
-  const loadBothTabs = async () => {
-    isHydratingRef.current = true;
-
-    currentTabRef.current = activeTab; // Track which tab we're loading for
-    setIsTabLoading(true);
-
-    const yearKey = `${currentYear}_${activeTab}`;
-
-    if (!yearDataLoadedRef.current[yearKey]) {
-      const revenueData = await loadFinancialReport("revenue", currentYear);
-      const expenseData = await loadFinancialReport("expense", currentYear);
-
-      // Use LOCAL variables for the fetched data
-      const newRevenueData = revenueData.gridData;
-      const newExpenseData = expenseData.gridData;
-
-      // Store in state (async, but we use locals below)
-      setRevenueGrid((prev) => ({
-        ...prev,
-        [currentYear]: newRevenueData,
-      }));
-      setExpenseGrid((prev) => ({
-        ...prev,
-        [currentYear]: newExpenseData,
-      }));
-
-      // Update REF (not state) - immediate effect
-      yearDataLoadedRef.current = {
-        ...yearDataLoadedRef.current,
-        [`${currentYear}_revenue`]: true,
-        [`${currentYear}_expense`]: true,
-      };
-
-      // Also update state for UI if needed
-      setYearDataLoaded(yearDataLoadedRef.current);
-
-            // Set current view using LOCAL variables
-      if (activeTab === "revenue") {
-        setGridData(newRevenueData || createBlankGrid());
-        lastSavedGridRef.current = newRevenueData || createBlankGrid();
-      } else if (activeTab === "expense") {
-        setGridData(newExpenseData || createBlankGrid());
-        lastSavedGridRef.current = newExpenseData || createBlankGrid();
-      } else {
-        // Transaction tab: load BOTH revenue and expense for display
-        const transactionData = {
-          revenue: newRevenueData || {},
-          expense: newExpenseData || {},
-        };
-        setGridData(transactionData);
-        lastSavedGridRef.current = transactionData;
-      }
-
-     } else {
-      // Check if we're still on the same tab (prevents race conditions)
-      if (currentTabRef.current !== activeTab) {
-        console.log(`⏭️ Skipping - tab changed from ${currentTabRef.current} to ${activeTab}`);
-        return;
-      }
-
-
-      // For cached years, use the data from state
-      const cachedData =
-        activeTab === "revenue"
-          ? revenueGrid[currentYear]
-          : expenseGrid[currentYear];
-
-      // Check if this SPECIFIC tab's data exists in state
-      const hasTabData = cachedData && Object.keys(cachedData).length > 0;
-
-            if (hasTabData) {
-        // Still check localStorage for newer data even if cached exists
-        const localData = loadFromLocalStorage(activeTab, currentYear);
-        
-        if (localData && hasActualData(localData)) {
-          // Merge cached data with localStorage (localStorage wins)
-          const mergedData = { ...cachedData };
-          
-          if (localData) {
-            Object.keys(localData).forEach(monthIndex => {
-              const localMonth = localData[monthIndex] || {};
-              const cachedMonth = cachedData[monthIndex] || {};
-              
-              mergedData[monthIndex] = { ...cachedMonth };
-              
-              Object.keys(localMonth).forEach(rowKey => {
-                mergedData[monthIndex][rowKey] = localMonth[rowKey];
-              });
-            });
-          }
-          
-          setGridData(mergedData);
-          lastSavedGridRef.current = mergedData;
-          
-          // Update state with merged data
-          if (activeTab === "revenue") {
-            setRevenueGrid((prev) => ({ ...prev, [currentYear]: mergedData }));
-          } else {
-            setExpenseGrid((prev) => ({ ...prev, [currentYear]: mergedData }));
-          }
-        } else {
-          // No localStorage data, use cached
-          setGridData(cachedData);
-          lastSavedGridRef.current = cachedData;
-        }
-      } else {
-        // No cached data, load from Firestore + localStorage
-        if (activeTab === "revenue") {
-          // Load from Firestore
-          const firestoreData = await loadFinancialReport("revenue", currentYear);
-          const firestoreGrid = firestoreData.gridData || {};
-          
-          // Load from localStorage
-          const localData = loadFromLocalStorage("revenue", currentYear);
-          
-          // MERGE: LocalStorage takes priority, but keep Firestore data too
-          const mergedData = { ...firestoreGrid };
-          
-          // For each month in localStorage, merge rows
-          if (localData) {
-            Object.keys(localData).forEach(monthIndex => {
-              const localMonth = localData[monthIndex] || {};
-              const firestoreMonth = firestoreGrid[monthIndex] || {};
-              
-              mergedData[monthIndex] = { ...firestoreMonth };
-              
-              // Add/update rows from localStorage
-              Object.keys(localMonth).forEach(rowKey => {
-                mergedData[monthIndex][rowKey] = localMonth[rowKey];
-              });
-            });
-          }
-          
-          const dataToUse = mergedData;
-
-          // Functional update - verify we're preserving other years
-          setRevenueGrid((prev) => {
-            const updated = { ...prev, [currentYear]: dataToUse };
-
-            return updated;
-          });
-          setGridData(dataToUse);
-          lastSavedGridRef.current = dataToUse;
-        // } else if (activeTab === "expense") {
-        //   // Load from Firestore
-        //   const firestoreData = await loadFinancialReport("expense", currentYear);
-        //   const firestoreGrid = firestoreData.gridData || {};
-          
-        //   // Load from localStorage
-        //   const localData = loadFromLocalStorage("expense", currentYear);
-          
-        //   // MERGE: LocalStorage takes priority, but keep Firestore data too
-        //   const mergedData = { ...firestoreGrid };
-          
-        //   // For each month in localStorage, merge rows
-        //   if (localData) {
-        //     Object.keys(localData).forEach(monthIndex => {
-        //       const localMonth = localData[monthIndex] || {};
-        //       const firestoreMonth = firestoreGrid[monthIndex] || {};
-              
-        //       mergedData[monthIndex] = { ...firestoreMonth };
-              
-        //       // Add/update rows from localStorage
-        //       Object.keys(localMonth).forEach(rowKey => {
-        //         mergedData[monthIndex][rowKey] = localMonth[rowKey];
-        //       });
-        //     });
-        //   }
-          
-        //   const dataToUse = mergedData;
-
-        //   // Functional update - verify we're preserving other years
-        //   setExpenseGrid((prev) => {
-        //     const updated = { ...prev, [currentYear]: dataToUse };
-
-        //     return updated;
-        //   });
-
-        //     setGridData(dataToUse);
-        //     lastSavedGridRef.current = dataToUse;
-        //   }
-
-
-            } else {
-      // Determine which cached data to use based on tab
-      let cachedData;
-      let isValidCachedData = false;
-      
-      if (activeTab === "revenue" && revenueGrid[currentYear]) {
-        cachedData = revenueGrid[currentYear];
-        // Check if it's not the transaction combined structure
-        if (!cachedData.revenue && !cachedData.expense) {
-          isValidCachedData = true;
-        }
-      } else if (activeTab === "expense" && expenseGrid[currentYear]) {
-        cachedData = expenseGrid[currentYear];
-        // Check if it's not the transaction combined structure
-        if (!cachedData.revenue && !cachedData.expense) {
-          isValidCachedData = true;
-        }
-      }
-      
-      const hasTabData = isValidCachedData && Object.keys(cachedData).length > 0;
-
-      if (hasTabData) {
-        // Still check localStorage for newer data even if cached exists
-        const localData = loadFromLocalStorage(activeTab, currentYear);
-        
-        if (localData && hasActualData(localData)) {
-          // Merge cached data with localStorage (localStorage wins)
-          const mergedData = { ...cachedData };
-          
-          if (localData) {
-            Object.keys(localData).forEach(monthIndex => {
-              const localMonth = localData[monthIndex] || {};
-              const cachedMonth = cachedData[monthIndex] || {};
-              
-              mergedData[monthIndex] = { ...cachedMonth };
-              
-              Object.keys(localMonth).forEach(rowKey => {
-                mergedData[monthIndex][rowKey] = localMonth[rowKey];
-              });
-            });
-          }
-          
-          setGridData(mergedData);
-          lastSavedGridRef.current = mergedData;
-          
-          // Update state with merged data
-          if (activeTab === "revenue") {
-            setRevenueGrid((prev) => ({ ...prev, [currentYear]: mergedData }));
-          } else {
-            setExpenseGrid((prev) => ({ ...prev, [currentYear]: mergedData }));
-          }
-        } else {
-          // No localStorage data, use cached
-          setGridData(cachedData);
-          lastSavedGridRef.current = cachedData;
-        }
-      } else {
-        // No valid cached data, load from Firestore + localStorage
-        if (activeTab === "revenue") {
-          // Load from Firestore
-          const firestoreData = await loadFinancialReport("revenue", currentYear);
-          const firestoreGrid = firestoreData.gridData || {};
-          
-          // Load from localStorage
-          const localData = loadFromLocalStorage("revenue", currentYear);
-          
-          // MERGE: LocalStorage takes priority, but keep Firestore data too
-          const mergedData = { ...firestoreGrid };
-          
-          // For each month in localStorage, merge rows
-          if (localData) {
-            Object.keys(localData).forEach(monthIndex => {
-              const localMonth = localData[monthIndex] || {};
-              const firestoreMonth = firestoreGrid[monthIndex] || {};
-              
-              mergedData[monthIndex] = { ...firestoreMonth };
-              
-              // Add/update rows from localStorage
-              Object.keys(localMonth).forEach(rowKey => {
-                mergedData[monthIndex][rowKey] = localMonth[rowKey];
-              });
-            });
-          }
-          
-          const dataToUse = mergedData;
-
-          // Functional update
-          setRevenueGrid((prev) => {
-            const updated = { ...prev, [currentYear]: dataToUse };
-            return updated;
-          });
-
-          // Ensure proper structure for rendering
-          const displayData = dataToUse && Object.keys(dataToUse).length > 0 
-            ? dataToUse 
-            : createBlankGrid();
-            
-          setGridData(displayData);
-          lastSavedGridRef.current = displayData;
-        } else if (activeTab === "expense") {
-          // Load from Firestore
-          const firestoreData = await loadFinancialReport("expense", currentYear);
-          const firestoreGrid = firestoreData.gridData || {};
-          
-          // Load from localStorage
-          const localData = loadFromLocalStorage("expense", currentYear);
-          
-          // MERGE: LocalStorage takes priority, but keep Firestore data too
-          const mergedData = { ...firestoreGrid };
-          
-          // For each month in localStorage, merge rows
-          if (localData) {
-            Object.keys(localData).forEach(monthIndex => {
-              const localMonth = localData[monthIndex] || {};
-              const firestoreMonth = firestoreGrid[monthIndex] || {};
-              
-              mergedData[monthIndex] = { ...firestoreMonth };
-              
-              // Add/update rows from localStorage
-              Object.keys(localMonth).forEach(rowKey => {
-                mergedData[monthIndex][rowKey] = localMonth[rowKey];
-              });
-            });
-          }
-          
-          const dataToUse = mergedData;
-
-          // Functional update
-          setExpenseGrid((prev) => {
-            const updated = { ...prev, [currentYear]: dataToUse };
-            return updated;
-          });
-
-          // Ensure proper structure for rendering - ALWAYS use createBlankGrid if empty
-          const displayData = (dataToUse && Object.keys(dataToUse).length > 0 && !dataToUse.revenue && !dataToUse.expense)
-            ? dataToUse 
-            : createBlankGrid();
-            
-          setGridData(displayData);
-          lastSavedGridRef.current = displayData;
-        }
-      }
-    }
-
-        }
-
-    }
-
-    isHydratingRef.current = false;
-    setIsTabLoading(false);
-  };
-
-  loadBothTabs();
-}, [currentYear, activeTab]);
-
-useEffect(() => {
-  if (
-    !autoSaveEnabled ||
-    Object.keys(gridData).length === 0 ||
-    isSavingAuto
-    // isSavingAuto ||
-    // JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-  )
-    return;
-
-  lastSavedGridRef.current = gridData;
-  setIsSavingAuto(true);
-
-  (async () => {
-    try {
-      setSavingStatus(true);
-
-      // Update the year-specific state before saving
-      if (activeTab === "revenue") {
+        // Store in state (async, but we use locals below)
         setRevenueGrid((prev) => ({
           ...prev,
-          [currentYear]: gridData,
+          [currentYear]: newRevenueData,
         }));
-      } else {
         setExpenseGrid((prev) => ({
           ...prev,
-          [currentYear]: gridData,
+          [currentYear]: newExpenseData,
         }));
+
+        // Update REF (not state) - immediate effect
+        yearDataLoadedRef.current = {
+          ...yearDataLoadedRef.current,
+          [`${currentYear}_revenue`]: true,
+          [`${currentYear}_expense`]: true,
+        };
+
+        // Also update state for UI if needed
+        setYearDataLoaded(yearDataLoadedRef.current);
+
+        // Set current view using LOCAL variables
+        if (targetTab === "revenue") {
+          setGridData(newRevenueData || createBlankGrid());
+          lastSavedGridRef.current = newRevenueData || createBlankGrid();
+        } else if (targetTab === "expense") {
+          setGridData(newExpenseData || createBlankGrid());
+          lastSavedGridRef.current = newExpenseData || createBlankGrid();
+        } else {
+          // Transaction tab: load BOTH revenue and expense for display
+          const transactionData = {
+            revenue: newRevenueData || {},
+            expense: newExpenseData || {},
+          };
+          setGridData(transactionData);
+          lastSavedGridRef.current = transactionData;
+        }
+      } else {
+        // Check if we're still on the same tab (prevents race conditions)
+        if (currentTabRef.current !== targetTab) {
+          console.log(
+            `⏭️ Skipping - tab changed from ${currentTabRef.current} to ${targetTab}`,
+          );
+          isHydratingRef.current = false;
+          setIsTabLoading(false); // Hide loading on early return
+          return;
+        }
+
+        // For cached years, use the data from state
+        const cachedData =
+          targetTab === "revenue"
+            ? revenueGrid[currentYear]
+            : expenseGrid[currentYear];
+
+        // Check if this SPECIFIC tab's data exists in state
+        const hasTabData = cachedData && Object.keys(cachedData).length > 0;
+
+        if (hasTabData) {
+          // Still check localStorage for newer data even if cached exists
+          const localData = loadFromLocalStorage(targetTab, currentYear);
+
+          if (localData && hasActualData(localData)) {
+            // Merge cached data with localStorage (localStorage wins)
+            const mergedData = { ...cachedData };
+
+            if (localData) {
+              Object.keys(localData).forEach((monthIndex) => {
+                const localMonth = localData[monthIndex] || {};
+                const cachedMonth = cachedData[monthIndex] || {};
+
+                mergedData[monthIndex] = { ...cachedMonth };
+
+                Object.keys(localMonth).forEach((rowKey) => {
+                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                });
+              });
+            }
+
+            setGridData(mergedData);
+            lastSavedGridRef.current = mergedData;
+
+            // Update state with merged data
+            if (targetTab === "revenue") {
+              setRevenueGrid((prev) => ({
+                ...prev,
+                [currentYear]: mergedData,
+              }));
+            } else {
+              setExpenseGrid((prev) => ({
+                ...prev,
+                [currentYear]: mergedData,
+              }));
+            }
+          } else {
+            // No localStorage data, use cached
+            setGridData(cachedData);
+            lastSavedGridRef.current = cachedData;
+          }
+        } else {
+          // No cached data, load from Firestore + localStorage
+          if (targetTab === "revenue") {
+            // Load from Firestore
+            const firestoreData = await loadFinancialReport(
+              "revenue",
+              currentYear,
+            );
+            const firestoreGrid = firestoreData.gridData || {};
+
+            // Load from localStorage
+            const localData = loadFromLocalStorage("revenue", currentYear);
+
+            // MERGE: LocalStorage takes priority, but keep Firestore data too
+            const mergedData = { ...firestoreGrid };
+
+            // For each month in localStorage, merge rows
+            if (localData) {
+              Object.keys(localData).forEach((monthIndex) => {
+                const localMonth = localData[monthIndex] || {};
+                const firestoreMonth = firestoreGrid[monthIndex] || {};
+
+                mergedData[monthIndex] = { ...firestoreMonth };
+
+                // Add/update rows from localStorage
+                Object.keys(localMonth).forEach((rowKey) => {
+                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                });
+              });
+            }
+
+            const dataToUse = mergedData;
+
+            // Functional update - verify we're preserving other years
+            setRevenueGrid((prev) => {
+              const updated = { ...prev, [currentYear]: dataToUse };
+
+              return updated;
+            });
+            setGridData(dataToUse);
+            lastSavedGridRef.current = dataToUse;
+          } else {
+            // Determine which cached data to use based on tab
+            let cachedData;
+            let isValidCachedData = false;
+
+            if (targetTab === "revenue" && revenueGrid[currentYear]) {
+              cachedData = revenueGrid[currentYear];
+              // Check if it's not the transaction combined structure
+              if (!cachedData.revenue && !cachedData.expense) {
+                isValidCachedData = true;
+              }
+            } else if (targetTab === "expense" && expenseGrid[currentYear]) {
+              cachedData = expenseGrid[currentYear];
+              // Check if it's not the transaction combined structure
+              if (!cachedData.revenue && !cachedData.expense) {
+                isValidCachedData = true;
+              }
+            }
+
+            const hasTabData =
+              isValidCachedData && Object.keys(cachedData).length > 0;
+
+            if (hasTabData) {
+              // Still check localStorage for newer data even if cached exists
+              const localData = loadFromLocalStorage(targetTab, currentYear);
+
+              if (localData && hasActualData(localData)) {
+                // Merge cached data with localStorage (localStorage wins)
+                const mergedData = { ...cachedData };
+
+                if (localData) {
+                  Object.keys(localData).forEach((monthIndex) => {
+                    const localMonth = localData[monthIndex] || {};
+                    const cachedMonth = cachedData[monthIndex] || {};
+
+                    mergedData[monthIndex] = { ...cachedMonth };
+
+                    Object.keys(localMonth).forEach((rowKey) => {
+                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                    });
+                  });
+                }
+
+                setGridData(mergedData);
+                lastSavedGridRef.current = mergedData;
+
+                // Update state with merged data
+                if (targetTab === "revenue") {
+                  setRevenueGrid((prev) => ({
+                    ...prev,
+                    [currentYear]: mergedData,
+                  }));
+                } else {
+                  setExpenseGrid((prev) => ({
+                    ...prev,
+                    [currentYear]: mergedData,
+                  }));
+                }
+              } else {
+                // No localStorage data, use cached
+                setGridData(cachedData);
+                lastSavedGridRef.current = cachedData;
+              }
+            } else {
+              // No valid cached data, load from Firestore + localStorage
+              if (targetTab === "revenue") {
+                // Load from Firestore
+                const firestoreData = await loadFinancialReport(
+                  "revenue",
+                  currentYear,
+                );
+                const firestoreGrid = firestoreData.gridData || {};
+
+                // Load from localStorage
+                const localData = loadFromLocalStorage("revenue", currentYear);
+
+                // MERGE: LocalStorage takes priority, but keep Firestore data too
+                const mergedData = { ...firestoreGrid };
+
+                // For each month in localStorage, merge rows
+                if (localData) {
+                  Object.keys(localData).forEach((monthIndex) => {
+                    const localMonth = localData[monthIndex] || {};
+                    const firestoreMonth = firestoreGrid[monthIndex] || {};
+
+                    mergedData[monthIndex] = { ...firestoreMonth };
+
+                    // Add/update rows from localStorage
+                    Object.keys(localMonth).forEach((rowKey) => {
+                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                    });
+                  });
+                }
+
+                const dataToUse = mergedData;
+
+                // Functional update
+                setRevenueGrid((prev) => {
+                  const updated = { ...prev, [currentYear]: dataToUse };
+                  return updated;
+                });
+
+                // Ensure proper structure for rendering
+                const displayData =
+                  dataToUse && Object.keys(dataToUse).length > 0
+                    ? dataToUse
+                    : createBlankGrid();
+
+                setGridData(displayData);
+                lastSavedGridRef.current = displayData;
+              } else if (targetTab === "expense") {
+                // Load from Firestore
+                const firestoreData = await loadFinancialReport(
+                  "expense",
+                  currentYear,
+                );
+                const firestoreGrid = firestoreData.gridData || {};
+
+                // Load from localStorage
+                const localData = loadFromLocalStorage("expense", currentYear);
+
+                // MERGE: LocalStorage takes priority, but keep Firestore data too
+                const mergedData = { ...firestoreGrid };
+
+                // For each month in localStorage, merge rows
+                if (localData) {
+                  Object.keys(localData).forEach((monthIndex) => {
+                    const localMonth = localData[monthIndex] || {};
+                    const firestoreMonth = firestoreGrid[monthIndex] || {};
+
+                    mergedData[monthIndex] = { ...firestoreMonth };
+
+                    // Add/update rows from localStorage
+                    Object.keys(localMonth).forEach((rowKey) => {
+                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
+                    });
+                  });
+                }
+
+                const dataToUse = mergedData;
+
+                // Functional update
+                setExpenseGrid((prev) => {
+                  const updated = { ...prev, [currentYear]: dataToUse };
+                  return updated;
+                });
+
+                // Ensure proper structure for rendering - ALWAYS use createBlankGrid if empty
+                const displayData =
+                  dataToUse &&
+                  Object.keys(dataToUse).length > 0 &&
+                  !dataToUse.revenue &&
+                  !dataToUse.expense
+                    ? dataToUse
+                    : createBlankGrid();
+
+                setGridData(displayData);
+                lastSavedGridRef.current = displayData;
+              }
+            }
+          }
+        }
       }
 
-      await saveFinancialReport(activeTab, gridData, currentYear);
+      isHydratingRef.current = false;
+      setIsTabLoading(false);
+    };
 
-      const now = new Date();
-      setLastSavedAt(now);
-      setIsSynced(true);
-      setHasServerChange(false);
-      justSaved.current = true;
-      setTimeout(() => (justSaved.current = false), 1000);
-    } finally {
-      setSavingStatus(false);
-      setIsSavingAuto(false);
-    }
-  })();
-}, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+    loadBothTabs();
+  }, [currentYear, activeTab]);
+
+  useEffect(() => {
+    if (
+      !autoSaveEnabled ||
+      Object.keys(gridData).length === 0 ||
+      isSavingAuto
+      // isSavingAuto ||
+      // JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
+    )
+      return;
+
+    lastSavedGridRef.current = gridData;
+    setIsSavingAuto(true);
+
+    (async () => {
+      try {
+        setSavingStatus(true);
+
+        // Update the year-specific state before saving
+        if (activeTab === "revenue") {
+          setRevenueGrid((prev) => ({
+            ...prev,
+            [currentYear]: gridData,
+          }));
+        } else {
+          setExpenseGrid((prev) => ({
+            ...prev,
+            [currentYear]: gridData,
+          }));
+        }
+
+        await saveFinancialReport(activeTab, gridData, currentYear);
+
+        const now = new Date();
+        setLastSavedAt(now);
+        setIsSynced(true);
+        setHasServerChange(false);
+        justSaved.current = true;
+        setTimeout(() => (justSaved.current = false), 1000);
+      } finally {
+        setSavingStatus(false);
+        setIsSavingAuto(false);
+      }
+    })();
+  }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
 
   // Auto-save to localStorage when gridData changes
   useEffect(() => {
     if (!gridData || Object.keys(gridData).length === 0) return;
-    
+
     // Skip during initial hydration
     if (isHydratingRef.current) return;
-    
+
     // DO NOT save for transaction tab - it only reads revenue/expense
     if (activeTab === "transaction") return;
-    
+
     saveToLocalStorage(activeTab, currentYear, gridData);
-    
   }, [gridData, activeTab, currentYear]);
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+  
   // // Auto-save to localStorage when gridData changes
   // useEffect(() => {
   //   if (!gridData || Object.keys(gridData).length === 0) return;
-    
+
   //   // Skip during initial hydration
   //   if (isHydratingRef.current) return;
-    
+
   //   saveToLocalStorage(activeTab, currentYear, gridData);
-    
+
   // }, [gridData, activeTab, currentYear]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // DEBUG: Single clean logging to track tab switching and data persistence
   const lastLogRef = useRef(null);
@@ -1803,9 +1771,7 @@ useEffect(() => {
   };
 
   return (
-    
     <div className="financial-reports">
-      
       {isImageModalOpen && modalImage && (
         <div
           className="admin-image-modal-overlay"
@@ -2913,277 +2879,147 @@ useEffect(() => {
 
                           <div className="grid-header-cell">DATE</div>
                         </div>
+
                         {/* Scrollable Grid */}
-                        <div
-                          className="grid-scrollable"
-                          style={{ backgroundColor: background }}
-                        >
-                          {sortedEntries.map((item, sortedIndex) => {
-                            const row = item.row;
-                            const originalIndex = item.originalIndex;
+                        {isTabLoading ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "200px",
+                            }}
+                          >
+                            <div
+                              className="spinner"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                border: "4px solid #ccc",
+                                borderTop: `4px solid ${activeTab === "revenue" ? "#28a745" : "#dc3545"}`,
+                                borderRadius: "50%",
+                                animation: "spin 1s linear infinite",
+                              }}
+                            />
+                            <style>{`
+                                @keyframes spin {
+                                  to { transform: rotate(360deg); }
+                                }
+                              `}</style>
+                          </div>
+                        ) : (
+                          <div
+                            className="grid-scrollable"
+                            style={{ backgroundColor: background }}
+                          >
+                            {sortedEntries.map((item, sortedIndex) => {
+                              const row = item.row;
+                              const originalIndex = item.originalIndex;
 
-                            return (
-                              <div
-                                key={`${monthIndex}-${item.key}`}
-                                className={`grid-row ${selectedRows.includes(item.key) ? "selected" : ""}`}
-                                style={{
-                                  cursor: row._isAutoFill
-                                    ? "pointer"
-                                    : "default",
-                                }}
-                                onClick={() => {
-                                  if (row._isAutoFill) {
-                                    // Find in activeBookings (array)
-                                    let booking = activeBookings.find(
-                                      (b) => b.id === row._bookingId,
-                                    );
+                              return (
+                                <div
+                                  key={`${monthIndex}-${item.key}`}
+                                  className={`grid-row ${selectedRows.includes(item.key) ? "selected" : ""}`}
+                                  style={{
+                                    cursor: row._isAutoFill
+                                      ? "pointer"
+                                      : "default",
+                                  }}
+                                  onClick={() => {
+                                    if (row._isAutoFill) {
+                                      // Find in activeBookings (array)
+                                      let booking = activeBookings.find(
+                                        (b) => b.id === row._bookingId,
+                                      );
 
-                                    // If not found, search in completedBookingsAnalytics (object)
-                                    if (!booking) {
-                                      for (const plateNo in completedBookingsAnalytics) {
-                                        for (const key in completedBookingsAnalytics[
-                                          plateNo
-                                        ]) {
-                                          if (
-                                            [
-                                              "carName",
-                                              "carType",
-                                              "unitImage",
-                                            ].includes(key)
-                                          )
-                                            continue;
-                                          const dateData =
-                                            completedBookingsAnalytics[plateNo][
-                                              key
-                                            ];
-                                          if (dateData.bookings) {
-                                            booking = dateData.bookings.find(
-                                              (b) => b.id === row._bookingId,
-                                            );
-                                            if (booking) {
-                                              break;
+                                      // If not found, search in completedBookingsAnalytics (object)
+                                      if (!booking) {
+                                        for (const plateNo in completedBookingsAnalytics) {
+                                          for (const key in completedBookingsAnalytics[
+                                            plateNo
+                                          ]) {
+                                            if (
+                                              [
+                                                "carName",
+                                                "carType",
+                                                "unitImage",
+                                              ].includes(key)
+                                            )
+                                              continue;
+                                            const dateData =
+                                              completedBookingsAnalytics[
+                                                plateNo
+                                              ][key];
+                                            if (dateData.bookings) {
+                                              booking = dateData.bookings.find(
+                                                (b) => b.id === row._bookingId,
+                                              );
+                                              if (booking) {
+                                                break;
+                                              }
                                             }
                                           }
+                                          if (booking) break;
                                         }
-                                        if (booking) break;
+                                      }
+
+                                      if (booking) {
+                                        setSelectedBooking(booking);
+                                        setShowDetailsOverlay(true);
+                                      } else {
                                       }
                                     }
+                                  }}
+                                >
+                                  <div className="grid-cell row-number-cell">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedRows.includes(item.key)}
+                                      disabled={row._isAutoFill === true}
+                                      style={
+                                        row._isAutoFill
+                                          ? {
+                                              cursor: "not-allowed",
+                                              opacity: 1,
+                                              pointerEvents: "none",
+                                            }
+                                          : {}
+                                      }
+                                      onChange={(e) => {
+                                        setSelectedRows((prev) =>
+                                          e.target.checked
+                                            ? [...prev, item.key]
+                                            : prev.filter(
+                                                (i) => i !== item.key,
+                                              ),
+                                        );
+                                      }}
+                                    />
+                                    <span>{sortedIndex + 1}</span>
+                                  </div>
 
-                                    if (booking) {
-                                      setSelectedBooking(booking);
-                                      setShowDetailsOverlay(true);
-                                    } else {
-                                    }
-                                  }
-                                }}
-                              >
-                                <div className="grid-cell row-number-cell">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedRows.includes(item.key)}
-                                    disabled={row._isAutoFill === true}
-                                    style={
-                                      row._isAutoFill
-                                        ? {
-                                            cursor: "not-allowed",
-                                            opacity: 1,
-                                            pointerEvents: "none",
-                                          }
-                                        : {}
-                                    }
-                                    onChange={(e) => {
-                                      setSelectedRows((prev) =>
-                                        e.target.checked
-                                          ? [...prev, item.key]
-                                          : prev.filter((i) => i !== item.key),
-                                      );
-                                    }}
-                                  />
-                                  <span>{sortedIndex + 1}</span>
-                                </div>
+                                  {Array.isArray(row) ? (
+                                    row.map((cell, colIndex) => {
+                                      // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
+                                      const isAutoFill =
+                                        row._isAutoFill === true;
 
-                                {Array.isArray(row) ? (
-                                  row.map((cell, colIndex) => {
-                                    // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
-                                    const isAutoFill = row._isAutoFill === true;
-
-                                    // UNIT column (dropdown from unitData)
-                                    if (colIndex === 0) {
-                                      return (
-                                        <select
-                                          key={colIndex}
-                                          value={cell}
-                                          disabled={isAutoFill}
-                                          style={
-                                            isAutoFill
-                                              ? {
-                                                  opacity: 1,
-                                                  cursor: "not-allowed",
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                          onChange={(e) =>
-                                            handleCellChange(
-                                              monthIndex,
-                                              item.key,
-                                              colIndex,
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="grid-cell"
-                                        >
-                                          <option value="">Select Unit</option>
-                                          {allUnitData.map((unit) => (
-                                            <option
-                                              key={unit.id}
-                                              value={unit.name}
-                                            >
-                                              {unit.name}
-                                            </option>
-                                          ))}
-                                          <option value="Person">Person</option>
-                                          <option value="Organization">
-                                            Organization
-                                          </option>
-                                        </select>
-                                      );
-                                    }
-
-                                    // MOP column (dropdown)
-                                    if (colIndex === 2) {
-                                      return (
-                                        <select
-                                          key={colIndex}
-                                          value={cell}
-                                          onChange={(e) =>
-                                            handleCellChange(
-                                              monthIndex,
-                                              item.key,
-                                              colIndex,
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="grid-cell"
-                                          disabled={isAutoFill}
-                                          style={
-                                            isAutoFill
-                                              ? {
-                                                  opacity: 1,
-                                                  cursor: "not-allowed",
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                        >
-                                          <option value="">Select MOP</option>
-                                          {mopTypes.map((type) => (
-                                            <option key={type} value={type}>
-                                              {type}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      );
-                                    }
-
-                                    // POP column (dropdown)
-                                    else if (colIndex === 3) {
-                                      const isRevenue = activeTab === "revenue";
-                                      const label = isRevenue ? "POP" : "POE";
-
-                                      const options = isRevenue
-                                        ? popTypesRevenue
-                                        : popTypesExpense;
-
-                                      return (
-                                        <select
-                                          key={colIndex}
-                                          value={cell}
-                                          onChange={(e) =>
-                                            handleCellChange(
-                                              monthIndex,
-                                              item.key,
-                                              colIndex,
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="grid-cell"
-                                          disabled={isAutoFill}
-                                          style={
-                                            isAutoFill
-                                              ? {
-                                                  opacity: 1,
-                                                  cursor: "not-allowed",
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                        >
-                                          <option value="">{`Select ${label}`}</option>
-                                          {options.map((opt) => (
-                                            <option key={opt} value={opt}>
-                                              {opt}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      );
-                                    }
-
-                                    // DATE column
-                                    else if (colIndex === 4) {
-                                      return (
-                                        <input
-                                          key={colIndex}
-                                          type="datetime-local"
-                                          className="grid-cell"
-                                          value={(() => {
-                                            if (!cell) return "";
-                                            const parsed = new Date(cell);
-                                            if (isNaN(parsed.getTime()))
-                                              return "";
-                                            const offset =
-                                              parsed.getTimezoneOffset();
-                                            const localDate = new Date(
-                                              parsed.getTime() - offset * 60000,
-                                            );
-                                            return localDate
-                                              .toISOString()
-                                              .slice(0, 16);
-                                          })()}
-                                          onChange={(e) =>
-                                            handleCellChange(
-                                              monthIndex,
-                                              item.key,
-                                              colIndex,
-                                              e.target.value,
-                                            )
-                                          }
-                                          onBlur={() =>
-                                            applySorting(monthIndex)
-                                          }
-                                          disabled={isAutoFill}
-                                          style={
-                                            isAutoFill
-                                              ? {
-                                                  opacity: 1,
-                                                  cursor: "not-allowed",
-                                                  pointerEvents: "none",
-                                                }
-                                              : {}
-                                          }
-                                        />
-                                      );
-                                    }
-
-                                    // UNIT or AMOUNT columns
-                                    else {
-                                      if (colIndex === 1) {
-                                        // AMOUNT INPUT — number-only while typing, format on blur
+                                      // UNIT column (dropdown from unitData)
+                                      if (colIndex === 0) {
                                         return (
-                                          <input
+                                          <select
                                             key={colIndex}
-                                            type="text"
-                                            value={cell || "₱0.00"}
+                                            value={cell}
+                                            disabled={isAutoFill}
+                                            style={
+                                              isAutoFill
+                                                ? {
+                                                    opacity: 1,
+                                                    cursor: "not-allowed",
+                                                    pointerEvents: "none",
+                                                  }
+                                                : {}
+                                            }
                                             onChange={(e) =>
                                               handleCellChange(
                                                 monthIndex,
@@ -3192,24 +3028,142 @@ useEffect(() => {
                                                 e.target.value,
                                               )
                                             }
-                                            onFocus={(e) =>
-                                              handleAmountFocus(
+                                            className="grid-cell"
+                                          >
+                                            <option value="">
+                                              Select Unit
+                                            </option>
+                                            {allUnitData.map((unit) => (
+                                              <option
+                                                key={unit.id}
+                                                value={unit.name}
+                                              >
+                                                {unit.name}
+                                              </option>
+                                            ))}
+                                            <option value="Person">
+                                              Person
+                                            </option>
+                                            <option value="Organization">
+                                              Organization
+                                            </option>
+                                          </select>
+                                        );
+                                      }
+
+                                      // MOP column (dropdown)
+                                      if (colIndex === 2) {
+                                        return (
+                                          <select
+                                            key={colIndex}
+                                            value={cell}
+                                            onChange={(e) =>
+                                              handleCellChange(
                                                 monthIndex,
                                                 item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
                                             }
-                                            onBlur={(e) =>
-                                              handleAmountBlur(
+                                            className="grid-cell"
+                                            disabled={isAutoFill}
+                                            style={
+                                              isAutoFill
+                                                ? {
+                                                    opacity: 1,
+                                                    cursor: "not-allowed",
+                                                    pointerEvents: "none",
+                                                  }
+                                                : {}
+                                            }
+                                          >
+                                            <option value="">Select MOP</option>
+                                            {mopTypes.map((type) => (
+                                              <option key={type} value={type}>
+                                                {type}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        );
+                                      }
+
+                                      // POP column (dropdown)
+                                      else if (colIndex === 3) {
+                                        const isRevenue =
+                                          activeTab === "revenue";
+                                        const label = isRevenue ? "POP" : "POE";
+
+                                        const options = isRevenue
+                                          ? popTypesRevenue
+                                          : popTypesExpense;
+
+                                        return (
+                                          <select
+                                            key={colIndex}
+                                            value={cell}
+                                            onChange={(e) =>
+                                              handleCellChange(
                                                 monthIndex,
                                                 item.key,
                                                 colIndex,
                                                 e.target.value,
                                               )
                                             }
-                                            className="grid-cell text-right"
-                                            placeholder="₱0.00"
+                                            className="grid-cell"
+                                            disabled={isAutoFill}
+                                            style={
+                                              isAutoFill
+                                                ? {
+                                                    opacity: 1,
+                                                    cursor: "not-allowed",
+                                                    pointerEvents: "none",
+                                                  }
+                                                : {}
+                                            }
+                                          >
+                                            <option value="">{`Select ${label}`}</option>
+                                            {options.map((opt) => (
+                                              <option key={opt} value={opt}>
+                                                {opt}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        );
+                                      }
+
+                                      // DATE column
+                                      else if (colIndex === 4) {
+                                        return (
+                                          <input
+                                            key={colIndex}
+                                            type="datetime-local"
+                                            className="grid-cell"
+                                            value={(() => {
+                                              if (!cell) return "";
+                                              const parsed = new Date(cell);
+                                              if (isNaN(parsed.getTime()))
+                                                return "";
+                                              const offset =
+                                                parsed.getTimezoneOffset();
+                                              const localDate = new Date(
+                                                parsed.getTime() -
+                                                  offset * 60000,
+                                              );
+                                              return localDate
+                                                .toISOString()
+                                                .slice(0, 16);
+                                            })()}
+                                            onChange={(e) =>
+                                              handleCellChange(
+                                                monthIndex,
+                                                item.key,
+                                                colIndex,
+                                                e.target.value,
+                                              )
+                                            }
+                                            onBlur={() =>
+                                              applySorting(monthIndex)
+                                            }
                                             disabled={isAutoFill}
                                             style={
                                               isAutoFill
@@ -3222,45 +3176,95 @@ useEffect(() => {
                                             }
                                           />
                                         );
-                                      } else {
-                                        // UNIT INPUT
-                                        return (
-                                          <input
-                                            key={colIndex}
-                                            type="text"
-                                            value={cell}
-                                            onChange={(e) =>
-                                              handleCellChange(
-                                                monthIndex,
-                                                item.key,
-                                                colIndex,
-                                                e.target.value,
-                                              )
-                                            }
-                                            className="grid-cell"
-                                            placeholder={`Cell ${parseInt(item.key.replace("Row_", "")) + 1}-${colIndex + 1}`}
-                                            disabled={isAutoFill}
-                                            style={
-                                              row._isAutoFill
-                                                ? {
-                                                    cursor: "not-allowed",
-                                                    opacity: 1,
-                                                    pointerEvents: "none",
-                                                  }
-                                                : {}
-                                            }
-                                          />
-                                        );
                                       }
-                                    }
-                                  })
-                                ) : (
-                                  <div className="empty-row">No data</div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+
+                                      // UNIT or AMOUNT columns
+                                      else {
+                                        if (colIndex === 1) {
+                                          // AMOUNT INPUT — number-only while typing, format on blur
+                                          return (
+                                            <input
+                                              key={colIndex}
+                                              type="text"
+                                              value={cell || "₱0.00"}
+                                              onChange={(e) =>
+                                                handleCellChange(
+                                                  monthIndex,
+                                                  item.key,
+                                                  colIndex,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              onFocus={(e) =>
+                                                handleAmountFocus(
+                                                  monthIndex,
+                                                  item.key,
+                                                  colIndex,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              onBlur={(e) =>
+                                                handleAmountBlur(
+                                                  monthIndex,
+                                                  item.key,
+                                                  colIndex,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              className="grid-cell text-right"
+                                              placeholder="₱0.00"
+                                              disabled={isAutoFill}
+                                              style={
+                                                isAutoFill
+                                                  ? {
+                                                      opacity: 1,
+                                                      cursor: "not-allowed",
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            />
+                                          );
+                                        } else {
+                                          // UNIT INPUT
+                                          return (
+                                            <input
+                                              key={colIndex}
+                                              type="text"
+                                              value={cell}
+                                              onChange={(e) =>
+                                                handleCellChange(
+                                                  monthIndex,
+                                                  item.key,
+                                                  colIndex,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              className="grid-cell"
+                                              placeholder={`Cell ${parseInt(item.key.replace("Row_", "")) + 1}-${colIndex + 1}`}
+                                              disabled={isAutoFill}
+                                              style={
+                                                row._isAutoFill
+                                                  ? {
+                                                      cursor: "not-allowed",
+                                                      opacity: 1,
+                                                      pointerEvents: "none",
+                                                    }
+                                                  : {}
+                                              }
+                                            />
+                                          );
+                                        }
+                                      }
+                                    })
+                                  ) : (
+                                    <div className="empty-row">No data</div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid-controls">
