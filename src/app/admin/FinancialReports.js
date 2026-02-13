@@ -308,325 +308,130 @@ const FinancialReports = () => {
 
     const loadBothTabs = async () => {
       isHydratingRef.current = true;
-
-      const targetTab = activeTab;
-      currentTabRef.current = targetTab; // Track which tab we're loading for
+      currentTabRef.current = activeTab;
       setIsTabLoading(true);
 
-      const yearKey = `${currentYear}_${targetTab}`;
-
-      if (!yearDataLoadedRef.current[yearKey]) {
+      try {
+        // Fetch BOTH tabs fresh from Firestore
         const revenueData = await loadFinancialReport("revenue", currentYear);
         const expenseData = await loadFinancialReport("expense", currentYear);
 
-        // Use LOCAL variables for the fetched data
-        const newRevenueData = revenueData.gridData;
-        const newExpenseData = expenseData.gridData;
+        const newRevenueData = revenueData.gridData || {};
+        const newExpenseData = expenseData.gridData || {};
 
-        // Store in state (async, but we use locals below)
+        // Load localStorage data FIRST
+        const localRevenueData = loadFromLocalStorage("revenue", currentYear);
+        const localExpenseData = loadFromLocalStorage("expense", currentYear);
+
+        // Merge localStorage with Firestore (localStorage wins)
+        const mergedRevenue = mergeData(newRevenueData, localRevenueData);
+        const mergedExpense = mergeData(newExpenseData, localExpenseData);
+
+        // Update state with MERGED data
         setRevenueGrid((prev) => ({
           ...prev,
-          [currentYear]: newRevenueData,
+          [currentYear]: mergedRevenue,
         }));
         setExpenseGrid((prev) => ({
           ...prev,
-          [currentYear]: newExpenseData,
+          [currentYear]: mergedExpense,
         }));
 
-        // Update REF (not state) - immediate effect
-        yearDataLoadedRef.current = {
-          ...yearDataLoadedRef.current,
-          [`${currentYear}_revenue`]: true,
-          [`${currentYear}_expense`]: true,
-        };
-
-        // Also update state for UI if needed
-        setYearDataLoaded(yearDataLoadedRef.current);
-
-        // Set current view using LOCAL variables
-        if (targetTab === "revenue") {
-          setGridData(newRevenueData || createBlankGrid());
-          lastSavedGridRef.current = newRevenueData || createBlankGrid();
-        } else if (targetTab === "expense") {
-          setGridData(newExpenseData || createBlankGrid());
-          lastSavedGridRef.current = newExpenseData || createBlankGrid();
+        // Set gridData based on current tab
+        if (activeTab === "revenue") {
+          setGridData(mergedRevenue);
+          lastSavedGridRef.current = mergedRevenue;
+        } else if (activeTab === "expense") {
+          setGridData(mergedExpense);
+          lastSavedGridRef.current = mergedExpense;
         } else {
-          // Transaction tab: load BOTH revenue and expense for display
-          const transactionData = {
-            revenue: newRevenueData || {},
-            expense: newExpenseData || {},
+          // Transaction tab: load ALL transactions from localStorage (all years, all months)
+          const allYears = yearOptions;
+
+          const allTransactions = {
+            revenue: [],
+            expense: [],
           };
-          setGridData(transactionData);
-          lastSavedGridRef.current = transactionData;
-        }
-      } else {
-        // Check if we're still on the same tab (prevents race conditions)
-        if (currentTabRef.current !== targetTab) {
-          console.log(
-            `⏭️ Skipping - tab changed from ${currentTabRef.current} to ${targetTab}`,
-          );
-          isHydratingRef.current = false;
-          setIsTabLoading(false); // Hide loading on early return
-          return;
-        }
 
-        // For cached years, use the data from state
-        const cachedData =
-          targetTab === "revenue"
-            ? revenueGrid[currentYear]
-            : expenseGrid[currentYear];
+          // Load all years from localStorage
+          allYears.forEach((year) => {
+            const yearRevenueData = loadFromLocalStorage("revenue", year);
+            const yearExpenseData = loadFromLocalStorage("expense", year);
 
-        // Check if this SPECIFIC tab's data exists in state
-        const hasTabData = cachedData && Object.keys(cachedData).length > 0;
-
-        if (hasTabData) {
-          // Still check localStorage for newer data even if cached exists
-          const localData = loadFromLocalStorage(targetTab, currentYear);
-
-          if (localData && hasActualData(localData)) {
-            // Merge cached data with localStorage (localStorage wins)
-            const mergedData = { ...cachedData };
-
-            if (localData) {
-              Object.keys(localData).forEach((monthIndex) => {
-                const localMonth = localData[monthIndex] || {};
-                const cachedMonth = cachedData[monthIndex] || {};
-
-                mergedData[monthIndex] = { ...cachedMonth };
-
-                Object.keys(localMonth).forEach((rowKey) => {
-                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+            // Process revenue data
+            if (yearRevenueData) {
+              Object.keys(yearRevenueData).forEach((monthIndex) => {
+                const monthData = yearRevenueData[monthIndex];
+                Object.keys(monthData).forEach((rowKey) => {
+                  const row = monthData[rowKey];
+                  if (Array.isArray(row) && row.some((cell) => cell !== "")) {
+                    allTransactions.revenue.push({
+                      year,
+                      month: parseInt(monthIndex),
+                      rowKey,
+                      data: row,
+                    });
+                  }
                 });
               });
             }
 
-            setGridData(mergedData);
-            lastSavedGridRef.current = mergedData;
-
-            // Update state with merged data
-            if (targetTab === "revenue") {
-              setRevenueGrid((prev) => ({
-                ...prev,
-                [currentYear]: mergedData,
-              }));
-            } else {
-              setExpenseGrid((prev) => ({
-                ...prev,
-                [currentYear]: mergedData,
-              }));
-            }
-          } else {
-            // No localStorage data, use cached
-            setGridData(cachedData);
-            lastSavedGridRef.current = cachedData;
-          }
-        } else {
-          // No cached data, load from Firestore + localStorage
-          if (targetTab === "revenue") {
-            // Load from Firestore
-            const firestoreData = await loadFinancialReport(
-              "revenue",
-              currentYear,
-            );
-            const firestoreGrid = firestoreData.gridData || {};
-
-            // Load from localStorage
-            const localData = loadFromLocalStorage("revenue", currentYear);
-
-            // MERGE: LocalStorage takes priority, but keep Firestore data too
-            const mergedData = { ...firestoreGrid };
-
-            // For each month in localStorage, merge rows
-            if (localData) {
-              Object.keys(localData).forEach((monthIndex) => {
-                const localMonth = localData[monthIndex] || {};
-                const firestoreMonth = firestoreGrid[monthIndex] || {};
-
-                mergedData[monthIndex] = { ...firestoreMonth };
-
-                // Add/update rows from localStorage
-                Object.keys(localMonth).forEach((rowKey) => {
-                  mergedData[monthIndex][rowKey] = localMonth[rowKey];
+            // Process expense data
+            if (yearExpenseData) {
+              Object.keys(yearExpenseData).forEach((monthIndex) => {
+                const monthData = yearExpenseData[monthIndex];
+                Object.keys(monthData).forEach((rowKey) => {
+                  const row = monthData[rowKey];
+                  if (Array.isArray(row) && row.some((cell) => cell !== "")) {
+                    allTransactions.expense.push({
+                      year,
+                      month: parseInt(monthIndex),
+                      rowKey,
+                      data: row,
+                    });
+                  }
                 });
               });
             }
+          });
 
-            const dataToUse = mergedData;
+          // Sort by year and month
+          allTransactions.revenue.sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.month - b.month;
+          });
+          allTransactions.expense.sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.month - b.month;
+          });
 
-            // Functional update - verify we're preserving other years
-            setRevenueGrid((prev) => {
-              const updated = { ...prev, [currentYear]: dataToUse };
+          console.log("📊 ALL TRANSACTIONS LOADED:", allTransactions);
 
-              return updated;
-            });
-            setGridData(dataToUse);
-            lastSavedGridRef.current = dataToUse;
-          } else {
-            // Determine which cached data to use based on tab
-            let cachedData;
-            let isValidCachedData = false;
-
-            if (targetTab === "revenue" && revenueGrid[currentYear]) {
-              cachedData = revenueGrid[currentYear];
-              // Check if it's not the transaction combined structure
-              if (!cachedData.revenue && !cachedData.expense) {
-                isValidCachedData = true;
-              }
-            } else if (targetTab === "expense" && expenseGrid[currentYear]) {
-              cachedData = expenseGrid[currentYear];
-              // Check if it's not the transaction combined structure
-              if (!cachedData.revenue && !cachedData.expense) {
-                isValidCachedData = true;
-              }
-            }
-
-            const hasTabData =
-              isValidCachedData && Object.keys(cachedData).length > 0;
-
-            if (hasTabData) {
-              // Still check localStorage for newer data even if cached exists
-              const localData = loadFromLocalStorage(targetTab, currentYear);
-
-              if (localData && hasActualData(localData)) {
-                // Merge cached data with localStorage (localStorage wins)
-                const mergedData = { ...cachedData };
-
-                if (localData) {
-                  Object.keys(localData).forEach((monthIndex) => {
-                    const localMonth = localData[monthIndex] || {};
-                    const cachedMonth = cachedData[monthIndex] || {};
-
-                    mergedData[monthIndex] = { ...cachedMonth };
-
-                    Object.keys(localMonth).forEach((rowKey) => {
-                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
-                    });
-                  });
-                }
-
-                setGridData(mergedData);
-                lastSavedGridRef.current = mergedData;
-
-                // Update state with merged data
-                if (targetTab === "revenue") {
-                  setRevenueGrid((prev) => ({
-                    ...prev,
-                    [currentYear]: mergedData,
-                  }));
-                } else {
-                  setExpenseGrid((prev) => ({
-                    ...prev,
-                    [currentYear]: mergedData,
-                  }));
-                }
-              } else {
-                // No localStorage data, use cached
-                setGridData(cachedData);
-                lastSavedGridRef.current = cachedData;
-              }
-            } else {
-              // No valid cached data, load from Firestore + localStorage
-              if (targetTab === "revenue") {
-                // Load from Firestore
-                const firestoreData = await loadFinancialReport(
-                  "revenue",
-                  currentYear,
-                );
-                const firestoreGrid = firestoreData.gridData || {};
-
-                // Load from localStorage
-                const localData = loadFromLocalStorage("revenue", currentYear);
-
-                // MERGE: LocalStorage takes priority, but keep Firestore data too
-                const mergedData = { ...firestoreGrid };
-
-                // For each month in localStorage, merge rows
-                if (localData) {
-                  Object.keys(localData).forEach((monthIndex) => {
-                    const localMonth = localData[monthIndex] || {};
-                    const firestoreMonth = firestoreGrid[monthIndex] || {};
-
-                    mergedData[monthIndex] = { ...firestoreMonth };
-
-                    // Add/update rows from localStorage
-                    Object.keys(localMonth).forEach((rowKey) => {
-                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
-                    });
-                  });
-                }
-
-                const dataToUse = mergedData;
-
-                // Functional update
-                setRevenueGrid((prev) => {
-                  const updated = { ...prev, [currentYear]: dataToUse };
-                  return updated;
-                });
-
-                // Ensure proper structure for rendering
-                const displayData =
-                  dataToUse && Object.keys(dataToUse).length > 0
-                    ? dataToUse
-                    : createBlankGrid();
-
-                setGridData(displayData);
-                lastSavedGridRef.current = displayData;
-              } else if (targetTab === "expense") {
-                // Load from Firestore
-                const firestoreData = await loadFinancialReport(
-                  "expense",
-                  currentYear,
-                );
-                const firestoreGrid = firestoreData.gridData || {};
-
-                // Load from localStorage
-                const localData = loadFromLocalStorage("expense", currentYear);
-
-                // MERGE: LocalStorage takes priority, but keep Firestore data too
-                const mergedData = { ...firestoreGrid };
-
-                // For each month in localStorage, merge rows
-                if (localData) {
-                  Object.keys(localData).forEach((monthIndex) => {
-                    const localMonth = localData[monthIndex] || {};
-                    const firestoreMonth = firestoreGrid[monthIndex] || {};
-
-                    mergedData[monthIndex] = { ...firestoreMonth };
-
-                    // Add/update rows from localStorage
-                    Object.keys(localMonth).forEach((rowKey) => {
-                      mergedData[monthIndex][rowKey] = localMonth[rowKey];
-                    });
-                  });
-                }
-
-                const dataToUse = mergedData;
-
-                // Functional update
-                setExpenseGrid((prev) => {
-                  const updated = { ...prev, [currentYear]: dataToUse };
-                  return updated;
-                });
-
-                // Ensure proper structure for rendering - ALWAYS use createBlankGrid if empty
-                const displayData =
-                  dataToUse &&
-                  Object.keys(dataToUse).length > 0 &&
-                  !dataToUse.revenue &&
-                  !dataToUse.expense
-                    ? dataToUse
-                    : createBlankGrid();
-
-                setGridData(displayData);
-                lastSavedGridRef.current = displayData;
-              }
-            }
-          }
+          setGridData({
+            revenue: allTransactions.revenue,
+            expense: allTransactions.expense,
+          });
         }
+      } finally {
+        isHydratingRef.current = false;
+        setIsTabLoading(false);
       }
+    };
 
-      isHydratingRef.current = false;
-      setIsTabLoading(false);
+    // Helper function to merge Firestore + localStorage
+    const mergeData = (firestoreData, localData) => {
+      const merged = { ...firestoreData };
+      if (localData) {
+        Object.keys(localData).forEach((monthIndex) => {
+          const localMonth = localData[monthIndex] || {};
+          const firestoreMonth = firestoreData[monthIndex] || {};
+          merged[monthIndex] = { ...firestoreMonth };
+          Object.keys(localMonth).forEach((rowKey) => {
+            merged[monthIndex][rowKey] = localMonth[rowKey];
+          });
+        });
+      }
+      return merged;
     };
 
     loadBothTabs();
@@ -690,21 +495,6 @@ const FinancialReports = () => {
     saveToLocalStorage(activeTab, currentYear, gridData);
   }, [gridData, activeTab, currentYear]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
   // // Auto-save to localStorage when gridData changes
   // useEffect(() => {
   //   if (!gridData || Object.keys(gridData).length === 0) return;
@@ -2492,6 +2282,11 @@ const FinancialReports = () => {
           <button
             data-type="revenue"
             className={`tab-button ${activeTab === "revenue" ? "active" : ""}`}
+            disabled={isTabLoading}
+            style={{
+              opacity: isTabLoading ? 0.5 : 1,
+              cursor: isTabLoading ? "not-allowed" : "pointer",
+            }}
             onClick={() => {
               if (activeTab === "expense") setExpenseGrid(gridData);
               setActiveTab("revenue");
@@ -2502,6 +2297,11 @@ const FinancialReports = () => {
           <button
             data-type="expense"
             className={`tab-button ${activeTab === "expense" ? "active" : ""}`}
+            disabled={isTabLoading}
+            style={{
+              opacity: isTabLoading ? 0.5 : 1,
+              cursor: isTabLoading ? "not-allowed" : "pointer",
+            }}
             onClick={() => {
               if (activeTab === "revenue") setRevenueGrid(gridData);
               setActiveTab("expense");
@@ -2513,6 +2313,11 @@ const FinancialReports = () => {
           <button
             data-type="transaction"
             className={`tab-button ${activeTab === "transaction" ? "active" : ""}`}
+            disabled={isTabLoading}
+            style={{
+              opacity: isTabLoading ? 0.5 : 1,
+              cursor: isTabLoading ? "not-allowed" : "pointer",
+            }}
             onClick={() => {
               if (activeTab === "revenue") setRevenueGrid(gridData);
               if (activeTab === "expense") setExpenseGrid(gridData);
@@ -3364,53 +3169,92 @@ const FinancialReports = () => {
                 {(() => {
                   const transactions = [];
 
-                  // Collect from revenue grid
-                  Object.values(revenueGrid).forEach((monthRows) => {
-                    Object.values(monthRows).forEach((row) => {
-                      if (
-                        row &&
-                        Array.isArray(row) &&
-                        row.some((cell) => cell !== "")
-                      ) {
-                        transactions.push({
-                          date: row[4] || "",
-                          mop: row[2] || "",
-                          type: "Revenue",
-                          description:
-                            row[3] ||
-                            "" +
-                              (row._isAutoFill
-                                ? ` (${row[0] || "Unknown"})`
-                                : ""),
-                          amount: row[1] || "",
-                        });
-                      }
+                  // For transaction tab, use gridData (which has all localStorage data)
+                  // gridData.revenue and gridData.expense are arrays of transaction objects
+                  if (activeTab === "transaction" && gridData.revenue) {
+                    // gridData.revenue is already an array of {year, month, rowKey, data}
+                    gridData.revenue.forEach((tx) => {
+                      transactions.push({
+                        date: tx.data[4] || "",
+                        mop: tx.data[2] || "",
+                        type: "Revenue",
+                        description:
+                          tx.data[3] ||
+                          "" +
+                            (tx.data._isAutoFill
+                              ? ` (${tx.data[0] || "Unknown"})`
+                              : ""),
+                        amount: tx.data[1] || "",
+                      });
                     });
-                  });
+                  } else {
+                    // Original logic for non-transaction tabs
+                    Object.values(revenueGrid).forEach((monthRows) => {
+                      Object.values(monthRows).forEach((row) => {
+                        if (
+                          row &&
+                          Array.isArray(row) &&
+                          row.some((cell) => cell !== "")
+                        ) {
+                          transactions.push({
+                            date: row[4] || "",
+                            mop: row[2] || "",
+                            type: "Revenue",
+                            description:
+                              row[3] ||
+                              "" +
+                                (row._isAutoFill
+                                  ? ` (${row[0] || "Unknown"})`
+                                  : ""),
+                            amount: row[1] || "",
+                          });
+                        }
+                      });
+                    });
+                  }
 
                   // Collect from expense grid
-                  Object.values(expenseGrid).forEach((monthRows) => {
-                    Object.values(monthRows).forEach((row) => {
-                      if (
-                        row &&
-                        Array.isArray(row) &&
-                        row.some((cell) => cell !== "")
-                      ) {
-                        transactions.push({
-                          date: row[4] || "",
-                          mop: row[2] || "",
-                          type: "Expense",
-                          description:
-                            row[3] ||
-                            "" +
-                              (row._isAutoFill
-                                ? ` (${row[0] || "Unknown"})`
-                                : ""),
-                          amount: row[1] || "",
-                        });
-                      }
+                  if (activeTab === "transaction" && gridData.expense) {
+                    // gridData.expense is already an array of {year, month, rowKey, data}
+                    gridData.expense.forEach((tx) => {
+                      transactions.push({
+                        date: tx.data[4] || "",
+                        mop: tx.data[2] || "",
+                        type: "Expense",
+                        description:
+                          tx.data[3] ||
+                          "" +
+                            (tx.data._isAutoFill
+                              ? ` (${tx.data[0] || "Unknown"})`
+                              : ""),
+                        amount: tx.data[1] || "",
+                      });
                     });
-                  });
+                  } else {
+                    // Original logic for non-transaction tabs
+                    Object.values(expenseGrid).forEach((monthRows) => {
+                      Object.values(monthRows).forEach((row) => {
+                        if (
+                          row &&
+                          Array.isArray(row) &&
+                          row.some((cell) => cell !== "")
+                        ) {
+                          transactions.push({
+                            date: row[4] || "",
+                            mop: row[2] || "",
+                            type: "Expense",
+                            description:
+                              row[3] ||
+                              "" +
+                                (row._isAutoFill
+                                  ? ` (${row[0] || "Unknown"})`
+                                  : ""),
+                            amount: row[1] || "",
+                          });
+                        }
+                      });
+                    });
+                  }
 
                   // Helper to format date
                   const formatDate = (dateStr) => {
