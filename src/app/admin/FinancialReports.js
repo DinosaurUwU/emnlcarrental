@@ -1640,26 +1640,65 @@ const FinancialReports = () => {
     }
   };
 
+  // const addRow = (monthIndex) => {
+  //   setGridData((prev) => {
+  //     const updated = { ...prev };
+  //     const monthRows = [...(updated[monthIndex] || [])];
+
+  //     // Add 3 new empty rows
+  //     for (let i = 0; i < 3; i++) {
+  //       monthRows.push(Array(5).fill(""));
+  //     }
+
+  //     // Limit to max 50 rows
+  //     if (monthRows.length > 50) {
+  //       alert("Maximum of 50 rows per month reached.");
+  //       return prev;
+  //     }
+
+  //     updated[monthIndex] = monthRows;
+  //     return updated;
+  //   });
+  // };
+
   const addRow = (monthIndex) => {
     setGridData((prev) => {
       const updated = { ...prev };
-      const monthRows = [...(updated[monthIndex] || [])];
-
-      // Add 3 new empty rows
-      for (let i = 0; i < 3; i++) {
-        monthRows.push(Array(5).fill(""));
+      
+      // Ensure month exists
+      if (!updated[monthIndex]) {
+        updated[monthIndex] = {};
       }
-
+      
+      const monthRows = { ...updated[monthIndex] };
+      
+      // Find the next available numeric row key ONLY
+      const existingNumericKeys = Object.keys(monthRows)
+        .filter((key) => !isNaN(Number(key)) && key.startsWith("Row_")) // Only Row_ keys
+        .map((key) => Number(key.replace("Row_", "")));
+      
+      const nextKeyNum = existingNumericKeys.length > 0 ? Math.max(...existingNumericKeys) + 1 : 0;
+      const nextKey = `Row_${nextKeyNum}`;
+      
+      console.log(`➕ Adding new row at key: ${nextKey}`);
+      
+      // Add 1 new empty row
+      monthRows[nextKey] = Array(5).fill("");
+      
       // Limit to max 50 rows
-      if (monthRows.length > 50) {
+      if (Object.keys(monthRows).length > 50) {
         alert("Maximum of 50 rows per month reached.");
         return prev;
       }
-
+      
       updated[monthIndex] = monthRows;
       return updated;
     });
   };
+
+
+
+
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
@@ -3423,9 +3462,15 @@ const FinancialReports = () => {
                       </div>
 
                       <div className="grid-controls">
-                        <button onClick={() => addRow(monthIndex)}>
-                          + Row
-                        </button>
+<button 
+  onClick={() => {
+    console.log("🎯 Button clicked - monthIndex:", monthIndex, "activeTab:", activeTab);
+    addRow(monthIndex);
+  }}
+>
+  + Row
+</button>
+
 
                         <button
                           onClick={() => {
@@ -3437,32 +3482,29 @@ const FinancialReports = () => {
                               return;
                             }
 
-                            setGridData((prev) => {
-                              const newGrid = { ...prev };
-                              const monthRows = [...newGrid[monthIndex]];
-
-                              selectedRows.forEach((r) => {
-                                if (monthRows.length <= 5) {
-                                  monthRows[r] = Array(
-                                    monthRows[r]?.length || 5,
-                                  ).fill("");
-                                } else {
-                                  monthRows[r] = null;
+                              setGridData((prev) => {
+                                const newGrid = { ...prev };
+                                
+                                // Ensure month exists
+                                if (!newGrid[monthIndex]) {
+                                  newGrid[monthIndex] = {};
                                 }
+                                
+                                const monthRows = { ...newGrid[monthIndex] };
+                                
+                                // Clear selected rows (keep the row, just empty it)
+                                selectedRows.forEach((r) => {
+                                  monthRows[r] = Array(5).fill("");
+                                });
+                                
+                                newGrid[monthIndex] = monthRows;
+                                
+                                return newGrid;
                               });
 
-                              // Filter out removed rows
-                              newGrid[monthIndex] = monthRows.filter(Boolean);
+                              setSelectedRows([]);
 
-                              // Restore 5 rows minimum
-                              while (newGrid[monthIndex].length < 5) {
-                                newGrid[monthIndex].push(Array(5).fill(""));
-                              }
 
-                              return newGrid;
-                            });
-
-                            setSelectedRows([]);
                           }}
                         >
                           🗑 Delete Selected Rows
