@@ -1298,97 +1298,155 @@ const FinancialReports = () => {
   };
 
   // Autofill payments when context changes
-  useEffect(() => {
-    // CASE 1: Handle booking cancellation cleanup
-    if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
+// Autofill payments when context changes
+useEffect(() => {
+  // Skip if no payment entries
+  if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
 
-    if (cancelTrigger) {
-      try {
-        const deletedBookingId = String(cancelTrigger);
+  // CASE 1: Handle booking cancellation cleanup
+  if (cancelTrigger) {
+    setRevenueGrid((prev) => {
+      const currentYearData = prev[currentYear] || {};
+      const newGrid = JSON.parse(JSON.stringify(currentYearData));
 
-        // const newGrid =
-        //   structuredClone?.(revenueGrid) ||
-        //   JSON.parse(JSON.stringify(revenueGrid));
-
-        const currentYearData = revenueGrid[currentYear] || {};
-        const newGrid =
-          structuredClone?.(currentYearData) ||
-          JSON.parse(JSON.stringify(currentYearData));
-
-        // Debug: show all bookingIds before deletion
-        const beforeIds = [];
-        Object.keys(newGrid).forEach((mIndex) => {
-          newGrid[mIndex].forEach((row) => {
-            if (row?._isAutoFill) beforeIds.push(row._bookingId);
-          });
-        });
-
-        // Remove only rows matching that bookingId
-        Object.keys(newGrid).forEach((mIndex) => {
-          const beforeCount = newGrid[mIndex].length;
-
+      Object.keys(newGrid).forEach((mIndex) => {
+        if (Array.isArray(newGrid[mIndex])) {
           newGrid[mIndex] = newGrid[mIndex].filter(
-            (row) => !(row?._isAutoFill && row._bookingId === deletedBookingId),
+            (row) => !(row?._isAutoFill && row._bookingId === String(cancelTrigger)),
           );
+          while (newGrid[mIndex].length < 5) {
+            newGrid[mIndex].push(Array(5).fill(""));
+          }
+        }
+      });
 
-          const afterCount = newGrid[mIndex].length;
-          const removedCount = beforeCount - afterCount;
+      return { ...prev, [currentYear]: newGrid };
+    });
 
-          if (removedCount > 0)
-            // keep structure
+    if (activeTab === "revenue") {
+      setGridData((prev) => {
+        const newGrid = JSON.parse(JSON.stringify(prev));
+        Object.keys(newGrid).forEach((mIndex) => {
+          if (Array.isArray(newGrid[mIndex])) {
+            newGrid[mIndex] = newGrid[mIndex].filter(
+              (row) => !(row?._isAutoFill && row._bookingId === String(cancelTrigger)),
+            );
             while (newGrid[mIndex].length < 5) {
               newGrid[mIndex].push(Array(5).fill(""));
             }
+          }
         });
-
-        // Debug remaining
-        const remainingIds = [];
-        Object.keys(newGrid).forEach((mIndex) => {
-          newGrid[mIndex].forEach((row) => {
-            if (row?._isAutoFill) remainingIds.push(row._bookingId);
-          });
-        });
-
-        // setRevenueGrid(newGrid);
-        // if (activeTab === "revenue") {
-        //   setGridData(newGrid);
-        // }
-
-        // Update ONLY the current year in revenueGrid
-        setRevenueGrid((prev) => ({
-          ...prev,
-          [currentYear]: newGrid,
-        }));
-        if (activeTab === "revenue") {
-          setGridData(newGrid);
-        }
-      } catch (err) {
-        console.error("❌ Error in cancelTrigger handling:", err);
-      }
-      return; // Do not rebuild below
+        return newGrid;
+      });
     }
+    return;
+  }
 
-    // CASE 2: Handle normal rebuild from autofill trigger
-    if (!autoFillTrigger || !paymentEntries) return;
+  // CASE 2: Handle normal autofill - ONLY run when autoFillTrigger is true
+  if (!autoFillTrigger) return;
 
-    // try {
-    //   const newGrid =
-    //     structuredClone?.(revenueGrid) ||
-    //     JSON.parse(JSON.stringify(revenueGrid));
+  console.log("🟢 AUTOFILL TRIGGERED with paymentEntries:", paymentEntries);
 
-    try {
-      // Clone ONLY the current year's data, not the entire revenueGrid
-      const currentYearData = revenueGrid[currentYear] || {};
-      const newGrid =
-        structuredClone?.(currentYearData) ||
-        JSON.parse(JSON.stringify(currentYearData));
+  setRevenueGrid((prevRevenueGrid) => {
+    const currentYearData = prevRevenueGrid[currentYear] || {};
+    const newGrid = JSON.parse(JSON.stringify(currentYearData));
 
-      // Ensure all months exist
+    // Ensure all months exist as arrays
+    months.forEach((_, i) => {
+      if (!Array.isArray(newGrid[i])) {
+        newGrid[i] = Array(5).fill().map(() => Array(5).fill(""));
+      }
+    });
+
+    const validKeys = new Set();
+
+    Object.entries(paymentEntries).forEach(([bookingId, entries]) => {
+      if (!Array.isArray(entries)) return;
+
+      entries.forEach((entry, entryIndex) => {
+        if (!entry?.date) return;
+
+        const date = new Date(entry.date);
+        if (isNaN(date.getTime())) return;
+
+        const monthIndex = date.getMonth();
+
+        if (!Array.isArray(newGrid[monthIndex])) {
+          newGrid[monthIndex] = Array(5).fill().map(() => Array(5).fill(""));
+        }
+
+        const formattedAmount = entry.amount != null
+          ? `₱${Number(entry.amount).toLocaleString("en-PH", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`
+          : "₱0.00";
+
+        const rowArray = [
+          entry.carName || "",
+          formattedAmount,
+          entry.mop || "",
+          entry.pop || "",
+          entry.date || "",
+        ];
+        rowArray._isAutoFill = true;
+        rowArray._bookingId = String(bookingId);
+        rowArray._entryIndex = entryIndex;
+
+        validKeys.add(`${bookingId}-${entryIndex}`);
+
+        const existingIndex = newGrid[monthIndex].findIndex(
+          (r) => r?._isAutoFill && r._bookingId === String(bookingId) && r._entryIndex === entryIndex,
+        );
+
+        if (existingIndex !== -1) {
+          newGrid[monthIndex][existingIndex] = rowArray;
+        } else {
+          const emptyIndex = newGrid[monthIndex].findIndex(
+            (r) => Array.isArray(r) && r.every((c) => c === ""),
+          );
+          if (emptyIndex !== -1) {
+            newGrid[monthIndex][emptyIndex] = rowArray;
+          } else {
+            newGrid[monthIndex].push(rowArray);
+          }
+        }
+
+        while (newGrid[monthIndex].length < 5) {
+          newGrid[monthIndex].push(Array(5).fill(""));
+        }
+      });
+    });
+
+    // Cleanup stale autofill rows
+    Object.keys(newGrid).forEach((mIndex) => {
+      if (!Array.isArray(newGrid[mIndex])) return;
+      
+      newGrid[mIndex] = newGrid[mIndex].filter((row) => {
+        if (row?._isAutoFill) {
+          return validKeys.has(`${row._bookingId}-${row._entryIndex}`);
+        }
+        return true;
+      });
+
+      while (newGrid[mIndex].length < 5) {
+        newGrid[mIndex].push(Array(5).fill(""));
+      }
+    });
+
+    console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
+    return { ...prevRevenueGrid, [currentYear]: newGrid };
+  });
+
+  // Update gridData for display if on revenue tab
+  if (activeTab === "revenue") {
+    setGridData((prev) => {
+      const newGrid = JSON.parse(JSON.stringify(prev));
+      
       months.forEach((_, i) => {
-        if (!newGrid[i])
-          newGrid[i] = Array(5)
-            .fill()
-            .map(() => Array(5).fill(""));
+        if (!Array.isArray(newGrid[i])) {
+          newGrid[i] = Array(5).fill().map(() => Array(5).fill(""));
+        }
       });
 
       const validKeys = new Set();
@@ -1399,21 +1457,21 @@ const FinancialReports = () => {
         entries.forEach((entry, entryIndex) => {
           if (!entry?.date) return;
 
-          // Validate date to prevent invalid Date objects
           const date = new Date(entry.date);
-          if (isNaN(date.getTime())) {
-            return;
-          }
+          if (isNaN(date.getTime())) return;
 
           const monthIndex = date.getMonth();
 
-          const formattedAmount =
-            entry.amount !== undefined && entry.amount !== null
-              ? `₱${Number(entry.amount).toLocaleString("en-PH", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : "₱0.00";
+          if (!Array.isArray(newGrid[monthIndex])) {
+            newGrid[monthIndex] = Array(5).fill().map(() => Array(5).fill(""));
+          }
+
+          const formattedAmount = entry.amount != null
+            ? `₱${Number(entry.amount).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`
+            : "₱0.00";
 
           const rowArray = [
             entry.carName || "",
@@ -1422,7 +1480,6 @@ const FinancialReports = () => {
             entry.pop || "",
             entry.date || "",
           ];
-
           rowArray._isAutoFill = true;
           rowArray._bookingId = String(bookingId);
           rowArray._entryIndex = entryIndex;
@@ -1430,10 +1487,7 @@ const FinancialReports = () => {
           validKeys.add(`${bookingId}-${entryIndex}`);
 
           const existingIndex = newGrid[monthIndex].findIndex(
-            (r) =>
-              r?._isAutoFill &&
-              r._bookingId === String(bookingId) &&
-              r._entryIndex === entryIndex,
+            (r) => r?._isAutoFill && r._bookingId === String(bookingId) && r._entryIndex === entryIndex,
           );
 
           if (existingIndex !== -1) {
@@ -1455,47 +1509,16 @@ const FinancialReports = () => {
         });
       });
 
-      // Cleanup stale rows
-      Object.keys(newGrid).forEach((mIndex) => {
-        newGrid[mIndex] = newGrid[mIndex].filter((row) => {
-          if (row?._isAutoFill) {
-            const key = `${row._bookingId}-${row._entryIndex}`;
-            return validKeys.has(key);
-          }
-          return true;
-        });
+      console.log("🟢 UPDATED gridData:", newGrid);
+      return newGrid;
+    });
+  }
 
-        while (newGrid[mIndex].length < 5) {
-          newGrid[mIndex].push(Array(5).fill(""));
-        }
-      });
+  setIsSynced(false);
+}, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
 
-      // Debug final booking IDs
-      const finalIds = [];
-      Object.keys(newGrid).forEach((mIndex) => {
-        newGrid[mIndex].forEach((row) => {
-          if (row?._isAutoFill) finalIds.push(row._bookingId);
-        });
-      });
 
-      // setRevenueGrid(newGrid);
-      // if (activeTab === "revenue") {
-      //   setGridData(newGrid);
-      // }
-      // Update ONLY the current year in revenueGrid
-      setRevenueGrid((prev) => ({
-        ...prev,
-        [currentYear]: newGrid,
-      }));
-      if (activeTab === "revenue") {
-        setGridData(newGrid);
-      }
 
-      setIsSynced(false);
-    } catch (err) {
-      console.error("❌ Error in autofill rebuild:", err);
-    }
-  }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab]);
 
   // DEBUG: Track ALL tabs data on every change
   useEffect(() => {
@@ -4281,3 +4304,209 @@ export default FinancialReports;
 // export default React.memo(FinancialReports);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//   // Autofill payments when context changes
+//   useEffect(() => {
+//     // CASE 1: Handle booking cancellation cleanup
+//     // if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
+//     // Wait for grid data to be loaded before processing autofill
+// if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
+// if (isTabLoading) return; // Don't process while data is loading
+// if (isHydratingRef.current) return; // Don't process during initial hydration
+
+
+//     if (cancelTrigger) {
+//       try {
+//         const deletedBookingId = String(cancelTrigger);
+
+//         // const newGrid =
+//         //   structuredClone?.(revenueGrid) ||
+//         //   JSON.parse(JSON.stringify(revenueGrid));
+
+//         const currentYearData = revenueGrid[currentYear] || {};
+//         const newGrid =
+//           structuredClone?.(currentYearData) ||
+//           JSON.parse(JSON.stringify(currentYearData));
+
+//         // Debug: show all bookingIds before deletion
+//         const beforeIds = [];
+//         Object.keys(newGrid).forEach((mIndex) => {
+//           newGrid[mIndex].forEach((row) => {
+//             if (row?._isAutoFill) beforeIds.push(row._bookingId);
+//           });
+//         });
+
+//         // Remove only rows matching that bookingId
+//         Object.keys(newGrid).forEach((mIndex) => {
+//           const beforeCount = newGrid[mIndex].length;
+
+//           newGrid[mIndex] = newGrid[mIndex].filter(
+//             (row) => !(row?._isAutoFill && row._bookingId === deletedBookingId),
+//           );
+
+//           const afterCount = newGrid[mIndex].length;
+//           const removedCount = beforeCount - afterCount;
+
+//           if (removedCount > 0)
+//             // keep structure
+//             while (newGrid[mIndex].length < 5) {
+//               newGrid[mIndex].push(Array(5).fill(""));
+//             }
+//         });
+
+//         // Debug remaining
+//         const remainingIds = [];
+//         Object.keys(newGrid).forEach((mIndex) => {
+//           newGrid[mIndex].forEach((row) => {
+//             if (row?._isAutoFill) remainingIds.push(row._bookingId);
+//           });
+//         });
+
+//         // setRevenueGrid(newGrid);
+//         // if (activeTab === "revenue") {
+//         //   setGridData(newGrid);
+//         // }
+
+//         // Update ONLY the current year in revenueGrid
+//         setRevenueGrid((prev) => ({
+//           ...prev,
+//           [currentYear]: newGrid,
+//         }));
+//         if (activeTab === "revenue") {
+//           setGridData(newGrid);
+//         }
+//       } catch (err) {
+//         console.error("❌ Error in cancelTrigger handling:", err);
+//       }
+//       return; // Do not rebuild below
+//     }
+
+//     // CASE 2: Handle normal rebuild from autofill trigger
+//     if (!autoFillTrigger || !paymentEntries) return;
+
+//     // try {
+//     //   const newGrid =
+//     //     structuredClone?.(revenueGrid) ||
+//     //     JSON.parse(JSON.stringify(revenueGrid));
+
+//     try {
+//       // Clone ONLY the current year's data, not the entire revenueGrid
+//       const currentYearData = revenueGrid[currentYear] || {};
+//       const newGrid =
+//         structuredClone?.(currentYearData) ||
+//         JSON.parse(JSON.stringify(currentYearData));
+
+//       // Ensure all months exist
+//       months.forEach((_, i) => {
+//         if (!newGrid[i])
+//           newGrid[i] = Array(5)
+//             .fill()
+//             .map(() => Array(5).fill(""));
+//       });
+
+//       const validKeys = new Set();
+
+//       Object.entries(paymentEntries).forEach(([bookingId, entries]) => {
+//         if (!Array.isArray(entries)) return;
+
+//         entries.forEach((entry, entryIndex) => {
+//           if (!entry?.date) return;
+
+//           // Validate date to prevent invalid Date objects
+//           const date = new Date(entry.date);
+//           if (isNaN(date.getTime())) {
+//             return;
+//           }
+
+//           const monthIndex = date.getMonth();
+
+//           const formattedAmount =
+//             entry.amount !== undefined && entry.amount !== null
+//               ? `₱${Number(entry.amount).toLocaleString("en-PH", {
+//                   minimumFractionDigits: 2,
+//                   maximumFractionDigits: 2,
+//                 })}`
+//               : "₱0.00";
+
+//           const rowArray = [
+//             entry.carName || "",
+//             formattedAmount,
+//             entry.mop || "",
+//             entry.pop || "",
+//             entry.date || "",
+//           ];
+
+//           rowArray._isAutoFill = true;
+//           rowArray._bookingId = String(bookingId);
+//           rowArray._entryIndex = entryIndex;
+
+//           validKeys.add(`${bookingId}-${entryIndex}`);
+
+//           const existingIndex = newGrid[monthIndex].findIndex(
+//             (r) =>
+//               r?._isAutoFill &&
+//               r._bookingId === String(bookingId) &&
+//               r._entryIndex === entryIndex,
+//           );
+
+//           if (existingIndex !== -1) {
+//             newGrid[monthIndex][existingIndex] = rowArray;
+//           } else {
+//             const emptyIndex = newGrid[monthIndex].findIndex(
+//               (r) => Array.isArray(r) && r.every((c) => c === ""),
+//             );
+//             if (emptyIndex !== -1) {
+//               newGrid[monthIndex][emptyIndex] = rowArray;
+//             } else {
+//               newGrid[monthIndex].push(rowArray);
+//             }
+//           }
+
+//           while (newGrid[monthIndex].length < 5) {
+//             newGrid[monthIndex].push(Array(5).fill(""));
+//           }
+//         });
+//       });
+
+//       // Cleanup stale rows
+//       Object.keys(newGrid).forEach((mIndex) => {
+//         newGrid[mIndex] = newGrid[mIndex].filter((row) => {
+//           if (row?._isAutoFill) {
+//             const key = `${row._bookingId}-${row._entryIndex}`;
+//             return validKeys.has(key);
+//           }
+//           return true;
+//         });
+
+//         while (newGrid[mIndex].length < 5) {
+//           newGrid[mIndex].push(Array(5).fill(""));
+//         }
+//       });
+
+//       // Debug final booking IDs
+//       const finalIds = [];
+//       Object.keys(newGrid).forEach((mIndex) => {
+//         newGrid[mIndex].forEach((row) => {
+//           if (row?._isAutoFill) finalIds.push(row._bookingId);
+//         });
+//       });
+
+//       // setRevenueGrid(newGrid);
+//       // if (activeTab === "revenue") {
+//       //   setGridData(newGrid);
+//       // }
+//       // Update ONLY the current year in revenueGrid
+//       setRevenueGrid((prev) => ({
+//         ...prev,
+//         [currentYear]: newGrid,
+//       }));
+//       if (activeTab === "revenue") {
+//         setGridData(newGrid);
+//       }
+
+//       setIsSynced(false);
+//     } catch (err) {
+//       console.error("❌ Error in autofill rebuild:", err);
+//     }
+// }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
