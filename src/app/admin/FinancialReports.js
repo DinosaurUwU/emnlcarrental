@@ -300,6 +300,7 @@ const FinancialReports = () => {
   const [showManualLoadMenu, setShowManualLoadMenu] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(false);
 
 
   const [manualLoadOption, setManualLoadOption] = useState(null); // "month", "year", "allyears"
@@ -3579,6 +3580,36 @@ const FinancialReports = () => {
     <MdDelete /> Delete Rows
   </span>
 </button>
+
+<button
+  onClick={() => {
+    if (selectedRows.length === 0) {
+      setFinancialWarningMessage(
+        "No rows selected. Please select at least one row to delete from database.",
+      );
+      setShowFinancialWarning(true);
+      return;
+    }
+
+    // Show confirmation for Firestore deletion
+    setShowDeleteFirestoreConfirm(true);
+  }}
+  style={{
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    marginLeft: "10px",
+  }}
+>
+  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+    <MdDelete /> Delete to DB
+  </span>
+</button>
+
 
                       </div>
                     </div>
