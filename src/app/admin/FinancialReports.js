@@ -245,6 +245,10 @@ const FinancialReports = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
 
+    useEffect(() => {
+    setSelectedRows([]);
+  }, [selectedMonthIndex, activeTab, currentYear]);
+
   const [sortColumn, setSortColumn] = useState("date");
 
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
@@ -3226,25 +3230,25 @@ await saveFinancialReport(
                           <div className="grid-header-cell row-number-header">
                             <input
                               type="checkbox"
-                              checked={
+                                                            checked={
                                 sortedEntries.length > 0 &&
                                 sortedEntries.every((item) =>
-                                  selectedRows.includes(item.key),
+                                  selectedRows.includes(`${monthIndex}-${item.key}`),
                                 )
                               }
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  // Select all visible rows
+                                  // Select all visible rows for this month
                                   const allRowKeys = sortedEntries.map(
-                                    (item) => item.key,
+                                    (item) => `${monthIndex}-${item.key}`,
                                   );
                                   setSelectedRows((prev) => [
                                     ...new Set([...prev, ...allRowKeys]),
                                   ]);
                                 } else {
-                                  // Deselect all visible rows
+                                  // Deselect all visible rows for this month
                                   const allRowKeys = sortedEntries.map(
-                                    (item) => item.key,
+                                    (item) => `${monthIndex}-${item.key}`,
                                   );
                                   setSelectedRows((prev) =>
                                     prev.filter(
@@ -3253,6 +3257,34 @@ await saveFinancialReport(
                                   );
                                 }
                               }}
+
+                              // checked={
+                              //   sortedEntries.length > 0 &&
+                              //   sortedEntries.every((item) =>
+                              //     selectedRows.includes(item.key),
+                              //   )
+                              // }
+                              // onChange={(e) => {
+                              //   if (e.target.checked) {
+                              //     // Select all visible rows
+                              //     const allRowKeys = sortedEntries.map(
+                              //       (item) => item.key,
+                              //     );
+                              //     setSelectedRows((prev) => [
+                              //       ...new Set([...prev, ...allRowKeys]),
+                              //     ]);
+                              //   } else {
+                              //     // Deselect all visible rows
+                              //     const allRowKeys = sortedEntries.map(
+                              //       (item) => item.key,
+                              //     );
+                              //     setSelectedRows((prev) =>
+                              //       prev.filter(
+                              //         (key) => !allRowKeys.includes(key),
+                              //       ),
+                              //     );
+                              //   }
+                              // }}
                               style={{ cursor: "pointer" }}
                             />
                           </div>
@@ -3306,7 +3338,8 @@ await saveFinancialReport(
                               return (
                                 <div
                                   key={`${monthIndex}-${item.key}`}
-                                  className={`grid-row ${selectedRows.includes(item.key) ? "selected" : ""}`}
+                                                                    className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
+
                                   style={{
                                     cursor: row._isAutoFill
                                       ? "pointer"
@@ -3361,7 +3394,8 @@ await saveFinancialReport(
                                   <div className="grid-cell row-number-cell">
                                     <input
                                       type="checkbox"
-                                      checked={selectedRows.includes(item.key)}
+                                                                            checked={selectedRows.includes(`${monthIndex}-${item.key}`)}
+
                                       disabled={row._isAutoFill === true}
                                       style={
                                         row._isAutoFill
@@ -3372,15 +3406,17 @@ await saveFinancialReport(
                                             }
                                           : {}
                                       }
-                                      onChange={(e) => {
+                                                                            onChange={(e) => {
+                                        const rowKey = `${monthIndex}-${item.key}`;
                                         setSelectedRows((prev) =>
                                           e.target.checked
-                                            ? [...prev, item.key]
+                                            ? [...prev, rowKey]
                                             : prev.filter(
-                                                (i) => i !== item.key,
+                                                (i) => i !== rowKey,
                                               ),
                                         );
                                       }}
+
                                     />
                                     <span>{sortedIndex + 1}</span>
                                   </div>
