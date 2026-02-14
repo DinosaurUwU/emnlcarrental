@@ -4,12 +4,16 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import "./FinancialReports.css";
 import XLSX from "xlsx-js-style";
-import { MdWarning, MdDownload, MdRefresh, MdDelete, MdCalendarToday, MdAnalytics } from "react-icons/md";
-
-
+import {
+  MdWarning,
+  MdDownload,
+  MdRefresh,
+  MdDelete,
+  MdCalendarToday,
+  MdAnalytics,
+} from "react-icons/md";
 
 import { createPortal } from "react-dom";
-
 
 const FinancialReports = () => {
   const {
@@ -64,8 +68,7 @@ const FinancialReports = () => {
   // Local Storage Keys
   const LOCAL_STORAGE_KEY = "emnlcarrental_financial_reports";
 
- // Local Storage Helpers
-
+  // Local Storage Helpers
 
   const saveToLocalStorage = (tab, year, data) => {
     try {
@@ -124,7 +127,6 @@ const FinancialReports = () => {
   };
 
   // // Function to save ALL pending localStorage data to Firestore
-
 
   const saveAllPendingToFirestore = async () => {
     setSavingStatus(true);
@@ -300,8 +302,8 @@ const FinancialReports = () => {
   const [showManualLoadMenu, setShowManualLoadMenu] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(false);
-
+  const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] =
+    useState(false);
 
   const [manualLoadOption, setManualLoadOption] = useState(null); // "month", "year", "allyears"
 
@@ -2048,85 +2050,180 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
       )}
 
       {showDeleteConfirm && (
-  <div className="overlay-delete">
-    <div className="confirm-modal">
-      <h3 className="confirm-header">Delete Selected Rows?</h3>
-      <p className="confirm-text">
-        This will delete <strong>{selectedRows.length}</strong> selected row(s) in{" "}
-        {months[selectedMonthIndex]} {currentYear}. For rows 1-5, only the data will be 
-        cleared. For rows 6 and above, the entire row will be removed. Continue?
-      </p>
+        <div className="overlay-delete">
+          <div className="confirm-modal">
+            <h3 className="confirm-header">Delete Selected Rows?</h3>
+            <p className="confirm-text">
+              This will delete <strong>{selectedRows.length}</strong> selected
+              row(s) in {months[selectedMonthIndex]} {currentYear}. For rows
+              1-5, only the data will be cleared. For rows 6 and above, the
+              entire row will be removed. Continue?
+            </p>
 
-      <div className="confirm-buttons">
-        <button
-          className="confirm-btn delete"
-          onClick={() => {
-            setShowDeleteConfirm(false);
-            
-            setGridData((prev) => {
-              const newGrid = { ...prev };
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
 
-              // Ensure month exists
-              if (!newGrid[selectedMonthIndex]) {
-  newGrid[selectedMonthIndex] = {};
-}
+                  setGridData((prev) => {
+                    const newGrid = { ...prev };
 
-              const monthRows = { ...newGrid[selectedMonthIndex] };
+                    // Ensure month exists
+                    if (!newGrid[selectedMonthIndex]) {
+                      newGrid[selectedMonthIndex] = {};
+                    }
 
-              // For Row_0 to Row_4: only clear data, keep the row
-              // For Row_5+: actually delete the row entirely
-              selectedRows.forEach((r) => {
-                const rowNum = parseInt(
-                  r.replace("Row_", ""),
-                  10,
-                );
+                    const monthRows = { ...newGrid[selectedMonthIndex] };
 
-                if (rowNum < 5) {
-                  // First 5 rows: only clear the data, keep the row
-                  monthRows[r] = Array(5).fill("");
-                } else {
-                  // Row_5 and above: delete the entire row
-                  delete monthRows[r];
-                }
-              });
+                    // For Row_0 to Row_4: only clear data, keep the row
+                    // For Row_5+: actually delete the row entirely
+                    selectedRows.forEach((r) => {
+                      const rowNum = parseInt(r.replace("Row_", ""), 10);
 
-              newGrid[selectedMonthIndex] = monthRows;
+                      if (rowNum < 5) {
+                        // First 5 rows: only clear the data, keep the row
+                        monthRows[r] = Array(5).fill("");
+                      } else {
+                        // Row_5 and above: delete the entire row
+                        delete monthRows[r];
+                      }
+                    });
 
-              return newGrid;
-            });
+                    newGrid[selectedMonthIndex] = monthRows;
 
-            setSelectedRows([]);
-            
-            setActionOverlay({
-              isVisible: true,
-              type: "warning",
-              message: `${selectedRows.length} row(s) deleted successfully.`,
-            });
-            setTimeout(() => {
-              setHideCancelAnimation(true);
-              setTimeout(() => {
-                setActionOverlay((prev) => ({
-                  ...prev,
-                  isVisible: false,
-                }));
-                setHideCancelAnimation(false);
-              }, 400);
-            }, 2500);
-          }}
-        >
-          Yes, Delete
-        </button>
-        <button
-          className="confirm-btn cancel"
-          onClick={() => setShowDeleteConfirm(false)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                    return newGrid;
+                  });
 
+                  setSelectedRows([]);
+
+                  setActionOverlay({
+                    isVisible: true,
+                    type: "warning",
+                    message: `${selectedRows.length} row(s) deleted successfully.`,
+                  });
+                  setTimeout(() => {
+                    setHideCancelAnimation(true);
+                    setTimeout(() => {
+                      setActionOverlay((prev) => ({
+                        ...prev,
+                        isVisible: false,
+                      }));
+                      setHideCancelAnimation(false);
+                    }, 400);
+                  }, 2500);
+                }}
+              >
+                Yes, Delete
+              </button>
+              <button
+                className="confirm-btn cancel"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteFirestoreConfirm && (
+        <div className="overlay-delete">
+          <div className="confirm-modal">
+            <h3 className="confirm-header">Delete to Database?</h3>
+            <p className="confirm-text">
+              This will permanently delete{" "}
+              <strong>{selectedRows.length}</strong> selected row(s):{" "}
+              <strong>{selectedRows.join(", ")}</strong> from the{" "}
+              <strong>{activeTab}</strong> tab in {months[selectedMonthIndex]}{" "}
+              {currentYear}. This action cannot be undone. Continue?
+            </p>
+
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={async () => {
+                  setShowDeleteFirestoreConfirm(false);
+
+                  setSavingStatus(true);
+
+                  try {
+                    // Get the current grid data
+                    const currentGrid = gridData[selectedMonthIndex] || {};
+                    const rowsToDelete = selectedRows;
+
+                    // Create a new grid without the deleted rows
+                    const updatedGrid = { ...currentGrid };
+
+                    // Remove the selected rows from the grid
+                    rowsToDelete.forEach((rowKey) => {
+                      delete updatedGrid[rowKey];
+                    });
+
+                    // Create the data object to save - need to include ALL months, not just the current one
+const dataToSave = { ...gridData };
+dataToSave[selectedMonthIndex] = updatedGrid;
+
+// Save to Firestore
+console.log(
+  "🗑️ Deleting rows from Firestore:",
+  rowsToDelete,
+);
+await saveFinancialReport(
+  activeTab,
+  dataToSave,
+  currentYear,
+);
+
+
+                    // Also update local state
+                    setGridData((prev) => {
+                      const newGrid = { ...prev };
+                      newGrid[selectedMonthIndex] = updatedGrid;
+                      return newGrid;
+                    });
+
+                    setSelectedRows([]);
+
+                    setActionOverlay({
+                      isVisible: true,
+                      type: "warning",
+                      message: `${rowsToDelete.length} row(s) deleted from database successfully.`,
+                    });
+                    setTimeout(() => {
+                      setHideCancelAnimation(true);
+                      setTimeout(() => {
+                        setActionOverlay((prev) => ({
+                          ...prev,
+                          isVisible: false,
+                        }));
+                        setHideCancelAnimation(false);
+                      }, 400);
+                    }, 2500);
+                  } catch (error) {
+                    console.error("❌ Error deleting from Firestore:", error);
+                    setActionOverlay({
+                      isVisible: true,
+                      type: "warning",
+                      message: "Error deleting rows from database.",
+                    });
+                  } finally {
+                    setSavingStatus(false);
+                  }
+                }}
+              >
+                Yes, Delete to DB
+              </button>
+              <button
+                className="confirm-btn cancel"
+                onClick={() => setShowDeleteFirestoreConfirm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
@@ -2744,9 +2841,16 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                           setShowManualLoadConfirm(true);
                         }}
                       >
-                       <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-    <MdCalendarToday /> {months[selectedMonthIndex]} {currentYear}
-  </span>
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <MdCalendarToday /> {months[selectedMonthIndex]}{" "}
+                          {currentYear}
+                        </span>
                       </button>
                       <button
                         className="mlo-buttons"
@@ -2756,15 +2860,20 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                           setShowManualLoadConfirm(true);
                         }}
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-    <MdAnalytics  /> YEAR {currentYear}
-  </span>
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <MdAnalytics /> YEAR {currentYear}
+                        </span>
                       </button>
                     </div>
                   )}
                 </div>
               </div>
-
 
               <div className="g1-item-sm">
                 <button onClick={toggleShowAll}>
@@ -2814,22 +2923,33 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
 
               {/* Column 2: Export Button */}
               <div className="group-right export-block">
-<button className="export-btn" onClick={handleExport}>
-  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
-    <MdDownload /> Export
-  </span>
-</button>
-<button
-  className="reset-btn"
-  onClick={() => setShowResetConfirm(true)}
->
-  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
-    <MdRefresh /> Reset Grid
-  </span>
-</button>
-
-
-
+                <button className="export-btn" onClick={handleExport}>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <MdDownload /> Export
+                  </span>
+                </button>
+                <button
+                  className="reset-btn"
+                  onClick={() => setShowResetConfirm(true)}
+                >
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <MdRefresh /> Reset Grid
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -2985,6 +3105,7 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                             onClick={goToPrevMonth}
                             className="month-toggle"
                             style={{
+                              visibility: showAllMonths ? "hidden" : "visible",
                               background: "transparent",
                               border: "none",
                               cursor: "pointer",
@@ -3004,9 +3125,11 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
 
                           <div
                             ref={monthYearButtonRef}
-                            onClick={() =>
-                              setShowMonthYearDropdown(!showMonthYearDropdown)
-                            }
+                            onClick={() => {
+    if (!showAllMonths) {
+      setShowMonthYearDropdown(!showMonthYearDropdown);
+    }
+  }}
                             style={{
                               letterSpacing: "0.5px",
                               fontWeight: "bolder",
@@ -3014,7 +3137,7 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                               textAlign: "center",
                               flex: "0 0 auto",
                               minWidth: "180px",
-                              cursor: "pointer",
+                              cursor: showAllMonths ? "default" : "pointer",
                               padding: "5px 10px",
                               borderRadius: "5px",
                               userSelect: "none",
@@ -3024,14 +3147,14 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                                 : "transparent",
                             }}
                           >
-                            {months[selectedMonthIndex].toUpperCase()}{" "}
-                            {currentYear}
+                            {months[monthIndex].toUpperCase()} {currentYear}
                           </div>
 
                           <button
                             onClick={goToNextMonth}
                             className="month-toggle"
                             style={{
+                              visibility: showAllMonths ? "hidden" : "visible",
                               background: "transparent",
                               border: "none",
                               cursor: "pointer",
@@ -3529,91 +3652,102 @@ const [showDeleteFirestoreConfirm, setShowDeleteFirestoreConfirm] = useState(fal
                         )}
                       </div>
 
+{!showAllMonths && (
                       <div className="grid-controls">
-<button
-  onClick={() => {
-    console.log(
-      "🎯 Button clicked - monthIndex:",
-      monthIndex,
-      "activeTab:",
-      activeTab,
-    );
-    addRow(monthIndex);
-  }}
-  style={{
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  }}
->
-  + Row
-</button>
+                        <button
+                          onClick={() => {
+                            console.log(
+                              "🎯 Button clicked - monthIndex:",
+                              monthIndex,
+                              "activeTab:",
+                              activeTab,
+                            );
+                            addRow(monthIndex);
+                          }}
+                          style={{
+                            backgroundColor: "#28a745",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          + Row
+                        </button>
 
+                        <button
+                          onClick={() => {
+                            if (selectedRows.length === 0) {
+                              setFinancialWarningMessage(
+                                "No rows selected. Please select at least one row to proceed.",
+                              );
+                              setShowFinancialWarning(true);
+                              return;
+                            }
 
+                            setShowDeleteConfirm(true);
+                          }}
+                          style={{
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "5px",
+                            }}
+                          >
+                            <MdDelete /> Delete Rows
+                          </span>
+                        </button>
 
+                        <button
+                          onClick={() => {
+                            if (selectedRows.length === 0) {
+                              setFinancialWarningMessage(
+                                "No rows selected. Please select at least one row to delete from database.",
+                              );
+                              setShowFinancialWarning(true);
+                              return;
+                            }
 
-<button
-  onClick={() => {
-    if (selectedRows.length === 0) {
-      setFinancialWarningMessage(
-        "No rows selected. Please select at least one row to proceed.",
-      );
-      setShowFinancialWarning(true);
-      return;
-    }
-
-    setShowDeleteConfirm(true);
-  }}
-  style={{
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  }}
->
-  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
-    <MdDelete /> Delete Rows
-  </span>
-</button>
-
-<button
-  onClick={() => {
-    if (selectedRows.length === 0) {
-      setFinancialWarningMessage(
-        "No rows selected. Please select at least one row to delete from database.",
-      );
-      setShowFinancialWarning(true);
-      return;
-    }
-
-    // Show confirmation for Firestore deletion
-    setShowDeleteFirestoreConfirm(true);
-  }}
-  style={{
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    marginLeft: "10px",
-  }}
->
-  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
-    <MdDelete /> Delete to DB
-  </span>
-</button>
-
-
+                            // Show confirmation for Firestore deletion
+                            setShowDeleteFirestoreConfirm(true);
+                          }}
+                          style={{
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                            marginLeft: "10px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "5px",
+                            }}
+                          >
+                            <MdDelete /> Delete from Database
+                          </span>
+                        </button>
                       </div>
+                      )}
                     </div>
                   </div>
                 );
