@@ -1415,7 +1415,14 @@ useEffect(() => {
         validKeys.add(`${bookingId}-${entryIndex}`);
 
         let targetRowKey = null;
-        const rowKeys = Object.keys(newGrid[monthIndex]).filter(k => k.startsWith("Row_"));
+        const rowKeys = Object.keys(newGrid[monthIndex])
+  .filter(k => k.startsWith("Row_"))
+  .sort((a, b) => {
+    const numA = parseInt(a.replace("Row_", ""));
+    const numB = parseInt(b.replace("Row_", ""));
+    return numA - numB;
+  });
+
         
         // First, check if this booking already exists (check 6th element)
         for (const rowKey of rowKeys) {
@@ -1507,7 +1514,14 @@ useEffect(() => {
           validKeys.add(`${bookingId}-${entryIndex}`);
 
           let targetRowKey = null;
-          const rowKeys = Object.keys(newGrid[monthIndex]).filter(k => k.startsWith("Row_"));
+          const rowKeys = Object.keys(newGrid[monthIndex])
+  .filter(k => k.startsWith("Row_"))
+  .sort((a, b) => {
+    const numA = parseInt(a.replace("Row_", ""));
+    const numB = parseInt(b.replace("Row_", ""));
+    return numA - numB;
+  });
+
           
           for (const rowKey of rowKeys) {
             const row = newGrid[monthIndex][rowKey];
