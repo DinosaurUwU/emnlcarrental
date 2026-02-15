@@ -1302,7 +1302,7 @@ const FinancialReports = () => {
 
 
 
-  // Autofill payments when context changes
+// Autofill payments when context changes
 useEffect(() => {
   // Skip if no payment entries
   if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
@@ -1324,6 +1324,9 @@ useEffect(() => {
           });
         }
       });
+
+      // Save to localStorage to persist the cleanup
+      saveToLocalStorage("revenue", currentYear, { revenue: newGrid });
 
       return { ...prev, [currentYear]: newGrid };
     });
@@ -1353,13 +1356,11 @@ useEffect(() => {
   // Helper function to clean month data (remove array indices, keep only Row_X keys)
   const cleanMonthData = (monthData) => {
     const cleaned = {};
-    // Copy only Row_X keys
     Object.keys(monthData || {}).forEach((key) => {
       if (key.startsWith("Row_")) {
         cleaned[key] = monthData[key];
       }
     });
-    // Ensure at least 5 empty rows
     for (let r = 0; r < 5; r++) {
       if (!cleaned[`Row_${r}`]) {
         cleaned[`Row_${r}`] = Array(5).fill("");
@@ -1367,6 +1368,9 @@ useEffect(() => {
     }
     return cleaned;
   };
+
+  // Track the new grid for localStorage
+  let updatedGrid = null;
 
   // CASE 2: Handle normal autofill
   setRevenueGrid((prevRevenueGrid) => {
@@ -1411,11 +1415,9 @@ useEffect(() => {
 
         validKeys.add(`${bookingId}-${entryIndex}`);
 
-        // Find existing row or empty slot
         let targetRowKey = null;
         const rowKeys = Object.keys(newGrid[monthIndex]).filter(k => k.startsWith("Row_"));
         
-        // First, check if this booking already exists
         for (const rowKey of rowKeys) {
           const row = newGrid[monthIndex][rowKey];
           if (row._isAutoFill && row._bookingId === String(bookingId) && row._entryIndex === entryIndex) {
@@ -1424,7 +1426,6 @@ useEffect(() => {
           }
         }
 
-        // If not found, find an empty row
         if (!targetRowKey) {
           for (const rowKey of rowKeys) {
             const row = newGrid[monthIndex][rowKey];
@@ -1438,7 +1439,6 @@ useEffect(() => {
         if (targetRowKey) {
           newGrid[monthIndex][targetRowKey] = rowArray;
         } else {
-          // Add new row
           const newRowNum = Object.keys(newGrid[monthIndex]).length;
           newGrid[monthIndex][`Row_${newRowNum}`] = rowArray;
         }
@@ -1459,6 +1459,10 @@ useEffect(() => {
     });
 
     console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
+    
+    // Store for localStorage save
+    updatedGrid = newGrid;
+    
     return { ...prevRevenueGrid, [currentYear]: newGrid };
   });
 
@@ -1467,7 +1471,6 @@ useEffect(() => {
     setGridData((prev) => {
       const newGrid = {};
       
-      // Clean all months - remove array indices, keep only Row_X keys
       months.forEach((_, i) => {
         newGrid[i] = cleanMonthData(prev[i]);
       });
@@ -1516,7 +1519,6 @@ useEffect(() => {
             }
           }
 
-          
           if (!targetRowKey) {
             for (const rowKey of rowKeys) {
               const row = newGrid[monthIndex][rowKey];
@@ -1537,12 +1539,27 @@ useEffect(() => {
       });
 
       console.log("🟢 UPDATED gridData:", newGrid);
+      
+      // Save to localStorage AFTER both updates
+      if (updatedGrid) {
+        saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
+        console.log("💾 Autofill data saved to localStorage");
+      }
+      
       return newGrid;
     });
+  } else {
+    // If not on revenue tab, still save to localStorage
+    if (updatedGrid) {
+      saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
+      console.log("💾 Autofill data saved to localStorage (background)");
+    }
   }
 
   setIsSynced(false);
 }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
+
+
 
 
 
