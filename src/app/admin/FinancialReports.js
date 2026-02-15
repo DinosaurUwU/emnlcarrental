@@ -1318,14 +1318,14 @@ useEffect(() => {
         if (typeof monthData === "object" && !Array.isArray(monthData)) {
           Object.keys(monthData).forEach((rowKey) => {
             const row = monthData[rowKey];
-            if (row?._isAutoFill && row._bookingId === String(cancelTrigger)) {
+            // Check 6th element for metadata
+            if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(cancelTrigger)) {
               monthData[rowKey] = Array(5).fill("");
             }
           });
         }
       });
 
-      // Save to localStorage to persist the cleanup
       saveToLocalStorage("revenue", currentYear, { revenue: newGrid });
 
       return { ...prev, [currentYear]: newGrid };
@@ -1339,7 +1339,7 @@ useEffect(() => {
           if (typeof monthData === "object" && !Array.isArray(monthData)) {
             Object.keys(monthData).forEach((rowKey) => {
               const row = monthData[rowKey];
-              if (row?._isAutoFill && row._bookingId === String(cancelTrigger)) {
+              if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(cancelTrigger)) {
                 monthData[rowKey] = Array(5).fill("");
               }
             });
@@ -1396,40 +1396,41 @@ useEffect(() => {
         const monthIndex = date.getMonth();
 
         const formattedAmount = entry.amount != null
-          ? `₱${Number(entry.amount).toLocaleString("en-PH", {
+          ? "₱" + Number(entry.amount).toLocaleString("en-PH", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            })}`
+            })
           : "₱0.00";
 
+        // Store metadata as 6th element (serializable object)
         const rowArray = [
           entry.carName || "",
           formattedAmount,
           entry.mop || "",
           entry.pop || "",
           entry.date || "",
+          { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
         ];
-        rowArray._isAutoFill = true;
-        rowArray._bookingId = String(bookingId);
-        rowArray._entryIndex = entryIndex;
 
         validKeys.add(`${bookingId}-${entryIndex}`);
 
         let targetRowKey = null;
         const rowKeys = Object.keys(newGrid[monthIndex]).filter(k => k.startsWith("Row_"));
         
+        // First, check if this booking already exists (check 6th element)
         for (const rowKey of rowKeys) {
           const row = newGrid[monthIndex][rowKey];
-          if (row._isAutoFill && row._bookingId === String(bookingId) && row._entryIndex === entryIndex) {
+          if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(bookingId) && row[5]._entryIndex === entryIndex) {
             targetRowKey = rowKey;
             break;
           }
         }
 
+        // If not found, find an empty row
         if (!targetRowKey) {
           for (const rowKey of rowKeys) {
             const row = newGrid[monthIndex][rowKey];
-            if (!row._isAutoFill && row.every((c) => c === "")) {
+            if (!Array.isArray(row) || (!row[5]?._isAutoFill && row.slice(0, 5).every((c) => c === ""))) {
               targetRowKey = rowKey;
               break;
             }
@@ -1449,8 +1450,8 @@ useEffect(() => {
     Object.keys(newGrid).forEach((mIndex) => {
       Object.keys(newGrid[mIndex]).forEach((rowKey) => {
         const row = newGrid[mIndex][rowKey];
-        if (row._isAutoFill) {
-          const key = `${row._bookingId}-${row._entryIndex}`;
+        if (Array.isArray(row) && row[5]?._isAutoFill) {
+          const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
           if (!validKeys.has(key)) {
             newGrid[mIndex][rowKey] = Array(5).fill("");
           }
@@ -1460,7 +1461,6 @@ useEffect(() => {
 
     console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
     
-    // Store for localStorage save
     updatedGrid = newGrid;
     
     return { ...prevRevenueGrid, [currentYear]: newGrid };
@@ -1489,10 +1489,10 @@ useEffect(() => {
           const monthIndex = date.getMonth();
 
           const formattedAmount = entry.amount != null
-            ? `₱${Number(entry.amount).toLocaleString("en-PH", {
+            ? "₱" + Number(entry.amount).toLocaleString("en-PH", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              })}`
+              })
             : "₱0.00";
 
           const rowArray = [
@@ -1501,10 +1501,8 @@ useEffect(() => {
             entry.mop || "",
             entry.pop || "",
             entry.date || "",
+            { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
           ];
-          rowArray._isAutoFill = true;
-          rowArray._bookingId = String(bookingId);
-          rowArray._entryIndex = entryIndex;
 
           validKeys.add(`${bookingId}-${entryIndex}`);
 
@@ -1513,7 +1511,7 @@ useEffect(() => {
           
           for (const rowKey of rowKeys) {
             const row = newGrid[monthIndex][rowKey];
-            if (row._isAutoFill && row._bookingId === String(bookingId) && row._entryIndex === entryIndex) {
+            if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(bookingId) && row[5]._entryIndex === entryIndex) {
               targetRowKey = rowKey;
               break;
             }
@@ -1522,7 +1520,7 @@ useEffect(() => {
           if (!targetRowKey) {
             for (const rowKey of rowKeys) {
               const row = newGrid[monthIndex][rowKey];
-              if (!row._isAutoFill && row.every((c) => c === "")) {
+              if (!Array.isArray(row) || (!row[5]?._isAutoFill && row.slice(0, 5).every((c) => c === ""))) {
                 targetRowKey = rowKey;
                 break;
               }
@@ -1540,7 +1538,6 @@ useEffect(() => {
 
       console.log("🟢 UPDATED gridData:", newGrid);
       
-      // Save to localStorage AFTER both updates
       if (updatedGrid) {
         saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
         console.log("💾 Autofill data saved to localStorage");
@@ -1549,7 +1546,6 @@ useEffect(() => {
       return newGrid;
     });
   } else {
-    // If not on revenue tab, still save to localStorage
     if (updatedGrid) {
       saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
       console.log("💾 Autofill data saved to localStorage (background)");
@@ -1558,6 +1554,8 @@ useEffect(() => {
 
   setIsSynced(false);
 }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
+
+
 
 
 
@@ -3491,7 +3489,7 @@ await saveFinancialReport(
                                   </div>
 
                                   {Array.isArray(row) ? (
-                                    row.map((cell, colIndex) => {
+                                    row.slice(0, 5).map((cell, colIndex) => {
                                       // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
                                       const isAutoFill =
                                         row._isAutoFill === true;
