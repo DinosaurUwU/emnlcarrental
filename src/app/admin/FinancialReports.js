@@ -883,77 +883,151 @@ const FinancialReports = () => {
     });
   };
 
-  // Handles typing in cells
-  const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-    let newValue = value;
+  // // Handles typing in cells
+  // const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+  //   let newValue = value;
 
-    // AMOUNT COLUMN
-    if (colIndex === 1) {
-      const numeric = value.replace(/[^0-9.]/g, "");
-      newValue = `₱${numeric}`;
+  //   // AMOUNT COLUMN
+  //   if (colIndex === 1) {
+  //     const numeric = value.replace(/[^0-9.]/g, "");
+  //     newValue = `₱${numeric}`;
+  //   }
+
+  //   // DATE COLUMN
+  //   if (colIndex === 4) {
+  //     newValue = value;
+  //   }
+
+  //   setGridData((prev) => {
+  //     const updated = { ...prev };
+
+  //     // Ensure month exists
+  //     if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
+  //       updated[monthIndex] = {};
+  //     }
+
+  //     // Safe row key creation with null check
+  //     const numericIndex = rowIndex
+  //       ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+  //         ? parseInt(rowIndex.replace("Row_", ""))
+  //         : parseInt(rowIndex)
+  //       : 0;
+  //     const rowKey = `Row_${numericIndex}`;
+
+  //     // Get current row or create new one
+  //     const currentRow = updated[monthIndex][rowKey]
+  //       ? [...updated[monthIndex][rowKey]]
+  //       : ["", "", "", "", ""];
+
+  //     // Metadata
+  //     const meta = {
+  //       _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
+  //       _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
+  //       _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
+  //       _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
+  //       _manualId:
+  //         updated[monthIndex][rowKey]?._manualId ||
+  //         `manual-${crypto.randomUUID()}`,
+  //     };
+
+  //     if (meta._sourceType === "manual") {
+  //       meta._bookingId = null;
+  //       meta._isAutoFill = false;
+  //       meta._entryIndex = null;
+  //     }
+
+  //     // Apply change
+  //     currentRow[colIndex] = newValue;
+
+  //     // Reattach metadata
+  //     Object.assign(currentRow, meta);
+
+  //     // Put row back
+  //     updated[monthIndex][rowKey] = currentRow;
+
+  //     return updated;
+  //   });
+
+  //   setIsSynced(false);
+
+  //   if (colIndex === 4) {
+  //     setTimeout(() => applySorting(monthIndex), 0);
+  //   }
+  // };
+
+// Handles typing in cells
+const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+  let newValue = value;
+
+  // AMOUNT COLUMN
+  if (colIndex === 1) {
+    const numeric = value.replace(/[^0-9.]/g, "");
+    newValue = "₱" + numeric;
+  }
+
+  // DATE COLUMN
+  if (colIndex === 4) {
+    newValue = value;
+  }
+
+  setGridData((prev) => {
+    const updated = { ...prev };
+
+    // Ensure month exists
+    if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
+      updated[monthIndex] = {};
     }
 
-    // DATE COLUMN
-    if (colIndex === 4) {
-      newValue = value;
+    // Safe row key creation with null check
+    const numericIndex = rowIndex
+      ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+        ? parseInt(rowIndex.replace("Row_", ""))
+        : parseInt(rowIndex)
+      : 0;
+    const rowKey = `Row_${numericIndex}`;
+
+    // Get current row or create new one
+    const currentRow = updated[monthIndex][rowKey]
+      ? [...updated[monthIndex][rowKey]]
+      : ["", "", "", "", ""];
+
+    // Get existing metadata from 6th element or create new
+    const existingMeta = Array.isArray(currentRow) && currentRow[5] ? currentRow[5] : {};
+    
+    const meta = {
+      _isAutoFill: existingMeta._isAutoFill || false,
+      _bookingId: existingMeta._bookingId || null,
+      _entryIndex: existingMeta._entryIndex ?? null,
+      _sourceType: existingMeta._sourceType || "manual",
+      _manualId: existingMeta._manualId || `manual-${crypto.randomUUID()}`,
+    };
+
+    if (meta._sourceType === "manual") {
+      meta._bookingId = null;
+      meta._isAutoFill = false;
+      meta._entryIndex = null;
     }
 
-    setGridData((prev) => {
-      const updated = { ...prev };
+    // Apply change to the cell
+    currentRow[colIndex] = newValue;
 
-      // Ensure month exists
-      if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
-        updated[monthIndex] = {};
-      }
+    // Store metadata as 6th element (serializable)
+    currentRow[5] = meta;
 
-      // Safe row key creation with null check
-      const numericIndex = rowIndex
-        ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-          ? parseInt(rowIndex.replace("Row_", ""))
-          : parseInt(rowIndex)
-        : 0;
-      const rowKey = `Row_${numericIndex}`;
+    // Put row back
+    updated[monthIndex][rowKey] = currentRow;
 
-      // Get current row or create new one
-      const currentRow = updated[monthIndex][rowKey]
-        ? [...updated[monthIndex][rowKey]]
-        : ["", "", "", "", ""];
+    return updated;
+  });
 
-      // Metadata
-      const meta = {
-        _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
-        _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
-        _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
-        _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
-        _manualId:
-          updated[monthIndex][rowKey]?._manualId ||
-          `manual-${crypto.randomUUID()}`,
-      };
+  setIsSynced(false);
 
-      if (meta._sourceType === "manual") {
-        meta._bookingId = null;
-        meta._isAutoFill = false;
-        meta._entryIndex = null;
-      }
+  if (colIndex === 4) {
+    setTimeout(() => applySorting(monthIndex), 0);
+  }
+};
 
-      // Apply change
-      currentRow[colIndex] = newValue;
 
-      // Reattach metadata
-      Object.assign(currentRow, meta);
-
-      // Put row back
-      updated[monthIndex][rowKey] = currentRow;
-
-      return updated;
-    });
-
-    setIsSynced(false);
-
-    if (colIndex === 4) {
-      setTimeout(() => applySorting(monthIndex), 0);
-    }
-  };
 
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
