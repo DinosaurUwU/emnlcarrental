@@ -2976,33 +2976,72 @@ if (autoSaveEnabled && updatedGrid) {
     });
     
     if (Object.keys(newEntries).length > 0) {
-      triggerAutoFill(newEntries);
+      // Build grid data directly
+      const currentYearData = revenueGrid[currentYear] || {};
+      const newGrid = JSON.parse(JSON.stringify(currentYearData));
       
-      // Wait for state to update then save
-      setTimeout(async () => {
-        if (autoSaveEnabled && activeTab === "revenue") {
-          const currentGridData = gridData;
-          await saveFinancialReport(activeTab, currentGridData, currentYear);
-          saveToLocalStorage(activeTab, currentYear, { [activeTab]: currentGridData });
-          setLastSavedAt(new Date());
-          setIsSynced(true);
-          setHasServerChange(false);
-          console.log("✅ Sync payments auto-saved to Firestore");
+      months.forEach((_, i) => {
+        if (!newGrid[i] || typeof newGrid[i] !== "object") {
+          newGrid[i] = {};
+          for (let r = 0; r < 5; r++) {
+            newGrid[i][`Row_${r}`] = ["", "", "", "", ""];
+          }
         }
-      }, 500);
-      
-      setActionOverlay({
-        isVisible: true,
-        type: "success",
-        message: `${Object.keys(newEntries).length} booking(s) synced!`,
       });
-      setTimeout(() => {
-        setHideCancelAnimation(true);
-        setTimeout(() => {
-          setActionOverlay((prev) => ({ ...prev, isVisible: false }));
-          setHideCancelAnimation(false);
-        }, 400);
-      }, 2500);
+      
+      Object.entries(newEntries).forEach(([bookingId, entries]) => {
+        entries.forEach((entry, entryIndex) => {
+          if (!entry?.date) return;
+          const date = new Date(entry.date);
+          if (isNaN(date.getTime())) return;
+          
+          const monthIndex = date.getMonth();
+          const formattedAmount = entry.amount != null
+            ? "₱" + Number(entry.amount).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : "₱0.00";
+          
+          const rowArray = [
+            entry.carName || "",
+            formattedAmount,
+            entry.mop || "",
+            entry.pop || "",
+            entry.date || "",
+            { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
+          ];
+          
+          const rowKeys = Object.keys(newGrid[monthIndex])
+            .filter(k => k.startsWith("Row_"))
+            .sort((a, b) => parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")));
+          
+          let targetRowKey = null;
+          for (const rowKey of rowKeys) {
+            if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
+              targetRowKey = rowKey;
+              break;
+            }
+          }
+          
+          if (targetRowKey) {
+            newGrid[monthIndex][targetRowKey] = rowArray;
+          } else {
+            newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
+          }
+        });
+      });
+      
+      setRevenueGrid(prev => ({ ...prev, [currentYear]: newGrid }));
+      setGridData(newGrid);
+      
+      if (autoSaveEnabled) {
+        await saveFinancialReport(activeTab, newGrid, currentYear);
+        saveToLocalStorage(activeTab, currentYear, { [activeTab]: newGrid });
+        setLastSavedAt(new Date());
+        setIsSynced(true);
+        prevGridDataStringRef.current = JSON.stringify(newGrid);
+      }
+      
+      setActionOverlay({ isVisible: true, type: "success", message: `${Object.keys(newEntries).length} booking(s) synced & saved!` });
+      setTimeout(() => { setHideCancelAnimation(true); setTimeout(() => { setActionOverlay(prev => ({ ...prev, isVisible: false })); setHideCancelAnimation(false); }, 400); }, 2500);
     } else {
       setFinancialWarningMessage("No payment entries found.");
       setShowFinancialWarning(true);
@@ -3011,6 +3050,7 @@ if (autoSaveEnabled && updatedGrid) {
     <MdSync /> Sync Payments
   </button>
 </div>
+
 
 
 
