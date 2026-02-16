@@ -24,6 +24,7 @@ const FinancialReports = () => {
     autoFillTrigger,
     cancelTrigger,
     triggerAutoFill,
+    removePaymentEntry,
 
     hasServerChange,
     setHasServerChange,
@@ -2267,15 +2268,38 @@ if (autoSaveEnabled && updatedGrid) {
                     // Create a new grid - clear data instead of deleting rows
                     const updatedGrid = { ...currentGrid };
 
+                    // // Clear the selected rows (set to empty) instead of deleting
+                    // rowsToDelete.forEach((rowKey) => {
+                    //   // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
+                    //   const actualRowKey = rowKey.includes("-")
+                    //     ? rowKey.split("-")[1]
+                    //     : rowKey;
+                    //   // Clear the row data but keep the row
+                    //   updatedGrid[actualRowKey] = ["", "", "", "", ""];
+                    // });
+
                     // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
                       // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
                       const actualRowKey = rowKey.includes("-")
                         ? rowKey.split("-")[1]
                         : rowKey;
+                      
+                      // Check if this is an autofill row and remove from paymentEntries (temp state only)
+                      const rowData = currentGrid[actualRowKey];
+                      if (Array.isArray(rowData) && rowData[5]?._isAutoFill) {
+                        const bookingId = rowData[5]._bookingId;
+                        const entryIndex = rowData[5]._entryIndex;
+                        if (bookingId && entryIndex !== undefined) {
+                          removePaymentEntry(bookingId, entryIndex);
+                          console.log(`🗑️ Removed entry ${entryIndex} from paymentEntries for booking ${bookingId}`);
+                        }
+                      }
+                      
                       // Clear the row data but keep the row
                       updatedGrid[actualRowKey] = ["", "", "", "", ""];
                     });
+
 
                     // Ensure at least 5 rows exist
                     for (let i = 0; i < 5; i++) {
