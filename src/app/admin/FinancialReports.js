@@ -2278,7 +2278,7 @@ if (autoSaveEnabled && updatedGrid) {
                     //   updatedGrid[actualRowKey] = ["", "", "", "", ""];
                     // });
 
-                    // Clear the selected rows (set to empty) instead of deleting
+                                        // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
                       // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
                       const actualRowKey = rowKey.includes("-")
@@ -2290,7 +2290,8 @@ if (autoSaveEnabled && updatedGrid) {
                       if (Array.isArray(rowData) && rowData[5]?._isAutoFill) {
                         const bookingId = rowData[5]._bookingId;
                         const entryIndex = rowData[5]._entryIndex;
-                        if (bookingId && entryIndex !== undefined) {
+                        // Safety check: only remove if bookingId exists in paymentEntries
+                        if (bookingId && entryIndex !== undefined && paymentEntries[bookingId]) {
                           removePaymentEntry(bookingId, entryIndex);
                           console.log(`🗑️ Removed entry ${entryIndex} from paymentEntries for booking ${bookingId}`);
                         }
