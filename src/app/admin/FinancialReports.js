@@ -1030,6 +1030,7 @@ const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
 
 
 
+
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
 
