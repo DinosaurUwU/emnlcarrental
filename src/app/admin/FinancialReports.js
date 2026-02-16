@@ -1,6 +1,6 @@
 "use client";
 //FinancialReports.js
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../lib/UserContext";
 import "./FinancialReports.css";
 import XLSX from "xlsx-js-style";
@@ -126,225 +126,123 @@ const FinancialReports = () => {
     );
   };
 
-  // // Function to save ALL pending localStorage data to Firestore
-
-  // const saveAllPendingToFirestore = async () => {
-  //   setSavingStatus(true);
-  //   const pendingKeys = [];
-  //   const savedYears = new Set(); // Track which years were saved
-  //   const savedTabs = new Set(); // Track which tabs were saved
-
-  //   for (let i = 0; i < localStorage.length; i++) {
-  //     const key = localStorage.key(i);
-  //     if (key.startsWith(LOCAL_STORAGE_KEY)) {
-  //       pendingKeys.push(key);
-
-  //       // Extract tab and year from key
-  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-  //       if (parts.length >= 2) {
-  //         savedTabs.add(parts[0]);
-  //         savedYears.add(parseInt(parts[1]));
-  //       }
-  //     }
-  //   }
-
-  //   console.log(
-  //     `📤 Found ${pendingKeys.length} pending items to save to Database`,
-  //   );
-  //   console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
-  //   console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
-
-  //   for (const key of pendingKeys) {
-  //     try {
-  //       const data = JSON.parse(localStorage.getItem(key));
-
-  //       // SKIP if no actual data
-  //       if (!hasActualData(data)) {
-  //         console.log(`⏭️ Skipping ${key} - no data`);
-  //         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-  //         clearLocalStorage(parts[0], parseInt(parts[1]));
-  //         continue;
-  //       }
-
-  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-  //       const tab = parts[0];
-  //       const year = parseInt(parts[1]);
-
-  //       console.log(`📤 Saving ${tab}/${year} to Database...`);
-  //       await saveFinancialReport(tab, data, year);
-  //       clearLocalStorage(tab, year);
-  //     } catch (error) {
-  //       console.error(`❌ Error saving ${key} to Database:`, error);
-  //     }
-  //   }
-
-  //   // Reload ALL saved tabs and years (not just activeTab/currentYear)
-  //   console.log("🔄 Reloading all saved data from Database...");
-
-  //   // Reload current active tab/year first
-  //   const currentResult = await loadFinancialReport(activeTab, currentYear);
-  //   const currentFreshData = currentResult.gridData || createBlankGrid();
-
-  //   if (activeTab === "revenue") {
-  //     setRevenueGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: currentFreshData,
-  //     }));
-  //   } else {
-  //     setExpenseGrid((prev) => ({
-  //       ...prev,
-  //       [currentYear]: currentFreshData,
-  //     }));
-  //   }
-  //   setGridData(currentFreshData);
-  //   lastSavedGridRef.current = currentFreshData;
-
-  //   // Reload all other saved years and tabs
-  //   for (const year of savedYears) {
-  //     if (year === currentYear) continue; // Already reloaded
-
-  //     if (savedTabs.has("revenue")) {
-  //       const revenueResult = await loadFinancialReport("revenue", year);
-  //       setRevenueGrid((prev) => ({
-  //         ...prev,
-  //         [year]: revenueResult.gridData || {},
-  //       }));
-  //     }
-
-  //     if (savedTabs.has("expense")) {
-  //       const expenseResult = await loadFinancialReport("expense", year);
-  //       setExpenseGrid((prev) => ({
-  //         ...prev,
-  //         [year]: expenseResult.gridData || {},
-  //       }));
-  //     }
-  //   }
-
-  //   setLastSavedAt(new Date());
-  //   setIsSynced(true);
-  //   setHasServerChange(false);
-  //   setSavingStatus(false);
-
-  //   console.log("✅ All data saved and reloaded from Database!");
-  // };
-
+  // Function to save ALL pending localStorage data to Firestore
   const saveAllPendingToFirestore = async () => {
-  setSavingStatus(true);
-  const pendingKeys = [];
-  const savedYears = new Set(); // Track which years were saved
-  const savedTabs = new Set(); // Track which tabs were saved
+    setSavingStatus(true);
+    const pendingKeys = [];
+    const savedYears = new Set(); // Track which years were saved
+    const savedTabs = new Set(); // Track which tabs were saved
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith(LOCAL_STORAGE_KEY)) {
-      pendingKeys.push(key);
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(LOCAL_STORAGE_KEY)) {
+        pendingKeys.push(key);
 
-      // Extract tab and year from key
-      const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-      if (parts.length >= 2) {
-        savedTabs.add(parts[0]);
-        savedYears.add(parseInt(parts[1]));
-      }
-    }
-  }
-
-  console.log(
-    `📤 Found ${pendingKeys.length} pending items to save to Database`,
-  );
-  console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
-  console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
-
-  for (const key of pendingKeys) {
-    try {
-      const data = JSON.parse(localStorage.getItem(key));
-
-      // SKIP if no actual data
-      if (!hasActualData(data)) {
-        console.log(`⏭️ Skipping ${key} - no data`);
+        // Extract tab and year from key
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-        clearLocalStorage(parts[0], parseInt(parts[1]));
-        continue;
+        if (parts.length >= 2) {
+          savedTabs.add(parts[0]);
+          savedYears.add(parseInt(parts[1]));
+        }
       }
-
-      const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-      const tab = parts[0];
-      const year = parseInt(parts[1]);
-
-      console.log(`📤 Saving ${tab}/${year} to Database...`);
-      await saveFinancialReport(tab, data, year);
-      clearLocalStorage(tab, year);
-    } catch (error) {
-      console.error(`❌ Error saving ${key} to Database:`, error);
     }
-  }
 
-  // Reload ALL saved tabs and years (not just activeTab/currentYear)
-  console.log("🔄 Reloading all saved data from Database...");
+    console.log(
+      `📤 Found ${pendingKeys.length} pending items to save to Database`,
+    );
+    console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
+    console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
 
-  // Reload current active tab/year first
-  const currentResult = await loadFinancialReport(activeTab, currentYear);
-  const currentFreshData = currentResult.gridData || createBlankGrid();
+    for (const key of pendingKeys) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
 
-  if (activeTab === "revenue") {
-    setRevenueGrid((prev) => ({
-      ...prev,
-      [currentYear]: currentFreshData,
-    }));
-  } else {
-    setExpenseGrid((prev) => ({
-      ...prev,
-      [currentYear]: currentFreshData,
-    }));
-  }
-  setGridData(currentFreshData);
-  lastSavedGridRef.current = currentFreshData;
+        // SKIP if no actual data
+        if (!hasActualData(data)) {
+          console.log(`⏭️ Skipping ${key} - no data`);
+          const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+          clearLocalStorage(parts[0], parseInt(parts[1]));
+          continue;
+        }
 
-  // Reload all other saved years and tabs
-  for (const year of savedYears) {
-    if (year === currentYear) continue; // Already reloaded
+        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+        const tab = parts[0];
+        const year = parseInt(parts[1]);
 
-    if (savedTabs.has("revenue")) {
-      const revenueResult = await loadFinancialReport("revenue", year);
+        console.log(`📤 Saving ${tab}/${year} to Database...`);
+        await saveFinancialReport(tab, data, year);
+        clearLocalStorage(tab, year);
+      } catch (error) {
+        console.error(`❌ Error saving ${key} to Database:`, error);
+      }
+    }
+
+    // Reload ALL saved tabs and years (not just activeTab/currentYear)
+    console.log("🔄 Reloading all saved data from Database...");
+
+    // Reload current active tab/year first
+    const currentResult = await loadFinancialReport(activeTab, currentYear);
+    const currentFreshData = currentResult.gridData || createBlankGrid();
+
+    if (activeTab === "revenue") {
       setRevenueGrid((prev) => ({
         ...prev,
-        [year]: revenueResult.gridData || {},
+        [currentYear]: currentFreshData,
       }));
-    }
-
-    if (savedTabs.has("expense")) {
-      const expenseResult = await loadFinancialReport("expense", year);
+    } else {
       setExpenseGrid((prev) => ({
         ...prev,
-        [year]: expenseResult.gridData || {},
+        [currentYear]: currentFreshData,
       }));
     }
-  }
+    setGridData(currentFreshData);
+    lastSavedGridRef.current = currentFreshData;
 
-  setLastSavedAt(new Date());
-  setIsSynced(true);
-  setHasServerChange(false);
-  setSavingStatus(false);
+    // Reload all other saved years and tabs
+    for (const year of savedYears) {
+      if (year === currentYear) continue; // Already reloaded
 
-  console.log("✅ All data saved and reloaded from Database!");
+      if (savedTabs.has("revenue")) {
+        const revenueResult = await loadFinancialReport("revenue", year);
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [year]: revenueResult.gridData || {},
+        }));
+      }
 
-  // Show success overlay
-  setActionOverlay({
-    isVisible: true,
-    type: "success",
-    message: `${pendingKeys.length} item(s) saved to database successfully.`,
-  });
-  setTimeout(() => {
-    setHideCancelAnimation(true);
+      if (savedTabs.has("expense")) {
+        const expenseResult = await loadFinancialReport("expense", year);
+        setExpenseGrid((prev) => ({
+          ...prev,
+          [year]: expenseResult.gridData || {},
+        }));
+      }
+    }
+
+    setLastSavedAt(new Date());
+    setIsSynced(true);
+    setHasServerChange(false);
+    setSavingStatus(false);
+
+    console.log("✅ All data saved and reloaded from Database!");
+
+    // Show success overlay
+    setActionOverlay({
+      isVisible: true,
+      type: "success",
+      message: `${pendingKeys.length} item(s) saved to database successfully.`,
+    });
     setTimeout(() => {
-      setActionOverlay((prev) => ({
-        ...prev,
-        isVisible: false,
-      }));
-      setHideCancelAnimation(false);
-    }, 400);
-  }, 2500);
-};
-
+      setHideCancelAnimation(true);
+      setTimeout(() => {
+        setActionOverlay((prev) => ({
+          ...prev,
+          isVisible: false,
+        }));
+        setHideCancelAnimation(false);
+      }, 400);
+    }, 2500);
+  };
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
 
@@ -354,12 +252,8 @@ const FinancialReports = () => {
   const isFirstRenderRef = useRef(true); // Skip first render
 
   const [gridData, setGridData] = useState({});
-  const yearDataLoadedRef = useRef({});
-  const [yearDataLoaded, setYearDataLoaded] = useState({});
-  const [showAllMonths, setShowAllMonths] = useState(false);
 
-  const [selectedRowToDelete, setSelectedRowToDelete] = useState(0);
-  const [selectedColToDelete, setSelectedColToDelete] = useState(0);
+  const [showAllMonths, setShowAllMonths] = useState(false);
 
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -668,17 +562,6 @@ const FinancialReports = () => {
     saveToLocalStorage(activeTab, currentYear, gridData);
   }, [gridData, activeTab, currentYear]);
 
-  // // Auto-save to localStorage when gridData changes
-  // useEffect(() => {
-  //   if (!gridData || Object.keys(gridData).length === 0) return;
-
-  //   // Skip during initial hydration
-  //   if (isHydratingRef.current) return;
-
-  //   saveToLocalStorage(activeTab, currentYear, gridData);
-
-  // }, [gridData, activeTab, currentYear]);
-
   // DEBUG: Single clean logging to track tab switching and data persistence
   const lastLogRef = useRef(null);
 
@@ -827,53 +710,6 @@ const FinancialReports = () => {
     }
   }, [zoomLevel]);
 
-  const handleManualSave = async () => {
-    try {
-      setSavingStatus(true);
-      // await saveFinancialReport(activeTab, gridData);
-      await saveFinancialReport(activeTab, gridData, currentYear);
-
-      const now = new Date();
-      setLastSavedAt(now);
-      setIsSynced(true);
-      setHasServerChange(false);
-
-      justSaved.current = true; // Set flag to skip next counter increment
-      setTimeout(() => (justSaved.current = false), 1000); // Reset after 1 second
-    } finally {
-      setSavingStatus(false);
-    }
-  };
-
-  const handleManualLoad = () => {
-    setShowManualLoadConfirm(true);
-  };
-
-  // const performManualLoad = async () => {
-  //   try {
-  //     setShowManualLoadConfirm(false);
-  //     setSavingStatus(true);
-
-  //     // const { gridData, updatedAt } = await loadFinancialReport(activeTab);
-
-  //     const { gridData, updatedAt } = await loadFinancialReport(
-  //       activeTab,
-  //       currentYear,
-  //     );
-
-  //     setGridData(gridData);
-  //     setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
-
-  //     setIsSynced(true);
-  //     setHasServerChange(false);
-  //     // optional: reset server indicator text, or other UI-only flags
-  //   } catch (err) {
-  //     console.error("❌ Error during manual load:", err);
-  //   } finally {
-  //     setSavingStatus(false);
-  //   }
-  // };
-
   // Load only the current month
   const performManualLoadMonth = async () => {
     try {
@@ -955,44 +791,6 @@ const FinancialReports = () => {
     }
   };
 
-  // Load all years for current tab
-  const performManualLoadAllYears = async () => {
-    try {
-      setSavingStatus(true);
-
-      for (const year of yearOptions) {
-        const { gridData } = await loadFinancialReport(activeTab, year);
-
-        if (activeTab === "revenue") {
-          setRevenueGrid((prev) => ({
-            ...prev,
-            [year]: gridData || {},
-          }));
-        } else {
-          setExpenseGrid((prev) => ({
-            ...prev,
-            [year]: gridData || {},
-          }));
-        }
-      }
-
-      // Also reload current view
-      const { gridData, updatedAt } = await loadFinancialReport(
-        activeTab,
-        currentYear,
-      );
-      setGridData(gridData || createBlankGrid());
-      setLastSavedAt(updatedAt ? new Date(updatedAt.toMillis()) : null);
-
-      setIsSynced(true);
-      setHasServerChange(false);
-    } catch (err) {
-      console.error("❌ Error loading all years:", err);
-    } finally {
-      setSavingStatus(false);
-    }
-  };
-
   const applySorting = (monthIndex) => {
     setGridData((prev) => {
       const updated = { ...prev };
@@ -1001,87 +799,16 @@ const FinancialReports = () => {
     });
   };
 
-  // // Handles typing in cells
-  // const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-  //   let newValue = value;
-
-  //   // AMOUNT COLUMN
-  //   if (colIndex === 1) {
-  //     const numeric = value.replace(/[^0-9.]/g, "");
-  //     newValue = `₱${numeric}`;
-  //   }
-
-  //   // DATE COLUMN
-  //   if (colIndex === 4) {
-  //     newValue = value;
-  //   }
-
-  //   setGridData((prev) => {
-  //     const updated = { ...prev };
-
-  //     // Ensure month exists
-  //     if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
-  //       updated[monthIndex] = {};
-  //     }
-
-  //     // Safe row key creation with null check
-  //     const numericIndex = rowIndex
-  //       ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-  //         ? parseInt(rowIndex.replace("Row_", ""))
-  //         : parseInt(rowIndex)
-  //       : 0;
-  //     const rowKey = `Row_${numericIndex}`;
-
-  //     // Get current row or create new one
-  //     const currentRow = updated[monthIndex][rowKey]
-  //       ? [...updated[monthIndex][rowKey]]
-  //       : ["", "", "", "", ""];
-
-  //     // Metadata
-  //     const meta = {
-  //       _sourceType: updated[monthIndex][rowKey]?._sourceType || "manual",
-  //       _bookingId: updated[monthIndex][rowKey]?._bookingId || null,
-  //       _isAutoFill: updated[monthIndex][rowKey]?._isAutoFill || false,
-  //       _entryIndex: updated[monthIndex][rowKey]?._entryIndex ?? null,
-  //       _manualId:
-  //         updated[monthIndex][rowKey]?._manualId ||
-  //         `manual-${crypto.randomUUID()}`,
-  //     };
-
-  //     if (meta._sourceType === "manual") {
-  //       meta._bookingId = null;
-  //       meta._isAutoFill = false;
-  //       meta._entryIndex = null;
-  //     }
-
-  //     // Apply change
-  //     currentRow[colIndex] = newValue;
-
-  //     // Reattach metadata
-  //     Object.assign(currentRow, meta);
-
-  //     // Put row back
-  //     updated[monthIndex][rowKey] = currentRow;
-
-  //     return updated;
-  //   });
-
-  //   setIsSynced(false);
-
-  //   if (colIndex === 4) {
-  //     setTimeout(() => applySorting(monthIndex), 0);
-  //   }
-  // };
-
   // Handles typing in cells
   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     let newValue = value;
 
-    // AMOUNT COLUMN
-    if (colIndex === 1) {
-      const numeric = value.replace(/[^0-9.]/g, "");
-      newValue = "₱" + numeric;
-    }
+// AMOUNT COLUMN
+if (colIndex === 1) {
+  const numeric = value.replace(/[^0-9.]/g, "");
+  newValue = numeric === "" ? "₱0.00" : "₱" + numeric;
+}
+
 
     // DATE COLUMN
     if (colIndex === 4) {
@@ -1428,17 +1155,6 @@ const FinancialReports = () => {
 
     XLSX.writeFile(wb, fileName);
   };
-
-  // const handleResetGrid = () => {
-  //   const blankGrid = createBlankGrid();
-  //   setGridData(blankGrid);
-  //   if (activeTab === "revenue") {
-  //     setRevenueGrid(blankGrid);
-  //   } else {
-  //     setExpenseGrid(blankGrid);
-  //   }
-  //   setIsSynced(false);
-  // };
 
   const handleResetGrid = () => {
     // Step 1: Clear ONLY the selected month from localStorage
@@ -1881,27 +1597,6 @@ const FinancialReports = () => {
     }
   };
 
-  // const addRow = (monthIndex) => {
-  //   setGridData((prev) => {
-  //     const updated = { ...prev };
-  //     const monthRows = [...(updated[monthIndex] || [])];
-
-  //     // Add 3 new empty rows
-  //     for (let i = 0; i < 3; i++) {
-  //       monthRows.push(Array(5).fill(""));
-  //     }
-
-  //     // Limit to max 50 rows
-  //     if (monthRows.length > 50) {
-  //       alert("Maximum of 50 rows per month reached.");
-  //       return prev;
-  //     }
-
-  //     updated[monthIndex] = monthRows;
-  //     return updated;
-  //   });
-  // };
-
   const addRow = (monthIndex) => {
     console.log("=== addRow FUNCTION ENTERED ===");
     console.log("monthIndex:", monthIndex);
@@ -1998,14 +1693,6 @@ const FinancialReports = () => {
     setFinancialWarningMessage("");
   };
 
-  // Add this near the top of FinancialReports.js, after the imports
-  const ensureArray = (value) => {
-    if (Array.isArray(value)) return value;
-    if (typeof value === "object" && value !== null) {
-      return Object.values(value);
-    }
-    return Array(5).fill("");
-  };
 
   const MonthYearDropdown = () => {
     if (typeof document === "undefined") return null;
@@ -3570,33 +3257,6 @@ const FinancialReports = () => {
                                   );
                                 }
                               }}
-                              // checked={
-                              //   sortedEntries.length > 0 &&
-                              //   sortedEntries.every((item) =>
-                              //     selectedRows.includes(item.key),
-                              //   )
-                              // }
-                              // onChange={(e) => {
-                              //   if (e.target.checked) {
-                              //     // Select all visible rows
-                              //     const allRowKeys = sortedEntries.map(
-                              //       (item) => item.key,
-                              //     );
-                              //     setSelectedRows((prev) => [
-                              //       ...new Set([...prev, ...allRowKeys]),
-                              //     ]);
-                              //   } else {
-                              //     // Deselect all visible rows
-                              //     const allRowKeys = sortedEntries.map(
-                              //       (item) => item.key,
-                              //     );
-                              //     setSelectedRows((prev) =>
-                              //       prev.filter(
-                              //         (key) => !allRowKeys.includes(key),
-                              //       ),
-                              //     );
-                              //   }
-                              // }}
                               style={{ cursor: "pointer" }}
                             />
                           </div>
@@ -4143,211 +3803,6 @@ const FinancialReports = () => {
                 </tr>
               </thead>
 
-              {/* <tbody>
-                {isTabLoading ? (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      style={{ textAlign: "center", padding: "40px" }}
-                    >
-                      <div
-                        className="spinner"
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          border: "4px solid #ccc",
-                          borderTop: `4px solid #FF8C00`,
-                          borderRadius: "50%",
-                          animation: "spin 1s linear infinite",
-                          margin: "0 auto",
-                        }}
-                      />
-                      <style>{`
-                        @keyframes spin {
-                          to { transform: rotate(360deg); }
-                        }
-                      `}</style>
-                    </td>
-                  </tr>
-                ) : (
-                  (() => {
-                    const transactions = [];
-
-                    // For transaction tab, use gridData (which has all localStorage data)
-                    // gridData.revenue and gridData.expense are arrays of transaction objects
-                    if (activeTab === "transaction" && gridData.revenue) {
-                      // gridData.revenue is already an array of {year, month, rowKey, data}
-                      gridData.revenue.forEach((tx) => {
-                        transactions.push({
-                          date: tx.data[4] || "",
-                          mop: tx.data[2] || "",
-                          type: "Revenue",
-                          amount: tx.data[1] || "",
-                          unit: tx.data[0] || "",
-                          description:
-                            tx.data[3] ||
-                            "" +
-                              (tx.data._isAutoFill
-                                ? ` (${tx.data[0] || "Unknown"})`
-                                : ""),
-                        });
-                      });
-                    } else {
-                      // Original logic for non-transaction tabs
-                      Object.values(revenueGrid).forEach((monthRows) => {
-                        Object.values(monthRows).forEach((row) => {
-                          if (
-                            row &&
-                            Array.isArray(row) &&
-                            row.some((cell) => cell !== "")
-                          ) {
-                            transactions.push({
-                              date: row[4] || "",
-                              mop: row[2] || "",
-                              type: "Revenue",
-                              description:
-                                row[3] ||
-                                "" +
-                                  (row._isAutoFill
-                                    ? ` (${row[0] || "Unknown"})`
-                                    : ""),
-                              amount: row[1] || "",
-                            });
-                          }
-                        });
-                      });
-                    }
-
-                    // Collect from expense grid
-                    if (activeTab === "transaction" && gridData.expense) {
-                      // gridData.expense is already an array of {year, month, rowKey, data}
-                      gridData.expense.forEach((tx) => {
-                        transactions.push({
-                          date: tx.data[4] || "",
-                          mop: tx.data[2] || "",
-                          type: "Expense",
-                          amount: tx.data[1] || "",
-                          unit: tx.data[0] || "",
-                          description:
-                            tx.data[3] ||
-                            "" +
-                              (tx.data._isAutoFill
-                                ? ` (${tx.data[0] || "Unknown"})`
-                                : ""),
-                        });
-                      });
-                    } else {
-                      // Original logic for non-transaction tabs
-                      Object.values(expenseGrid).forEach((monthRows) => {
-                        Object.values(monthRows).forEach((row) => {
-                          if (
-                            row &&
-                            Array.isArray(row) &&
-                            row.some((cell) => cell !== "")
-                          ) {
-                            transactions.push({
-                              date: row[4] || "",
-                              mop: row[2] || "",
-                              type: "Expense",
-                              description:
-                                row[3] ||
-                                "" +
-                                  (row._isAutoFill
-                                    ? ` (${row[0] || "Unknown"})`
-                                    : ""),
-                              amount: row[1] || "",
-                            });
-                          }
-                        });
-                      });
-                    }
-
-                    // Helper to format date
-                    const formatDate = (dateStr) => {
-                      if (!dateStr) return "No Date";
-                      const d = new Date(dateStr);
-                      if (isNaN(d.getTime())) return dateStr;
-                      return d.toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      });
-                    };
-
-                    const sortedTransactions = [...transactions].sort(
-                      (a, b) => {
-                        const hasDateA =
-                          a.date && !isNaN(new Date(a.date).getTime());
-                        const hasDateB =
-                          b.date && !isNaN(new Date(b.date).getTime());
-
-                        if (hasDateA && !hasDateB) return -1;
-                        if (!hasDateA && hasDateB) return 1;
-                        if (!hasDateA && !hasDateB) return 0;
-
-                        let valA, valB;
-                        if (sortColumn === "date") {
-                          valA = new Date(a.date).getTime();
-                          valB = new Date(b.date).getTime();
-                        } else if (sortColumn === "type") {
-                          valA = a.type;
-                          valB = b.type;
-                        }
-
-                        if (sortDirection === "asc") {
-                          if (valA < valB) return -1;
-                          if (valA > valB) return 1;
-                          // Equal, secondary sort
-                          if (sortColumn === "date") {
-                            return a.type < b.type
-                              ? -1
-                              : a.type > b.type
-                                ? 1
-                                : 0;
-                          } else {
-                            const dateA = new Date(a.date).getTime();
-                            const dateB = new Date(b.date).getTime();
-                            return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
-                          }
-                        } else {
-                          if (valA > valB) return -1;
-                          if (valA < valB) return 1;
-                          // Equal, secondary sort
-                          if (sortColumn === "date") {
-                            return a.type > b.type
-                              ? -1
-                              : a.type < b.type
-                                ? 1
-                                : 0;
-                          } else {
-                            const dateA = new Date(a.date).getTime();
-                            const dateB = new Date(b.date).getTime();
-                            return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
-                          }
-                        }
-                      },
-                    );
-
-                    return sortedTransactions.map((txn, index) => (
-                      <tr
-                        key={`txn-${index}`}
-                        className={txn.type.toLowerCase()}
-                      >
-                        <td>{formatDate(txn.date)}</td>
-                        <td>{txn.mop || "No MOP"}</td>
-                        <td>{txn.type}</td>
-                        <td>{txn.amount || "No Amount"}</td>
-                        <td>{txn.unit || "-"}</td>
-                        <td>{txn.description || "No Description"}</td>
-                      </tr>
-                    ));
-                  })()
-                )}
-              </tbody> */}
-
               <tbody>
                 {isTabLoading ? (
                   <tr>
@@ -4590,6 +4045,106 @@ export default FinancialReports;
 // export default React.memo(FinancialReports);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// const saveAllPendingToFirestore = async () => {
+//   setSavingStatus(true);
+//   const pendingKeys = [];
+//   const savedYears = new Set(); // Track which years were saved
+//   const savedTabs = new Set(); // Track which tabs were saved
+
+//   for (let i = 0; i < localStorage.length; i++) {
+//     const key = localStorage.key(i);
+//     if (key.startsWith(LOCAL_STORAGE_KEY)) {
+//       pendingKeys.push(key);
+
+//       // Extract tab and year from key
+//       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+//       if (parts.length >= 2) {
+//         savedTabs.add(parts[0]);
+//         savedYears.add(parseInt(parts[1]));
+//       }
+//     }
+//   }
+
+//   console.log(
+//     `📤 Found ${pendingKeys.length} pending items to save to Database`,
+//   );
+//   console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
+//   console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
+
+//   for (const key of pendingKeys) {
+//     try {
+//       const data = JSON.parse(localStorage.getItem(key));
+
+//       // SKIP if no actual data
+//       if (!hasActualData(data)) {
+//         console.log(`⏭️ Skipping ${key} - no data`);
+//         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+//         clearLocalStorage(parts[0], parseInt(parts[1]));
+//         continue;
+//       }
+
+//       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+//       const tab = parts[0];
+//       const year = parseInt(parts[1]);
+
+//       console.log(`📤 Saving ${tab}/${year} to Database...`);
+//       await saveFinancialReport(tab, data, year);
+//       clearLocalStorage(tab, year);
+//     } catch (error) {
+//       console.error(`❌ Error saving ${key} to Database:`, error);
+//     }
+//   }
+
+//   // Reload ALL saved tabs and years (not just activeTab/currentYear)
+//   console.log("🔄 Reloading all saved data from Database...");
+
+//   // Reload current active tab/year first
+//   const currentResult = await loadFinancialReport(activeTab, currentYear);
+//   const currentFreshData = currentResult.gridData || createBlankGrid();
+
+//   if (activeTab === "revenue") {
+//     setRevenueGrid((prev) => ({
+//       ...prev,
+//       [currentYear]: currentFreshData,
+//     }));
+//   } else {
+//     setExpenseGrid((prev) => ({
+//       ...prev,
+//       [currentYear]: currentFreshData,
+//     }));
+//   }
+//   setGridData(currentFreshData);
+//   lastSavedGridRef.current = currentFreshData;
+
+//   // Reload all other saved years and tabs
+//   for (const year of savedYears) {
+//     if (year === currentYear) continue; // Already reloaded
+
+//     if (savedTabs.has("revenue")) {
+//       const revenueResult = await loadFinancialReport("revenue", year);
+//       setRevenueGrid((prev) => ({
+//         ...prev,
+//         [year]: revenueResult.gridData || {},
+//       }));
+//     }
+
+//     if (savedTabs.has("expense")) {
+//       const expenseResult = await loadFinancialReport("expense", year);
+//       setExpenseGrid((prev) => ({
+//         ...prev,
+//         [year]: expenseResult.gridData || {},
+//       }));
+//     }
+//   }
+
+//   setLastSavedAt(new Date());
+//   setIsSynced(true);
+//   setHasServerChange(false);
+//   setSavingStatus(false);
+
+//   console.log("✅ All data saved and reloaded from Database!");
+// };
 
 //   // Autofill payments when context changes
 //   useEffect(() => {
