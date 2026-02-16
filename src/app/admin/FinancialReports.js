@@ -128,105 +128,223 @@ const FinancialReports = () => {
 
   // // Function to save ALL pending localStorage data to Firestore
 
+  // const saveAllPendingToFirestore = async () => {
+  //   setSavingStatus(true);
+  //   const pendingKeys = [];
+  //   const savedYears = new Set(); // Track which years were saved
+  //   const savedTabs = new Set(); // Track which tabs were saved
+
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     if (key.startsWith(LOCAL_STORAGE_KEY)) {
+  //       pendingKeys.push(key);
+
+  //       // Extract tab and year from key
+  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //       if (parts.length >= 2) {
+  //         savedTabs.add(parts[0]);
+  //         savedYears.add(parseInt(parts[1]));
+  //       }
+  //     }
+  //   }
+
+  //   console.log(
+  //     `📤 Found ${pendingKeys.length} pending items to save to Database`,
+  //   );
+  //   console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
+  //   console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
+
+  //   for (const key of pendingKeys) {
+  //     try {
+  //       const data = JSON.parse(localStorage.getItem(key));
+
+  //       // SKIP if no actual data
+  //       if (!hasActualData(data)) {
+  //         console.log(`⏭️ Skipping ${key} - no data`);
+  //         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //         clearLocalStorage(parts[0], parseInt(parts[1]));
+  //         continue;
+  //       }
+
+  //       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+  //       const tab = parts[0];
+  //       const year = parseInt(parts[1]);
+
+  //       console.log(`📤 Saving ${tab}/${year} to Database...`);
+  //       await saveFinancialReport(tab, data, year);
+  //       clearLocalStorage(tab, year);
+  //     } catch (error) {
+  //       console.error(`❌ Error saving ${key} to Database:`, error);
+  //     }
+  //   }
+
+  //   // Reload ALL saved tabs and years (not just activeTab/currentYear)
+  //   console.log("🔄 Reloading all saved data from Database...");
+
+  //   // Reload current active tab/year first
+  //   const currentResult = await loadFinancialReport(activeTab, currentYear);
+  //   const currentFreshData = currentResult.gridData || createBlankGrid();
+
+  //   if (activeTab === "revenue") {
+  //     setRevenueGrid((prev) => ({
+  //       ...prev,
+  //       [currentYear]: currentFreshData,
+  //     }));
+  //   } else {
+  //     setExpenseGrid((prev) => ({
+  //       ...prev,
+  //       [currentYear]: currentFreshData,
+  //     }));
+  //   }
+  //   setGridData(currentFreshData);
+  //   lastSavedGridRef.current = currentFreshData;
+
+  //   // Reload all other saved years and tabs
+  //   for (const year of savedYears) {
+  //     if (year === currentYear) continue; // Already reloaded
+
+  //     if (savedTabs.has("revenue")) {
+  //       const revenueResult = await loadFinancialReport("revenue", year);
+  //       setRevenueGrid((prev) => ({
+  //         ...prev,
+  //         [year]: revenueResult.gridData || {},
+  //       }));
+  //     }
+
+  //     if (savedTabs.has("expense")) {
+  //       const expenseResult = await loadFinancialReport("expense", year);
+  //       setExpenseGrid((prev) => ({
+  //         ...prev,
+  //         [year]: expenseResult.gridData || {},
+  //       }));
+  //     }
+  //   }
+
+  //   setLastSavedAt(new Date());
+  //   setIsSynced(true);
+  //   setHasServerChange(false);
+  //   setSavingStatus(false);
+
+  //   console.log("✅ All data saved and reloaded from Database!");
+  // };
+
   const saveAllPendingToFirestore = async () => {
-    setSavingStatus(true);
-    const pendingKeys = [];
-    const savedYears = new Set(); // Track which years were saved
-    const savedTabs = new Set(); // Track which tabs were saved
+  setSavingStatus(true);
+  const pendingKeys = [];
+  const savedYears = new Set(); // Track which years were saved
+  const savedTabs = new Set(); // Track which tabs were saved
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith(LOCAL_STORAGE_KEY)) {
-        pendingKeys.push(key);
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(LOCAL_STORAGE_KEY)) {
+      pendingKeys.push(key);
 
-        // Extract tab and year from key
-        const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-        if (parts.length >= 2) {
-          savedTabs.add(parts[0]);
-          savedYears.add(parseInt(parts[1]));
-        }
+      // Extract tab and year from key
+      const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+      if (parts.length >= 2) {
+        savedTabs.add(parts[0]);
+        savedYears.add(parseInt(parts[1]));
       }
     }
+  }
 
-    console.log(
-      `📤 Found ${pendingKeys.length} pending items to save to Database`,
-    );
-    console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
-    console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
+  console.log(
+    `📤 Found ${pendingKeys.length} pending items to save to Database`,
+  );
+  console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
+  console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
 
-    for (const key of pendingKeys) {
-      try {
-        const data = JSON.parse(localStorage.getItem(key));
+  for (const key of pendingKeys) {
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
 
-        // SKIP if no actual data
-        if (!hasActualData(data)) {
-          console.log(`⏭️ Skipping ${key} - no data`);
-          const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-          clearLocalStorage(parts[0], parseInt(parts[1]));
-          continue;
-        }
-
+      // SKIP if no actual data
+      if (!hasActualData(data)) {
+        console.log(`⏭️ Skipping ${key} - no data`);
         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-        const tab = parts[0];
-        const year = parseInt(parts[1]);
-
-        console.log(`📤 Saving ${tab}/${year} to Database...`);
-        await saveFinancialReport(tab, data, year);
-        clearLocalStorage(tab, year);
-      } catch (error) {
-        console.error(`❌ Error saving ${key} to Database:`, error);
+        clearLocalStorage(parts[0], parseInt(parts[1]));
+        continue;
       }
+
+      const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
+      const tab = parts[0];
+      const year = parseInt(parts[1]);
+
+      console.log(`📤 Saving ${tab}/${year} to Database...`);
+      await saveFinancialReport(tab, data, year);
+      clearLocalStorage(tab, year);
+    } catch (error) {
+      console.error(`❌ Error saving ${key} to Database:`, error);
     }
+  }
 
-    // Reload ALL saved tabs and years (not just activeTab/currentYear)
-    console.log("🔄 Reloading all saved data from Database...");
+  // Reload ALL saved tabs and years (not just activeTab/currentYear)
+  console.log("🔄 Reloading all saved data from Database...");
 
-    // Reload current active tab/year first
-    const currentResult = await loadFinancialReport(activeTab, currentYear);
-    const currentFreshData = currentResult.gridData || createBlankGrid();
+  // Reload current active tab/year first
+  const currentResult = await loadFinancialReport(activeTab, currentYear);
+  const currentFreshData = currentResult.gridData || createBlankGrid();
 
-    if (activeTab === "revenue") {
+  if (activeTab === "revenue") {
+    setRevenueGrid((prev) => ({
+      ...prev,
+      [currentYear]: currentFreshData,
+    }));
+  } else {
+    setExpenseGrid((prev) => ({
+      ...prev,
+      [currentYear]: currentFreshData,
+    }));
+  }
+  setGridData(currentFreshData);
+  lastSavedGridRef.current = currentFreshData;
+
+  // Reload all other saved years and tabs
+  for (const year of savedYears) {
+    if (year === currentYear) continue; // Already reloaded
+
+    if (savedTabs.has("revenue")) {
+      const revenueResult = await loadFinancialReport("revenue", year);
       setRevenueGrid((prev) => ({
         ...prev,
-        [currentYear]: currentFreshData,
+        [year]: revenueResult.gridData || {},
       }));
-    } else {
+    }
+
+    if (savedTabs.has("expense")) {
+      const expenseResult = await loadFinancialReport("expense", year);
       setExpenseGrid((prev) => ({
         ...prev,
-        [currentYear]: currentFreshData,
+        [year]: expenseResult.gridData || {},
       }));
     }
-    setGridData(currentFreshData);
-    lastSavedGridRef.current = currentFreshData;
+  }
 
-    // Reload all other saved years and tabs
-    for (const year of savedYears) {
-      if (year === currentYear) continue; // Already reloaded
+  setLastSavedAt(new Date());
+  setIsSynced(true);
+  setHasServerChange(false);
+  setSavingStatus(false);
 
-      if (savedTabs.has("revenue")) {
-        const revenueResult = await loadFinancialReport("revenue", year);
-        setRevenueGrid((prev) => ({
-          ...prev,
-          [year]: revenueResult.gridData || {},
-        }));
-      }
+  console.log("✅ All data saved and reloaded from Database!");
 
-      if (savedTabs.has("expense")) {
-        const expenseResult = await loadFinancialReport("expense", year);
-        setExpenseGrid((prev) => ({
-          ...prev,
-          [year]: expenseResult.gridData || {},
-        }));
-      }
-    }
+  // Show success overlay
+  setActionOverlay({
+    isVisible: true,
+    type: "success",
+    message: `${pendingKeys.length} item(s) saved to database successfully.`,
+  });
+  setTimeout(() => {
+    setHideCancelAnimation(true);
+    setTimeout(() => {
+      setActionOverlay((prev) => ({
+        ...prev,
+        isVisible: false,
+      }));
+      setHideCancelAnimation(false);
+    }, 400);
+  }, 2500);
+};
 
-    setLastSavedAt(new Date());
-    setIsSynced(true);
-    setHasServerChange(false);
-    setSavingStatus(false);
-
-    console.log("✅ All data saved and reloaded from Database!");
-  };
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
 
@@ -245,7 +363,7 @@ const FinancialReports = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
     setSelectedRows([]);
   }, [selectedMonthIndex, activeTab, currentYear]);
 
@@ -955,82 +1073,78 @@ const FinancialReports = () => {
   //   }
   // };
 
-// Handles typing in cells
-const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
-  let newValue = value;
+  // Handles typing in cells
+  const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
+    let newValue = value;
 
-  // AMOUNT COLUMN
-  if (colIndex === 1) {
-    const numeric = value.replace(/[^0-9.]/g, "");
-    newValue = "₱" + numeric;
-  }
-
-  // DATE COLUMN
-  if (colIndex === 4) {
-    newValue = value;
-  }
-
-  setGridData((prev) => {
-    const updated = { ...prev };
-
-    // Ensure month exists
-    if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
-      updated[monthIndex] = {};
+    // AMOUNT COLUMN
+    if (colIndex === 1) {
+      const numeric = value.replace(/[^0-9.]/g, "");
+      newValue = "₱" + numeric;
     }
 
-    // Safe row key creation with null check
-    const numericIndex = rowIndex
-      ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
-        ? parseInt(rowIndex.replace("Row_", ""))
-        : parseInt(rowIndex)
-      : 0;
-    const rowKey = `Row_${numericIndex}`;
-
-    // Get current row or create new one
-    const currentRow = updated[monthIndex][rowKey]
-      ? [...updated[monthIndex][rowKey]]
-      : ["", "", "", "", ""];
-
-    // Get existing metadata from 6th element or create new
-    const existingMeta = Array.isArray(currentRow) && currentRow[5] ? currentRow[5] : {};
-    
-    const meta = {
-      _isAutoFill: existingMeta._isAutoFill || false,
-      _bookingId: existingMeta._bookingId || null,
-      _entryIndex: existingMeta._entryIndex ?? null,
-      _sourceType: existingMeta._sourceType || "manual",
-      _manualId: existingMeta._manualId || `manual-${crypto.randomUUID()}`,
-    };
-
-    if (meta._sourceType === "manual") {
-      meta._bookingId = null;
-      meta._isAutoFill = false;
-      meta._entryIndex = null;
+    // DATE COLUMN
+    if (colIndex === 4) {
+      newValue = value;
     }
 
-    // Apply change to the cell
-    currentRow[colIndex] = newValue;
+    setGridData((prev) => {
+      const updated = { ...prev };
 
-    // Store metadata as 6th element (serializable)
-    currentRow[5] = meta;
+      // Ensure month exists
+      if (!updated[monthIndex] || typeof updated[monthIndex] !== "object") {
+        updated[monthIndex] = {};
+      }
 
-    // Put row back
-    updated[monthIndex][rowKey] = currentRow;
+      // Safe row key creation with null check
+      const numericIndex = rowIndex
+        ? typeof rowIndex === "string" && rowIndex.startsWith("Row_")
+          ? parseInt(rowIndex.replace("Row_", ""))
+          : parseInt(rowIndex)
+        : 0;
+      const rowKey = `Row_${numericIndex}`;
 
-    return updated;
-  });
+      // Get current row or create new one
+      const currentRow = updated[monthIndex][rowKey]
+        ? [...updated[monthIndex][rowKey]]
+        : ["", "", "", "", ""];
 
-  setIsSynced(false);
+      // Get existing metadata from 6th element or create new
+      const existingMeta =
+        Array.isArray(currentRow) && currentRow[5] ? currentRow[5] : {};
 
-  if (colIndex === 4) {
-    setTimeout(() => applySorting(monthIndex), 0);
-  }
-};
+      const meta = {
+        _isAutoFill: existingMeta._isAutoFill || false,
+        _bookingId: existingMeta._bookingId || null,
+        _entryIndex: existingMeta._entryIndex ?? null,
+        _sourceType: existingMeta._sourceType || "manual",
+        _manualId: existingMeta._manualId || `manual-${crypto.randomUUID()}`,
+      };
 
+      if (meta._sourceType === "manual") {
+        meta._bookingId = null;
+        meta._isAutoFill = false;
+        meta._entryIndex = null;
+      }
 
+      // Apply change to the cell
+      currentRow[colIndex] = newValue;
 
+      // Store metadata as 6th element (serializable)
+      currentRow[5] = meta;
 
+      // Put row back
+      updated[monthIndex][rowKey] = currentRow;
 
+      return updated;
+    });
+
+    setIsSynced(false);
+
+    if (colIndex === 4) {
+      setTimeout(() => applySorting(monthIndex), 0);
+    }
+  };
 
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
@@ -1374,189 +1488,92 @@ const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     setIsSynced(false);
   };
 
+  // Autofill payments when context changes
+  useEffect(() => {
+    // Skip if no payment entries
+    if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
 
-  
+    // CASE 1: Handle booking cancellation cleanup
+    if (cancelTrigger) {
+      setRevenueGrid((prev) => {
+        const currentYearData = prev[currentYear] || {};
+        const newGrid = JSON.parse(JSON.stringify(currentYearData));
 
-
-
-// Autofill payments when context changes
-useEffect(() => {
-  // Skip if no payment entries
-  if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
-
-  // CASE 1: Handle booking cancellation cleanup
-  if (cancelTrigger) {
-    setRevenueGrid((prev) => {
-      const currentYearData = prev[currentYear] || {};
-      const newGrid = JSON.parse(JSON.stringify(currentYearData));
-
-      Object.keys(newGrid).forEach((mIndex) => {
-        const monthData = newGrid[mIndex];
-        if (typeof monthData === "object" && !Array.isArray(monthData)) {
-          Object.keys(monthData).forEach((rowKey) => {
-            const row = monthData[rowKey];
-            // Check 6th element for metadata
-            if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(cancelTrigger)) {
-              monthData[rowKey] = Array(5).fill("");
-            }
-          });
-        }
-      });
-
-      saveToLocalStorage("revenue", currentYear, { revenue: newGrid });
-
-      return { ...prev, [currentYear]: newGrid };
-    });
-
-    if (activeTab === "revenue") {
-      setGridData((prev) => {
-        const newGrid = JSON.parse(JSON.stringify(prev));
         Object.keys(newGrid).forEach((mIndex) => {
           const monthData = newGrid[mIndex];
           if (typeof monthData === "object" && !Array.isArray(monthData)) {
             Object.keys(monthData).forEach((rowKey) => {
               const row = monthData[rowKey];
-              if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(cancelTrigger)) {
+              // Check 6th element for metadata
+              if (
+                Array.isArray(row) &&
+                row[5]?._isAutoFill &&
+                row[5]._bookingId === String(cancelTrigger)
+              ) {
                 monthData[rowKey] = Array(5).fill("");
               }
             });
           }
         });
-        return newGrid;
+
+        saveToLocalStorage("revenue", currentYear, { revenue: newGrid });
+
+        return { ...prev, [currentYear]: newGrid };
       });
-    }
-    return;
-  }
 
-  console.log("🟢 AUTOFILL TRIGGERED with paymentEntries:", paymentEntries);
-
-  // Helper function to clean month data (remove array indices, keep only Row_X keys)
-  const cleanMonthData = (monthData) => {
-    const cleaned = {};
-    Object.keys(monthData || {}).forEach((key) => {
-      if (key.startsWith("Row_")) {
-        cleaned[key] = monthData[key];
-      }
-    });
-    for (let r = 0; r < 5; r++) {
-      if (!cleaned[`Row_${r}`]) {
-        cleaned[`Row_${r}`] = Array(5).fill("");
-      }
-    }
-    return cleaned;
-  };
-
-  // Track the new grid for localStorage
-  let updatedGrid = null;
-
-  // CASE 2: Handle normal autofill
-  setRevenueGrid((prevRevenueGrid) => {
-    const currentYearData = prevRevenueGrid[currentYear] || {};
-    const newGrid = {};
-
-    // Clean all months - remove array indices, keep only Row_X keys
-    months.forEach((_, i) => {
-      newGrid[i] = cleanMonthData(currentYearData[i]);
-    });
-
-    const validKeys = new Set();
-
-    Object.entries(paymentEntries).forEach(([bookingId, entries]) => {
-      if (!Array.isArray(entries)) return;
-
-      entries.forEach((entry, entryIndex) => {
-        if (!entry?.date) return;
-
-        const date = new Date(entry.date);
-        if (isNaN(date.getTime())) return;
-
-        const monthIndex = date.getMonth();
-
-        const formattedAmount = entry.amount != null
-          ? "₱" + Number(entry.amount).toLocaleString("en-PH", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })
-          : "₱0.00";
-
-        // Store metadata as 6th element (serializable object)
-        const rowArray = [
-          entry.carName || "",
-          formattedAmount,
-          entry.mop || "",
-          entry.pop || "",
-          entry.date || "",
-          { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
-        ];
-
-        validKeys.add(`${bookingId}-${entryIndex}`);
-
-        let targetRowKey = null;
-        const rowKeys = Object.keys(newGrid[monthIndex])
-  .filter(k => k.startsWith("Row_"))
-  .sort((a, b) => {
-    const numA = parseInt(a.replace("Row_", ""));
-    const numB = parseInt(b.replace("Row_", ""));
-    return numA - numB;
-  });
-
-        
-        // First, check if this booking already exists (check 6th element)
-        for (const rowKey of rowKeys) {
-          const row = newGrid[monthIndex][rowKey];
-          if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(bookingId) && row[5]._entryIndex === entryIndex) {
-            targetRowKey = rowKey;
-            break;
-          }
-        }
-
-        // If not found, find an empty row
-        if (!targetRowKey) {
-          for (const rowKey of rowKeys) {
-            const row = newGrid[monthIndex][rowKey];
-            if (!Array.isArray(row) || (!row[5]?._isAutoFill && row.slice(0, 5).every((c) => c === ""))) {
-              targetRowKey = rowKey;
-              break;
+      if (activeTab === "revenue") {
+        setGridData((prev) => {
+          const newGrid = JSON.parse(JSON.stringify(prev));
+          Object.keys(newGrid).forEach((mIndex) => {
+            const monthData = newGrid[mIndex];
+            if (typeof monthData === "object" && !Array.isArray(monthData)) {
+              Object.keys(monthData).forEach((rowKey) => {
+                const row = monthData[rowKey];
+                if (
+                  Array.isArray(row) &&
+                  row[5]?._isAutoFill &&
+                  row[5]._bookingId === String(cancelTrigger)
+                ) {
+                  monthData[rowKey] = Array(5).fill("");
+                }
+              });
             }
-          }
-        }
+          });
+          return newGrid;
+        });
+      }
+      return;
+    }
 
-        if (targetRowKey) {
-          newGrid[monthIndex][targetRowKey] = rowArray;
-        } else {
-          const newRowNum = Object.keys(newGrid[monthIndex]).length;
-          newGrid[monthIndex][`Row_${newRowNum}`] = rowArray;
-        }
-      });
-    });
+    console.log("🟢 AUTOFILL TRIGGERED with paymentEntries:", paymentEntries);
 
-    // Cleanup stale autofill rows
-    Object.keys(newGrid).forEach((mIndex) => {
-      Object.keys(newGrid[mIndex]).forEach((rowKey) => {
-        const row = newGrid[mIndex][rowKey];
-        if (Array.isArray(row) && row[5]?._isAutoFill) {
-          const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
-          if (!validKeys.has(key)) {
-            newGrid[mIndex][rowKey] = Array(5).fill("");
-          }
+    // Helper function to clean month data (remove array indices, keep only Row_X keys)
+    const cleanMonthData = (monthData) => {
+      const cleaned = {};
+      Object.keys(monthData || {}).forEach((key) => {
+        if (key.startsWith("Row_")) {
+          cleaned[key] = monthData[key];
         }
       });
-    });
+      for (let r = 0; r < 5; r++) {
+        if (!cleaned[`Row_${r}`]) {
+          cleaned[`Row_${r}`] = Array(5).fill("");
+        }
+      }
+      return cleaned;
+    };
 
-    console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
-    
-    updatedGrid = newGrid;
-    
-    return { ...prevRevenueGrid, [currentYear]: newGrid };
-  });
+    // Track the new grid for localStorage
+    let updatedGrid = null;
 
-  // Update gridData for display if on revenue tab
-  if (activeTab === "revenue") {
-    setGridData((prev) => {
+    // CASE 2: Handle normal autofill
+    setRevenueGrid((prevRevenueGrid) => {
+      const currentYearData = prevRevenueGrid[currentYear] || {};
       const newGrid = {};
-      
+
+      // Clean all months - remove array indices, keep only Row_X keys
       months.forEach((_, i) => {
-        newGrid[i] = cleanMonthData(prev[i]);
+        newGrid[i] = cleanMonthData(currentYearData[i]);
       });
 
       const validKeys = new Set();
@@ -1572,46 +1589,62 @@ useEffect(() => {
 
           const monthIndex = date.getMonth();
 
-          const formattedAmount = entry.amount != null
-            ? "₱" + Number(entry.amount).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-            : "₱0.00";
+          const formattedAmount =
+            entry.amount != null
+              ? "₱" +
+                Number(entry.amount).toLocaleString("en-PH", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              : "₱0.00";
 
+          // Store metadata as 6th element (serializable object)
           const rowArray = [
             entry.carName || "",
             formattedAmount,
             entry.mop || "",
             entry.pop || "",
             entry.date || "",
-            { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
+            {
+              _isAutoFill: true,
+              _bookingId: String(bookingId),
+              _entryIndex: entryIndex,
+            },
           ];
 
           validKeys.add(`${bookingId}-${entryIndex}`);
 
           let targetRowKey = null;
           const rowKeys = Object.keys(newGrid[monthIndex])
-  .filter(k => k.startsWith("Row_"))
-  .sort((a, b) => {
-    const numA = parseInt(a.replace("Row_", ""));
-    const numB = parseInt(b.replace("Row_", ""));
-    return numA - numB;
-  });
+            .filter((k) => k.startsWith("Row_"))
+            .sort((a, b) => {
+              const numA = parseInt(a.replace("Row_", ""));
+              const numB = parseInt(b.replace("Row_", ""));
+              return numA - numB;
+            });
 
-          
+          // First, check if this booking already exists (check 6th element)
           for (const rowKey of rowKeys) {
             const row = newGrid[monthIndex][rowKey];
-            if (Array.isArray(row) && row[5]?._isAutoFill && row[5]._bookingId === String(bookingId) && row[5]._entryIndex === entryIndex) {
+            if (
+              Array.isArray(row) &&
+              row[5]?._isAutoFill &&
+              row[5]._bookingId === String(bookingId) &&
+              row[5]._entryIndex === entryIndex
+            ) {
               targetRowKey = rowKey;
               break;
             }
           }
 
+          // If not found, find an empty row
           if (!targetRowKey) {
             for (const rowKey of rowKeys) {
               const row = newGrid[monthIndex][rowKey];
-              if (!Array.isArray(row) || (!row[5]?._isAutoFill && row.slice(0, 5).every((c) => c === ""))) {
+              if (
+                !Array.isArray(row) ||
+                (!row[5]?._isAutoFill && row.slice(0, 5).every((c) => c === ""))
+              ) {
                 targetRowKey = rowKey;
                 break;
               }
@@ -1627,33 +1660,135 @@ useEffect(() => {
         });
       });
 
-      console.log("🟢 UPDATED gridData:", newGrid);
-      
+      // Cleanup stale autofill rows
+      Object.keys(newGrid).forEach((mIndex) => {
+        Object.keys(newGrid[mIndex]).forEach((rowKey) => {
+          const row = newGrid[mIndex][rowKey];
+          if (Array.isArray(row) && row[5]?._isAutoFill) {
+            const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
+            if (!validKeys.has(key)) {
+              newGrid[mIndex][rowKey] = Array(5).fill("");
+            }
+          }
+        });
+      });
+
+      console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
+
+      updatedGrid = newGrid;
+
+      return { ...prevRevenueGrid, [currentYear]: newGrid };
+    });
+
+    // Update gridData for display if on revenue tab
+    if (activeTab === "revenue") {
+      setGridData((prev) => {
+        const newGrid = {};
+
+        months.forEach((_, i) => {
+          newGrid[i] = cleanMonthData(prev[i]);
+        });
+
+        const validKeys = new Set();
+
+        Object.entries(paymentEntries).forEach(([bookingId, entries]) => {
+          if (!Array.isArray(entries)) return;
+
+          entries.forEach((entry, entryIndex) => {
+            if (!entry?.date) return;
+
+            const date = new Date(entry.date);
+            if (isNaN(date.getTime())) return;
+
+            const monthIndex = date.getMonth();
+
+            const formattedAmount =
+              entry.amount != null
+                ? "₱" +
+                  Number(entry.amount).toLocaleString("en-PH", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                : "₱0.00";
+
+            const rowArray = [
+              entry.carName || "",
+              formattedAmount,
+              entry.mop || "",
+              entry.pop || "",
+              entry.date || "",
+              {
+                _isAutoFill: true,
+                _bookingId: String(bookingId),
+                _entryIndex: entryIndex,
+              },
+            ];
+
+            validKeys.add(`${bookingId}-${entryIndex}`);
+
+            let targetRowKey = null;
+            const rowKeys = Object.keys(newGrid[monthIndex])
+              .filter((k) => k.startsWith("Row_"))
+              .sort((a, b) => {
+                const numA = parseInt(a.replace("Row_", ""));
+                const numB = parseInt(b.replace("Row_", ""));
+                return numA - numB;
+              });
+
+            for (const rowKey of rowKeys) {
+              const row = newGrid[monthIndex][rowKey];
+              if (
+                Array.isArray(row) &&
+                row[5]?._isAutoFill &&
+                row[5]._bookingId === String(bookingId) &&
+                row[5]._entryIndex === entryIndex
+              ) {
+                targetRowKey = rowKey;
+                break;
+              }
+            }
+
+            if (!targetRowKey) {
+              for (const rowKey of rowKeys) {
+                const row = newGrid[monthIndex][rowKey];
+                if (
+                  !Array.isArray(row) ||
+                  (!row[5]?._isAutoFill &&
+                    row.slice(0, 5).every((c) => c === ""))
+                ) {
+                  targetRowKey = rowKey;
+                  break;
+                }
+              }
+            }
+
+            if (targetRowKey) {
+              newGrid[monthIndex][targetRowKey] = rowArray;
+            } else {
+              const newRowNum = Object.keys(newGrid[monthIndex]).length;
+              newGrid[monthIndex][`Row_${newRowNum}`] = rowArray;
+            }
+          });
+        });
+
+        console.log("🟢 UPDATED gridData:", newGrid);
+
+        if (updatedGrid) {
+          saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
+          console.log("💾 Autofill data saved to localStorage");
+        }
+
+        return newGrid;
+      });
+    } else {
       if (updatedGrid) {
         saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
-        console.log("💾 Autofill data saved to localStorage");
+        console.log("💾 Autofill data saved to localStorage (background)");
       }
-      
-      return newGrid;
-    });
-  } else {
-    if (updatedGrid) {
-      saveToLocalStorage("revenue", currentYear, { revenue: updatedGrid });
-      console.log("💾 Autofill data saved to localStorage (background)");
     }
-  }
 
-  setIsSynced(false);
-}, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
-
-
-
-
-
-
-
-
-
+    setIsSynced(false);
+  }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
 
   // DEBUG: Track ALL tabs data on every change
   useEffect(() => {
@@ -2241,14 +2376,21 @@ useEffect(() => {
                     // For Row_0 to Row_4: only clear data, keep the row
                     // For Row_5+: actually delete the row entirely
                     selectedRows.forEach((r) => {
-                      const rowNum = parseInt(r.replace("Row_", ""), 10);
+                      // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
+                      const actualRowKey = r.includes("-")
+                        ? r.split("-")[1]
+                        : r;
+                      const rowNum = parseInt(
+                        actualRowKey.replace("Row_", ""),
+                        10,
+                      );
 
                       if (rowNum < 5) {
                         // First 5 rows: only clear the data, keep the row
-                        monthRows[r] = Array(5).fill("");
+                        monthRows[actualRowKey] = ["", "", "", "", ""];
                       } else {
                         // Row_5 and above: delete the entire row
-                        delete monthRows[r];
+                        delete monthRows[actualRowKey];
                       }
                     });
 
@@ -2314,29 +2456,40 @@ useEffect(() => {
                     const currentGrid = gridData[selectedMonthIndex] || {};
                     const rowsToDelete = selectedRows;
 
-                    // Create a new grid without the deleted rows
+                    // Create a new grid - clear data instead of deleting rows
                     const updatedGrid = { ...currentGrid };
 
-                    // Remove the selected rows from the grid
+                    // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
-                      delete updatedGrid[rowKey];
+                      // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
+                      const actualRowKey = rowKey.includes("-")
+                        ? rowKey.split("-")[1]
+                        : rowKey;
+                      // Clear the row data but keep the row
+                      updatedGrid[actualRowKey] = ["", "", "", "", ""];
                     });
 
+                    // Ensure at least 5 rows exist
+                    for (let i = 0; i < 5; i++) {
+                      if (!updatedGrid[`Row_${i}`]) {
+                        updatedGrid[`Row_${i}`] = ["", "", "", "", ""];
+                      }
+                    }
+
                     // Create the data object to save - need to include ALL months, not just the current one
-const dataToSave = { ...gridData };
-dataToSave[selectedMonthIndex] = updatedGrid;
+                    const dataToSave = { ...gridData };
+                    dataToSave[selectedMonthIndex] = updatedGrid;
 
-// Save to Firestore
-console.log(
-  "🗑️ Deleting rows from Firestore:",
-  rowsToDelete,
-);
-await saveFinancialReport(
-  activeTab,
-  dataToSave,
-  currentYear,
-);
-
+                    // Save to Firestore
+                    console.log(
+                      "🗑️ Deleting rows from Firestore:",
+                      rowsToDelete,
+                    );
+                    await saveFinancialReport(
+                      activeTab,
+                      dataToSave,
+                      currentYear,
+                    );
 
                     // Also update local state
                     setGridData((prev) => {
@@ -3288,10 +3441,12 @@ await saveFinancialReport(
                           <div
                             ref={monthYearButtonRef}
                             onClick={() => {
-    if (!showAllMonths) {
-      setShowMonthYearDropdown(!showMonthYearDropdown);
-    }
-  }}
+                              if (!showAllMonths) {
+                                setShowMonthYearDropdown(
+                                  !showMonthYearDropdown,
+                                );
+                              }
+                            }}
                             style={{
                               letterSpacing: "0.5px",
                               fontWeight: "bolder",
@@ -3311,8 +3466,6 @@ await saveFinancialReport(
                           >
                             {months[monthIndex].toUpperCase()} {currentYear}
                           </div>
-
-
 
                           <button
                             onClick={goToNextMonth}
@@ -3388,10 +3541,12 @@ await saveFinancialReport(
                           <div className="grid-header-cell row-number-header">
                             <input
                               type="checkbox"
-                                                            checked={
+                              checked={
                                 sortedEntries.length > 0 &&
                                 sortedEntries.every((item) =>
-                                  selectedRows.includes(`${monthIndex}-${item.key}`),
+                                  selectedRows.includes(
+                                    `${monthIndex}-${item.key}`,
+                                  ),
                                 )
                               }
                               onChange={(e) => {
@@ -3415,7 +3570,6 @@ await saveFinancialReport(
                                   );
                                 }
                               }}
-
                               // checked={
                               //   sortedEntries.length > 0 &&
                               //   sortedEntries.every((item) =>
@@ -3496,8 +3650,7 @@ await saveFinancialReport(
                               return (
                                 <div
                                   key={`${monthIndex}-${item.key}`}
-                                                                    className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
-
+                                  className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
                                   style={{
                                     cursor: row._isAutoFill
                                       ? "pointer"
@@ -3552,8 +3705,9 @@ await saveFinancialReport(
                                   <div className="grid-cell row-number-cell">
                                     <input
                                       type="checkbox"
-                                                                            checked={selectedRows.includes(`${monthIndex}-${item.key}`)}
-
+                                      checked={selectedRows.includes(
+                                        `${monthIndex}-${item.key}`,
+                                      )}
                                       disabled={row._isAutoFill === true}
                                       style={
                                         row._isAutoFill
@@ -3564,17 +3718,14 @@ await saveFinancialReport(
                                             }
                                           : {}
                                       }
-                                                                            onChange={(e) => {
+                                      onChange={(e) => {
                                         const rowKey = `${monthIndex}-${item.key}`;
                                         setSelectedRows((prev) =>
                                           e.target.checked
                                             ? [...prev, rowKey]
-                                            : prev.filter(
-                                                (i) => i !== rowKey,
-                                              ),
+                                            : prev.filter((i) => i !== rowKey),
                                         );
                                       }}
-
                                     />
                                     <span>{sortedIndex + 1}</span>
                                   </div>
@@ -3848,101 +3999,101 @@ await saveFinancialReport(
                         )}
                       </div>
 
-{!showAllMonths && (
-                      <div className="grid-controls">
-                        <button
-                          onClick={() => {
-                            console.log(
-                              "🎯 Button clicked - monthIndex:",
-                              monthIndex,
-                              "activeTab:",
-                              activeTab,
-                            );
-                            addRow(monthIndex);
-                          }}
-                          style={{
-                            backgroundColor: "#28a745",
-                            color: "white",
-                            border: "none",
-                            padding: "8px 16px",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          + Row
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            if (selectedRows.length === 0) {
-                              setFinancialWarningMessage(
-                                "No rows selected. Please select at least one row to proceed.",
+                      {!showAllMonths && (
+                        <div className="grid-controls">
+                          <button
+                            onClick={() => {
+                              console.log(
+                                "🎯 Button clicked - monthIndex:",
+                                monthIndex,
+                                "activeTab:",
+                                activeTab,
                               );
-                              setShowFinancialWarning(true);
-                              return;
-                            }
-
-                            setShowDeleteConfirm(true);
-                          }}
-                          style={{
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            border: "none",
-                            padding: "8px 16px",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          <span
+                              addRow(monthIndex);
+                            }}
                             style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "5px",
+                              backgroundColor: "#28a745",
+                              color: "white",
+                              border: "none",
+                              padding: "8px 16px",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
                             }}
                           >
-                            <MdDelete /> Delete Rows
-                          </span>
-                        </button>
+                            + Row
+                          </button>
 
-                        <button
-                          onClick={() => {
-                            if (selectedRows.length === 0) {
-                              setFinancialWarningMessage(
-                                "No rows selected. Please select at least one row to delete from database.",
-                              );
-                              setShowFinancialWarning(true);
-                              return;
-                            }
+                          <button
+                            onClick={() => {
+                              if (selectedRows.length === 0) {
+                                setFinancialWarningMessage(
+                                  "No rows selected. Please select at least one row to proceed.",
+                                );
+                                setShowFinancialWarning(true);
+                                return;
+                              }
 
-                            // Show confirmation for Firestore deletion
-                            setShowDeleteFirestoreConfirm(true);
-                          }}
-                          style={{
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            border: "none",
-                            padding: "8px 16px",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                            marginLeft: "10px",
-                          }}
-                        >
-                          <span
+                              setShowDeleteConfirm(true);
+                            }}
                             style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "5px",
+                              backgroundColor: "#dc3545",
+                              color: "white",
+                              border: "none",
+                              padding: "8px 16px",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
                             }}
                           >
-                            <MdDelete /> Delete from Database
-                          </span>
-                        </button>
-                      </div>
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "5px",
+                              }}
+                            >
+                              <MdDelete /> Delete Rows
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              if (selectedRows.length === 0) {
+                                setFinancialWarningMessage(
+                                  "No rows selected. Please select at least one row to delete from database.",
+                                );
+                                setShowFinancialWarning(true);
+                                return;
+                              }
+
+                              // Show confirmation for Firestore deletion
+                              setShowDeleteFirestoreConfirm(true);
+                            }}
+                            style={{
+                              backgroundColor: "#dc3545",
+                              color: "white",
+                              border: "none",
+                              padding: "8px 16px",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              marginLeft: "10px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "5px",
+                              }}
+                            >
+                              <MdDelete /> Delete from Database
+                            </span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -4440,7 +4591,6 @@ export default FinancialReports;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 //   // Autofill payments when context changes
 //   useEffect(() => {
 //     // CASE 1: Handle booking cancellation cleanup
@@ -4449,7 +4599,6 @@ export default FinancialReports;
 // if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
 // if (isTabLoading) return; // Don't process while data is loading
 // if (isHydratingRef.current) return; // Don't process during initial hydration
-
 
 //     if (cancelTrigger) {
 //       try {
