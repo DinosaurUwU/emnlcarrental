@@ -59,7 +59,7 @@ const FinancialReports = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(currentMonth);
 
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
   const [isTabLoading, setIsTabLoading] = useState(false);
 
@@ -245,6 +245,12 @@ const FinancialReports = () => {
   };
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
+const prevGridDataStringRef = useRef(null);
+
+  const autoSaveTimeoutRef = useRef(null);
+const pendingAutoSaveRef = useRef(false);
+
+
 
   const lastSavedGridRef = useRef(null);
 
@@ -408,9 +414,11 @@ const FinancialReports = () => {
         if (activeTab === "revenue") {
           setGridData(mergedRevenue);
           lastSavedGridRef.current = mergedRevenue;
+          prevGridDataStringRef.current = JSON.stringify(mergedRevenue);
         } else if (activeTab === "expense") {
           setGridData(mergedExpense);
           lastSavedGridRef.current = mergedExpense;
+          prevGridDataStringRef.current = JSON.stringify(mergedExpense);
         } else {
           // Transaction tab: load ALL transactions from localStorage (all years, all months)
           const allYears = yearOptions;
@@ -478,6 +486,10 @@ const FinancialReports = () => {
             revenue: allTransactions.revenue,
             expense: allTransactions.expense,
           });
+          prevGridDataStringRef.current = JSON.stringify({
+  revenue: allTransactions.revenue,
+  expense: allTransactions.expense,
+});
         }
       } finally {
         isHydratingRef.current = false;
@@ -504,50 +516,132 @@ const FinancialReports = () => {
     loadBothTabs();
   }, [currentYear, activeTab]);
 
-  useEffect(() => {
-    if (
-      !autoSaveEnabled ||
-      Object.keys(gridData).length === 0 ||
-      isSavingAuto
-      // isSavingAuto ||
-      // JSON.stringify(gridData) === JSON.stringify(lastSavedGridRef.current)
-    )
-      return;
+  // AUTO SAVE
+  // useEffect(() => {
+  //   if (
+  //     !autoSaveEnabled ||
+  //     Object.keys(gridData).length === 0 ||
+  //     isSavingAuto
 
-    lastSavedGridRef.current = gridData;
+  //   )
+  //     return;
+
+  //   lastSavedGridRef.current = gridData;
+  //   setIsSavingAuto(true);
+
+  //   (async () => {
+  //     try {
+  //       setSavingStatus(true);
+
+  //       // Update the year-specific state before saving
+  //       if (activeTab === "revenue") {
+  //         setRevenueGrid((prev) => ({
+  //           ...prev,
+  //           [currentYear]: gridData,
+  //         }));
+  //       } else {
+  //         setExpenseGrid((prev) => ({
+  //           ...prev,
+  //           [currentYear]: gridData,
+  //         }));
+  //       }
+
+  //       await saveFinancialReport(activeTab, gridData, currentYear);
+
+  //       const now = new Date();
+  //       setLastSavedAt(now);
+  //       setIsSynced(true);
+  //       setHasServerChange(false);
+  //       justSaved.current = true;
+  //       setTimeout(() => (justSaved.current = false), 1000);
+  //     } finally {
+  //       setSavingStatus(false);
+  //       setIsSavingAuto(false);
+  //     }
+  //   })();
+  // }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+
+  
+// Debounced auto-save for manual inputs
+useEffect(() => {
+  // Skip if auto-save disabled, no data, or during hydration
+  if (!autoSaveEnabled || Object.keys(gridData).length === 0 || isHydratingRef.current) {
+    return;
+  }
+
+  // Skip if this is just a tab/year change (no actual user input)
+  const currentGridString = JSON.stringify(gridData);
+  if (currentGridString === prevGridDataStringRef.current) {
+    return;
+  }
+
+  // Update the ref to track current state
+  prevGridDataStringRef.current = currentGridString;
+
+  // Clear any existing timeout
+  if (autoSaveTimeoutRef.current) {
+    clearTimeout(autoSaveTimeoutRef.current);
+  }
+
+  // Set pending flag
+  pendingAutoSaveRef.current = true;
+
+  // Debounce: wait 2s before saving
+  autoSaveTimeoutRef.current = setTimeout(async () => {
+    if (!pendingAutoSaveRef.current || isSavingAuto) return;
+    
+    pendingAutoSaveRef.current = false;
     setIsSavingAuto(true);
 
-    (async () => {
-      try {
-        setSavingStatus(true);
+    try {
+      setSavingStatus(true);
 
-        // Update the year-specific state before saving
-        if (activeTab === "revenue") {
-          setRevenueGrid((prev) => ({
-            ...prev,
-            [currentYear]: gridData,
-          }));
-        } else {
-          setExpenseGrid((prev) => ({
-            ...prev,
-            [currentYear]: gridData,
-          }));
-        }
-
-        await saveFinancialReport(activeTab, gridData, currentYear);
-
-        const now = new Date();
-        setLastSavedAt(now);
-        setIsSynced(true);
-        setHasServerChange(false);
-        justSaved.current = true;
-        setTimeout(() => (justSaved.current = false), 1000);
-      } finally {
-        setSavingStatus(false);
-        setIsSavingAuto(false);
+      if (activeTab === "revenue") {
+        setRevenueGrid((prev) => ({
+          ...prev,
+          [currentYear]: gridData,
+        }));
+      } else {
+        setExpenseGrid((prev) => ({
+          ...prev,
+          [currentYear]: gridData,
+        }));
       }
-    })();
-  }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+      await saveFinancialReport(activeTab, gridData, currentYear);
+
+      const now = new Date();
+      setLastSavedAt(now);
+      setIsSynced(true);
+      setHasServerChange(false);
+      justSaved.current = true;
+      setTimeout(() => (justSaved.current = false), 1000);
+    } finally {
+      setSavingStatus(false);
+      setIsSavingAuto(false);
+    }
+  }, 2000); // 2 second buffer
+
+  // Cleanup on unmount
+  return () => {
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+  };
+}, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+// Initialize baseline when tab/year changes
+useEffect(() => {
+  if (Object.keys(gridData).length > 0 && !isHydratingRef.current) {
+    prevGridDataStringRef.current = JSON.stringify(gridData);
+  }
+}, [currentYear, activeTab]);
+
+
+
+
+
 
   // Auto-save to localStorage when gridData changes
   useEffect(() => {
@@ -803,11 +897,12 @@ const FinancialReports = () => {
   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     let newValue = value;
 
-// AMOUNT COLUMN
+// AMOUNT COLUMN - just keep peso sign during typing, format on blur
 if (colIndex === 1) {
   const numeric = value.replace(/[^0-9.]/g, "");
-  newValue = numeric === "" ? "₱0.00" : "₱" + numeric;
+  newValue = "₱" + numeric;  // Keep just peso sign during typing
 }
+
 
 
     // DATE COLUMN
@@ -1504,6 +1599,32 @@ if (colIndex === 1) {
     }
 
     setIsSynced(false);
+
+// Immediate auto-save for autofill
+if (autoSaveEnabled && updatedGrid) {
+  // Clear any pending debounced save
+  if (autoSaveTimeoutRef.current) {
+    clearTimeout(autoSaveTimeoutRef.current);
+    pendingAutoSaveRef.current = false;
+  }
+
+  // Save immediately for autofill
+  setIsSavingAuto(true);
+  saveFinancialReport(activeTab, updatedGrid, currentYear).then(() => {
+    setLastSavedAt(new Date());
+    setIsSynced(true);
+    setHasServerChange(false);
+    setIsSavingAuto(false);
+    prevGridDataStringRef.current = JSON.stringify(updatedGrid);
+    console.log("✅ Autofill auto-saved to Firestore");
+  }).catch((err) => {
+    console.error("Auto-save error:", err);
+    setIsSavingAuto(false);
+  });
+}
+
+
+  //   setIsSynced(false);
   }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
 
   // DEBUG: Track ALL tabs data on every change
@@ -1559,8 +1680,9 @@ if (colIndex === 1) {
           : `Row_${rowIndex}`;
       const currentRow = monthData[rowKey] || ["", "", "", "", ""];
       const updatedRow = currentRow.map((cell, c) =>
-        c === colIndex ? value : cell,
-      );
+  c === colIndex ? formatted : cell,
+);
+
 
       return {
         ...prev,
