@@ -1623,7 +1623,6 @@ if (autoSaveEnabled && updatedGrid) {
   });
 }
 
-
   //   setIsSynced(false);
   }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
 
