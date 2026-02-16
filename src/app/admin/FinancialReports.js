@@ -1469,18 +1469,18 @@ if (colIndex === 1) {
         });
       });
 
-      // Cleanup stale autofill rows
-      Object.keys(newGrid).forEach((mIndex) => {
-        Object.keys(newGrid[mIndex]).forEach((rowKey) => {
-          const row = newGrid[mIndex][rowKey];
-          if (Array.isArray(row) && row[5]?._isAutoFill) {
-            const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
-            if (!validKeys.has(key)) {
-              newGrid[mIndex][rowKey] = Array(5).fill("");
-            }
-          }
-        });
-      });
+      // // Cleanup stale autofill rows
+      // Object.keys(newGrid).forEach((mIndex) => {
+      //   Object.keys(newGrid[mIndex]).forEach((rowKey) => {
+      //     const row = newGrid[mIndex][rowKey];
+      //     if (Array.isArray(row) && row[5]?._isAutoFill) {
+      //       const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
+      //       if (!validKeys.has(key)) {
+      //         newGrid[mIndex][rowKey] = Array(5).fill("");
+      //       }
+      //     }
+      //   });
+      // });
 
       console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
 
