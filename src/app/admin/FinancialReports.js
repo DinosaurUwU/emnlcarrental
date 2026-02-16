@@ -11,6 +11,7 @@ import {
   MdDelete,
   MdCalendarToday,
   MdAnalytics,
+  MdSync,
 } from "react-icons/md";
 
 import { createPortal } from "react-dom";
@@ -22,6 +23,7 @@ const FinancialReports = () => {
     paymentEntries,
     autoFillTrigger,
     cancelTrigger,
+    triggerAutoFill,
 
     hasServerChange,
     setHasServerChange,
@@ -38,6 +40,7 @@ const FinancialReports = () => {
     setExpenseGrid,
     activeBookings,
     completedBookingsAnalytics,
+    adminBookingRequests,
   } = useUser();
 
   const [showFinancialWarning, setShowFinancialWarning] = useState(false);
@@ -594,33 +597,28 @@ useEffect(() => {
     pendingAutoSaveRef.current = false;
     setIsSavingAuto(true);
 
-    try {
-      setSavingStatus(true);
+try {
+  setSavingStatus(true);
 
-      if (activeTab === "revenue") {
-        setRevenueGrid((prev) => ({
-          ...prev,
-          [currentYear]: gridData,
-        }));
-      } else {
-        setExpenseGrid((prev) => ({
-          ...prev,
-          [currentYear]: gridData,
-        }));
-      }
+  if (activeTab === "revenue") {
+    setRevenueGrid((prev) => ({ ...prev, [currentYear]: gridData }));
+  } else {
+    setExpenseGrid((prev) => ({ ...prev, [currentYear]: gridData }));
+  }
 
-      await saveFinancialReport(activeTab, gridData, currentYear);
+  await saveFinancialReport(activeTab, gridData, currentYear);
 
-      const now = new Date();
-      setLastSavedAt(now);
-      setIsSynced(true);
-      setHasServerChange(false);
-      justSaved.current = true;
-      setTimeout(() => (justSaved.current = false), 1000);
-    } finally {
-      setSavingStatus(false);
-      setIsSavingAuto(false);
-    }
+  // ALSO save to localStorage to keep them in sync
+  saveToLocalStorage(activeTab, currentYear, { [activeTab]: gridData });
+
+  setLastSavedAt(new Date());
+  setIsSynced(true);
+  setHasServerChange(false);
+} finally {
+  setSavingStatus(false);
+  setIsSavingAuto(false);
+}
+
   }, 2000); // 2 second buffer
 
   // Cleanup on unmount
@@ -1602,15 +1600,16 @@ if (colIndex === 1) {
 
 // Immediate auto-save for autofill
 if (autoSaveEnabled && updatedGrid) {
-  // Clear any pending debounced save
   if (autoSaveTimeoutRef.current) {
     clearTimeout(autoSaveTimeoutRef.current);
     pendingAutoSaveRef.current = false;
   }
 
-  // Save immediately for autofill
   setIsSavingAuto(true);
   saveFinancialReport(activeTab, updatedGrid, currentYear).then(() => {
+    // ALSO save to localStorage to keep them in sync
+    saveToLocalStorage(activeTab, currentYear, { [activeTab]: updatedGrid });
+    
     setLastSavedAt(new Date());
     setIsSynced(true);
     setHasServerChange(false);
@@ -1622,6 +1621,7 @@ if (autoSaveEnabled && updatedGrid) {
     setIsSavingAuto(false);
   });
 }
+
 
   //   setIsSynced(false);
   }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
@@ -2924,10 +2924,7 @@ if (autoSaveEnabled && updatedGrid) {
       {activeTab !== "transaction" && (
         <>
           <div className="toolbar" style={{ backgroundColor: background }}>
-            {/* GROUP 1 — LEFT SIDE (2×2 grid) */}
-            <div className="toolbar-group group-left">
-              <div className="g1-item">
-                {/* Auto Save */}
+                            {/* Auto Save */}
                 <div
                   className="auto-save-toggle"
                   onClick={() => setAutoSaveEnabled((prev) => !prev)}
@@ -2942,7 +2939,90 @@ if (autoSaveEnabled && updatedGrid) {
                   </label>
                   <span className="auto-label">Auto-Save</span>
                 </div>
+            {/* GROUP 1 — LEFT SIDE (2×2 grid) */}
+            <div className="toolbar-group group-left">
+              
+              <div className="g1-item">
+                              <button
+  onClick={() => {
+    // Rebuild payment entries from all booking sources
+    const newEntries = {};
+    
+    // 1. From active bookings
+    activeBookings.forEach((booking) => {
+      if (booking.paymentEntries && booking.paymentEntries.length > 0) {
+        newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
+          ...entry,
+          carName: booking.carName || booking.plateNo,
+        }));
+      }
+    });
+    
+    // 2. From balance due bookings (completedBookingsAnalytics)
+    Object.values(completedBookingsAnalytics).forEach((carData) => {
+      if (carData.bookings) {
+        carData.bookings.forEach((booking) => {
+          if (booking.paymentEntries && booking.paymentEntries.length > 0) {
+            newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
+              ...entry,
+              carName: carData.carName,
+            }));
+          }
+        });
+      }
+    });
+    
+    // 3. From user booking requests
+    adminBookingRequests.forEach((request) => {
+      if (request.paymentEntries && request.paymentEntries.length > 0) {
+        newEntries[request.id] = request.paymentEntries.map(entry => ({
+          ...entry,
+          carName: request.carName || request.plateNo,
+        }));
+      }
+    });
+    
+    if (Object.keys(newEntries).length > 0) {
+      triggerAutoFill(newEntries);
+      setActionOverlay({
+        isVisible: true,
+        type: "success",
+        message: `${Object.keys(newEntries).length} booking(s) synced successfully!`,
+      });
+      setTimeout(() => {
+        setHideCancelAnimation(true);
+        setTimeout(() => {
+          setActionOverlay((prev) => ({ ...prev, isVisible: false }));
+          setHideCancelAnimation(false);
+        }, 400);
+      }, 2500);
+    } else {
+      setFinancialWarningMessage("No payment entries found to sync.");
+      setShowFinancialWarning(true);
+    }
+  }}
+  style={{
+    backgroundColor: "#17a2b8",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "5px",
+    width: "100%",
+  }}
+  title="Rebuild and sync all payment entries from bookings"
+>
+  <MdSync /> Sync Payments
+</button>
+                
               </div>
+
+
 
               <div className="g1-item-ml">
                 <div
@@ -3042,6 +3122,9 @@ if (autoSaveEnabled && updatedGrid) {
                 </div>
 
                 <div className="zoom-label">Zoom: {zoomLevel}%</div>
+
+
+
               </div>
 
               {/* Column 2: Export Button */}
