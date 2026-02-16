@@ -2942,15 +2942,12 @@ if (autoSaveEnabled && updatedGrid) {
             {/* GROUP 1 — LEFT SIDE (2×2 grid) */}
             <div className="toolbar-group group-left">
               
-              <div className="g1-item">
-                              <button
-  onClick={() => {
-    // Rebuild payment entries from all booking sources
+<div className="g1-item-sync">
+  <button onClick={async () => {
     const newEntries = {};
     
-    // 1. From active bookings
     activeBookings.forEach((booking) => {
-      if (booking.paymentEntries && booking.paymentEntries.length > 0) {
+      if (booking.paymentEntries?.length > 0) {
         newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
           ...entry,
           carName: booking.carName || booking.plateNo,
@@ -2958,23 +2955,19 @@ if (autoSaveEnabled && updatedGrid) {
       }
     });
     
-    // 2. From balance due bookings (completedBookingsAnalytics)
     Object.values(completedBookingsAnalytics).forEach((carData) => {
-      if (carData.bookings) {
-        carData.bookings.forEach((booking) => {
-          if (booking.paymentEntries && booking.paymentEntries.length > 0) {
-            newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
-              ...entry,
-              carName: carData.carName,
-            }));
-          }
-        });
-      }
+      carData.bookings?.forEach((booking) => {
+        if (booking.paymentEntries?.length > 0) {
+          newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
+            ...entry,
+            carName: carData.carName,
+          }));
+        }
+      });
     });
     
-    // 3. From user booking requests
     adminBookingRequests.forEach((request) => {
-      if (request.paymentEntries && request.paymentEntries.length > 0) {
+      if (request.paymentEntries?.length > 0) {
         newEntries[request.id] = request.paymentEntries.map(entry => ({
           ...entry,
           carName: request.carName || request.plateNo,
@@ -2984,10 +2977,24 @@ if (autoSaveEnabled && updatedGrid) {
     
     if (Object.keys(newEntries).length > 0) {
       triggerAutoFill(newEntries);
+      
+      // Wait for state to update then save
+      setTimeout(async () => {
+        if (autoSaveEnabled && activeTab === "revenue") {
+          const currentGridData = gridData;
+          await saveFinancialReport(activeTab, currentGridData, currentYear);
+          saveToLocalStorage(activeTab, currentYear, { [activeTab]: currentGridData });
+          setLastSavedAt(new Date());
+          setIsSynced(true);
+          setHasServerChange(false);
+          console.log("✅ Sync payments auto-saved to Firestore");
+        }
+      }, 500);
+      
       setActionOverlay({
         isVisible: true,
         type: "success",
-        message: `${Object.keys(newEntries).length} booking(s) synced successfully!`,
+        message: `${Object.keys(newEntries).length} booking(s) synced!`,
       });
       setTimeout(() => {
         setHideCancelAnimation(true);
@@ -2997,30 +3004,15 @@ if (autoSaveEnabled && updatedGrid) {
         }, 400);
       }, 2500);
     } else {
-      setFinancialWarningMessage("No payment entries found to sync.");
+      setFinancialWarningMessage("No payment entries found.");
       setShowFinancialWarning(true);
     }
-  }}
-  style={{
-    backgroundColor: "#17a2b8",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "5px",
-    width: "100%",
-  }}
-  title="Rebuild and sync all payment entries from bookings"
->
-  <MdSync /> Sync Payments
-</button>
-                
-              </div>
+  }}>
+    <MdSync /> Sync Payments
+  </button>
+</div>
+
+
 
 
 

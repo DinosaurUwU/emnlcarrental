@@ -162,6 +162,21 @@
 
 
 
+.g1-item-sync button {
+  width: 100%;
+  background-color: #d4edda !important;
+  border-color: #28a745 !important;
+  transition: all 0.5s ease;
+}
+
+.g1-item-sync button:hover {
+  background-color: #28a745 !important;
+  color: white;
+}
+
+
+
+
 
 .manual-load-dropdown {
   position: relative;
