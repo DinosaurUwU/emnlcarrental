@@ -365,12 +365,26 @@ export const UserProvider = ({ children }) => {
     }));
   };
 
-  const removePaymentEntry = (bookingId, index) => {
-    setPaymentEntries((prev) => ({
-      ...prev,
-      [bookingId]: prev[bookingId].filter((_, i) => i !== index),
-    }));
+  // const removePaymentEntry = (bookingId, index) => {
+  //   setPaymentEntries((prev) => ({
+  //     ...prev,
+  //     [bookingId]: prev[bookingId].filter((_, i) => i !== index),
+  //   }));
+  // };
+
+    const removePaymentEntry = (bookingId, index) => {
+    setPaymentEntries((prev) => {
+      // Safety check: if bookingId doesn't exist or entries is not an array, return unchanged
+      if (!prev[bookingId] || !Array.isArray(prev[bookingId])) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [bookingId]: prev[bookingId].filter((_, i) => i !== index),
+      };
+    });
   };
+
 
   // REALTIME FETCH UNITS COLLECTION
   useEffect(() => {
