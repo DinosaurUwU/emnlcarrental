@@ -52,6 +52,7 @@ const FinancialReports = () => {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0–11
+  const [exportYear, setExportYear] = useState(currentYear);
 
   const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
   const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
@@ -1049,7 +1050,7 @@ const FinancialReports = () => {
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
 
-    const fileName = `EMNL Financial Report ${currentYear}.xlsx`;
+    const fileName = `EMNL Financial Report ${exportYear}.xlsx`;
 
     const formatExportDate = (val) => {
       if (!val) return "";
@@ -1073,7 +1074,8 @@ const FinancialReports = () => {
       TITLE_BG: "28A745",
       UNIT_HDR: "A8E6CF",
       AMOUNT_HDR: "B3E5FC",
-      MOP_HDR: "EEE9F7",
+            MOP_HDR: "D4C4E8",      // Darker lavender for header
+
       POP_HDR: "F8BBD0",
       DATE_HDR: "FFE0B2",
 
@@ -1183,7 +1185,8 @@ const FinancialReports = () => {
 
         for (let col = startCol; col <= startCol + 4; col++) {
           ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
-            v: col === startCol ? `${month} ${currentYear}` : "",
+                        v: col === startCol ? `${month} ${exportYear}` : "",
+
             t: "s",
             s: {
               fill: { fgColor: { rgb: COLORS.TITLE_BG } },
@@ -1361,14 +1364,14 @@ const FinancialReports = () => {
 
     // CREATE BOTH SHEETS
     generateSheet(
-      revenueGrid[currentYear] || {},
-      `REVENUE ${currentYear}`,
+      revenueGrid[exportYear] || {},
+      `REVENUE ${exportYear}`,
       REVENUE_COLORS,
       false,
     );
     generateSheet(
-      expenseGrid[currentYear] || {},
-      `EXPENSE ${currentYear}`,
+      expenseGrid[exportYear] || {},
+      `EXPENSE ${exportYear}`,
       EXPENSE_COLORS,
       true,
     );
@@ -3401,7 +3404,26 @@ const FinancialReports = () => {
 
               {/* Column 2: Export Button */}
               <div className="group-right export-block">
+                <select 
+                  value={exportYear} 
+                  onChange={(e) => setExportYear(parseInt(e.target.value))}
+                  className="export-year-select"
+                  style={{
+                    padding: "8px 12px",
+                    marginRight: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    cursor: "pointer"
+                  }}
+                >
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
                 <button className="export-btn" onClick={handleExport}>
+
                   <span
                     style={{
                       display: "flex",
