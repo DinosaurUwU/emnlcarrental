@@ -249,12 +249,10 @@ const FinancialReports = () => {
   };
 
   const [isSavingAuto, setIsSavingAuto] = useState(false);
-const prevGridDataStringRef = useRef(null);
+  const prevGridDataStringRef = useRef(null);
 
   const autoSaveTimeoutRef = useRef(null);
-const pendingAutoSaveRef = useRef(false);
-
-
+  const pendingAutoSaveRef = useRef(false);
 
   const lastSavedGridRef = useRef(null);
 
@@ -491,9 +489,9 @@ const pendingAutoSaveRef = useRef(false);
             expense: allTransactions.expense,
           });
           prevGridDataStringRef.current = JSON.stringify({
-  revenue: allTransactions.revenue,
-  expense: allTransactions.expense,
-});
+            revenue: allTransactions.revenue,
+            expense: allTransactions.expense,
+          });
         }
       } finally {
         isHydratingRef.current = false;
@@ -565,101 +563,102 @@ const pendingAutoSaveRef = useRef(false);
   //   })();
   // }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
 
+  // Debounced auto-save for manual inputs
+  useEffect(() => {
+    // Skip if auto-save disabled, no data, or during hydration
+    if (
+      !autoSaveEnabled ||
+      Object.keys(gridData).length === 0 ||
+      isHydratingRef.current
+    ) {
+      return;
+    }
 
-  
-// Debounced auto-save for manual inputs
-useEffect(() => {
-  // Skip if auto-save disabled, no data, or during hydration
-  if (!autoSaveEnabled || Object.keys(gridData).length === 0 || isHydratingRef.current) {
-    return;
-  }
+    // Skip if this is just a tab/year change (no actual user input)
+    const currentGridString = JSON.stringify(gridData);
+    if (currentGridString === prevGridDataStringRef.current) {
+      return;
+    }
 
-  // Skip if this is just a tab/year change (no actual user input)
-  const currentGridString = JSON.stringify(gridData);
-  if (currentGridString === prevGridDataStringRef.current) {
-    return;
-  }
+    // Update the ref to track current state
+    prevGridDataStringRef.current = currentGridString;
 
-  // Update the ref to track current state
-  prevGridDataStringRef.current = currentGridString;
-
-  // Clear any existing timeout
-  if (autoSaveTimeoutRef.current) {
-    clearTimeout(autoSaveTimeoutRef.current);
-  }
-
-  // Set pending flag
-  pendingAutoSaveRef.current = true;
-
-  // Debounce: wait 2s before saving
-  autoSaveTimeoutRef.current = setTimeout(async () => {
-    if (!pendingAutoSaveRef.current || isSavingAuto) return;
-    
-    pendingAutoSaveRef.current = false;
-    setIsSavingAuto(true);
-
-try {
-  setSavingStatus(true);
-
-  if (activeTab === "revenue") {
-    setRevenueGrid((prev) => ({ ...prev, [currentYear]: gridData }));
-  } else {
-    setExpenseGrid((prev) => ({ ...prev, [currentYear]: gridData }));
-  }
-
-  await saveFinancialReport(activeTab, gridData, currentYear);
-
-  // ALSO save to localStorage to keep them in sync
-  saveToLocalStorage(activeTab, currentYear, { [activeTab]: gridData });
-
-  setLastSavedAt(new Date());
-  setIsSynced(true);
-  setHasServerChange(false);
-} finally {
-  setSavingStatus(false);
-  setIsSavingAuto(false);
-}
-
-  }, 2000); // 2 second buffer
-
-  // Cleanup on unmount
-  return () => {
+    // Clear any existing timeout
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
-  };
-}, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
 
-// Initialize baseline when tab/year changes
-useEffect(() => {
-  if (Object.keys(gridData).length > 0 && !isHydratingRef.current) {
-    prevGridDataStringRef.current = JSON.stringify(gridData);
-  }
-}, [currentYear, activeTab]);
+    // Set pending flag
+    pendingAutoSaveRef.current = true;
 
+    // Debounce: wait 2s before saving
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      if (!pendingAutoSaveRef.current || isSavingAuto) return;
+
+      pendingAutoSaveRef.current = false;
+      setIsSavingAuto(true);
+
+      try {
+        setSavingStatus(true);
+
+        if (activeTab === "revenue") {
+          setRevenueGrid((prev) => ({ ...prev, [currentYear]: gridData }));
+        } else {
+          setExpenseGrid((prev) => ({ ...prev, [currentYear]: gridData }));
+        }
+
+        await saveFinancialReport(activeTab, gridData, currentYear);
+
+        // ALSO save to localStorage to keep them in sync
+        saveToLocalStorage(activeTab, currentYear, { [activeTab]: gridData });
+
+        setLastSavedAt(new Date());
+        setIsSynced(true);
+        setHasServerChange(false);
+      } finally {
+        setSavingStatus(false);
+        setIsSavingAuto(false);
+      }
+    }, 2000); // 2 second buffer
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+
+  // Initialize baseline when tab/year changes
+  useEffect(() => {
+    if (Object.keys(gridData).length > 0 && !isHydratingRef.current) {
+      prevGridDataStringRef.current = JSON.stringify(gridData);
+    }
+  }, [currentYear, activeTab]);
 
   // Trigger re-sort and auto-save when sort direction changes
   useEffect(() => {
-    if (!autoSaveEnabled || Object.keys(gridData).length === 0 || isHydratingRef.current) {
+    if (
+      !autoSaveEnabled ||
+      Object.keys(gridData).length === 0 ||
+      isHydratingRef.current
+    ) {
       return;
     }
-    
+
     // Apply sorting to all months
     setGridData((prev) => {
       const sorted = {};
       Object.keys(prev).forEach((monthIndex) => {
         sorted[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
       });
-      
+
       // Force auto-save to trigger by resetting the ref
       prevGridDataStringRef.current = null;
-      
+
       return sorted;
     });
   }, [sortDirection]);
-
-
-
 
   // Auto-save to localStorage when gridData changes
   useEffect(() => {
@@ -915,13 +914,11 @@ useEffect(() => {
   const handleCellChange = (monthIndex, rowIndex, colIndex, value) => {
     let newValue = value;
 
-// AMOUNT COLUMN - just keep peso sign during typing, format on blur
-if (colIndex === 1) {
-  const numeric = value.replace(/[^0-9.]/g, "");
-  newValue = "₱" + numeric;  // Keep just peso sign during typing
-}
-
-
+    // AMOUNT COLUMN - just keep peso sign during typing, format on blur
+    if (colIndex === 1) {
+      const numeric = value.replace(/[^0-9.]/g, "");
+      newValue = "₱" + numeric; // Keep just peso sign during typing
+    }
 
     // DATE COLUMN
     if (colIndex === 4) {
@@ -979,14 +976,14 @@ if (colIndex === 1) {
       return updated;
     });
 
-  //   setIsSynced(false);
+    //   setIsSynced(false);
 
-  //   if (colIndex === 4) {
-  //     setTimeout(() => applySorting(monthIndex), 0);
-  //   }
-  // };
+    //   if (colIndex === 4) {
+    //     setTimeout(() => applySorting(monthIndex), 0);
+    //   }
+    // };
 
-      setIsSynced(false);
+    setIsSynced(false);
 
     // For date column, apply sorting synchronously so auto-save captures sorted data
     if (colIndex === 4) {
@@ -997,7 +994,6 @@ if (colIndex === 1) {
       });
     }
   };
-
 
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
@@ -1045,6 +1041,12 @@ if (colIndex === 1) {
 
     return result;
   };
+
+
+
+
+
+
 
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
@@ -1105,7 +1107,8 @@ if (colIndex === 1) {
       "DECEMBER",
     ];
 
-    const COLUMNS_PER_BLOCK = 5;
+        const COLUMNS_PER_BLOCK = 6;
+
     const GAP_COLS = 2;
     const BLOCK_COLS = COLUMNS_PER_BLOCK + GAP_COLS;
     const MONTHS_PER_ROW = 3;
@@ -1133,18 +1136,36 @@ if (colIndex === 1) {
 
       for (let m = 0; m < 12; m++) {
         const month = monthNames[m];
-        const monthRows = Array.isArray(gridData[m]) ? gridData[m] : [];
+        // const monthRows = Array.isArray(gridData[m]) ? gridData[m] : [];
+
+        // Handle both array format and object with Row_X keys
+        let monthRows = [];
+        if (Array.isArray(gridData[m])) {
+          monthRows = gridData[m];
+        } else if (gridData[m] && typeof gridData[m] === "object") {
+          // Convert object with Row_X keys to array
+          const rowKeys = Object.keys(gridData[m])
+            .filter((k) => k.startsWith("Row_"))
+            .sort(
+              (a, b) =>
+                parseInt(a.replace("Row_", "")) -
+                parseInt(b.replace("Row_", "")),
+            );
+          monthRows = rowKeys.map((k) => gridData[m][k]);
+        }
 
         const startCol = (m % MONTHS_PER_ROW) * BLOCK_COLS;
         const startRow = Math.floor(m / MONTHS_PER_ROW) * BLOCK_ROWS;
 
         // MONTH TITLE
-        ws["!merges"].push({
+                ws["!merges"].push({
           s: { r: startRow, c: startCol },
-          e: { r: startRow, c: startCol + 4 },
+          e: { r: startRow, c: startCol + 5 },
         });
 
-        for (let col = startCol; col <= startCol + 4; col++) {
+
+                for (let col = startCol; col <= startCol + 5; col++) {
+
           ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
             v: col === startCol ? `${month} ${currentYear}` : "",
             t: "s",
@@ -1163,9 +1184,9 @@ if (colIndex === 1) {
         }
 
         // HEADERS
-        const headers = isExpense
-          ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE"]
-          : ["UNIT", "AMOUNT", "MOP", "POP", "DATE"];
+                const headers = isExpense
+          ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE", "TOTAL"]
+          : ["UNIT", "AMOUNT", "MOP", "POP", "DATE", "TOTAL"];
 
         const headerBGs = [
           COLORS.UNIT_HDR,
@@ -1173,9 +1194,11 @@ if (colIndex === 1) {
           COLORS.MOP_HDR,
           COLORS.POP_HDR,
           COLORS.DATE_HDR,
+          "FFD700", // Gold for TOTAL
         ];
 
-        for (let i = 0; i < 5; i++) {
+
+        for (let i = 0; i < 6; i++) {
           ws[XLSX.utils.encode_cell({ r: startRow + 1, c: startCol + i })] = {
             v: headers[i],
             t: "s",
@@ -1187,6 +1210,19 @@ if (colIndex === 1) {
             },
           };
         }
+
+        // Calculate month total
+        let monthTotal = 0;
+        for (let r = 0; r < monthRows.length; r++) {
+          const raw = monthRows[r];
+          if (raw && raw[1]) {
+            const cleaned = Number(raw[1]?.toString().replace(/[₱,]/g, ""));
+            if (!isNaN(cleaned)) {
+              monthTotal += cleaned;
+            }
+          }
+        }
+
 
         const rowsToShow = Math.max(monthRows.length, 5);
 
@@ -1212,7 +1248,7 @@ if (colIndex === 1) {
               ]
             : [null, null, null, null, null];
 
-          for (let c = 0; c < 5; c++) {
+          for (let c = 0; c < 6; c++) {
             const rr = startRow + 2 + r;
             const cc = startCol + c;
 
@@ -1245,12 +1281,30 @@ if (colIndex === 1) {
                   },
                 };
               }
+            } else if (c === 5) {
+              // TOTAL column - show total only on last row
+              if (r === rowsToShow - 1) {
+                ws[ref] = {
+                  v: monthTotal,
+                  t: "n",
+                  z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
+                  s: {
+                    ...cellStyle,
+                    fill: { fgColor: { rgb: "FFD700" } }, // Gold background
+                    font: { name: "Calibri", bold: true, sz: 12 },
+                    alignment: { horizontal: "right", vertical: "center" },
+                  },
+                };
+              } else {
+                ws[ref] = { v: "", t: "s", s: cellStyle };
+              }
             } else {
               ws[ref] = { v: formattedRow[c], t: "s", s: cellStyle };
             }
 
             maxRowUsed = Math.max(maxRowUsed, rr);
           }
+
         }
       }
 
@@ -1265,7 +1319,9 @@ if (colIndex === 1) {
         ws["!cols"][base + 2] = { wch: 14 };
         ws["!cols"][base + 3] = { wch: 20 };
         ws["!cols"][base + 4] = { wch: 22 };
+        ws["!cols"][base + 5] = { wch: 18 }; // TOTAL column
       }
+
 
       ws["!ref"] = XLSX.utils.encode_range({
         s: { r: 0, c: 0 },
@@ -1275,12 +1331,28 @@ if (colIndex === 1) {
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
     }
 
-    // CREATE BOTH SHEETS
-    generateSheet(revenueGrid, `REVENUE ${currentYear}`, REVENUE_COLORS, false);
-    generateSheet(expenseGrid, `EXPENSE ${currentYear}`, EXPENSE_COLORS, true);
+    // CREATE BOTH SHEETS - pass the current year's data
+    generateSheet(
+      revenueGrid[currentYear] || {},
+      `REVENUE ${currentYear}`,
+      REVENUE_COLORS,
+      false,
+    );
+    generateSheet(
+      expenseGrid[currentYear] || {},
+      `EXPENSE ${currentYear}`,
+      EXPENSE_COLORS,
+      true,
+    );
 
     XLSX.writeFile(wb, fileName);
   };
+
+
+  
+
+
+
 
   const handleResetGrid = () => {
     // Step 1: Clear ONLY the selected month from localStorage
@@ -1631,32 +1703,35 @@ if (colIndex === 1) {
 
     setIsSynced(false);
 
-// Immediate auto-save for autofill
-if (autoSaveEnabled && updatedGrid) {
-  if (autoSaveTimeoutRef.current) {
-    clearTimeout(autoSaveTimeoutRef.current);
-    pendingAutoSaveRef.current = false;
-  }
+    // Immediate auto-save for autofill
+    if (autoSaveEnabled && updatedGrid) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        pendingAutoSaveRef.current = false;
+      }
 
-  setIsSavingAuto(true);
-  saveFinancialReport(activeTab, updatedGrid, currentYear).then(() => {
-    // ALSO save to localStorage to keep them in sync
-    saveToLocalStorage(activeTab, currentYear, { [activeTab]: updatedGrid });
-    
-    setLastSavedAt(new Date());
-    setIsSynced(true);
-    setHasServerChange(false);
-    setIsSavingAuto(false);
-    prevGridDataStringRef.current = JSON.stringify(updatedGrid);
-    console.log("✅ Autofill auto-saved to Firestore");
-  }).catch((err) => {
-    console.error("Auto-save error:", err);
-    setIsSavingAuto(false);
-  });
-}
+      setIsSavingAuto(true);
+      saveFinancialReport(activeTab, updatedGrid, currentYear)
+        .then(() => {
+          // ALSO save to localStorage to keep them in sync
+          saveToLocalStorage(activeTab, currentYear, {
+            [activeTab]: updatedGrid,
+          });
 
+          setLastSavedAt(new Date());
+          setIsSynced(true);
+          setHasServerChange(false);
+          setIsSavingAuto(false);
+          prevGridDataStringRef.current = JSON.stringify(updatedGrid);
+          console.log("✅ Autofill auto-saved to Firestore");
+        })
+        .catch((err) => {
+          console.error("Auto-save error:", err);
+          setIsSavingAuto(false);
+        });
+    }
 
-  //   setIsSynced(false);
+    //   setIsSynced(false);
   }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
 
   // DEBUG: Track ALL tabs data on every change
@@ -1712,9 +1787,8 @@ if (autoSaveEnabled && updatedGrid) {
           : `Row_${rowIndex}`;
       const currentRow = monthData[rowKey] || ["", "", "", "", ""];
       const updatedRow = currentRow.map((cell, c) =>
-  c === colIndex ? formatted : cell,
-);
-
+        c === colIndex ? formatted : cell,
+      );
 
       return {
         ...prev,
@@ -1846,7 +1920,6 @@ if (autoSaveEnabled && updatedGrid) {
     setShowFinancialWarning(false);
     setFinancialWarningMessage("");
   };
-
 
   const MonthYearDropdown = () => {
     if (typeof document === "undefined") return null;
@@ -2310,29 +2383,34 @@ if (autoSaveEnabled && updatedGrid) {
                     //   updatedGrid[actualRowKey] = ["", "", "", "", ""];
                     // });
 
-                                        // Clear the selected rows (set to empty) instead of deleting
+                    // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
                       // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
                       const actualRowKey = rowKey.includes("-")
                         ? rowKey.split("-")[1]
                         : rowKey;
-                      
+
                       // Check if this is an autofill row and remove from paymentEntries (temp state only)
                       const rowData = currentGrid[actualRowKey];
                       if (Array.isArray(rowData) && rowData[5]?._isAutoFill) {
                         const bookingId = rowData[5]._bookingId;
                         const entryIndex = rowData[5]._entryIndex;
                         // Safety check: only remove if bookingId exists in paymentEntries
-                        if (bookingId && entryIndex !== undefined && paymentEntries[bookingId]) {
+                        if (
+                          bookingId &&
+                          entryIndex !== undefined &&
+                          paymentEntries[bookingId]
+                        ) {
                           removePaymentEntry(bookingId, entryIndex);
-                          console.log(`🗑️ Removed entry ${entryIndex} from paymentEntries for booking ${bookingId}`);
+                          console.log(
+                            `🗑️ Removed entry ${entryIndex} from paymentEntries for booking ${bookingId}`,
+                          );
                         }
                       }
-                      
+
                       // Clear the row data but keep the row
                       updatedGrid[actualRowKey] = ["", "", "", "", ""];
                     });
-
 
                     // Ensure at least 5 rows exist
                     for (let i = 0; i < 5; i++) {
@@ -2981,178 +3059,217 @@ if (autoSaveEnabled && updatedGrid) {
       {activeTab !== "transaction" && (
         <>
           <div className="toolbar" style={{ backgroundColor: background }}>
-                            {/* Auto Save */}
-                <div
-                  className="auto-save-toggle"
-                  onClick={() => setAutoSaveEnabled((prev) => !prev)}
-                >
-                  <label className="ios-switch">
-                    <input
-                      type="checkbox"
-                      checked={autoSaveEnabled}
-                      onChange={() => setAutoSaveEnabled((prev) => !prev)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                  <span className="auto-label">Auto-Save</span>
-                </div>
+            {/* Auto Save */}
+            <div
+              className="auto-save-toggle"
+              onClick={() => setAutoSaveEnabled((prev) => !prev)}
+            >
+              <label className="ios-switch">
+                <input
+                  type="checkbox"
+                  checked={autoSaveEnabled}
+                  onChange={() => setAutoSaveEnabled((prev) => !prev)}
+                />
+                <span className="slider"></span>
+              </label>
+              <span className="auto-label">Auto-Save</span>
+            </div>
             {/* GROUP 1 — LEFT SIDE (2×2 grid) */}
             <div className="toolbar-group group-left">
-              
-<div className="g1-item-sync">
-  <button onClick={async () => {
-    const newEntries = {};
-    
-    activeBookings.forEach((booking) => {
-      if (booking.paymentEntries?.length > 0) {
-        newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
-          ...entry,
-          carName: booking.carName || booking.plateNo,
-        }));
-      }
-    });
-    
-    Object.values(completedBookingsAnalytics).forEach((carData) => {
-      carData.bookings?.forEach((booking) => {
-        if (booking.paymentEntries?.length > 0) {
-          newEntries[booking.bookingUid] = booking.paymentEntries.map(entry => ({
-            ...entry,
-            carName: carData.carName,
-          }));
-        }
-      });
-    });
-    
-    adminBookingRequests.forEach((request) => {
-      if (request.paymentEntries?.length > 0) {
-        newEntries[request.id] = request.paymentEntries.map(entry => ({
-          ...entry,
-          carName: request.carName || request.plateNo,
-        }));
-      }
-    });
-    
-    if (Object.keys(newEntries).length > 0) {
-      // Build grid data directly
-      const currentYearData = revenueGrid[currentYear] || {};
-      const newGrid = JSON.parse(JSON.stringify(currentYearData));
-      
-      months.forEach((_, i) => {
-        if (!newGrid[i] || typeof newGrid[i] !== "object") {
-          newGrid[i] = {};
-          for (let r = 0; r < 5; r++) {
-            newGrid[i][`Row_${r}`] = ["", "", "", "", ""];
-          }
-        }
-      });
-      
-      Object.entries(newEntries).forEach(([bookingId, entries]) => {
-        entries.forEach((entry, entryIndex) => {
-          if (!entry?.date) return;
-          const date = new Date(entry.date);
-          if (isNaN(date.getTime())) return;
-          
-          const monthIndex = date.getMonth();
-          const formattedAmount = entry.amount != null
-            ? "₱" + Number(entry.amount).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : "₱0.00";
-          
-          const rowArray = [
-            entry.carName || "",
-            formattedAmount,
-            entry.mop || "",
-            entry.pop || "",
-            entry.date || "",
-            { _isAutoFill: true, _bookingId: String(bookingId), _entryIndex: entryIndex }
-          ];
-          
-          const rowKeys = Object.keys(newGrid[monthIndex])
-            .filter(k => k.startsWith("Row_"))
-            .sort((a, b) => parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")));
-          
-          // let targetRowKey = null;
-          // for (const rowKey of rowKeys) {
-          //   if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
-          //     targetRowKey = rowKey;
-          //     break;
-          //   }
-          // }
-          
-          // if (targetRowKey) {
-          //   newGrid[monthIndex][targetRowKey] = rowArray;
-          // } else {
-          //   newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
-          // }
-          
-          let targetRowKey = null;
-          
-          // First, check if this booking already exists (check 6th element for metadata)
-          for (const rowKey of rowKeys) {
-            const row = newGrid[monthIndex][rowKey];
-            if (
-              Array.isArray(row) &&
-              row[5]?._isAutoFill &&
-              row[5]._bookingId === String(bookingId) &&
-              row[5]._entryIndex === entryIndex
-            ) {
-              targetRowKey = rowKey;
-              break;
-            }
-          }
-          
-          // If not found, find an empty row
-          if (!targetRowKey) {
-            for (const rowKey of rowKeys) {
-              const row = newGrid[monthIndex][rowKey];
-              if (
-                !Array.isArray(row) ||
-                (!row[5]?._isAutoFill && row.slice(0, 5).every(c => c === ""))
-              ) {
-                targetRowKey = rowKey;
-                break;
-              }
-            }
-          }
-          
-          if (targetRowKey) {
-            newGrid[monthIndex][targetRowKey] = rowArray;
-          } else {
-            newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
-          }
+              <div className="g1-item-sync">
+                <button
+                  onClick={async () => {
+                    const newEntries = {};
 
-        });
-      });
-      
-      setRevenueGrid(prev => ({ ...prev, [currentYear]: newGrid }));
-      setGridData(newGrid);
-      
-      if (autoSaveEnabled) {
-        await saveFinancialReport(activeTab, newGrid, currentYear);
-        saveToLocalStorage(activeTab, currentYear, { [activeTab]: newGrid });
-        setLastSavedAt(new Date());
-        setIsSynced(true);
-        prevGridDataStringRef.current = JSON.stringify(newGrid);
-      }
-      
-      setActionOverlay({ isVisible: true, type: "success", message: `${Object.keys(newEntries).length} booking(s) synced & saved!` });
-      setTimeout(() => { setHideCancelAnimation(true); setTimeout(() => { setActionOverlay(prev => ({ ...prev, isVisible: false })); setHideCancelAnimation(false); }, 400); }, 2500);
-    } else {
-      setFinancialWarningMessage("No payment entries found.");
-      setShowFinancialWarning(true);
-    }
-  }}>
-    <MdSync /> Sync Payments
-  </button>
-</div>
+                    activeBookings.forEach((booking) => {
+                      if (booking.paymentEntries?.length > 0) {
+                        newEntries[booking.bookingUid] =
+                          booking.paymentEntries.map((entry) => ({
+                            ...entry,
+                            carName: booking.carName || booking.plateNo,
+                          }));
+                      }
+                    });
 
+                    Object.values(completedBookingsAnalytics).forEach(
+                      (carData) => {
+                        carData.bookings?.forEach((booking) => {
+                          if (booking.paymentEntries?.length > 0) {
+                            newEntries[booking.bookingUid] =
+                              booking.paymentEntries.map((entry) => ({
+                                ...entry,
+                                carName: carData.carName,
+                              }));
+                          }
+                        });
+                      },
+                    );
 
+                    adminBookingRequests.forEach((request) => {
+                      if (request.paymentEntries?.length > 0) {
+                        newEntries[request.id] = request.paymentEntries.map(
+                          (entry) => ({
+                            ...entry,
+                            carName: request.carName || request.plateNo,
+                          }),
+                        );
+                      }
+                    });
 
+                    if (Object.keys(newEntries).length > 0) {
+                      // Build grid data directly
+                      const currentYearData = revenueGrid[currentYear] || {};
+                      const newGrid = JSON.parse(
+                        JSON.stringify(currentYearData),
+                      );
 
+                      months.forEach((_, i) => {
+                        if (!newGrid[i] || typeof newGrid[i] !== "object") {
+                          newGrid[i] = {};
+                          for (let r = 0; r < 5; r++) {
+                            newGrid[i][`Row_${r}`] = ["", "", "", "", ""];
+                          }
+                        }
+                      });
 
+                      Object.entries(newEntries).forEach(
+                        ([bookingId, entries]) => {
+                          entries.forEach((entry, entryIndex) => {
+                            if (!entry?.date) return;
+                            const date = new Date(entry.date);
+                            if (isNaN(date.getTime())) return;
 
+                            const monthIndex = date.getMonth();
+                            const formattedAmount =
+                              entry.amount != null
+                                ? "₱" +
+                                  Number(entry.amount).toLocaleString("en-PH", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : "₱0.00";
 
+                            const rowArray = [
+                              entry.carName || "",
+                              formattedAmount,
+                              entry.mop || "",
+                              entry.pop || "",
+                              entry.date || "",
+                              {
+                                _isAutoFill: true,
+                                _bookingId: String(bookingId),
+                                _entryIndex: entryIndex,
+                              },
+                            ];
 
+                            const rowKeys = Object.keys(newGrid[monthIndex])
+                              .filter((k) => k.startsWith("Row_"))
+                              .sort(
+                                (a, b) =>
+                                  parseInt(a.replace("Row_", "")) -
+                                  parseInt(b.replace("Row_", "")),
+                              );
 
+                            // let targetRowKey = null;
+                            // for (const rowKey of rowKeys) {
+                            //   if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
+                            //     targetRowKey = rowKey;
+                            //     break;
+                            //   }
+                            // }
+
+                            // if (targetRowKey) {
+                            //   newGrid[monthIndex][targetRowKey] = rowArray;
+                            // } else {
+                            //   newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
+                            // }
+
+                            let targetRowKey = null;
+
+                            // First, check if this booking already exists (check 6th element for metadata)
+                            for (const rowKey of rowKeys) {
+                              const row = newGrid[monthIndex][rowKey];
+                              if (
+                                Array.isArray(row) &&
+                                row[5]?._isAutoFill &&
+                                row[5]._bookingId === String(bookingId) &&
+                                row[5]._entryIndex === entryIndex
+                              ) {
+                                targetRowKey = rowKey;
+                                break;
+                              }
+                            }
+
+                            // If not found, find an empty row
+                            if (!targetRowKey) {
+                              for (const rowKey of rowKeys) {
+                                const row = newGrid[monthIndex][rowKey];
+                                if (
+                                  !Array.isArray(row) ||
+                                  (!row[5]?._isAutoFill &&
+                                    row.slice(0, 5).every((c) => c === ""))
+                                ) {
+                                  targetRowKey = rowKey;
+                                  break;
+                                }
+                              }
+                            }
+
+                            if (targetRowKey) {
+                              newGrid[monthIndex][targetRowKey] = rowArray;
+                            } else {
+                              newGrid[monthIndex][
+                                `Row_${Object.keys(newGrid[monthIndex]).length}`
+                              ] = rowArray;
+                            }
+                          });
+                        },
+                      );
+
+                      setRevenueGrid((prev) => ({
+                        ...prev,
+                        [currentYear]: newGrid,
+                      }));
+                      setGridData(newGrid);
+
+                      if (autoSaveEnabled) {
+                        await saveFinancialReport(
+                          activeTab,
+                          newGrid,
+                          currentYear,
+                        );
+                        saveToLocalStorage(activeTab, currentYear, {
+                          [activeTab]: newGrid,
+                        });
+                        setLastSavedAt(new Date());
+                        setIsSynced(true);
+                        prevGridDataStringRef.current = JSON.stringify(newGrid);
+                      }
+
+                      setActionOverlay({
+                        isVisible: true,
+                        type: "success",
+                        message: `${Object.keys(newEntries).length} booking(s) synced & saved!`,
+                      });
+                      setTimeout(() => {
+                        setHideCancelAnimation(true);
+                        setTimeout(() => {
+                          setActionOverlay((prev) => ({
+                            ...prev,
+                            isVisible: false,
+                          }));
+                          setHideCancelAnimation(false);
+                        }, 400);
+                      }, 2500);
+                    } else {
+                      setFinancialWarningMessage("No payment entries found.");
+                      setShowFinancialWarning(true);
+                    }
+                  }}
+                >
+                  <MdSync /> Sync Payments
+                </button>
+              </div>
 
               <div className="g1-item-ml">
                 <div
@@ -3252,9 +3369,6 @@ if (autoSaveEnabled && updatedGrid) {
                 </div>
 
                 <div className="zoom-label">Zoom: {zoomLevel}%</div>
-
-
-
               </div>
 
               {/* Column 2: Export Button */}
@@ -4052,44 +4166,43 @@ if (autoSaveEnabled && updatedGrid) {
                             </span>
                           </button>
 
-{!autoSaveEnabled && (
-                          <button
-                            onClick={() => {
-                              if (selectedRows.length === 0) {
-                                setFinancialWarningMessage(
-                                  "No rows selected. Please select at least one row to delete from database.",
-                                );
-                                setShowFinancialWarning(true);
-                                return;
-                              }
+                          {!autoSaveEnabled && (
+                            <button
+                              onClick={() => {
+                                if (selectedRows.length === 0) {
+                                  setFinancialWarningMessage(
+                                    "No rows selected. Please select at least one row to delete from database.",
+                                  );
+                                  setShowFinancialWarning(true);
+                                  return;
+                                }
 
-                              // Show confirmation for Firestore deletion
-                              setShowDeleteFirestoreConfirm(true);
-                            }}
-                            style={{
-                              backgroundColor: "#dc3545",
-                              color: "white",
-                              border: "none",
-                              padding: "8px 16px",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              marginLeft: "10px",
-                            }}
-                          >
-                            <span
+                                // Show confirmation for Firestore deletion
+                                setShowDeleteFirestoreConfirm(true);
+                              }}
                               style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "5px",
+                                backgroundColor: "#dc3545",
+                                color: "white",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                marginLeft: "10px",
                               }}
                             >
-                              <MdDelete /> Delete from Database
-                            </span>
-                          </button>
+                              <span
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: "5px",
+                                }}
+                              >
+                                <MdDelete /> Delete from Database
+                              </span>
+                            </button>
                           )}
-
                         </div>
                       )}
                     </div>
