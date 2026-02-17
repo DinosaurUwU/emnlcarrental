@@ -638,6 +638,25 @@ useEffect(() => {
 }, [currentYear, activeTab]);
 
 
+  // Trigger re-sort and auto-save when sort direction changes
+  useEffect(() => {
+    if (!autoSaveEnabled || Object.keys(gridData).length === 0 || isHydratingRef.current) {
+      return;
+    }
+    
+    // Apply sorting to all months
+    setGridData((prev) => {
+      const sorted = {};
+      Object.keys(prev).forEach((monthIndex) => {
+        sorted[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
+      });
+      
+      // Force auto-save to trigger by resetting the ref
+      prevGridDataStringRef.current = null;
+      
+      return sorted;
+    });
+  }, [sortDirection]);
 
 
 
@@ -960,12 +979,25 @@ if (colIndex === 1) {
       return updated;
     });
 
-    setIsSynced(false);
+  //   setIsSynced(false);
 
+  //   if (colIndex === 4) {
+  //     setTimeout(() => applySorting(monthIndex), 0);
+  //   }
+  // };
+
+      setIsSynced(false);
+
+    // For date column, apply sorting synchronously so auto-save captures sorted data
     if (colIndex === 4) {
-      setTimeout(() => applySorting(monthIndex), 0);
+      setGridData((prev) => {
+        const updated = { ...prev };
+        updated[monthIndex] = cleanAndReorderRows(prev[monthIndex] || {});
+        return updated;
+      });
     }
   };
+
 
   const cleanAndReorderRows = (rows) => {
     if (!rows || typeof rows !== "object") return {};
@@ -3038,11 +3070,47 @@ if (autoSaveEnabled && updatedGrid) {
             .filter(k => k.startsWith("Row_"))
             .sort((a, b) => parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")));
           
+          // let targetRowKey = null;
+          // for (const rowKey of rowKeys) {
+          //   if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
+          //     targetRowKey = rowKey;
+          //     break;
+          //   }
+          // }
+          
+          // if (targetRowKey) {
+          //   newGrid[monthIndex][targetRowKey] = rowArray;
+          // } else {
+          //   newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
+          // }
+          
           let targetRowKey = null;
+          
+          // First, check if this booking already exists (check 6th element for metadata)
           for (const rowKey of rowKeys) {
-            if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
+            const row = newGrid[monthIndex][rowKey];
+            if (
+              Array.isArray(row) &&
+              row[5]?._isAutoFill &&
+              row[5]._bookingId === String(bookingId) &&
+              row[5]._entryIndex === entryIndex
+            ) {
               targetRowKey = rowKey;
               break;
+            }
+          }
+          
+          // If not found, find an empty row
+          if (!targetRowKey) {
+            for (const rowKey of rowKeys) {
+              const row = newGrid[monthIndex][rowKey];
+              if (
+                !Array.isArray(row) ||
+                (!row[5]?._isAutoFill && row.slice(0, 5).every(c => c === ""))
+              ) {
+                targetRowKey = rowKey;
+                break;
+              }
             }
           }
           
@@ -3051,6 +3119,7 @@ if (autoSaveEnabled && updatedGrid) {
           } else {
             newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
           }
+
         });
       });
       
