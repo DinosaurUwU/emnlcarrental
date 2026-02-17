@@ -54,6 +54,8 @@ const FinancialReports = () => {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0–11
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [exportYear, setExportYear] = useState(currentYear);
+  const exportDropdownRef = useRef(null);
+  const manualLoadRef = useRef(null);
 
 
   const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
@@ -374,6 +376,42 @@ const FinancialReports = () => {
       document.body.style.top = "";
     };
   }, [showManualLoadConfirm]);
+
+    // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(e.target)) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    if (showExportDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showExportDropdown]);
+
+
+    // Close manual load dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (manualLoadRef.current && !manualLoadRef.current.contains(e.target)) {
+        setShowManualLoadMenu(false);
+      }
+    };
+
+    if (showManualLoadMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showManualLoadMenu]);
+
 
   useEffect(() => {
     if (serverChangeCounter > 0 && !justSaved.current) {
@@ -3307,7 +3345,7 @@ const FinancialReports = () => {
               <div className="g1-item-ml">
                 <div
                   className="manual-load-dropdown"
-                  style={{ position: "relative" }}
+                  style={{ position: "relative" }} ref={manualLoadRef}
                 >
                   <button
                     onClick={() => setShowManualLoadMenu(!showManualLoadMenu)}
@@ -3405,7 +3443,7 @@ const FinancialReports = () => {
               </div>
 
               {/* Column 2: Export Button */}
-              <div className="group-right export-block" style={{ position: "relative" }}>
+              <div className="group-right export-block" style={{ position: "relative" }} ref={exportDropdownRef}>
                 <button 
                   className="export-btn" 
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
