@@ -3983,6 +3983,7 @@ if (autoSaveEnabled && updatedGrid) {
                             </span>
                           </button>
 
+{!autoSaveEnabled && (
                           <button
                             onClick={() => {
                               if (selectedRows.length === 0) {
@@ -4018,6 +4019,8 @@ if (autoSaveEnabled && updatedGrid) {
                               <MdDelete /> Delete from Database
                             </span>
                           </button>
+                          )}
+
                         </div>
                       )}
                     </div>
