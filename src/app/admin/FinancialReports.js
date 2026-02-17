@@ -1073,7 +1073,7 @@ const FinancialReports = () => {
       TITLE_BG: "28A745",
       UNIT_HDR: "A8E6CF",
       AMOUNT_HDR: "B3E5FC",
-      MOP_HDR: "B3E5FC",
+      MOP_HDR: "EEE9F7",
       POP_HDR: "F8BBD0",
       DATE_HDR: "FFE0B2",
 
