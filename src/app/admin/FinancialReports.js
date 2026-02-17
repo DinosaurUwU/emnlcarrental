@@ -1046,8 +1046,6 @@ const FinancialReports = () => {
 
 
 
-
-
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
 
@@ -1107,12 +1105,11 @@ const FinancialReports = () => {
       "DECEMBER",
     ];
 
-        const COLUMNS_PER_BLOCK = 6;
-
+    const COLUMNS_PER_BLOCK = 5;
     const GAP_COLS = 2;
+    const GAP_ROWS = 2;
     const BLOCK_COLS = COLUMNS_PER_BLOCK + GAP_COLS;
     const MONTHS_PER_ROW = 3;
-    const BLOCK_ROWS = 10;
 
     const borderFull = {
       top: { style: "thin", color: { rgb: "000000" } },
@@ -1123,8 +1120,19 @@ const FinancialReports = () => {
 
     const leftBorder = { left: { style: "thin", color: { rgb: "000000" } } };
     const rightBorder = { right: { style: "thin", color: { rgb: "000000" } } };
-    const bottomBorder = {
-      bottom: { style: "thin", color: { rgb: "000000" } },
+
+    // Helper function to get monthRows from gridData
+    const getMonthRows = (data, monthIndex) => {
+      let monthRows = [];
+      if (Array.isArray(data[monthIndex])) {
+        monthRows = data[monthIndex];
+      } else if (data[monthIndex] && typeof data[monthIndex] === "object") {
+        const rowKeys = Object.keys(data[monthIndex])
+          .filter((k) => k.startsWith("Row_"))
+          .sort((a, b) => parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")));
+        monthRows = rowKeys.map((k) => data[monthIndex][k]);
+      }
+      return monthRows;
     };
 
     // REUSABLE SHEET GENERATOR
@@ -1134,38 +1142,46 @@ const FinancialReports = () => {
 
       let maxRowUsed = 0;
 
+      // Calculate dynamic block heights for each row of months
+      const blockHeights = [];
+      for (let row = 0; row < 4; row++) {
+        let maxHeight = 7; // Minimum: title + header + 5 rows
+        for (let col = 0; col < 3; col++) {
+          const m = row * 3 + col;
+          if (m >= 12) break;
+          
+          const monthRows = getMonthRows(gridData, m);
+          // Use total rows count (not just filled)
+          maxHeight = Math.max(maxHeight, monthRows.length + 3); // +3 for title, header, total
+        }
+        // Add gap rows EXCEPT for the last row
+        if (row < 3) {
+          maxHeight += GAP_ROWS;
+        }
+        blockHeights.push(maxHeight);
+      }
+
+
       for (let m = 0; m < 12; m++) {
         const month = monthNames[m];
-        // const monthRows = Array.isArray(gridData[m]) ? gridData[m] : [];
-
-        // Handle both array format and object with Row_X keys
-        let monthRows = [];
-        if (Array.isArray(gridData[m])) {
-          monthRows = gridData[m];
-        } else if (gridData[m] && typeof gridData[m] === "object") {
-          // Convert object with Row_X keys to array
-          const rowKeys = Object.keys(gridData[m])
-            .filter((k) => k.startsWith("Row_"))
-            .sort(
-              (a, b) =>
-                parseInt(a.replace("Row_", "")) -
-                parseInt(b.replace("Row_", "")),
-            );
-          monthRows = rowKeys.map((k) => gridData[m][k]);
-        }
+        const monthRows = getMonthRows(gridData, m);
 
         const startCol = (m % MONTHS_PER_ROW) * BLOCK_COLS;
-        const startRow = Math.floor(m / MONTHS_PER_ROW) * BLOCK_ROWS;
+        
+        // Calculate startRow dynamically based on previous block heights
+        let startRow = 0;
+        const monthRow = Math.floor(m / MONTHS_PER_ROW);
+        for (let i = 0; i < monthRow; i++) {
+          startRow += blockHeights[i];
+        }
 
         // MONTH TITLE
-                ws["!merges"].push({
+        ws["!merges"].push({
           s: { r: startRow, c: startCol },
-          e: { r: startRow, c: startCol + 5 },
+          e: { r: startRow, c: startCol + 4 },
         });
 
-
-                for (let col = startCol; col <= startCol + 5; col++) {
-
+        for (let col = startCol; col <= startCol + 4; col++) {
           ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
             v: col === startCol ? `${month} ${currentYear}` : "",
             t: "s",
@@ -1184,9 +1200,9 @@ const FinancialReports = () => {
         }
 
         // HEADERS
-                const headers = isExpense
-          ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE", "TOTAL"]
-          : ["UNIT", "AMOUNT", "MOP", "POP", "DATE", "TOTAL"];
+        const headers = isExpense
+          ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE"]
+          : ["UNIT", "AMOUNT", "MOP", "POP", "DATE"];
 
         const headerBGs = [
           COLORS.UNIT_HDR,
@@ -1194,11 +1210,9 @@ const FinancialReports = () => {
           COLORS.MOP_HDR,
           COLORS.POP_HDR,
           COLORS.DATE_HDR,
-          "FFD700", // Gold for TOTAL
         ];
 
-
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 5; i++) {
           ws[XLSX.utils.encode_cell({ r: startRow + 1, c: startCol + i })] = {
             v: headers[i],
             t: "s",
@@ -1223,7 +1237,7 @@ const FinancialReports = () => {
           }
         }
 
-
+        // Use ALL rows, not just filled
         const rowsToShow = Math.max(monthRows.length, 5);
 
         for (let r = 0; r < rowsToShow; r++) {
@@ -1248,7 +1262,7 @@ const FinancialReports = () => {
               ]
             : [null, null, null, null, null];
 
-          for (let c = 0; c < 6; c++) {
+          for (let c = 0; c < 5; c++) {
             const rr = startRow + 2 + r;
             const cc = startCol + c;
 
@@ -1258,7 +1272,6 @@ const FinancialReports = () => {
               border: {
                 ...(c === 0 ? leftBorder : {}),
                 ...rightBorder,
-                ...(r === rowsToShow - 1 ? bottomBorder : {}),
               },
               ...(rowBGs[c] ? { fill: { fgColor: { rgb: rowBGs[c] } } } : {}),
             };
@@ -1281,31 +1294,48 @@ const FinancialReports = () => {
                   },
                 };
               }
-            } else if (c === 5) {
-              // TOTAL column - show total only on last row
-              if (r === rowsToShow - 1) {
-                ws[ref] = {
-                  v: monthTotal,
-                  t: "n",
-                  z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
-                  s: {
-                    ...cellStyle,
-                    fill: { fgColor: { rgb: "FFD700" } }, // Gold background
-                    font: { name: "Calibri", bold: true, sz: 12 },
-                    alignment: { horizontal: "right", vertical: "center" },
-                  },
-                };
-              } else {
-                ws[ref] = { v: "", t: "s", s: cellStyle };
-              }
             } else {
               ws[ref] = { v: formattedRow[c], t: "s", s: cellStyle };
             }
 
             maxRowUsed = Math.max(maxRowUsed, rr);
           }
-
         }
+
+        // Add TOTAL row at the bottom
+        const totalRow = startRow + 2 + rowsToShow;
+        const totalRowStyle = {
+          font: { name: "Calibri", bold: true, sz: 12 },
+          alignment: { horizontal: "center", vertical: "center" },
+          border: borderFull,
+          fill: { fgColor: { rgb: "FFD700" } },
+        };
+
+        ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol })] = {
+          v: "TOTAL",
+          t: "s",
+          s: totalRowStyle,
+        };
+
+        ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + 1 })] = {
+          v: monthTotal,
+          t: "n",
+          z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
+          s: {
+            ...totalRowStyle,
+            alignment: { horizontal: "right", vertical: "center" },
+          },
+        };
+
+        for (let c = 2; c < 5; c++) {
+          ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + c })] = {
+            v: "",
+            t: "s",
+            s: totalRowStyle,
+          };
+        }
+
+        maxRowUsed = Math.max(maxRowUsed, totalRow);
       }
 
       // Column widths
@@ -1319,9 +1349,7 @@ const FinancialReports = () => {
         ws["!cols"][base + 2] = { wch: 14 };
         ws["!cols"][base + 3] = { wch: 20 };
         ws["!cols"][base + 4] = { wch: 22 };
-        ws["!cols"][base + 5] = { wch: 18 }; // TOTAL column
       }
-
 
       ws["!ref"] = XLSX.utils.encode_range({
         s: { r: 0, c: 0 },
@@ -1331,7 +1359,7 @@ const FinancialReports = () => {
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
     }
 
-    // CREATE BOTH SHEETS - pass the current year's data
+    // CREATE BOTH SHEETS
     generateSheet(
       revenueGrid[currentYear] || {},
       `REVENUE ${currentYear}`,
@@ -4495,6 +4523,330 @@ export default FinancialReports;
 // export default React.memo(FinancialReports);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  // const handleExport = () => {
+  //   const wb = XLSX.utils.book_new();
+
+  //   const fileName = `EMNL Financial Report ${currentYear}.xlsx`;
+
+  //   const formatExportDate = (val) => {
+  //     if (!val) return "";
+  //     const d = new Date(val);
+  //     if (isNaN(d)) return val;
+
+  //     let mm = String(d.getMonth() + 1).padStart(2, "0");
+  //     let dd = String(d.getDate()).padStart(2, "0");
+  //     let yyyy = d.getFullYear();
+
+  //     let hr = d.getHours();
+  //     let min = String(d.getMinutes()).padStart(2, "0");
+  //     let ampm = hr >= 12 ? "PM" : "AM";
+  //     hr = hr % 12 || 12;
+
+  //     return `${mm}/${dd}/${yyyy} | ${hr}:${min} ${ampm}`;
+  //   };
+
+  //   // Colors for REVENUE sheet
+  //   const REVENUE_COLORS = {
+  //     TITLE_BG: "28A745",
+  //     UNIT_HDR: "A8E6CF",
+  //     AMOUNT_HDR: "B3E5FC",
+  //     MOP_HDR: "B3E5FC",
+  //     POP_HDR: "F8BBD0",
+  //     DATE_HDR: "FFE0B2",
+
+  //     UNIT_ROW: "DFF7EE",
+  //     AMOUNT_ROW: "E3F6FE",
+  //     MOP_ROW: "EEE9F7",
+  //     POP_ROW: "FDE6EE",
+  //     DATE_ROW: "FFF3E0",
+  //   };
+
+  //   // Colors for EXPENSE sheet
+  //   const EXPENSE_COLORS = {
+  //     ...REVENUE_COLORS,
+  //     TITLE_BG: "DC3545",
+  //   };
+
+  //   const monthNames = [
+  //     "JANUARY",
+  //     "FEBRUARY",
+  //     "MARCH",
+  //     "APRIL",
+  //     "MAY",
+  //     "JUNE",
+  //     "JULY",
+  //     "AUGUST",
+  //     "SEPTEMBER",
+  //     "OCTOBER",
+  //     "NOVEMBER",
+  //     "DECEMBER",
+  //   ];
+
+  //       const COLUMNS_PER_BLOCK = 5;
+
+  //   const GAP_COLS = 2;
+  //   const BLOCK_COLS = COLUMNS_PER_BLOCK + GAP_COLS;
+  //   const MONTHS_PER_ROW = 3;
+  //       const BLOCK_ROWS = 11; // Increased to accommodate TOTAL row
+
+
+  //   const borderFull = {
+  //     top: { style: "thin", color: { rgb: "000000" } },
+  //     bottom: { style: "thin", color: { rgb: "000000" } },
+  //     left: { style: "thin", color: { rgb: "000000" } },
+  //     right: { style: "thin", color: { rgb: "000000" } },
+  //   };
+
+  //   const leftBorder = { left: { style: "thin", color: { rgb: "000000" } } };
+  //   const rightBorder = { right: { style: "thin", color: { rgb: "000000" } } };
+  //   const bottomBorder = {
+  //     bottom: { style: "thin", color: { rgb: "000000" } },
+  //   };
+
+  //   // REUSABLE SHEET GENERATOR
+  //   function generateSheet(gridData, sheetName, COLORS, isExpense = false) {
+  //     const ws = {};
+  //     ws["!merges"] = [];
+
+  //     let maxRowUsed = 0;
+
+  //     for (let m = 0; m < 12; m++) {
+  //       const month = monthNames[m];
+  //       // const monthRows = Array.isArray(gridData[m]) ? gridData[m] : [];
+
+  //       // Handle both array format and object with Row_X keys
+  //       let monthRows = [];
+  //       if (Array.isArray(gridData[m])) {
+  //         monthRows = gridData[m];
+  //       } else if (gridData[m] && typeof gridData[m] === "object") {
+  //         // Convert object with Row_X keys to array
+  //         const rowKeys = Object.keys(gridData[m])
+  //           .filter((k) => k.startsWith("Row_"))
+  //           .sort(
+  //             (a, b) =>
+  //               parseInt(a.replace("Row_", "")) -
+  //               parseInt(b.replace("Row_", "")),
+  //           );
+  //         monthRows = rowKeys.map((k) => gridData[m][k]);
+  //       }
+
+  //       const startCol = (m % MONTHS_PER_ROW) * BLOCK_COLS;
+  //       const startRow = Math.floor(m / MONTHS_PER_ROW) * BLOCK_ROWS;
+
+  //       // MONTH TITLE
+  //               ws["!merges"].push({
+  //         s: { r: startRow, c: startCol },
+  //         e: { r: startRow, c: startCol + 4 },
+  //       });
+
+
+  //               for (let col = startCol; col <= startCol + 4; col++) {
+
+  //         ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
+  //           v: col === startCol ? `${month} ${currentYear}` : "",
+  //           t: "s",
+  //           s: {
+  //             fill: { fgColor: { rgb: COLORS.TITLE_BG } },
+  //             font: {
+  //               name: "Arial Black",
+  //               bold: true,
+  //               sz: 14,
+  //               color: { rgb: "FFFFFFFF" },
+  //             },
+  //             alignment: { horizontal: "center", vertical: "center" },
+  //             border: borderFull,
+  //           },
+  //         };
+  //       }
+
+  //       // HEADERS
+  //               const headers = isExpense
+  //         ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE"]
+  //         : ["UNIT", "AMOUNT", "MOP", "POP", "DATE"];
+
+  //       const headerBGs = [
+  //         COLORS.UNIT_HDR,
+  //         COLORS.AMOUNT_HDR,
+  //         COLORS.MOP_HDR,
+  //         COLORS.POP_HDR,
+  //         COLORS.DATE_HDR,
+  //       ];
+
+
+  //       for (let i = 0; i < 5; i++) {
+  //         ws[XLSX.utils.encode_cell({ r: startRow + 1, c: startCol + i })] = {
+  //           v: headers[i],
+  //           t: "s",
+  //           s: {
+  //             fill: { fgColor: { rgb: headerBGs[i] } },
+  //             font: { name: "Arial", bold: true, sz: 11 },
+  //             alignment: { horizontal: "center" },
+  //             border: borderFull,
+  //           },
+  //         };
+  //       }
+
+  //       // Calculate month total
+  //       let monthTotal = 0;
+  //       for (let r = 0; r < monthRows.length; r++) {
+  //         const raw = monthRows[r];
+  //         if (raw && raw[1]) {
+  //           const cleaned = Number(raw[1]?.toString().replace(/[₱,]/g, ""));
+  //           if (!isNaN(cleaned)) {
+  //             monthTotal += cleaned;
+  //           }
+  //         }
+  //       }
+
+
+  //       const rowsToShow = Math.max(monthRows.length, 5);
+
+  //       for (let r = 0; r < rowsToShow; r++) {
+  //         const raw = monthRows[r] || ["", "", "", "", ""];
+
+  //         const formattedRow = [
+  //           raw[0] ?? "",
+  //           raw[1] ?? "",
+  //           raw[2] ?? "",
+  //           raw[3] ?? "",
+  //           formatExportDate(raw[4]),
+  //         ];
+
+  //         const isColored = r % 2 === 0;
+  //         const rowBGs = isColored
+  //           ? [
+  //               COLORS.UNIT_ROW,
+  //               COLORS.AMOUNT_ROW,
+  //               COLORS.MOP_ROW,
+  //               COLORS.POP_ROW,
+  //               COLORS.DATE_ROW,
+  //             ]
+  //           : [null, null, null, null, null];
+
+  //         for (let c = 0; c < 5; c++) {
+  //           const rr = startRow + 2 + r;
+  //           const cc = startCol + c;
+
+  //           const cellStyle = {
+  //             font: { name: "Calibri", bold: true, sz: 11 },
+  //             alignment: { horizontal: "center", vertical: "center" },
+  //             border: {
+  //               ...(c === 0 ? leftBorder : {}),
+  //               ...rightBorder,
+  //             },
+  //             ...(rowBGs[c] ? { fill: { fgColor: { rgb: rowBGs[c] } } } : {}),
+  //           };
+
+  //           const ref = XLSX.utils.encode_cell({ r: rr, c: cc });
+
+  //           // AMOUNT column (#1)
+  //           if (c === 1) {
+  //             const cleaned = Number(raw[1]?.toString().replace(/[₱,]/g, ""));
+  //             if (!raw[1]) {
+  //               ws[ref] = { v: "", t: "s", s: cellStyle };
+  //             } else {
+  //               ws[ref] = {
+  //                 v: cleaned,
+  //                 t: "n",
+  //                 z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
+  //                 s: {
+  //                   ...cellStyle,
+  //                   alignment: { horizontal: "right", vertical: "center" },
+  //                 },
+  //               };
+  //             }
+  //           } else {
+  //             ws[ref] = { v: formattedRow[c], t: "s", s: cellStyle };
+  //           }
+
+  //           maxRowUsed = Math.max(maxRowUsed, rr);
+  //         }
+  //       }
+
+  //       // Add TOTAL row at the bottom
+  //       const totalRow = startRow + 2 + rowsToShow;
+  //       const totalRowStyle = {
+  //         font: { name: "Calibri", bold: true, sz: 12 },
+  //         alignment: { horizontal: "center", vertical: "center" },
+  //         border: borderFull,
+  //         fill: { fgColor: { rgb: "FFD700" } }, // Gold background
+  //       };
+
+  //       // TOTAL label in first column
+  //       ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol })] = {
+  //         v: "TOTAL",
+  //         t: "s",
+  //         s: totalRowStyle,
+  //       };
+
+  //       // Total amount in second column
+  //       ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + 1 })] = {
+  //         v: monthTotal,
+  //         t: "n",
+  //         z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
+  //         s: {
+  //           ...totalRowStyle,
+  //           alignment: { horizontal: "right", vertical: "center" },
+  //         },
+  //       };
+
+  //       // Empty cells for remaining columns
+  //       for (let c = 2; c < 5; c++) {
+  //         ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + c })] = {
+  //           v: "",
+  //           t: "s",
+  //           s: totalRowStyle,
+  //         };
+  //       }
+
+  //       maxRowUsed = Math.max(maxRowUsed, totalRow);
+
+  //     }
+
+
+
+  //     // Column widths
+  //     const totalCols = MONTHS_PER_ROW * BLOCK_COLS;
+  //     ws["!cols"] = Array(totalCols).fill({ wch: 2 });
+
+  //     for (let b = 0; b < MONTHS_PER_ROW; b++) {
+  //       const base = b * BLOCK_COLS;
+  //       ws["!cols"][base + 0] = { wch: 20 };
+  //       ws["!cols"][base + 1] = { wch: 18 };
+  //       ws["!cols"][base + 2] = { wch: 14 };
+  //       ws["!cols"][base + 3] = { wch: 20 };
+  //       ws["!cols"][base + 4] = { wch: 22 };
+  //     }
+
+
+  //     ws["!ref"] = XLSX.utils.encode_range({
+  //       s: { r: 0, c: 0 },
+  //       e: { r: maxRowUsed + 2, c: totalCols - 1 },
+  //     });
+
+  //     XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  //   }
+
+  //   // CREATE BOTH SHEETS - pass the current year's data
+  //   generateSheet(
+  //     revenueGrid[currentYear] || {},
+  //     `REVENUE ${currentYear}`,
+  //     REVENUE_COLORS,
+  //     false,
+  //   );
+  //   generateSheet(
+  //     expenseGrid[currentYear] || {},
+  //     `EXPENSE ${currentYear}`,
+  //     EXPENSE_COLORS,
+  //     true,
+  //   );
+
+  //   XLSX.writeFile(wb, fileName);
+  // };
+
+
 
 // const saveAllPendingToFirestore = async () => {
 //   setSavingStatus(true);
