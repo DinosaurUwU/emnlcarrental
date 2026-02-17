@@ -52,7 +52,9 @@ const FinancialReports = () => {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0–11
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [exportYear, setExportYear] = useState(currentYear);
+
 
   const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
   const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
@@ -3403,27 +3405,11 @@ const FinancialReports = () => {
               </div>
 
               {/* Column 2: Export Button */}
-              <div className="group-right export-block">
-                <select 
-                  value={exportYear} 
-                  onChange={(e) => setExportYear(parseInt(e.target.value))}
-                  className="export-year-select"
-                  style={{
-                    padding: "8px 12px",
-                    marginRight: "8px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    cursor: "pointer"
-                  }}
+              <div className="group-right export-block" style={{ position: "relative" }}>
+                <button 
+                  className="export-btn" 
+                  onClick={() => setShowExportDropdown(!showExportDropdown)}
                 >
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-                <button className="export-btn" onClick={handleExport}>
-
                   <span
                     style={{
                       display: "flex",
@@ -3435,6 +3421,63 @@ const FinancialReports = () => {
                     <MdDownload /> Export
                   </span>
                 </button>
+                {showExportDropdown && (
+                  <div 
+                    className="export-dropdown"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      right: 0,
+                      marginTop: "5px",
+                      background: "#fff",
+                      border: "1px solid #ccc",
+                      borderRadius: "8px",
+                      padding: "15px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      zIndex: 1000,
+                      minWidth: "200px"
+                    }}
+                  >
+                    <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
+                      Select Year to Export
+                    </div>
+                    <select
+                      value={exportYear}
+                      onChange={(e) => setExportYear(parseInt(e.target.value))}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        marginBottom: "10px"
+                      }}
+                    >
+                      {yearOptions.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => {
+                        setShowExportDropdown(false);
+                        handleExport();
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        background: "#28a745",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      Confirm Export
+                    </button>
+                  </div>
+                )}
                 <button
                   className="reset-btn"
                   onClick={() => setShowResetConfirm(true)}
@@ -3451,6 +3494,7 @@ const FinancialReports = () => {
                   </span>
                 </button>
               </div>
+
             </div>
           </div>
 
