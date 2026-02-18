@@ -5978,6 +5978,29 @@ const loadFinancialReport = async (type, year) => {
     }
   };
 
+    // Update cache with new image data (call this when image is updated)
+  const updateImageCache = async (imageId, data) => {
+    // Update React state
+    setImageCache((prev) => ({
+      ...prev,
+      [imageId]: data,
+    }));
+    
+    // Update IndexedDB
+    try {
+      const db = await getImageDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction("images", "readwrite");
+        const store = transaction.objectStore("images");
+        store.put({ id: imageId, data });
+        transaction.oncomplete = () => resolve();
+      });
+    } catch (e) {
+      console.warn(`Error updating cache for ${imageId}:`, e);
+    }
+  };
+
+
   
   // Single DB connection reference
   const imageDBRef = useRef(null);
@@ -6750,6 +6773,7 @@ const loadFinancialReport = async (type, year) => {
     <UserContext.Provider
       value={{
         clearImageCache,
+        updateImageCache,
         signInWithFacebook,
         isUpdatingUser,
         linkAccount,

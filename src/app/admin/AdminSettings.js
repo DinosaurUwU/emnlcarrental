@@ -887,7 +887,44 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const result = await updateUnitData(selectedUnitId, normalizedUnit);
 
     if (result.success) {
-      // Upload main image if changed
+    //   // Upload main image if changed
+    //   if (editedMainImageFile) {
+    //     const uploadResult = await updateUnitImage(
+    //       selectedUnitId,
+    //       "main",
+    //       editedMainImageFile,
+    //     );
+    //     if (uploadResult.success) {
+    //       setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
+    //     } else {
+    //       setAdminErrorMessage(
+    //         "Failed to upload main image: " + uploadResult.error,
+    //       );
+    //       setShowAdminError(true);
+    //     }
+    //   } else {
+    //     setMainImage(editedMainImage || mainImage); // Already object
+    //   }
+
+    //   // Update gallery images
+    //   const galleryResult = await updateUnitGalleryImages(
+    //     selectedUnitId,
+    //     editedGalleryImages,
+    //     editedGalleryImageFiles,
+    //     galleryImages,
+    //     currentUnit.galleryIds,
+    //   );
+    //   if (galleryResult.success) {
+    //     setGalleryImages(galleryResult.newGalleryImages); // Now objects
+    //   } else {
+    //     setAdminErrorMessage(
+    //       "Failed to update gallery: " + galleryResult.error,
+    //     );
+    //     setShowAdminError(true);
+    //   }
+
+
+          // Upload main image if changed
       if (editedMainImageFile) {
         const uploadResult = await updateUnitImage(
           selectedUnitId,
@@ -895,7 +932,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
           editedMainImageFile,
         );
         if (uploadResult.success) {
-          setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
+          const imageData = { base64: uploadResult.base64, updatedAt: Date.now() };
+          setMainImage(imageData);
+          // Update cache with new image
+          await updateImageCache(`${selectedUnitId}_main`, imageData);
         } else {
           setAdminErrorMessage(
             "Failed to upload main image: " + uploadResult.error,
@@ -906,7 +946,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         setMainImage(editedMainImage || mainImage); // Already object
       }
 
-      // Update gallery images
+            // Update gallery images
       const galleryResult = await updateUnitGalleryImages(
         selectedUnitId,
         editedGalleryImages,
@@ -915,13 +955,21 @@ const AdminSettings = ({ subSection = "overview" }) => {
         currentUnit.galleryIds,
       );
       if (galleryResult.success) {
-        setGalleryImages(galleryResult.newGalleryImages); // Now objects
+        setGalleryImages(galleryResult.newGalleryImages);
+        // Update cache for each gallery image
+        for (let i = 0; i < galleryResult.newGalleryImages.length; i++) {
+          const img = galleryResult.newGalleryImages[i];
+          if (img && img.base64) {
+            await updateImageCache(`${selectedUnitId}_gallery_${i}`, img);
+          }
+        }
       } else {
         setAdminErrorMessage(
           "Failed to update gallery: " + galleryResult.error,
         );
         setShowAdminError(true);
       }
+
 
       setShowSavedSuccess(true);
       setIsEditing(false);
@@ -1030,7 +1078,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
       }
     }
 
-    
+
     // Reset file input to allow re-uploading the same file
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
