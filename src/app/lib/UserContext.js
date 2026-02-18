@@ -333,18 +333,27 @@ export const UserProvider = ({ children }) => {
   };
 
   const triggerCancelFill = (bookingId) => {
+    console.log("🔴 triggerCancelFill CALLED with bookingId:", bookingId);
+
     // Remove this booking from paymentEntries completely
     setPaymentEntries((prev) => {
       const updated = { ...prev };
       delete updated[bookingId];
+      console.log("🔴 paymentEntries after delete:", Object.keys(updated));
       return updated;
     });
 
     // Trigger cancel cleanup in FinancialReports
+    console.log("🔴 Setting cancelTrigger to:", bookingId);
     setCancelTrigger(bookingId);
 
     // Reset trigger safely after a short delay
-    setTimeout(() => setCancelTrigger(null), 300);
+    // setTimeout(() => setCancelTrigger(null), 300);
+
+    // setTimeout(() => {
+    //   console.log("🔴 Resetting cancelTrigger to null");
+    //   setCancelTrigger(null);
+    // }, 300);
   };
 
   const [allUnitData, setAllUnitData] = useState([]);
@@ -6615,6 +6624,7 @@ const loadFinancialReport = async (type, year) => {
 
         triggerCancelFill,
         cancelTrigger,
+        setCancelTrigger,
 
         hasServerChange,
         setHasServerChange,

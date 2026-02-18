@@ -23,6 +23,7 @@ const FinancialReports = () => {
     paymentEntries,
     autoFillTrigger,
     cancelTrigger,
+    setCancelTrigger,
     triggerAutoFill,
     removePaymentEntry,
 
@@ -1476,8 +1477,15 @@ const FinancialReports = () => {
   // Autofill payments when context changes
   useEffect(() => {
 
+    console.log("📊 USEFFECT RUNNING - cancelTrigger:", cancelTrigger, "paymentEntries keys:", Object.keys(paymentEntries || {}));
+
+
     // CASE 1: Handle booking cancellation cleanup
     if (cancelTrigger) {
+      
+console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
+      console.log("🔴 CANCEL TRIGGER TYPE:", typeof cancelTrigger);
+
       setRevenueGrid((prev) => {
         const currentYearData = prev[currentYear] || {};
         const newGrid = JSON.parse(JSON.stringify(currentYearData));
@@ -1517,6 +1525,7 @@ const FinancialReports = () => {
                   row[5]?._isAutoFill &&
                   row[5]._bookingId === String(cancelTrigger)
                 ) {
+                  console.log("🟢 MATCH FOUND! Clearing row:", rowKey);
                   monthData[rowKey] = Array(5).fill("");
                 }
               });
@@ -1525,6 +1534,9 @@ const FinancialReports = () => {
           return newGrid;
         });
       }
+      // Reset cancelTrigger after processing
+      setCancelTrigger(null);
+
       return;
     }
 

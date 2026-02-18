@@ -58,6 +58,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [unitTypeFilter, setUnitTypeFilter] = useState("All");
+  const [showUnitTypeDropdown, setShowUnitTypeDropdown] = useState(false);
+
+  const unitTypeDropdownRef = useRef(null);
+
   const fileInputRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedUnit, setEditedUnit] = useState(null);
@@ -489,6 +494,24 @@ const AdminSettings = ({ subSection = "overview" }) => {
     showClientDetailsOverlay,
   ]);
 
+    // Close unit type dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (unitTypeDropdownRef.current && !unitTypeDropdownRef.current.contains(e.target)) {
+        setShowUnitTypeDropdown(false);
+      }
+    };
+
+    if (showUnitTypeDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUnitTypeDropdown]);
+
+
   useEffect(() => {
     if (showSavedSuccess) {
       const timer = setTimeout(() => {
@@ -570,9 +593,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
     }
   };
 
-  // Filter units by search term ONLY, ignore hidden
+    // Filter units by search term AND unit type
   const filteredUnitData =
     allUnitData?.filter((car) => {
+      // Filter by unit type first
+      if (unitTypeFilter !== "All" && car.carType?.toUpperCase() !== unitTypeFilter) {
+        return false;
+      }
+      
+      // Then filter by search term
       if (!searchTerm) return true;
       const search = searchTerm.toLowerCase();
       const analytics = completedBookingsAnalytics[car.plateNo];
@@ -599,6 +628,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
         bookingsCount.toString().includes(search)
       );
     }) || [];
+
+
+
 
   // Sorting logic
   const sortedUnitData = [...filteredUnitData].sort((a, b) => {
@@ -1386,24 +1418,47 @@ const AdminSettings = ({ subSection = "overview" }) => {
     setShowReferralFinalConfirm(true);
   };
 
+    // Compute unit type counts for filter dropdown
+  const unitTypeCounts = useMemo(() => {
+    const counts = { All: allUnitData?.length || 0 };
+    allUnitData?.forEach((unit) => {
+      const type = unit.carType?.toUpperCase() || "OTHER";
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return counts;
+  }, [allUnitData]);
+
+
+
+
+
   const mopData = useMemo(() => {
     const counts = {};
     const balances = {};
     const recents = {};
-    Object.values(revenueGrid).forEach((monthRows) => {
-      monthRows.forEach((row) => {
-        const mop = row[2];
-        const amountStr = row[1];
-        const dateStr = row[4];
-        if (mop && amountStr) {
-          counts[mop] = (counts[mop] || 0) + 1;
-          const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-          balances[mop] = (balances[mop] || 0) + amount;
-          const date = new Date(dateStr);
-          if (date && (!recents[mop] || date > recents[mop])) {
-            recents[mop] = date;
+    
+    // revenueGrid structure: { [year]: { [monthIndex]: { Row_0: [...], Row_1: [...], ... } } }
+    Object.values(revenueGrid || {}).forEach((yearData) => {
+      if (typeof yearData !== "object" || Array.isArray(yearData)) return;
+      
+      Object.values(yearData).forEach((monthData) => {
+        if (typeof monthData !== "object" || Array.isArray(monthData)) return;
+        
+        Object.values(monthData).forEach((row) => {
+          if (!Array.isArray(row)) return;
+          const mop = row[2];
+          const amountStr = row[1];
+          const dateStr = row[4];
+          if (mop && amountStr) {
+            counts[mop] = (counts[mop] || 0) + 1;
+            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            balances[mop] = (balances[mop] || 0) + amount;
+            const date = new Date(dateStr);
+            if (date && !isNaN(date.getTime()) && (!recents[mop] || date > recents[mop])) {
+              recents[mop] = date;
+            }
           }
-        }
+        });
       });
     });
     return { counts, balances, recents };
@@ -1413,20 +1468,28 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const counts = {};
     const balances = {};
     const recents = {};
-    Object.values(revenueGrid).forEach((monthRows) => {
-      monthRows.forEach((row) => {
-        const pop = row[3];
-        const amountStr = row[1];
-        const dateStr = row[4];
-        if (pop && amountStr) {
-          counts[pop] = (counts[pop] || 0) + 1;
-          const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-          balances[pop] = (balances[pop] || 0) + amount;
-          const date = new Date(dateStr);
-          if (date && (!recents[pop] || date > recents[pop])) {
-            recents[pop] = date;
+    
+    Object.values(revenueGrid || {}).forEach((yearData) => {
+      if (typeof yearData !== "object" || Array.isArray(yearData)) return;
+      
+      Object.values(yearData).forEach((monthData) => {
+        if (typeof monthData !== "object" || Array.isArray(monthData)) return;
+        
+        Object.values(monthData).forEach((row) => {
+          if (!Array.isArray(row)) return;
+          const pop = row[3];
+          const amountStr = row[1];
+          const dateStr = row[4];
+          if (pop && amountStr) {
+            counts[pop] = (counts[pop] || 0) + 1;
+            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            balances[pop] = (balances[pop] || 0) + amount;
+            const date = new Date(dateStr);
+            if (date && !isNaN(date.getTime()) && (!recents[pop] || date > recents[pop])) {
+              recents[pop] = date;
+            }
           }
-        }
+        });
       });
     });
     return { counts, balances, recents };
@@ -1436,24 +1499,36 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const counts = {};
     const balances = {};
     const recents = {};
-    Object.values(expenseGrid).forEach((monthRows) => {
-      monthRows.forEach((row) => {
-        const poe = row[3];
-        const amountStr = row[1];
-        const dateStr = row[4];
-        if (poe && amountStr) {
-          counts[poe] = (counts[poe] || 0) + 1;
-          const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-          balances[poe] = (balances[poe] || 0) + amount;
-          const date = new Date(dateStr);
-          if (date && (!recents[poe] || date > recents[poe])) {
-            recents[poe] = date;
+    
+    Object.values(expenseGrid || {}).forEach((yearData) => {
+      if (typeof yearData !== "object" || Array.isArray(yearData)) return;
+      
+      Object.values(yearData).forEach((monthData) => {
+        if (typeof monthData !== "object" || Array.isArray(monthData)) return;
+        
+        Object.values(monthData).forEach((row) => {
+          if (!Array.isArray(row)) return;
+          const poe = row[3];
+          const amountStr = row[1];
+          const dateStr = row[4];
+          if (poe && amountStr) {
+            counts[poe] = (counts[poe] || 0) + 1;
+            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            balances[poe] = (balances[poe] || 0) + amount;
+            const date = new Date(dateStr);
+            if (date && !isNaN(date.getTime()) && (!recents[poe] || date > recents[poe])) {
+              recents[poe] = date;
+            }
           }
-        }
+        });
       });
     });
     return { counts, balances, recents };
   }, [expenseGrid]);
+
+
+
+
 
   const referralData = useMemo(() => {
     const allBookings = Object.values(completedBookingsAnalytics).flatMap(
@@ -1677,9 +1752,35 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
       {/* Cars Section */}
       {(subSection === "overview" || subSection === "units") && (
-        <div className="cars-section">
-          <h2 className="section-title">
-            Units ({allUnitData ? allUnitData.length : 0})
+                <div className="cars-section">
+          <h2 
+            className="section-title clickable"
+            ref={unitTypeDropdownRef}
+            onClick={() => setShowUnitTypeDropdown(!showUnitTypeDropdown)}
+            style={{ cursor: "pointer", position: "relative" }}
+          >
+            {unitTypeFilter === "All" ? "Units" : unitTypeFilter} ({unitTypeCounts[unitTypeFilter] || 0})
+            
+            {showUnitTypeDropdown && (
+              <div className="unit-type-dropdown" onClick={(e) => e.stopPropagation()}>
+                {Object.entries(unitTypeCounts).map(([type, count]) => (
+                  <div
+                    key={type}
+                    className={`unit-type-option ${unitTypeFilter === type ? "active" : ""}`}
+                    onClick={() => {
+                      setUnitTypeFilter(type);
+                      setShowUnitTypeDropdown(false);
+                    }}
+                  >
+                    {type === "All" ? "All" : type} ({count})
+                  </div>
+                ))}
+              </div>
+            )}
+
+
+
+
             <div className="search-and-add">
               <input
                 type="text"
@@ -4905,3 +5006,107 @@ const AdminSettings = ({ subSection = "overview" }) => {
 // export default AdminSettings;
 
 export default React.memo(AdminSettings);
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+// const mopData = useMemo(() => {
+  //   const counts = {};
+  //   const balances = {};
+  //   const recents = {};
+  //   Object.values(revenueGrid).forEach((monthRows) => {
+  //     monthRows.forEach((row) => {
+  //       const mop = row[2];
+  //       const amountStr = row[1];
+  //       const dateStr = row[4];
+  //       if (mop && amountStr) {
+  //         counts[mop] = (counts[mop] || 0) + 1;
+  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+  //         balances[mop] = (balances[mop] || 0) + amount;
+  //         const date = new Date(dateStr);
+  //         if (date && (!recents[mop] || date > recents[mop])) {
+  //           recents[mop] = date;
+  //         }
+  //       }
+  //     });
+  //   });
+  //   return { counts, balances, recents };
+  // }, [revenueGrid]);
+
+  // const popData = useMemo(() => {
+  //   const counts = {};
+  //   const balances = {};
+  //   const recents = {};
+  //   Object.values(revenueGrid).forEach((monthRows) => {
+  //     monthRows.forEach((row) => {
+  //       const pop = row[3];
+  //       const amountStr = row[1];
+  //       const dateStr = row[4];
+  //       if (pop && amountStr) {
+  //         counts[pop] = (counts[pop] || 0) + 1;
+  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+  //         balances[pop] = (balances[pop] || 0) + amount;
+  //         const date = new Date(dateStr);
+  //         if (date && (!recents[pop] || date > recents[pop])) {
+  //           recents[pop] = date;
+  //         }
+  //       }
+  //     });
+  //   });
+  //   return { counts, balances, recents };
+  // }, [revenueGrid]);
+
+
+  // const poeData = useMemo(() => {
+  //   const counts = {};
+  //   const balances = {};
+  //   const recents = {};
+  //   Object.values(expenseGrid).forEach((monthRows) => {
+  //     monthRows.forEach((row) => {
+  //       const poe = row[3];
+  //       const amountStr = row[1];
+  //       const dateStr = row[4];
+  //       if (poe && amountStr) {
+  //         counts[poe] = (counts[poe] || 0) + 1;
+  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+  //         balances[poe] = (balances[poe] || 0) + amount;
+  //         const date = new Date(dateStr);
+  //         if (date && (!recents[poe] || date > recents[poe])) {
+  //           recents[poe] = date;
+  //         }
+  //       }
+  //     });
+  //   });
+  //   return { counts, balances, recents };
+  // }, [expenseGrid]);
+
+
+  //   // Filter units by search term ONLY, ignore hidden
+  // const filteredUnitData =
+  //   allUnitData?.filter((car) => {
+  //     if (!searchTerm) return true;
+  //     const search = searchTerm.toLowerCase();
+  //     const analytics = completedBookingsAnalytics[car.plateNo];
+  //     const bookingsCount = analytics?.bookings?.length || 0;
+  //     return (
+  //       car.name.toLowerCase().includes(search) ||
+  //       car.plateNo.toLowerCase().includes(search) ||
+  //       String(car.owner || "")
+  //         .toLowerCase()
+  //         .includes(search) ||
+  //       car.carType.toLowerCase().includes(search) ||
+  //       String(car.details?.specifications?.Transmission || "")
+  //         .toLowerCase()
+  //         .includes(search) ||
+  //       String(car.details?.specifications?.Fuel || "")
+  //         .toLowerCase()
+  //         .includes(search) ||
+  //       String(car.details?.specifications?.Capacity || "")
+  //         .toLowerCase()
+  //         .includes(search) ||
+  //       String(car.details?.specifications?.Color || "")
+  //         .toLowerCase()
+  //         .includes(search) ||
+  //       bookingsCount.toString().includes(search)
+  //     );
+  //   }) || [];
