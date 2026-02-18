@@ -1475,8 +1475,6 @@ const FinancialReports = () => {
 
   // Autofill payments when context changes
   useEffect(() => {
-    // Skip if no payment entries
-    if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
 
     // CASE 1: Handle booking cancellation cleanup
     if (cancelTrigger) {
@@ -1529,6 +1527,10 @@ const FinancialReports = () => {
       }
       return;
     }
+
+    // Skip if no payment entries
+    if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
+
 
     console.log("🟢 AUTOFILL TRIGGERED with paymentEntries:", paymentEntries);
 

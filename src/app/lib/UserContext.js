@@ -3711,18 +3711,24 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
         (bookingData.rentalDuration?.days || 0) * 86400 +
           (bookingData.rentalDuration?.extraHours || 0) * 3600;
 
-      const now = new Date();
-      const readableTimestamp = `${String(now.getMonth() + 1).padStart(
-        2,
-        "0",
-      )}${String(now.getDate()).padStart(2, "0")}${now.getFullYear()}${String(
-        now.getHours(),
-      ).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(
-        now.getSeconds(),
-      ).padStart(2, "0")}`;
-      const docId = `${plateNo}_${readableTimestamp}`;
+      // const now = new Date();
+      // const readableTimestamp = `${String(now.getMonth() + 1).padStart(
+      //   2,
+      //   "0",
+      // )}${String(now.getDate()).padStart(2, "0")}${now.getFullYear()}${String(
+      //   now.getHours(),
+      // ).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(
+      //   now.getSeconds(),
+      // ).padStart(2, "0")}`;
+      // const docId = `${plateNo}_${readableTimestamp}`;
+
+      // const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
+
+            // Use the provided bookingUid as docId to ensure consistency
+      const docId = bookingUid;
 
       const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
+
 
       const userStartTime =
         bookingData.startTimestamp?.toDate?.() || new Date();
@@ -5055,6 +5061,40 @@ Please ensure follow-ups and updates for the customer.`,
             return;
           }
 
+          // // Update analyticsMap with new data
+          // setCompletedBookingsAnalytics((prevMap) => {
+          //   const newMap = { ...prevMap };
+          //   if (!newMap[plateNo]) {
+          //     newMap[plateNo] = {
+          //       carName,
+          //       carType,
+          //       unitImage: data.unitImage || "",
+          //     };
+          //   }
+
+          //   const dayKey = rentalEnd.toISOString().slice(0, 10);
+          //   const monthKey = rentalEnd.toISOString().slice(0, 7);
+          //   const yearKey = rentalEnd.getFullYear().toString();
+          //   const keys = [dayKey, monthKey, yearKey];
+
+          //   keys.forEach((key) => {
+          //     if (!newMap[plateNo][key]) {
+          //       newMap[plateNo][key] = {
+          //         revenue: 0,
+          //         hours: 0,
+          //         timesRented: 0,
+          //         bookings: [],
+          //       };
+          //     }
+          //     newMap[plateNo][key].revenue += totalRevenue;
+          //     newMap[plateNo][key].hours += durationSec / 3600;
+          //     newMap[plateNo][key].timesRented += 1;
+          //     newMap[plateNo][key].bookings.push({ id: docId, ...data });
+          //   });
+
+          //   return newMap;
+          // });
+
           // Update analyticsMap with new data
           setCompletedBookingsAnalytics((prevMap) => {
             const newMap = { ...prevMap };
@@ -5086,8 +5126,28 @@ Please ensure follow-ups and updates for the customer.`,
               newMap[plateNo][key].bookings.push({ id: docId, ...data });
             });
 
+            // ✅ Rebuild flat bookings array for this plateNo
+            const allBookings = [];
+            for (const key in newMap[plateNo]) {
+              if (["carType", "unitImage", "carName", "bookings"].includes(key)) continue;
+              if (Array.isArray(newMap[plateNo][key]?.bookings)) {
+                allBookings.push(...newMap[plateNo][key].bookings);
+              }
+            }
+            
+            // Deduplicate by id
+            const uniqueMap = new Map();
+            allBookings.forEach((booking) => {
+              const key = booking.id || `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}`;
+              uniqueMap.set(key, booking);
+            });
+            
+            newMap[plateNo].bookings = Array.from(uniqueMap.values());
+
             return newMap;
           });
+
+
 
           // Add to calendar
           if (data.startTimestamp?.seconds) {
