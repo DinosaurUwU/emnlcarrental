@@ -5952,8 +5952,32 @@ const loadFinancialReport = async (type, year) => {
 
 
   
-  // IndexedDB for image caching
+
   
+
+    // Clear cache for a specific image (call this when image is updated)
+  const clearImageCache = async (imageId) => {
+    // Clear from React state
+    setImageCache((prev) => {
+      const updated = { ...prev };
+      delete updated[imageId];
+      return updated;
+    });
+    
+    // Clear from IndexedDB
+    try {
+      const db = await getImageDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction("images", "readwrite");
+        const store = transaction.objectStore("images");
+        store.delete(imageId);
+        transaction.oncomplete = () => resolve();
+      });
+    } catch (e) {
+      console.warn(`Error clearing cache for ${imageId}:`, e);
+    }
+  };
+
   
   // Single DB connection reference
   const imageDBRef = useRef(null);
@@ -6120,7 +6144,7 @@ const loadFinancialReport = async (type, year) => {
 
 
 
-  
+
   // UpdateUnitImage Function
   const updateUnitImage = async (
     plateNo,
@@ -6725,6 +6749,7 @@ const loadFinancialReport = async (type, year) => {
   return (
     <UserContext.Provider
       value={{
+        clearImageCache,
         signInWithFacebook,
         isUpdatingUser,
         linkAccount,

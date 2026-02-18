@@ -35,6 +35,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
     deleteReview,
     updateReview,
     fetchReviews,
+    clearImageCache,
+    updateImageCache,
   } = useUser();
 
   const [showAdminError, setShowAdminError] = useState(false);
@@ -985,11 +987,33 @@ const AdminSettings = ({ subSection = "overview" }) => {
         currentGalleryIndex,
       );
 
-      if (result.success) {
+
+
+            // if (result.success) {
+      //   const base64 = result.base64;
+
+      //   if (currentImageType === "main") {
+      //     setMainImage({ base64, updatedAt: Date.now() }); // Object
+      //   } else if (
+      //     currentImageType === "gallery" &&
+      //     currentGalleryIndex !== null
+      //   ) {
+      //     const updatedGallery = [...galleryImages];
+      //     updatedGallery[currentGalleryIndex] = {
+      //       base64,
+      //       updatedAt: Date.now(),
+      //     }; // Object
+      //     setGalleryImages(updatedGallery);
+      //   }
+      // }
+
+            if (result.success) {
         const base64 = result.base64;
 
         if (currentImageType === "main") {
-          setMainImage({ base64, updatedAt: Date.now() }); // Object
+          setMainImage({ base64, updatedAt: Date.now() });
+          // Clear cache for this image
+          await clearImageCache(`${selectedUnitId}_main`);
         } else if (
           currentImageType === "gallery" &&
           currentGalleryIndex !== null
@@ -998,8 +1022,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
           updatedGallery[currentGalleryIndex] = {
             base64,
             updatedAt: Date.now(),
-          }; // Object
+          };
           setGalleryImages(updatedGallery);
+          // Clear cache for this image
+          await clearImageCache(`${selectedUnitId}_gallery_${currentGalleryIndex}`);
         }
       }
     }
@@ -1036,6 +1062,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
               imageId,
               compressed.base64,
             );
+
+            // Clear cache for this image
+            await clearImageCache(imageId);
 
             if (!uploadResult.success) {
               setAdminErrorMessage(
