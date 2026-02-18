@@ -494,10 +494,13 @@ const AdminSettings = ({ subSection = "overview" }) => {
     showClientDetailsOverlay,
   ]);
 
-    // Close unit type dropdown when clicking outside
+  // Close unit type dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (unitTypeDropdownRef.current && !unitTypeDropdownRef.current.contains(e.target)) {
+      if (
+        unitTypeDropdownRef.current &&
+        !unitTypeDropdownRef.current.contains(e.target)
+      ) {
         setShowUnitTypeDropdown(false);
       }
     };
@@ -510,7 +513,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showUnitTypeDropdown]);
-
 
   useEffect(() => {
     if (showSavedSuccess) {
@@ -593,14 +595,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
     }
   };
 
-    // Filter units by search term AND unit type
+  // Filter units by search term AND unit type
   const filteredUnitData =
     allUnitData?.filter((car) => {
       // Filter by unit type first
-      if (unitTypeFilter !== "All" && car.carType?.toUpperCase() !== unitTypeFilter) {
+      if (
+        unitTypeFilter !== "All" &&
+        car.carType?.toUpperCase() !== unitTypeFilter
+      ) {
         return false;
       }
-      
+
       // Then filter by search term
       if (!searchTerm) return true;
       const search = searchTerm.toLowerCase();
@@ -628,9 +633,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
         bookingsCount.toString().includes(search)
       );
     }) || [];
-
-
-
 
   // Sorting logic
   const sortedUnitData = [...filteredUnitData].sort((a, b) => {
@@ -674,7 +676,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     setIsAddingUnit(false);
   };
 
-  const selectedUnit = unitData?.find(
+  const selectedUnit = allUnitData?.find(
     (unit) => unit.plateNo === selectedUnitId,
   );
 
@@ -1418,7 +1420,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     setShowReferralFinalConfirm(true);
   };
 
-    // Compute unit type counts for filter dropdown
+  // Compute unit type counts for filter dropdown
   const unitTypeCounts = useMemo(() => {
     const counts = { All: allUnitData?.length || 0 };
     allUnitData?.forEach((unit) => {
@@ -1428,22 +1430,18 @@ const AdminSettings = ({ subSection = "overview" }) => {
     return counts;
   }, [allUnitData]);
 
-
-
-
-
   const mopData = useMemo(() => {
     const counts = {};
     const balances = {};
     const recents = {};
-    
+
     // revenueGrid structure: { [year]: { [monthIndex]: { Row_0: [...], Row_1: [...], ... } } }
     Object.values(revenueGrid || {}).forEach((yearData) => {
       if (typeof yearData !== "object" || Array.isArray(yearData)) return;
-      
+
       Object.values(yearData).forEach((monthData) => {
         if (typeof monthData !== "object" || Array.isArray(monthData)) return;
-        
+
         Object.values(monthData).forEach((row) => {
           if (!Array.isArray(row)) return;
           const mop = row[2];
@@ -1451,10 +1449,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
           const dateStr = row[4];
           if (mop && amountStr) {
             counts[mop] = (counts[mop] || 0) + 1;
-            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            const amount =
+              parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
             balances[mop] = (balances[mop] || 0) + amount;
             const date = new Date(dateStr);
-            if (date && !isNaN(date.getTime()) && (!recents[mop] || date > recents[mop])) {
+            if (
+              date &&
+              !isNaN(date.getTime()) &&
+              (!recents[mop] || date > recents[mop])
+            ) {
               recents[mop] = date;
             }
           }
@@ -1468,13 +1471,13 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const counts = {};
     const balances = {};
     const recents = {};
-    
+
     Object.values(revenueGrid || {}).forEach((yearData) => {
       if (typeof yearData !== "object" || Array.isArray(yearData)) return;
-      
+
       Object.values(yearData).forEach((monthData) => {
         if (typeof monthData !== "object" || Array.isArray(monthData)) return;
-        
+
         Object.values(monthData).forEach((row) => {
           if (!Array.isArray(row)) return;
           const pop = row[3];
@@ -1482,10 +1485,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
           const dateStr = row[4];
           if (pop && amountStr) {
             counts[pop] = (counts[pop] || 0) + 1;
-            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            const amount =
+              parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
             balances[pop] = (balances[pop] || 0) + amount;
             const date = new Date(dateStr);
-            if (date && !isNaN(date.getTime()) && (!recents[pop] || date > recents[pop])) {
+            if (
+              date &&
+              !isNaN(date.getTime()) &&
+              (!recents[pop] || date > recents[pop])
+            ) {
               recents[pop] = date;
             }
           }
@@ -1499,13 +1507,13 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const counts = {};
     const balances = {};
     const recents = {};
-    
+
     Object.values(expenseGrid || {}).forEach((yearData) => {
       if (typeof yearData !== "object" || Array.isArray(yearData)) return;
-      
+
       Object.values(yearData).forEach((monthData) => {
         if (typeof monthData !== "object" || Array.isArray(monthData)) return;
-        
+
         Object.values(monthData).forEach((row) => {
           if (!Array.isArray(row)) return;
           const poe = row[3];
@@ -1513,10 +1521,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
           const dateStr = row[4];
           if (poe && amountStr) {
             counts[poe] = (counts[poe] || 0) + 1;
-            const amount = parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
+            const amount =
+              parseFloat(String(amountStr).replace(/[^\d.-]/g, "")) || 0;
             balances[poe] = (balances[poe] || 0) + amount;
             const date = new Date(dateStr);
-            if (date && !isNaN(date.getTime()) && (!recents[poe] || date > recents[poe])) {
+            if (
+              date &&
+              !isNaN(date.getTime()) &&
+              (!recents[poe] || date > recents[poe])
+            ) {
               recents[poe] = date;
             }
           }
@@ -1525,10 +1538,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     });
     return { counts, balances, recents };
   }, [expenseGrid]);
-
-
-
-
 
   const referralData = useMemo(() => {
     const allBookings = Object.values(completedBookingsAnalytics).flatMap(
@@ -1752,34 +1761,36 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
       {/* Cars Section */}
       {(subSection === "overview" || subSection === "units") && (
-                <div className="cars-section">
-          <h2 
-            className="section-title clickable"
-            ref={unitTypeDropdownRef}
-            onClick={() => setShowUnitTypeDropdown(!showUnitTypeDropdown)}
-            style={{ cursor: "pointer", position: "relative" }}
-          >
-            {unitTypeFilter === "All" ? "Units" : unitTypeFilter} ({unitTypeCounts[unitTypeFilter] || 0})
-            
-            {showUnitTypeDropdown && (
-              <div className="unit-type-dropdown" onClick={(e) => e.stopPropagation()}>
-                {Object.entries(unitTypeCounts).map(([type, count]) => (
-                  <div
-                    key={type}
-                    className={`unit-type-option ${unitTypeFilter === type ? "active" : ""}`}
-                    onClick={() => {
-                      setUnitTypeFilter(type);
-                      setShowUnitTypeDropdown(false);
-                    }}
-                  >
-                    {type === "All" ? "All" : type} ({count})
-                  </div>
-                ))}
-              </div>
-            )}
-
-
-
+        <div className="cars-section">
+          <h2 className="section-title">
+            <span
+              className="unit-type-selector"
+              ref={unitTypeDropdownRef}
+              onClick={() => setShowUnitTypeDropdown(!showUnitTypeDropdown)}
+            >
+              {unitTypeFilter === "All" ? "Units" : unitTypeFilter} (
+              {unitTypeCounts[unitTypeFilter] || 0})
+              <span className="dropdown-arrow">▼</span>
+              {showUnitTypeDropdown && (
+                <div
+                  className="unit-type-dropdown"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {Object.entries(unitTypeCounts).map(([type, count]) => (
+                    <div
+                      key={type}
+                      className={`unit-type-option ${unitTypeFilter === type ? "active" : ""}`}
+                      onClick={() => {
+                        setUnitTypeFilter(type);
+                        setShowUnitTypeDropdown(false);
+                      }}
+                    >
+                      {type === "All" ? "All" : type} ({count})
+                    </div>
+                  ))}
+                </div>
+              )}
+            </span>
 
             <div className="search-and-add">
               <input
@@ -2234,7 +2245,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
           <div className="content-subsections">
             <div className="content-page">
               <div className="content-page-header">
+                <div className="content-title-wrapper">
                 <h3>Reviews</h3>
+                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
                     <button
@@ -2386,7 +2400,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
             <div className="content-page">
               <div className="content-page-header">
+                <div className="content-title-wrapper">
                 <h3>Landing Page</h3>
+                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
                     <button
@@ -2514,7 +2531,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
             <div className="content-page">
               <div className="content-page-header">
+                <div className="content-title-wrapper">
                 <h3>Fleet Page</h3>
+                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
                     <button
@@ -2614,7 +2634,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
             <div className="content-page">
               <div className="content-page-header">
+                <div className="content-title-wrapper">
                 <h3>About & Contact Pages</h3>
+                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
                     <button
@@ -2809,7 +2832,35 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
                   <div className="unit-info-column">
                     <div className="unit-gallery-row">
-                      {(() => {
+                                           {galleryImagesLoading ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "100%",
+                            height: "130px",
+                          }}
+                        >
+                          <div
+                            className="spinner"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              border: "4px solid #ccc",
+                              borderTop: "4px solid #28a745",
+                              borderRadius: "50%",
+                              animation: "spin 1s linear infinite",
+                            }}
+                          />
+                          <style>{`
+                            @keyframes spin {
+                              to { transform: rotate(360deg); }
+                            }
+                          `}</style>
+                        </div>
+                      ) : (
+                        (() => {
                         const currentGallery = isEditing
                           ? editedGalleryImages
                           : galleryImages;
@@ -2931,7 +2982,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
                             );
                           }
                         });
-                      })()}
+                        })()
+                      )}
                     </div>
 
                     <div className="unit-name-plate-row">
@@ -5007,106 +5059,103 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
 export default React.memo(AdminSettings);
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // const mopData = useMemo(() => {
-  //   const counts = {};
-  //   const balances = {};
-  //   const recents = {};
-  //   Object.values(revenueGrid).forEach((monthRows) => {
-  //     monthRows.forEach((row) => {
-  //       const mop = row[2];
-  //       const amountStr = row[1];
-  //       const dateStr = row[4];
-  //       if (mop && amountStr) {
-  //         counts[mop] = (counts[mop] || 0) + 1;
-  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-  //         balances[mop] = (balances[mop] || 0) + amount;
-  //         const date = new Date(dateStr);
-  //         if (date && (!recents[mop] || date > recents[mop])) {
-  //           recents[mop] = date;
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return { counts, balances, recents };
-  // }, [revenueGrid]);
+//   const counts = {};
+//   const balances = {};
+//   const recents = {};
+//   Object.values(revenueGrid).forEach((monthRows) => {
+//     monthRows.forEach((row) => {
+//       const mop = row[2];
+//       const amountStr = row[1];
+//       const dateStr = row[4];
+//       if (mop && amountStr) {
+//         counts[mop] = (counts[mop] || 0) + 1;
+//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+//         balances[mop] = (balances[mop] || 0) + amount;
+//         const date = new Date(dateStr);
+//         if (date && (!recents[mop] || date > recents[mop])) {
+//           recents[mop] = date;
+//         }
+//       }
+//     });
+//   });
+//   return { counts, balances, recents };
+// }, [revenueGrid]);
 
-  // const popData = useMemo(() => {
-  //   const counts = {};
-  //   const balances = {};
-  //   const recents = {};
-  //   Object.values(revenueGrid).forEach((monthRows) => {
-  //     monthRows.forEach((row) => {
-  //       const pop = row[3];
-  //       const amountStr = row[1];
-  //       const dateStr = row[4];
-  //       if (pop && amountStr) {
-  //         counts[pop] = (counts[pop] || 0) + 1;
-  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-  //         balances[pop] = (balances[pop] || 0) + amount;
-  //         const date = new Date(dateStr);
-  //         if (date && (!recents[pop] || date > recents[pop])) {
-  //           recents[pop] = date;
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return { counts, balances, recents };
-  // }, [revenueGrid]);
+// const popData = useMemo(() => {
+//   const counts = {};
+//   const balances = {};
+//   const recents = {};
+//   Object.values(revenueGrid).forEach((monthRows) => {
+//     monthRows.forEach((row) => {
+//       const pop = row[3];
+//       const amountStr = row[1];
+//       const dateStr = row[4];
+//       if (pop && amountStr) {
+//         counts[pop] = (counts[pop] || 0) + 1;
+//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+//         balances[pop] = (balances[pop] || 0) + amount;
+//         const date = new Date(dateStr);
+//         if (date && (!recents[pop] || date > recents[pop])) {
+//           recents[pop] = date;
+//         }
+//       }
+//     });
+//   });
+//   return { counts, balances, recents };
+// }, [revenueGrid]);
 
+// const poeData = useMemo(() => {
+//   const counts = {};
+//   const balances = {};
+//   const recents = {};
+//   Object.values(expenseGrid).forEach((monthRows) => {
+//     monthRows.forEach((row) => {
+//       const poe = row[3];
+//       const amountStr = row[1];
+//       const dateStr = row[4];
+//       if (poe && amountStr) {
+//         counts[poe] = (counts[poe] || 0) + 1;
+//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
+//         balances[poe] = (balances[poe] || 0) + amount;
+//         const date = new Date(dateStr);
+//         if (date && (!recents[poe] || date > recents[poe])) {
+//           recents[poe] = date;
+//         }
+//       }
+//     });
+//   });
+//   return { counts, balances, recents };
+// }, [expenseGrid]);
 
-  // const poeData = useMemo(() => {
-  //   const counts = {};
-  //   const balances = {};
-  //   const recents = {};
-  //   Object.values(expenseGrid).forEach((monthRows) => {
-  //     monthRows.forEach((row) => {
-  //       const poe = row[3];
-  //       const amountStr = row[1];
-  //       const dateStr = row[4];
-  //       if (poe && amountStr) {
-  //         counts[poe] = (counts[poe] || 0) + 1;
-  //         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-  //         balances[poe] = (balances[poe] || 0) + amount;
-  //         const date = new Date(dateStr);
-  //         if (date && (!recents[poe] || date > recents[poe])) {
-  //           recents[poe] = date;
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return { counts, balances, recents };
-  // }, [expenseGrid]);
-
-
-  //   // Filter units by search term ONLY, ignore hidden
-  // const filteredUnitData =
-  //   allUnitData?.filter((car) => {
-  //     if (!searchTerm) return true;
-  //     const search = searchTerm.toLowerCase();
-  //     const analytics = completedBookingsAnalytics[car.plateNo];
-  //     const bookingsCount = analytics?.bookings?.length || 0;
-  //     return (
-  //       car.name.toLowerCase().includes(search) ||
-  //       car.plateNo.toLowerCase().includes(search) ||
-  //       String(car.owner || "")
-  //         .toLowerCase()
-  //         .includes(search) ||
-  //       car.carType.toLowerCase().includes(search) ||
-  //       String(car.details?.specifications?.Transmission || "")
-  //         .toLowerCase()
-  //         .includes(search) ||
-  //       String(car.details?.specifications?.Fuel || "")
-  //         .toLowerCase()
-  //         .includes(search) ||
-  //       String(car.details?.specifications?.Capacity || "")
-  //         .toLowerCase()
-  //         .includes(search) ||
-  //       String(car.details?.specifications?.Color || "")
-  //         .toLowerCase()
-  //         .includes(search) ||
-  //       bookingsCount.toString().includes(search)
-  //     );
-  //   }) || [];
+//   // Filter units by search term ONLY, ignore hidden
+// const filteredUnitData =
+//   allUnitData?.filter((car) => {
+//     if (!searchTerm) return true;
+//     const search = searchTerm.toLowerCase();
+//     const analytics = completedBookingsAnalytics[car.plateNo];
+//     const bookingsCount = analytics?.bookings?.length || 0;
+//     return (
+//       car.name.toLowerCase().includes(search) ||
+//       car.plateNo.toLowerCase().includes(search) ||
+//       String(car.owner || "")
+//         .toLowerCase()
+//         .includes(search) ||
+//       car.carType.toLowerCase().includes(search) ||
+//       String(car.details?.specifications?.Transmission || "")
+//         .toLowerCase()
+//         .includes(search) ||
+//       String(car.details?.specifications?.Fuel || "")
+//         .toLowerCase()
+//         .includes(search) ||
+//       String(car.details?.specifications?.Capacity || "")
+//         .toLowerCase()
+//         .includes(search) ||
+//       String(car.details?.specifications?.Color || "")
+//         .toLowerCase()
+//         .includes(search) ||
+//       bookingsCount.toString().includes(search)
+//     );
+//   }) || [];

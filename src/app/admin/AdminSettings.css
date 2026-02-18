@@ -44,6 +44,21 @@
    UNIT TYPE DROPDOWN
 ============================ */
 
+.unit-type-selector {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.unit-type-selector .dropdown-arrow {
+  font-size: 0.6rem;
+  margin-left: 8px;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
 .unit-type-dropdown {
   position: absolute;
   top: calc(100% + 5px);
@@ -104,19 +119,6 @@
   content: "✓";
   color: #2e7d32;
   font-weight: bold;
-}
-
-/* Dropdown arrow indicator on section title */
-.section-title.clickable::after {
-  content: "▼";
-  font-size: 0.6rem;
-  margin-left: 8px;
-  transition: transform 0.2s ease;
-}
-
-.section-title.clickable:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 
@@ -1765,7 +1767,7 @@
 }
 
 .content-page h3 {
-  margin: 20px 0 20px 0;
+  margin: 0;
   color: var(--accent-color);
 }
 
@@ -1775,6 +1777,22 @@
   align-items: center;
   margin-bottom: 10px;
 }
+
+.content-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.dimension-notice {
+  font-size: 0.75rem;
+  color: #666;
+  font-style: italic;
+  font-weight: 400;
+}
+
+
 
 .two-column-container {
   display: flex;
