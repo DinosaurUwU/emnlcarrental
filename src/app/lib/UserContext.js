@@ -161,6 +161,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+
   // SAVE GUEST USER BOOKING FORM AFTER LOGIN
   useEffect(() => {
     if (user && user.emailVerified) {
@@ -5916,29 +5917,188 @@ const loadFinancialReport = async (type, year) => {
     }
   };
 
-  const fetchImageFromFirestore = async (imageId) => {
-    // Check cache first
+  // const fetchImageFromFirestore = async (imageId) => {
+  //   // Check cache first
+  //   if (imageCache[imageId]) {
+  //     console.log(`✅ Image ${imageId} loaded from cache`);
+  //     return imageCache[imageId];
+  //   }
+
+  //   try {
+  //     const docRef = doc(db, "images", imageId);
+  //     const docSnap = await getDoc(docRef);
+
+  //     if (docSnap.exists()) {
+  //       const data = docSnap.data();
+  //       const base64 = data.base64;
+  //       const updatedAt = data.updatedAt;
+
+  //       // Cache the result
+  //       setImageCache((prev) => ({
+  //         ...prev,
+  //         [imageId]: { base64, updatedAt },
+  //       }));
+
+  //       return { base64, updatedAt };
+  //     } else {
+  //       console.warn(`No image found for ID: ${imageId}`);
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //     console.error(`Error fetching image ${imageId}:`, error);
+  //     return null;
+  //   }
+  // };
+
+
+  
+  // IndexedDB for image caching
+  
+  
+  // Single DB connection reference
+  const imageDBRef = useRef(null);
+
+  const getImageDB = async () => {
+    if (imageDBRef.current) return imageDBRef.current;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("ImageCacheDB", 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        imageDBRef.current = request.result;
+        resolve(request.result);
+      };
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains("images")) {
+          db.createObjectStore("images", { keyPath: "id" });
+        }
+      };
+    });
+  };
+
+  const getMultipleCachedImages = async (imageIds) => {
+    try {
+      const db = await getImageDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction("images", "readonly");
+        const store = transaction.objectStore("images");
+        const results = {};
+        imageIds.forEach((id) => {
+          const request = store.get(id);
+          request.onsuccess = () => {
+            if (request.result?.data) results[id] = request.result.data;
+          };
+        });
+        transaction.oncomplete = () => resolve(results);
+      });
+    } catch (e) { return {}; }
+  };
+
+  const getCachedImage = async (imageId) => {
+    try {
+      const db = await getImageDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction("images", "readonly");
+        const store = transaction.objectStore("images");
+        const request = store.get(imageId);
+        request.onsuccess = () => resolve(request.result?.data || null);
+      });
+    } catch (e) { return null; }
+  };
+
+  const setCachedImage = async (imageId, data) => {
+    try {
+      const db = await getImageDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction("images", "readwrite");
+        const store = transaction.objectStore("images");
+        store.put({ id: imageId, data });
+        transaction.oncomplete = () => resolve();
+      });
+    } catch (e) {}
+  };
+
+
+
+    // Pre-load all images on app startup
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imageIds = [];
+      for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
+      
+      const cachedImages = await getMultipleCachedImages(imageIds);
+      setImageCache((prev) => ({ ...prev, ...cachedImages }));
+      console.log(`🚀 Pre-loaded ${Object.keys(cachedImages).length} images`);
+    };
+    preloadImages();
+  }, []);
+
+
+
+  const fetchImageFromFirestore = async (imageId, skipValidation = false) => {
+    // Check React state cache first
     if (imageCache[imageId]) {
-      console.log(`✅ Image ${imageId} loaded from cache`);
+      console.log(`✅ Image ${imageId} loaded from React cache`);
       return imageCache[imageId];
     }
 
+    // Check IndexedDB cache
+    try {
+      const cachedData = await getCachedImage(imageId);
+      
+      if (cachedData) {
+        // If skipValidation is true, use cache without checking Firestore
+        if (skipValidation) {
+          setImageCache((prev) => ({
+            ...prev,
+            [imageId]: cachedData,
+          }));
+          console.log(`✅ Image ${imageId} loaded from IndexedDB cache (no validation)`);
+          return cachedData;
+        }
+        
+        // Otherwise, validate with Firestore
+        const docRef = doc(db, "images", imageId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const serverUpdatedAt = docSnap.data().updatedAt;
+          
+          if (serverUpdatedAt === cachedData.updatedAt) {
+            setImageCache((prev) => ({
+              ...prev,
+              [imageId]: cachedData,
+            }));
+            console.log(`✅ Image ${imageId} loaded from IndexedDB cache (validated)`);
+            return cachedData;
+          }
+          
+          // Timestamps don't match - fetch new version
+          console.log(`🔄 Image ${imageId} outdated, fetching new version...`);
+          const base64 = docSnap.data().base64;
+          const result = { base64, updatedAt: serverUpdatedAt };
+          
+          setImageCache((prev) => ({ ...prev, [imageId]: result }));
+          await setCachedImage(imageId, result);
+          return result;
+        }
+      }
+    } catch (e) {
+      console.warn(`Error checking cache for ${imageId}:`, e);
+    }
+
+    // No cache - fetch from Firestore
     try {
       const docRef = doc(db, "images", imageId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const base64 = data.base64;
-        const updatedAt = data.updatedAt;
+        const result = { base64: data.base64, updatedAt: data.updatedAt };
 
-        // Cache the result
-        setImageCache((prev) => ({
-          ...prev,
-          [imageId]: { base64, updatedAt },
-        }));
-
-        return { base64, updatedAt };
+        setImageCache((prev) => ({ ...prev, [imageId]: result }));
+        await setCachedImage(imageId, result);
+        return result;
       } else {
         console.warn(`No image found for ID: ${imageId}`);
         return null;
@@ -5949,6 +6109,18 @@ const loadFinancialReport = async (type, year) => {
     }
   };
 
+
+
+
+
+
+
+
+
+
+
+
+  
   // UpdateUnitImage Function
   const updateUnitImage = async (
     plateNo,

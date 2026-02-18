@@ -48,7 +48,8 @@ import "./FleetDetails.css";
       const promises = [];
 
       for (let i = 0; i < maxImages; i++) {
-        promises.push(fetchImageFromFirestore(`FleetPage_${i}`));
+        // promises.push(fetchImageFromFirestore(`FleetPage_${i}`));
+        promises.push(fetchImageFromFirestore(`FleetPage_${i}`, true));
       }
 
       const results = await Promise.all(promises);
@@ -131,9 +132,10 @@ import "./FleetDetails.css";
       const promises = fleetDetailsUnits.map(async (unit) => {
         if (!unit.imageId) return null;
         try {
-          const { base64, updatedAt } = await fetchImageFromFirestore(
-            unit.imageId,
-          );
+          // const { base64, updatedAt } = await fetchImageFromFirestore(
+          //   unit.imageId,
+          // );
+          const { base64, updatedAt } = await fetchImageFromFirestore(unit.imageId, true);
           return { [unit.imageId]: { base64, updatedAt } };
         } catch {
           return {
