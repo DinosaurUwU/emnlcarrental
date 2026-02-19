@@ -6065,6 +6065,7 @@ const loadFinancialReport = async (type, year) => {
     } catch (e) {}
   };
 
+  
 
     // Pre-load all images on app startup
   useEffect(() => {
