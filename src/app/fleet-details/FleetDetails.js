@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import React, { useEffect, useRef, useState, useLayoutEffect, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import { useBooking } from "../component/BookingProvider";
 import { useParams } from "next/navigation";
@@ -9,13 +9,20 @@ import Header from "../component/Header";
 import Footer from "../component/Footer";
 import "./FleetDetails.css";
 
+// Module-level carousel images (loaded once at import time)
+const fleetCarouselImages = (() => {
+  const importAll = (r) => r.keys().map(r);
+  return importAll(require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/));
+})();
+
+
 // const FleetDetails = ({ openBooking }) => {
   const FleetDetails = () => {
   const { openBooking } = useBooking();
 
   const { fleetDetailsUnits, fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
   const lastTriggerRef = useRef(imageUpdateTrigger);
-  const [carouselImages, setCarouselImages] = useState([]);
+  // const [carouselImages, setCarouselImages] = useState([]);
 
   const { category } = useParams();
   const sedanRef = useRef(null);
@@ -40,7 +47,7 @@ import "./FleetDetails.css";
 
   const [currentOverlayImage, setCurrentOverlayImage] = useState(null);
 
-  const [fetchedImages, setFetchedImages] = useState({});
+  // const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
 
   // useEffect(() => {
@@ -77,36 +84,57 @@ import "./FleetDetails.css";
   // }, [fetchImageFromFirestore]);
 
   // Load carousel images from cache (instant) or fetch if not available
-  useEffect(() => {
-    const fetchCarouselImages = async () => {
-      const maxImages = 20;
-      const loadedImages = [];
 
-      for (let i = 0; i < maxImages; i++) {
-        const imageId = `FleetPage_${i}`;
+
+  // Derive carousel images synchronously from cache (instant)
+  const carouselImages = useMemo(() => {
+    const maxImages = 20;
+    const cachedImages = [];
+    
+    for (let i = 0; i < maxImages; i++) {
+      const imageId = `FleetPage_${i}`;
+      if (imageCache[imageId]) {
+        cachedImages.push(imageCache[imageId].base64);
+      }
+    }
+    
+    // Use cached images if available, otherwise use module-level fallback (instant)
+    return cachedImages.length > 0 ? cachedImages : fleetCarouselImages;
+  }, [imageCache]);
+
+
+
+
+  // useEffect(() => {
+  //   const fetchCarouselImages = async () => {
+  //     const maxImages = 20;
+  //     const loadedImages = [];
+
+  //     for (let i = 0; i < maxImages; i++) {
+  //       const imageId = `FleetPage_${i}`;
         
-        if (imageCache[imageId]) {
-          loadedImages.push(imageCache[imageId].base64);
-        } else {
-          const result = await fetchImageFromFirestore(imageId, true);
-          if (result) loadedImages.push(result.base64);
-        }
-      }
+  //       if (imageCache[imageId]) {
+  //         loadedImages.push(imageCache[imageId].base64);
+  //       } else {
+  //         const result = await fetchImageFromFirestore(imageId, true);
+  //         if (result) loadedImages.push(result.base64);
+  //       }
+  //     }
 
-      if (loadedImages.length === 0) {
-        const localImages = importAll(
-          require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/),
-        );
-        setCarouselImages(localImages);
-      } else {
-        setCarouselImages(loadedImages);
-      }
-      lastTriggerRef.current = imageUpdateTrigger;
-    };
+  //     if (loadedImages.length === 0) {
+  //       const localImages = importAll(
+  //         require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/),
+  //       );
+  //       setCarouselImages(localImages);
+  //     } else {
+  //       setCarouselImages(loadedImages);
+  //     }
+  //     lastTriggerRef.current = imageUpdateTrigger;
+  //   };
 
-    fetchCarouselImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageUpdateTrigger]);
+  //   fetchCarouselImages();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [imageUpdateTrigger]);
 
 
   // triple images for smooth infinite loop
@@ -189,33 +217,58 @@ import "./FleetDetails.css";
   //   fetchImages();
   // }, [fleetDetailsUnits, fetchImageFromFirestore]);
 
-  useEffect(() => {
-    const fetchImages = async () => {
-      if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
 
-      const merged = {};
+    // Derive unit images synchronously from cache (instant)
+  const fetchedImages = useMemo(() => {
+    if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return {};
+    
+    const merged = {};
+    
+    for (const unit of fleetDetailsUnits) {
+      if (!unit.imageId) continue;
       
-      for (const unit of fleetDetailsUnits) {
-        if (!unit.imageId) continue;
-        
-        if (imageCache[unit.imageId]) {
-          merged[unit.imageId] = imageCache[unit.imageId];
-        } else {
-          try {
-            const result = await fetchImageFromFirestore(unit.imageId, true);
-            merged[unit.imageId] = result || { base64: "/assets/images/default.png", updatedAt: Date.now() };
-          } catch {
-            merged[unit.imageId] = { base64: "/assets/images/default.png", updatedAt: Date.now() };
-          }
-        }
+      if (imageCache[unit.imageId]) {
+        merged[unit.imageId] = imageCache[unit.imageId];
+      } else {
+        merged[unit.imageId] = {
+          base64: "/assets/images/default.png",
+          updatedAt: Date.now(),
+        };
       }
-      
-      setFetchedImages(merged);
-    };
+    }
+    
+    return merged;
+  }, [fleetDetailsUnits, imageCache]);
 
-    fetchImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fleetDetailsUnits, imageUpdateTrigger]);
+
+
+  // useEffect(() => {
+  //   const fetchImages = async () => {
+  //     if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
+
+  //     const merged = {};
+      
+  //     for (const unit of fleetDetailsUnits) {
+  //       if (!unit.imageId) continue;
+        
+  //       if (imageCache[unit.imageId]) {
+  //         merged[unit.imageId] = imageCache[unit.imageId];
+  //       } else {
+  //         try {
+  //           const result = await fetchImageFromFirestore(unit.imageId, true);
+  //           merged[unit.imageId] = result || { base64: "/assets/images/default.png", updatedAt: Date.now() };
+  //         } catch {
+  //           merged[unit.imageId] = { base64: "/assets/images/default.png", updatedAt: Date.now() };
+  //         }
+  //       }
+  //     }
+      
+  //     setFetchedImages(merged);
+  //   };
+
+  //   fetchImages();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [fleetDetailsUnits, imageUpdateTrigger]);
 
 
 
