@@ -6066,19 +6066,24 @@ const loadFinancialReport = async (type, year) => {
   };
 
 
-
     // Pre-load all images on app startup
   useEffect(() => {
     const preloadImages = async () => {
       const imageIds = [];
+      
+      // FleetPage carousel images
       for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
       
+      // LandingPage carousel images
+      for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
+
       const cachedImages = await getMultipleCachedImages(imageIds);
       setImageCache((prev) => ({ ...prev, ...cachedImages }));
-      console.log(`🚀 Pre-loaded ${Object.keys(cachedImages).length} images`);
+      console.log(`🚀 Pre-loaded ${Object.keys(cachedImages).length} images from IndexedDB`);
     };
     preloadImages();
   }, []);
+
 
 
 
@@ -6770,7 +6775,7 @@ const loadFinancialReport = async (type, year) => {
   };
 
 
-  
+
   return (
     <UserContext.Provider
       value={{
