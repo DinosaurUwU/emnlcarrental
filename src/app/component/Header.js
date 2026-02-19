@@ -24,6 +24,12 @@ function Header() {
   const { user, logout, theme } = useUser();
   const router = useRouter();
 
+  useEffect(() => {
+  router.prefetch("/");
+  router.prefetch("/fleet-details");
+}, [router]);
+
+
   const profilePic = user?.profilePic || "/assets/profile.png";
 
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
@@ -232,13 +238,24 @@ function Header() {
                   const labels = ["Home", "Fleet", "About", "Contact"];
                   return (
                     <li key={index}>
-                      <Link
+                      {/* <Link
                         href={path}
                         className={pathname === path ? "active" : ""}
                         onClick={() => setMenuOpen(false)}
                       >
                         {labels[index]}
+                      </Link> */}
+
+                      <Link
+                        href={path}
+                        prefetch
+                        onMouseEnter={() => router.prefetch(path)}
+                        className={pathname === path ? "active" : ""}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {labels[index]}
                       </Link>
+
                     </li>
                   );
                 },
@@ -300,7 +317,10 @@ function Header() {
           <div className="Header__center">
             <ul className="Header__nav">
               <li>
-                <Link href="/" className={pathname === "/" ? "active" : ""}>
+                <Link href="/" 
+                prefetch
+                onMouseEnter={() => router.prefetch("/")} 
+                className={pathname === "/" ? "active" : ""}>
                   Home
                 </Link>
               </li>
@@ -308,6 +328,8 @@ function Header() {
               <li>
                 <Link
                   href="/fleet-details"
+                  prefetch
+                  onMouseEnter={() => router.prefetch("/fleet-details")}
                   className={
                     pathname.startsWith("/fleet-details") ? "active" : ""
                   }
