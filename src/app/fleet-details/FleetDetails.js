@@ -15,6 +15,8 @@ const fleetCarouselImages = (() => {
   return importAll(require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/));
 })();
 
+const fleetCardImageMemory = {};
+
 
 // const FleetDetails = ({ openBooking }) => {
   const FleetDetails = () => {
@@ -47,8 +49,30 @@ const fleetCarouselImages = (() => {
 
   const [currentOverlayImage, setCurrentOverlayImage] = useState(null);
 
-  // const [fetchedImages, setFetchedImages] = useState({});
+  const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
+
+const buildUnitImageMap = (units, cache) => {
+  const map = {};
+  if (!units?.length) return map;
+
+  for (const unit of units) {
+    if (!unit.imageId) continue;
+
+    if (fleetCardImageMemory[unit.imageId]) {
+      map[unit.imageId] = fleetCardImageMemory[unit.imageId];
+      continue;
+    }
+
+    if (cache[unit.imageId]) {
+      map[unit.imageId] = cache[unit.imageId];
+    }
+  }
+
+  return map;
+};
+
+
 
   // useEffect(() => {
   //   const fetchCarouselImages = async () => {
@@ -218,27 +242,104 @@ const fleetCarouselImages = (() => {
   // }, [fleetDetailsUnits, fetchImageFromFirestore]);
 
 
-    // Derive unit images synchronously from cache (instant)
-  const fetchedImages = useMemo(() => {
-    if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return {};
-    
-    const merged = {};
-    
-    for (const unit of fleetDetailsUnits) {
-      if (!unit.imageId) continue;
-      
-      if (imageCache[unit.imageId]) {
-        merged[unit.imageId] = imageCache[unit.imageId];
-      } else {
-        merged[unit.imageId] = {
-          base64: "/assets/images/default.png",
-          updatedAt: Date.now(),
-        };
-      }
+
+
+// useEffect(() => {
+//   if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) {
+//     setFetchedImages({});
+//     return;
+//   }
+
+//   let cancelled = false;
+
+//   const baseMap = {};
+//   const missingIds = [];
+
+//   for (const unit of fleetDetailsUnits) {
+//     if (!unit.imageId) continue;
+
+//     if (imageCache[unit.imageId]) {
+//       baseMap[unit.imageId] = imageCache[unit.imageId];
+//     } else {
+//       baseMap[unit.imageId] = {
+//         base64: "/assets/images/default.png",
+//         updatedAt: 0,
+//       };
+//       missingIds.push(unit.imageId);
+//     }
+//   }
+
+//   // instant paint from cache/default
+//   setFetchedImages(baseMap);
+
+//   // fill missing images from firestore/indexeddb path
+//   if (missingIds.length > 0) {
+//     (async () => {
+//       const results = await Promise.all(
+//         missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null))
+//       );
+
+//       if (cancelled) return;
+
+//       setFetchedImages((prev) => {
+//         const merged = { ...prev };
+//         results.forEach((result, i) => {
+//           if (result) merged[missingIds[i]] = result;
+//         });
+//         return merged;
+//       });
+//     })();
+//   }
+
+//   return () => {
+//     cancelled = true;
+//   };
+// }, [fleetDetailsUnits, imageCache, fetchImageFromFirestore, imageUpdateTrigger]);
+
+
+
+useEffect(() => {
+  const instantMap = buildUnitImageMap(fleetDetailsUnits, imageCache);
+  setFetchedImages((prev) => ({ ...prev, ...instantMap }));
+}, [fleetDetailsUnits, imageCache]);
+
+useEffect(() => {
+  if (!fleetDetailsUnits?.length) return;
+
+  let cancelled = false;
+
+  const missingIds = fleetDetailsUnits
+    .map((u) => u.imageId)
+    .filter(Boolean)
+    .filter((id) => !fetchedImages[id]);
+
+  if (missingIds.length === 0) return;
+
+  (async () => {
+    const results = await Promise.all(
+      missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null))
+    );
+
+    if (cancelled) return;
+
+    const patch = {};
+    results.forEach((img, i) => {
+      const id = missingIds[i];
+      if (!img) return;
+      patch[id] = img;
+      fleetCardImageMemory[id] = img;
+    });
+
+    if (Object.keys(patch).length) {
+      setFetchedImages((prev) => ({ ...prev, ...patch }));
     }
-    
-    return merged;
-  }, [fleetDetailsUnits, imageCache]);
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [fleetDetailsUnits, fetchedImages, fetchImageFromFirestore]);
+
 
 
 
@@ -287,8 +388,37 @@ const fleetCarouselImages = (() => {
 
   const galleryRef = useRef(null);
 
+  // useEffect(() => {
+  //   const lightbox = new PhotoSwipeLightbox({
+  //     gallery: galleryRef.current,
+  //     children: "a",
+  //     pswpModule: () => import("photoswipe"),
+  //     showHideAnimationType: "fade",
+  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+  //     maxWidth: window.innerWidth * 0.8,
+  //     maxHeight: window.innerHeight * 0.8,
+  //   });
+
+  //   lightbox.init();
+  //   return () => lightbox.destroy();
+  // }, []);
+
   useEffect(() => {
-    const lightbox = new PhotoSwipeLightbox({
+  if (!galleryRef.current) return;
+
+  let mounted = true;
+  let idleId = null;
+  let lightbox = null;
+
+  const init = async () => {
+    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+      import("photoswipe/lightbox"),
+      import("photoswipe/style.css"),
+    ]);
+
+    if (!mounted || !galleryRef.current) return;
+
+    lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -299,13 +429,43 @@ const fleetCarouselImages = (() => {
     });
 
     lightbox.init();
-    return () => lightbox.destroy();
-  }, []);
+  };
+
+  if ("requestIdleCallback" in window) {
+    idleId = window.requestIdleCallback(init, { timeout: 1200 });
+  } else {
+    idleId = setTimeout(init, 0);
+  }
+
+  return () => {
+    mounted = false;
+    if (typeof idleId === "number") clearTimeout(idleId);
+    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+      window.cancelIdleCallback(idleId);
+    }
+    lightbox?.destroy();
+  };
+}, []);
+
 
   const carouselGalleryRef = useRef(null);
 
   useEffect(() => {
-    const carouselLightbox = new PhotoSwipeLightbox({
+  if (!carouselGalleryRef.current) return;
+
+  let mounted = true;
+  let idleId = null;
+  let carouselLightbox = null;
+
+  const init = async () => {
+    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+      import("photoswipe/lightbox"),
+      import("photoswipe/style.css"),
+    ]);
+
+    if (!mounted || !carouselGalleryRef.current) return;
+
+    carouselLightbox = new PhotoSwipeLightbox({
       gallery: carouselGalleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -316,8 +476,39 @@ const fleetCarouselImages = (() => {
     });
 
     carouselLightbox.init();
-    return () => carouselLightbox.destroy();
-  }, []);
+  };
+
+  if ("requestIdleCallback" in window) {
+    idleId = window.requestIdleCallback(init, { timeout: 1200 });
+  } else {
+    idleId = setTimeout(init, 0);
+  }
+
+  return () => {
+    mounted = false;
+    if (typeof idleId === "number") clearTimeout(idleId);
+    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+      window.cancelIdleCallback(idleId);
+    }
+    carouselLightbox?.destroy();
+  };
+}, []);
+
+
+  // useEffect(() => {
+  //   const carouselLightbox = new PhotoSwipeLightbox({
+  //     gallery: carouselGalleryRef.current,
+  //     children: "a",
+  //     pswpModule: () => import("photoswipe"),
+  //     showHideAnimationType: "fade",
+  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+  //     maxWidth: window.innerWidth * 0.8,
+  //     maxHeight: window.innerHeight * 0.8,
+  //   });
+
+  //   carouselLightbox.init();
+  //   return () => carouselLightbox.destroy();
+  // }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -635,7 +826,7 @@ const fleetCarouselImages = (() => {
               index === currentSlide ? "active" : "inactive"
             }`}
           >
-            <img
+            {/* <img
               src={image}
               alt={`Slide ${index}`}
               className="hero-carousel-image"
@@ -644,7 +835,21 @@ const fleetCarouselImages = (() => {
                   .querySelector(`[data-pswp-index="carousel-${index}"]`)
                   ?.click();
               }}
+            /> */}
+
+            <img
+              src={image}
+              alt={`Slide ${index}`}
+              className="hero-carousel-image"
+              loading={index === currentSlide ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={index === currentSlide ? "high" : "auto"}
+              onClick={() => {
+                document.querySelector(`[data-pswp-index="carousel-${index}"]`)?.click();
+              }}
             />
+
+
           </div>
         ))}
 
@@ -703,15 +908,24 @@ const fleetCarouselImages = (() => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
+                    {/* <img
+                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+                      alt={car.name}
+                      className="car-image"
+                      onLoad={(e) => e.target.style.opacity = 1}
+                      onError={(e) => {
+                        e.target.src = "/assets/images/default.png";
+                      }}
+                    /> */}
+
                     <img
-  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-  alt={car.name}
-  className="car-image"
-  onLoad={(e) => e.target.style.opacity = 1}
-  onError={(e) => {
-    e.target.src = "/assets/images/default.png";
-  }}
-/>
+                    src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+                    alt={car.name}
+                    className="car-image"
+                    loading="lazy"
+                    decoding="async"
+                  />
+
 
                   </div>
 
@@ -785,14 +999,22 @@ const fleetCarouselImages = (() => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    <img
+                    {/* <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
+                    /> */}
+                    <img
+                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+                      alt={car.name}
+                      className="car-image"
+                      loading="lazy"
+                      decoding="async"
                     />
+
                   </div>
 
                   {/* Content Overlay */}
@@ -865,14 +1087,22 @@ const fleetCarouselImages = (() => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    <img
+                    {/* <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
+                    /> */}
+                    <img
+                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+                      alt={car.name}
+                      className="car-image"
+                      loading="lazy"
+                      decoding="async"
                     />
+
                   </div>
 
                   {/* Content Overlay */}
@@ -945,14 +1175,22 @@ const fleetCarouselImages = (() => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    <img
+                    {/* <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    />
+                    /> */}
+                    <img
+  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+  alt={car.name}
+  className="car-image"
+  loading="lazy"
+  decoding="async"
+/>
+
                   </div>
 
                   {/* Content Overlay */}
@@ -1026,14 +1264,22 @@ const fleetCarouselImages = (() => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    <img
+                    {/* <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    />
+                    /> */}
+                    <img
+  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+  alt={car.name}
+  className="car-image"
+  loading="lazy"
+  decoding="async"
+/>
+
                   </div>
 
                   {/* Content Overlay */}
@@ -1261,7 +1507,8 @@ const fleetCarouselImages = (() => {
             data-pswp-height={1690}
             data-pswp-index={index}
           >
-            <img src={image.base64} alt="" />
+            {/* <img src={image.base64} alt="" /> */}
+            <span aria-hidden="true" />
           </a>
         ))}
       </div>

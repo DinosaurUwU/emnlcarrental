@@ -149,12 +149,23 @@ function Carousel() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [imageUpdateTrigger]); // Only re-run when imageUpdateTrigger changes
 
+useEffect(() => {
+  if (carouselImages.length === 0) return;
+  if (!carouselGalleryRef.current) return;
 
+  let mounted = true;
+  let idleId = null;
+  let lightbox = null;
 
-  useEffect(() => {
-    if (carouselImages.length === 0) return; // Wait for images to load
+  const init = async () => {
+    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+      import("photoswipe/lightbox"),
+      import("photoswipe/style.css"),
+    ]);
 
-    const carouselLightbox = new PhotoSwipeLightbox({
+    if (!mounted || !carouselGalleryRef.current) return;
+
+    lightbox = new PhotoSwipeLightbox({
       gallery: carouselGalleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -164,9 +175,42 @@ function Carousel() {
       maxHeight: window.innerHeight * 0.8,
     });
 
-    carouselLightbox.init();
-    return () => carouselLightbox.destroy();
-  }, [carouselImages]);
+    lightbox.init();
+  };
+
+  if ("requestIdleCallback" in window) {
+    idleId = window.requestIdleCallback(init, { timeout: 1200 });
+  } else {
+    idleId = setTimeout(init, 0);
+  }
+
+  return () => {
+    mounted = false;
+    if (typeof idleId === "number") clearTimeout(idleId);
+    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+      window.cancelIdleCallback(idleId);
+    }
+    lightbox?.destroy();
+  };
+}, [carouselImages]);
+
+
+  // useEffect(() => {
+  //   if (carouselImages.length === 0) return; // Wait for images to load
+
+  //   const carouselLightbox = new PhotoSwipeLightbox({
+  //     gallery: carouselGalleryRef.current,
+  //     children: "a",
+  //     pswpModule: () => import("photoswipe"),
+  //     showHideAnimationType: "fade",
+  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+  //     maxWidth: window.innerWidth * 0.8,
+  //     maxHeight: window.innerHeight * 0.8,
+  //   });
+
+  //   carouselLightbox.init();
+  //   return () => carouselLightbox.destroy();
+  // }, [carouselImages]);
 
   useEffect(() => {
     if (isPaused || carouselImages.length === 0) return;
@@ -241,20 +285,37 @@ function Carousel() {
         ))}
 
         {carouselImages.map((img, index) => (
-          <img
-            key={index}
-            src={img}
-            alt={`Slide ${index + 1}`}
-            className={`carousel-image 
-        ${index === currentSlide ? "active" : ""} 
-        ${index === prevSlide && index !== currentSlide ? "previous" : ""}`}
-            onClick={() => {
-              const currentIndex = carouselImages.indexOf(img);
-              document
-                .querySelector(`[data-pswp-index="${currentIndex}"]`)
-                ?.click();
-            }}
-          />
+        //   <img
+        //     key={index}
+        //     src={img}
+        //     alt={`Slide ${index + 1}`}
+        //     className={`carousel-image 
+        // ${index === currentSlide ? "active" : ""} 
+        // ${index === prevSlide && index !== currentSlide ? "previous" : ""}`}
+        //     onClick={() => {
+        //       const currentIndex = carouselImages.indexOf(img);
+        //       document
+        //         .querySelector(`[data-pswp-index="${currentIndex}"]`)
+        //         ?.click();
+        //     }}
+        //   />
+
+            <img
+              key={index}
+              src={img}
+              alt={`Slide ${index + 1}`}
+              loading={index === currentSlide ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={index === currentSlide ? "high" : "auto"}
+              className={`carousel-image 
+                ${index === currentSlide ? "active" : ""} 
+                ${index === prevSlide && index !== currentSlide ? "previous" : ""}`}
+              onClick={() => {
+                const currentIndex = carouselImages.indexOf(img);
+                document.querySelector(`[data-pswp-index="${currentIndex}"]`)?.click();
+              }}
+            />
+
         ))}
       </div>
 
@@ -297,7 +358,9 @@ function Carousel() {
             data-pswp-height={1690} // Recommended image HEIGHT
             data-pswp-index={index}
           >
-            <img src={src} alt="" />
+            {/* <img src={src} alt="" /> */}
+            <span aria-hidden="true" />
+
           </a>
         ))}
       </div>

@@ -24,6 +24,12 @@ function Header() {
   const { user, logout, theme } = useUser();
   const router = useRouter();
 
+  const go = (path) => {
+  router.prefetch(path);
+  router.push(path);
+};
+
+
   useEffect(() => {
   router.prefetch("/");
   router.prefetch("/fleet-details");
@@ -316,13 +322,33 @@ function Header() {
         {!isMobile && (
           <div className="Header__center">
             <ul className="Header__nav">
-              <li>
+
+              <button
+  type="button"
+  className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
+  onMouseDown={() => go("/")}
+>
+  Home
+</button>
+
+<button
+  type="button"
+  className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
+  onMouseDown={() => go("/fleet-details")}
+>
+  Fleet
+</button>
+
+              
+              {/* <li>
                 <Link href="/" 
                 prefetch
                 onMouseEnter={() => router.prefetch("/")} 
                 className={pathname === "/" ? "active" : ""}>
                   Home
                 </Link>
+
+                
               </li>
 
               <li>
@@ -336,7 +362,9 @@ function Header() {
                 >
                   Fleet
                 </Link>
-              </li>
+
+
+              </li> */}
 
               <li>
                 <button

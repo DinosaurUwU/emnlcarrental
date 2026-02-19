@@ -6066,25 +6066,65 @@ const loadFinancialReport = async (type, year) => {
   };
 
 
-  
 
-    // Pre-load all images on app startup
-  useEffect(() => {
-    const preloadImages = async () => {
-      const imageIds = [];
-      
-      // FleetPage carousel images
-      for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
-      
-      // LandingPage carousel images
-      for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
+useEffect(() => {
+  let cancelled = false;
 
-      const cachedImages = await getMultipleCachedImages(imageIds);
+  const preloadImages = async () => {
+    const imageIds = [];
+
+    for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
+    for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
+
+    const cachedImages = await getMultipleCachedImages(imageIds);
+    if (cancelled) return;
+
+    // Defer heavy base64 state injection so route transitions stay snappy.
+    setTimeout(() => {
+      if (cancelled) return;
       setImageCache((prev) => ({ ...prev, ...cachedImages }));
-      console.log(`🚀 Pre-loaded ${Object.keys(cachedImages).length} images from IndexedDB`);
+    }, 0);
+  };
+
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    const id = window.requestIdleCallback(preloadImages, { timeout: 1200 });
+    return () => {
+      cancelled = true;
+      window.cancelIdleCallback(id);
     };
-    preloadImages();
-  }, []);
+  }
+
+  preloadImages();
+  return () => {
+    cancelled = true;
+  };
+}, []);
+
+
+
+
+
+
+
+
+
+  //   // Pre-load all images on app startup
+  // useEffect(() => {
+  //   const preloadImages = async () => {
+  //     const imageIds = [];
+      
+  //     // FleetPage carousel images
+  //     for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
+      
+  //     // LandingPage carousel images
+  //     for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
+
+  //     const cachedImages = await getMultipleCachedImages(imageIds);
+  //     setImageCache((prev) => ({ ...prev, ...cachedImages }));
+  //     console.log(`🚀 Pre-loaded ${Object.keys(cachedImages).length} images from IndexedDB`);
+  //   };
+  //   preloadImages();
+  // }, []);
 
 
 
