@@ -65,7 +65,9 @@ function Carousel() {
 
       for (let i = 0; i < numImages; i++) {
         const imageId = `LandingPage_${i}`;
-        const result = await fetchImageFromFirestore(imageId);
+        // const result = await fetchImageFromFirestore(imageId);
+        const result = await fetchImageFromFirestore(imageId, true);
+
         if (result) {
           fetchedImages.push(result.base64); // Already a full data URL
         } else {
