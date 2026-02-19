@@ -48,7 +48,7 @@ const textContent = [
 ];
 
 function Carousel() {
-  const { fetchImageFromFirestore } = useUser();
+  const { fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
   const [carouselImages, setCarouselImages] = useState([]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -56,37 +56,82 @@ function Carousel() {
   const [isPaused, setIsPaused] = useState(false);
   const router = useRouter();
 
+  const lastTriggerRef = useRef(imageUpdateTrigger);
+
   const carouselGalleryRef = useRef(null);
 
-  useEffect(() => {
-    const fetchCarouselImages = async () => {
-      const fetchedImages = [];
+  // useEffect(() => {
+  //   const fetchCarouselImages = async () => {
+  //     const fetchedImages = [];
+  //     const numImages = 5;
+
+  //     for (let i = 0; i < numImages; i++) {
+  //       const imageId = `LandingPage_${i}`;
+  //       // const result = await fetchImageFromFirestore(imageId);
+  //       const result = await fetchImageFromFirestore(imageId, true);
+
+  //       if (result) {
+  //         fetchedImages.push(result.base64); // Already a full data URL
+  //       } else {
+  //         // Fallback to local images
+  //         const localImages = importAll(
+  //           require.context(
+  //             "../../public/assets/images/carousel_js",
+  //             false,
+  //             /\.(png|jpe?g|svg)$/,
+  //           ),
+  //         );
+  //         fetchedImages.push(localImages[i] || "/assets/images/default.png"); // Empty string or placeholder if no local image
+  //       }
+  //     }
+  //     setCarouselImages(fetchedImages);
+  //   };
+
+  //   fetchCarouselImages();
+  // }, [fetchImageFromFirestore]);
+
+ // Load images from cache (instant) or fetch if not available
+
+ 
+
+
+   useEffect(() => {
+    const loadCarouselImages = async () => {
       const numImages = 5;
+      const loadedImages = [];
 
       for (let i = 0; i < numImages; i++) {
         const imageId = `LandingPage_${i}`;
-        // const result = await fetchImageFromFirestore(imageId);
-        const result = await fetchImageFromFirestore(imageId, true);
-
-        if (result) {
-          fetchedImages.push(result.base64); // Already a full data URL
+        
+        // Check React cache first (instant)
+        if (imageCache[imageId]) {
+          loadedImages.push(imageCache[imageId].base64);
         } else {
-          // Fallback to local images
-          const localImages = importAll(
-            require.context(
-              "../../public/assets/images/carousel_js",
-              false,
-              /\.(png|jpe?g|svg)$/,
-            ),
-          );
-          fetchedImages.push(localImages[i] || "/assets/images/default.png"); // Empty string or placeholder if no local image
+          // Fallback to fetch
+          const result = await fetchImageFromFirestore(imageId, true);
+          if (result) {
+            loadedImages.push(result.base64);
+          } else {
+            const localImages = importAll(
+              require.context(
+                "../../public/assets/images/carousel_js",
+                false,
+                /\.(png|jpe?g|svg)$/,
+              ),
+            );
+            loadedImages.push(localImages[i] || "/assets/images/default.png");
+          }
         }
       }
-      setCarouselImages(fetchedImages);
+      setCarouselImages(loadedImages);
+      lastTriggerRef.current = imageUpdateTrigger;
     };
 
-    fetchCarouselImages();
-  }, [fetchImageFromFirestore]);
+    loadCarouselImages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageUpdateTrigger]); // Only re-run when imageUpdateTrigger changes
+
+
 
   useEffect(() => {
     if (carouselImages.length === 0) return; // Wait for images to load

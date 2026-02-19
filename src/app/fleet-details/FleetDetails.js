@@ -13,7 +13,8 @@ import "./FleetDetails.css";
   const FleetDetails = () => {
   const { openBooking } = useBooking();
 
-  const { fleetDetailsUnits, fetchImageFromFirestore } = useUser();
+  const { fleetDetailsUnits, fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
+  const lastTriggerRef = useRef(imageUpdateTrigger);
   const [carouselImages, setCarouselImages] = useState([]);
 
   const { category } = useParams();
@@ -42,38 +43,71 @@ import "./FleetDetails.css";
   const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
 
+  // useEffect(() => {
+  //   const fetchCarouselImages = async () => {
+  //     const maxImages = 20;
+  //     const promises = [];
+
+  //     for (let i = 0; i < maxImages; i++) {
+  //       // promises.push(fetchImageFromFirestore(`FleetPage_${i}`));
+  //       promises.push(fetchImageFromFirestore(`FleetPage_${i}`, true));
+  //     }
+
+  //     const results = await Promise.all(promises);
+  //     const fetchedImages = results
+  //       .filter((result) => result)
+  //       .map((result) => result.base64);
+
+  //     // If no images in Firestore, fallback to local images
+  //     if (fetchedImages.length === 0) {
+  //       const localImages = importAll(
+  //         require.context(
+  //           "./assets/images/carousel",
+  //           false,
+  //           /\.(png|jpe?g|svg)$/,
+  //         ),
+  //       );
+  //       setCarouselImages(localImages);
+  //     } else {
+  //       setCarouselImages(fetchedImages);
+  //     }
+  //   };
+
+  //   fetchCarouselImages();
+  // }, [fetchImageFromFirestore]);
+
+  // Load carousel images from cache (instant) or fetch if not available
   useEffect(() => {
     const fetchCarouselImages = async () => {
       const maxImages = 20;
-      const promises = [];
+      const loadedImages = [];
 
       for (let i = 0; i < maxImages; i++) {
-        // promises.push(fetchImageFromFirestore(`FleetPage_${i}`));
-        promises.push(fetchImageFromFirestore(`FleetPage_${i}`, true));
+        const imageId = `FleetPage_${i}`;
+        
+        if (imageCache[imageId]) {
+          loadedImages.push(imageCache[imageId].base64);
+        } else {
+          const result = await fetchImageFromFirestore(imageId, true);
+          if (result) loadedImages.push(result.base64);
+        }
       }
 
-      const results = await Promise.all(promises);
-      const fetchedImages = results
-        .filter((result) => result)
-        .map((result) => result.base64);
-
-      // If no images in Firestore, fallback to local images
-      if (fetchedImages.length === 0) {
+      if (loadedImages.length === 0) {
         const localImages = importAll(
-          require.context(
-            "./assets/images/carousel",
-            false,
-            /\.(png|jpe?g|svg)$/,
-          ),
+          require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/),
         );
         setCarouselImages(localImages);
       } else {
-        setCarouselImages(fetchedImages);
+        setCarouselImages(loadedImages);
       }
+      lastTriggerRef.current = imageUpdateTrigger;
     };
 
     fetchCarouselImages();
-  }, [fetchImageFromFirestore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageUpdateTrigger]);
+
 
   // triple images for smooth infinite loop
   const images = overlayGalleryImages;
@@ -125,35 +159,65 @@ import "./FleetDetails.css";
     });
   };
 
+  // useEffect(() => {
+  //   const fetchImages = async () => {
+  //     if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
+
+  //     const promises = fleetDetailsUnits.map(async (unit) => {
+  //       if (!unit.imageId) return null;
+  //       try {
+  //         // const { base64, updatedAt } = await fetchImageFromFirestore(
+  //         //   unit.imageId,
+  //         // );
+  //         const { base64, updatedAt } = await fetchImageFromFirestore(unit.imageId, true);
+  //         return { [unit.imageId]: { base64, updatedAt } };
+  //       } catch {
+  //         return {
+  //           [unit.imageId]: {
+  //             base64: "/assets/images/default.png",
+  //             updatedAt: Date.now(),
+  //           },
+  //         };
+  //       }
+  //     });
+
+  //     const results = await Promise.all(promises);
+  //     const merged = results.reduce((acc, cur) => ({ ...acc, ...cur }), {});
+  //     setFetchedImages(merged);
+  //   };
+
+  //   fetchImages();
+  // }, [fleetDetailsUnits, fetchImageFromFirestore]);
+
   useEffect(() => {
     const fetchImages = async () => {
       if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
 
-      const promises = fleetDetailsUnits.map(async (unit) => {
-        if (!unit.imageId) return null;
-        try {
-          // const { base64, updatedAt } = await fetchImageFromFirestore(
-          //   unit.imageId,
-          // );
-          const { base64, updatedAt } = await fetchImageFromFirestore(unit.imageId, true);
-          return { [unit.imageId]: { base64, updatedAt } };
-        } catch {
-          return {
-            [unit.imageId]: {
-              base64: "/assets/images/default.png",
-              updatedAt: Date.now(),
-            },
-          };
+      const merged = {};
+      
+      for (const unit of fleetDetailsUnits) {
+        if (!unit.imageId) continue;
+        
+        if (imageCache[unit.imageId]) {
+          merged[unit.imageId] = imageCache[unit.imageId];
+        } else {
+          try {
+            const result = await fetchImageFromFirestore(unit.imageId, true);
+            merged[unit.imageId] = result || { base64: "/assets/images/default.png", updatedAt: Date.now() };
+          } catch {
+            merged[unit.imageId] = { base64: "/assets/images/default.png", updatedAt: Date.now() };
+          }
         }
-      });
-
-      const results = await Promise.all(promises);
-      const merged = results.reduce((acc, cur) => ({ ...acc, ...cur }), {});
+      }
+      
       setFetchedImages(merged);
     };
 
     fetchImages();
-  }, [fleetDetailsUnits, fetchImageFromFirestore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fleetDetailsUnits, imageUpdateTrigger]);
+
+
 
   useEffect(() => {
     if (expandedCard?.galleryIds?.length > 0) {
