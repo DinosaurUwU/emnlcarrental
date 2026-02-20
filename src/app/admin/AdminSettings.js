@@ -1112,8 +1112,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
               compressed.base64,
             );
 
-            // Clear cache for this image
-            await clearImageCache(imageId);
+            // // Clear cache for this image
+            // await clearImageCache(imageId);
 
             if (!uploadResult.success) {
               setAdminErrorMessage(
@@ -3428,7 +3428,194 @@ const AdminSettings = ({ subSection = "overview" }) => {
                     </div>
                   </div>
 
-                  <div className="features-row">
+                                    <div className="features-row">
+                    <div className="description-row">
+                      <label>Features</label>
+                      {isEditing ? (
+                        <div className="bullet-input-container">
+                          {(Array.isArray(currentUnit.details?.specifications?.Features) 
+                            ? currentUnit.details.specifications.Features 
+                            : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim())
+                          ).map((feature, index, arr) => (
+                            <div key={index} className="bullet-input-row">
+                              <span className="bullet-dot">•</span>
+                              <input
+                                type="text"
+                                value={feature}
+                                onChange={(e) => {
+                                  const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
+                                    ? [...currentUnit.details.specifications.Features]
+                                    : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim());
+                                  newFeatures[index] = e.target.value;
+                                  setEditedUnit({
+                                    ...editedUnit,
+                                    details: {
+                                      ...editedUnit.details,
+                                      specifications: {
+                                        ...editedUnit.details.specifications,
+                                        Features: newFeatures,
+                                      },
+                                    },
+                                  });
+                                }}
+                                className="bullet-input"
+                                placeholder="Enter feature"
+                              />
+                              {arr.length > 1 && (
+                                <button
+                                  type="button"
+                                  className="remove-bullet-btn"
+                                  onClick={() => {
+                                    const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
+                                      ? [...currentUnit.details.specifications.Features]
+                                      : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim());
+                                    newFeatures.splice(index, 1);
+                                    setEditedUnit({
+                                      ...editedUnit,
+                                      details: {
+                                        ...editedUnit.details,
+                                        specifications: {
+                                          ...editedUnit.details.specifications,
+                                          Features: newFeatures,
+                                        },
+                                      },
+                                    });
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="add-bullet-btn"
+                            onClick={() => {
+                              const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
+                                ? [...currentUnit.details.specifications.Features, ""]
+                                : [...(currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim()), ""];
+                              setEditedUnit({
+                                ...editedUnit,
+                                details: {
+                                  ...editedUnit.details,
+                                  specifications: {
+                                    ...editedUnit.details.specifications,
+                                    Features: newFeatures,
+                                  },
+                                },
+                              });
+                            }}
+                          >
+                            + Add Feature
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="description-text">
+                          {Array.isArray(currentUnit.details?.specifications?.Features) 
+                            ? currentUnit.details.specifications.Features.map((f, i) => (
+                                <div key={i}>• {f}</div>
+                              ))
+                            : currentUnit.details?.specifications?.Features
+                          }
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="description-row">
+                      <label>Trunk</label>
+                      {isEditing ? (
+                        <div className="bullet-input-container">
+                          {(Array.isArray(currentUnit.details?.specifications?.Trunk) 
+                            ? currentUnit.details.specifications.Trunk 
+                            : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim())
+                          ).map((item, index, arr) => (
+                            <div key={index} className="bullet-input-row">
+                              <span className="bullet-dot">•</span>
+                              <input
+                                type="text"
+                                value={item}
+                                onChange={(e) => {
+                                  const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
+                                    ? [...currentUnit.details.specifications.Trunk]
+                                    : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim());
+                                  newTrunk[index] = e.target.value;
+                                  setEditedUnit({
+                                    ...editedUnit,
+                                    details: {
+                                      ...editedUnit.details,
+                                      specifications: {
+                                        ...editedUnit.details.specifications,
+                                        Trunk: newTrunk,
+                                      },
+                                    },
+                                  });
+                                }}
+                                className="bullet-input"
+                                placeholder="Enter trunk item"
+                              />
+                              {arr.length > 1 && (
+                                <button
+                                  type="button"
+                                  className="remove-bullet-btn"
+                                  onClick={() => {
+                                    const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
+                                      ? [...currentUnit.details.specifications.Trunk]
+                                      : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim());
+                                    newTrunk.splice(index, 1);
+                                    setEditedUnit({
+                                      ...editedUnit,
+                                      details: {
+                                        ...editedUnit.details,
+                                        specifications: {
+                                          ...editedUnit.details.specifications,
+                                          Trunk: newTrunk,
+                                        },
+                                      },
+                                    });
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="add-bullet-btn"
+                            onClick={() => {
+                              const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
+                                ? [...currentUnit.details.specifications.Trunk, ""]
+                                : [...(currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim()), ""];
+                              setEditedUnit({
+                                ...editedUnit,
+                                details: {
+                                  ...editedUnit.details,
+                                  specifications: {
+                                    ...editedUnit.details.specifications,
+                                    Trunk: newTrunk,
+                                  },
+                                },
+                              });
+                            }}
+                          >
+                            + Add Trunk Item
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="description-text">
+                          {Array.isArray(currentUnit.details?.specifications?.Trunk) 
+                            ? currentUnit.details.specifications.Trunk.map((t, i) => (
+                                <div key={i}>• {t}</div>
+                              ))
+                            : currentUnit.details?.specifications?.Trunk
+                          }
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+
+                  {/* <div className="features-row">
                     <div className="description-row">
                       <label>Features</label>
                       {isEditing ? (
@@ -3484,7 +3671,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 

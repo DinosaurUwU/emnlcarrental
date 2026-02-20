@@ -5855,6 +5855,25 @@ const loadFinancialReport = async (type, year) => {
         updatedAt: serverTimestamp(),
       });
 
+
+      // Keep client cache in sync immediately after admin upload
+      const localData = {
+        base64,
+        updatedAt: Date.now(), // local version stamp for cache
+      };
+
+      setImageCache((prev) => ({
+        ...prev,
+        [imageId]: localData,
+      }));
+
+      await setCachedImage(imageId, localData);
+
+      // notify consumers (Carousel/FleetDetails) in this session
+      setImageUpdateTrigger((prev) => prev + 1);
+
+
+
       console.log(
         `✅ Image uploaded: ${imageId} | Final size: ${sizeInKB} KB @ quality ${quality}`,
       );

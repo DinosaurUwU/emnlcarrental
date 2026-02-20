@@ -1,13 +1,13 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import Header from "../component/Header";
 import Footer from "../component/Footer";
 import "./About.css";
 
 function About({ openBooking }) {
-  const { fetchImageFromFirestore } = useUser();
-  const [aboutBackground, setAboutBackground] = useState("");
+  const { fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
+  // const [aboutBackground, setAboutBackground] = useState("");
 const [isLoading, setIsLoading] = useState(true);
   const aboutSectionRef = useRef(null);
   const contentRef = useRef(null);
@@ -22,16 +22,50 @@ const [isLoading, setIsLoading] = useState(true);
   //   fetchAboutBackground();
   // }, [fetchImageFromFirestore]);
 
-   useEffect(() => {
-    const fetchAboutBackground = async () => {
-      const result = await fetchImageFromFirestore("AboutPage_0");
-      if (result) {
-        setAboutBackground(result.base64);
-      }
-      setIsLoading(false); // Always stop loading
-    };
-    fetchAboutBackground();
-  }, [fetchImageFromFirestore]);
+  //  useEffect(() => {
+  //   const fetchAboutBackground = async () => {
+  //     const result = await fetchImageFromFirestore("AboutPage_0");
+  //     if (result) {
+  //       setAboutBackground(result.base64);
+  //     }
+  //     setIsLoading(false); // Always stop loading
+  //   };
+  //   fetchAboutBackground();
+  // }, [fetchImageFromFirestore]);
+
+
+
+  const aboutFallback = "/assets/images/about.png";
+
+const aboutCachedSrc = useMemo(
+  () => imageCache["AboutPage_0"]?.base64 || aboutFallback,
+  [imageCache],
+);
+
+const [aboutBackground, setAboutBackground] = useState(aboutCachedSrc);
+
+// instant from cache
+useEffect(() => {
+  setAboutBackground(aboutCachedSrc);
+}, [aboutCachedSrc]);
+
+// background revalidate (fresh from Firestore)
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchAboutBackground = async () => {
+    const result = await fetchImageFromFirestore("AboutPage_0", false);
+    if (!cancelled && result?.base64) {
+      setAboutBackground(result.base64);
+    }
+  };
+
+  fetchAboutBackground();
+  return () => {
+    cancelled = true;
+  };
+}, [fetchImageFromFirestore, imageUpdateTrigger]);
+
 
   useEffect(() => {
     const handleScroll = () => {

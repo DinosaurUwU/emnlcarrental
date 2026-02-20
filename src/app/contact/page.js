@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import Header from "../component/Header";
 import Footer from "../component/Footer";
@@ -217,7 +217,8 @@ const countries = [
 const defaultCountry = countries.find((c) => c.code === "ph") || countries[0];
 
 function Contact({ openBooking }) {
-  const { user, setUser, sendMessage, fetchAdminUid, fetchImageFromFirestore } =
+  const { user, setUser, sendMessage, fetchAdminUid, fetchImageFromFirestore, imageCache,
+  imageUpdateTrigger } =
     useUser();
 
     const [showContactSuccess, setShowContactSuccess] = useState(false);
@@ -248,19 +249,51 @@ const [contactSuccessMessage, setContactSuccessMessage] = useState("");
 
   const imageRef = useRef(null);
 
-  const [contactImageSrc, setContactImageSrc] = useState(
-    "/assets/images/contact.png",
-  );
+  // const [contactImageSrc, setContactImageSrc] = useState(
+  //   "/assets/images/contact.png",
+  // );
 
-  useEffect(() => {
-    const fetchContactImage = async () => {
-      const result = await fetchImageFromFirestore("ContactPage_0");
-      if (result) {
-        setContactImageSrc(result.base64);
-      }
-    };
-    fetchContactImage();
-  }, [fetchImageFromFirestore]);
+const contactFallback = "/assets/images/contact.png";
+
+const contactCachedSrc = useMemo(
+  () => imageCache["ContactPage_0"]?.base64 || contactFallback,
+  [imageCache],
+);
+
+const [contactImageSrc, setContactImageSrc] = useState(contactCachedSrc);
+
+// instant from cache
+useEffect(() => {
+  setContactImageSrc(contactCachedSrc);
+}, [contactCachedSrc]);
+
+// background revalidate (fresh from Firestore)
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchContactImage = async () => {
+    const result = await fetchImageFromFirestore("ContactPage_0", false);
+    if (!cancelled && result?.base64) {
+      setContactImageSrc(result.base64);
+    }
+  };
+
+  fetchContactImage();
+  return () => {
+    cancelled = true;
+  };
+}, [fetchImageFromFirestore, imageUpdateTrigger]);
+
+
+  // useEffect(() => {
+  //   const fetchContactImage = async () => {
+  //     const result = await fetchImageFromFirestore("ContactPage_0");
+  //     if (result) {
+  //       setContactImageSrc(result.base64);
+  //     }
+  //   };
+  //   fetchContactImage();
+  // }, [fetchImageFromFirestore]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -382,6 +415,9 @@ setShowContactSuccess(true);
           src={contactImageSrc}
           alt="Contact Us Background"
           className="contact-image"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
       </div>
 
