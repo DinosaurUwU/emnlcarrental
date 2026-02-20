@@ -57,6 +57,16 @@ const Header = ({
   const [showImportConfirmDialog, setShowImportConfirmDialog] = useState(false);
   const [importMode, setImportMode] = useState(null); // "merge" or "overwrite"
 
+    // Selected collections for import
+  const [selectedCollections, setSelectedCollections] = useState({
+    config: true,
+    images: true,
+    reviews: true,
+    terms: true,
+    units: true,
+    users: true,
+  });
+
   const [fetchedImages, setFetchedImages] = useState({});
 
   const [hoveredIcon, setHoveredIcon] = useState(null);
@@ -1884,19 +1894,55 @@ const icons = [
 
       {showImportConfirmDialog && (
         <div className="overlay-delete">
-          <div className="confirm-modal">
+          <div className="confirm-modal" style={{ minWidth: "400px" }}>
             <h3>{importMode === "merge" ? "Merge Data?" : "Overwrite Data?"}</h3>
-            <p>
+            <p style={{ marginBottom: "15px" }}>
               {importMode === "merge"
-                ? "This will merge the imported data with existing data. Existing records with matching IDs will be updated, and new records will be added. Continue?"
-                : "This will completely replace all existing data with the imported data. This action cannot be undone. Continue?"}
+                ? "This will merge the imported data with existing data. Select which collections to import:"
+                : "This will completely replace existing data. Select which collections to import:"}
             </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", marginBottom: "20px" }}>
+              {Object.keys(selectedCollections).map((collection) => (
+                <label
+                  key={collection}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    padding: "8px 12px",
+                    background: selectedCollections[collection] ? "#e8f5e9" : "#f5f5f5",
+                    borderRadius: "6px",
+                    border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #ddd",
+                    transition: "all 0.2s ease",
+                    textTransform: "capitalize",
+                    fontWeight: "500",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCollections[collection]}
+                    onChange={() =>
+                      setSelectedCollections((prev) => ({
+                        ...prev,
+                        [collection]: !prev[collection],
+                      }))
+                    }
+                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                  />
+                  {collection}
+                </label>
+              ))}
+            </div>
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
                 onClick={() => {
                   // Import function will be added here later
-                  console.log(`${importMode} import started`);
+                  const selected = Object.keys(selectedCollections).filter(
+                    (key) => selectedCollections[key]
+                  );
+                  console.log(`${importMode} import started for:`, selected);
                   setShowImportConfirmDialog(false);
                   setImportMode(null);
                 }}
@@ -1916,6 +1962,7 @@ const icons = [
           </div>
         </div>
       )}
+
 
 
 
