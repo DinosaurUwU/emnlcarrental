@@ -52,6 +52,11 @@ const Header = ({
     useState(false);
   const [adminToEdit, setAdminToEdit] = useState(null);
 
+  // Data Import states
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showImportConfirmDialog, setShowImportConfirmDialog] = useState(false);
+  const [importMode, setImportMode] = useState(null); // "merge" or "overwrite"
+
   const [fetchedImages, setFetchedImages] = useState({});
 
   const [hoveredIcon, setHoveredIcon] = useState(null);
@@ -1314,15 +1319,20 @@ const icons = [
                           </div>
                         </div>
 
-                        <div className="client-summary-box profit">
+                                                <div
+                          className="client-summary-box profit"
+                          onClick={() => setShowImportDialog(true)}
+                          style={{ cursor: "pointer" }}
+                        >
                           <div className="client-box-content">
-                            <p className="client-analytics-label">Coming</p>
-                            <p className="client-analytics-value">Soon</p>
+                            <p className="client-analytics-label">Data</p>
+                            <p className="client-analytics-value">Import</p>
                           </div>
                           <div className="box-icon">
-                            <img src="/assets/export.png" alt="Revenue" />
+                            <img src="/assets/export.png" alt="Import" />
                           </div>
                         </div>
+
                       </div>
 
                       <div
@@ -1817,6 +1827,99 @@ const icons = [
           </div>
         </div>
       )}
+
+
+
+
+
+
+
+
+      {showImportDialog && (
+        <div className="overlay-delete">
+          <div className="confirm-modal">
+            <h3>Import Data</h3>
+            <p>Choose how you want to import the data:</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button
+                  className="confirm-btn delete"
+                  style={{ flex: 1, margin: 0 }}
+                  onClick={() => {
+                    setImportMode("merge");
+                    setShowImportDialog(false);
+                    setShowImportConfirmDialog(true);
+                  }}
+                >
+                  Merge Data
+                </button>
+                <button
+                  className="confirm-btn delete"
+                  onClick={() => {
+                    setImportMode("overwrite");
+                    setShowImportDialog(false);
+                    setShowImportConfirmDialog(true);
+                  }}
+                >
+                  Overwrite Data
+                </button>
+              </div>
+              <button
+                className="confirm-btn cancel"
+                style={{ width: "100%", margin: 0 }}
+                onClick={() => setShowImportDialog(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {showImportConfirmDialog && (
+        <div className="overlay-delete">
+          <div className="confirm-modal">
+            <h3>{importMode === "merge" ? "Merge Data?" : "Overwrite Data?"}</h3>
+            <p>
+              {importMode === "merge"
+                ? "This will merge the imported data with existing data. Existing records with matching IDs will be updated, and new records will be added. Continue?"
+                : "This will completely replace all existing data with the imported data. This action cannot be undone. Continue?"}
+            </p>
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={() => {
+                  // Import function will be added here later
+                  console.log(`${importMode} import started`);
+                  setShowImportConfirmDialog(false);
+                  setImportMode(null);
+                }}
+              >
+                Yes, {importMode === "merge" ? "Merge" : "Overwrite"}
+              </button>
+              <button
+                className="confirm-btn cancel"
+                onClick={() => {
+                  setShowImportConfirmDialog(false);
+                  setShowImportDialog(true);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+
+
+
+
+
+
 
       {showResetConfirmDialog && (
         <div className="overlay-delete">
