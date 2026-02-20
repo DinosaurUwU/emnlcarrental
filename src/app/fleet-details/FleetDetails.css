@@ -1427,6 +1427,24 @@ will-change: transform;
   color: var(--accent-color);
 }
 
+/* Bullet list styles for Features and Trunk */
+.bullet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 5px;
+  margin-left: 20px;
+}
+
+.bullet-item {
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--accent-color);
+}
+
+
+
 .details-pricing{
 margin-top: 20px;
 margin-bottom: 0px;

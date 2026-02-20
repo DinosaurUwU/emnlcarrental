@@ -1372,7 +1372,7 @@ useEffect(() => {
 
                   <div className="details-specifications">
                     <ul>
-                      {specificationOrder.map((key, index) => {
+                      {/* {specificationOrder.map((key, index) => {
                         const value = expandedCard.details.specifications[key];
                         if (!value) return null; // Skip if missing
                         const icon = specificationIcons[key] || null;
@@ -1390,7 +1390,59 @@ useEffect(() => {
                             </span>
                           </li>
                         );
+                      })} */}
+
+
+
+                      {specificationOrder.map((key, index) => {
+                        const value = expandedCard.details.specifications[key];
+                        if (!value) return null; // Skip if missing
+                        const icon = specificationIcons[key] || null;
+                        
+                        // Check if this is Features or Trunk and format as bullets
+                        const isBulletField = key === "Features" || key === "Trunk";
+                        
+                        // Parse value into array if needed
+                        let displayValue = value;
+                        if (isBulletField) {
+                          if (Array.isArray(value)) {
+                            displayValue = value;
+                          } else if (typeof value === "string" && value.trim()) {
+                            displayValue = value.split(",").map(v => v.trim()).filter(v => v);
+                          }
+                        }
+                        
+                        return (
+                          <li key={index}>
+                            {icon && (
+                              <img
+                                src={icon}
+                                alt={key}
+                                className="specification-icon"
+                              />
+                            )}
+                            <span style={{ textAlign: "left" }}>
+                              {isBulletField && Array.isArray(displayValue) ? (
+                                <>
+                                  {key}:
+                                  <div className="bullet-list">
+                                    {displayValue.map((item, i) => (
+                                      <div key={i} className="bullet-item">• {item}</div>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  {key}: <strong>{value}</strong>
+                                </>
+                              )}
+                            </span>
+                          </li>
+                        );
                       })}
+
+
+
                     </ul>
                   </div>
 

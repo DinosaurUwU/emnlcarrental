@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdEdit, MdDelete } from "react-icons/md";
 
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
@@ -880,6 +880,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
           Transmission: toSentenceCase(
             editedUnit.details?.specifications?.Transmission,
           ),
+
+          // Filter out empty items from Features array
+          Features: Array.isArray(editedUnit.details?.specifications?.Features)
+            ? editedUnit.details.specifications.Features.filter(f => f && f.trim())
+            : editedUnit.details?.specifications?.Features,
+          
+          // Filter out empty items from Trunk array
+          Trunk: Array.isArray(editedUnit.details?.specifications?.Trunk)
+            ? editedUnit.details.specifications.Trunk.filter(t => t && t.trim())
+            : editedUnit.details?.specifications?.Trunk,
+
         },
       },
     };
@@ -2881,8 +2892,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                 setCurrentGalleryIndex(null);
                                 fileInputRef.current.click();
                               }}
+                              title="Change Image"
                             >
-                              <img src={"/assets/replace.png"} alt="Replace" />
+                              <MdEdit size={20} />
                             </button>
                           </div>
                         )}
@@ -3000,12 +3012,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                         setCurrentGalleryIndex(index);
                                         fileInputRef.current.click();
                                       }}
+                                      title="Replace Image"
                                     >
-                                      <img
-                                        style={{ padding: "15px" }}
-                                        src={"/assets/replace.png"}
-                                        alt="Replace"
-                                      />
+                                      <MdEdit size={18} />
                                     </button>
                                     <button
                                       className="delete-btn"
@@ -3023,11 +3032,9 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                           updatedFiles,
                                         );
                                       }}
+                                      title="Delete Image"
                                     >
-                                      <img
-                                        src={"/assets/delete.png"}
-                                        alt="Delete"
-                                      />
+                                      <MdDelete size={18} />
                                     </button>
                                   </div>
                                 )}
@@ -3510,16 +3517,19 @@ const AdminSettings = ({ subSection = "overview" }) => {
                             + Add Feature
                           </button>
                         </div>
-                      ) : (
-                        <div className="description-text">
+                                            ) : (
+                        <div className="description-text bullet-display">
                           {Array.isArray(currentUnit.details?.specifications?.Features) 
                             ? currentUnit.details.specifications.Features.map((f, i) => (
-                                <div key={i}>• {f}</div>
+                                <div key={i} className="bullet-item">• {f}</div>
                               ))
-                            : currentUnit.details?.specifications?.Features
+                            : (currentUnit.details?.specifications?.Features || "").split(",").map((f, i) => (
+                                <div key={i} className="bullet-item">• {f.trim()}</div>
+                              ))
                           }
                         </div>
                       )}
+
                     </div>
 
                     <div className="description-row">
@@ -3602,16 +3612,19 @@ const AdminSettings = ({ subSection = "overview" }) => {
                             + Add Trunk Item
                           </button>
                         </div>
-                      ) : (
-                        <div className="description-text">
+                                            ) : (
+                        <div className="description-text bullet-display">
                           {Array.isArray(currentUnit.details?.specifications?.Trunk) 
                             ? currentUnit.details.specifications.Trunk.map((t, i) => (
-                                <div key={i}>• {t}</div>
+                                <div key={i} className="bullet-item">• {t}</div>
                               ))
-                            : currentUnit.details?.specifications?.Trunk
+                            : (currentUnit.details?.specifications?.Trunk || "").split(",").map((t, i) => (
+                                <div key={i} className="bullet-item">• {t.trim()}</div>
+                              ))
                           }
                         </div>
                       )}
+
                     </div>
                   </div>
 

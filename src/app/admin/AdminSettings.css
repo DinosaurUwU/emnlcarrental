@@ -762,6 +762,21 @@
   flex-shrink: 0;
 }
 
+/* Bullet Display Styles (view mode) */
+.bullet-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.bullet-item {
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+
 .bullet-input {
   flex: 1;
   padding: 8px 12px;
