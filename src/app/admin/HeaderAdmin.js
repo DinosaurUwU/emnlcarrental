@@ -126,18 +126,33 @@ const Header = ({
     fetchImageFromFirestore,
     updateAdminProfilePic,
     resetAdminProfilePic,
-    createBackup,
+    
 
+    createBackup,
     isBackingUp,
     backupProgress,
     isBackupMinimized,
     setIsBackupMinimized,
+
 
     isDownloading,
     downloadProgress,
     isDownloadMinimized,
     setIsDownloadMinimized,
     createDownload,
+
+
+    importDataFromJson,
+    isImporting,
+    importProgress,
+    isImportMinimized,
+    setIsImportMinimized,
+    showImportSuccess,
+    setShowImportSuccess,
+    hideImportAnimation,
+    setHideImportAnimation,
+
+
 
     showBackupSuccess,
     setShowBackupSuccess,
@@ -150,6 +165,9 @@ const Header = ({
 
     showActionOverlay,
   } = useUser();
+
+  const importFileInputRef = useRef(null);
+
 
   const [pendingTheme, setPendingTheme] = useState(theme);
 
@@ -721,8 +739,51 @@ const icons = [
     }
   };
 
+const handleImportFilePick = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // Close dialogs immediately when import starts
+  setShowImportConfirmDialog(false);
+  setShowImportDialog(false);
+
+  try {
+    const raw = await file.text();
+    const parsed = JSON.parse(raw);
+
+    const selected = Object.keys(selectedCollections).filter(
+      (key) => selectedCollections[key],
+    );
+
+    if (selected.length === 0) {
+      console.warn("No collections selected for import.");
+      return;
+    }
+
+    await importDataFromJson(parsed, {
+      mode: importMode || "merge",
+      selectedCollections,
+    });
+  } catch (error) {
+    console.error("Invalid import file:", error);
+  } finally {
+    event.target.value = "";
+    setImportMode(null);
+  }
+};
+
+
+
   return (
     <>
+    <input
+  ref={importFileInputRef}
+  type="file"
+  accept=".json,application/json"
+  style={{ display: "none" }}
+  onChange={handleImportFilePick}
+/>
+
       <div
         className={`sidebar ${collapsed && !isOverlay ? "collapsed" : ""} ${sidebarOpen ? "open" : ""}`}
       >
@@ -1777,6 +1838,29 @@ const icons = [
         </div>
       )}
 
+      {/* 🟢 Success Overlay (Import Completed) */}
+      {showImportSuccess && (
+        <div
+          className={`sent-ongoing-overlay ${
+            hideImportAnimation ? "hide" : ""
+          }`}
+        >
+          <button
+            className="close-sent-ongoing"
+            onClick={() => {
+              setHideImportAnimation(true);
+              setTimeout(() => setShowImportSuccess(false), 400);
+            }}
+          >
+            ✖
+          </button>
+          <span className="warning-text" style={{ color: "#28a745" }}>
+            Import completed successfully!
+          </span>
+          <div className="sent-ongoing-progress-bar"></div>
+        </div>
+      )}
+
       {/* 🟢 Success Overlay (Admin Profile Reset) */}
       {showAdminProfileResetSuccess && (
         <div
@@ -1799,6 +1883,7 @@ const icons = [
           <div className="sent-ongoing-progress-bar"></div>
         </div>
       )}
+
 
 
 
@@ -2067,14 +2152,19 @@ const icons = [
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
-                onClick={() => {
-                  const selected = Object.keys(selectedCollections).filter(
-                    (key) => selectedCollections[key]
-                  );
-                  console.log(`${importMode} import started for:`, selected);
-                  setShowImportConfirmDialog(false);
-                  setImportMode(null);
-                }}
+onClick={() => {
+  const selected = Object.keys(selectedCollections).filter(
+    (key) => selectedCollections[key]
+  );
+
+  if (selected.length === 0) {
+    console.warn("No collections selected for import.");
+    return;
+  }
+
+  importFileInputRef.current?.click();
+}}
+
               >
                 Yes, {importMode === "merge" ? "Merge" : "Overwrite"}
               </button>
@@ -2282,6 +2372,50 @@ const icons = [
           )}
         </div>
       )}
+
+      {isImporting && (
+  <div className={`backup-progress ${isImportMinimized ? "backup-minimized" : ""}`}>
+    {!isImportMinimized ? (
+      <div className="backup-progress-container">
+        <span className="backup-progress-label">Importing Data</span>
+
+        <div className="backup-progress-bar">
+          <div
+            className="backup-progress-fill"
+            style={{ width: `${importProgress}%` }}
+          />
+        </div>
+
+        <span className="backup-progress-text">
+          {Math.round(importProgress)}%
+        </span>
+
+        <button
+          className="backup-toggle-btn"
+          onClick={() => setIsImportMinimized(true)}
+          aria-label="Minimize import progress"
+        >
+          ◀
+        </button>
+      </div>
+    ) : (
+      <div className="backup-minimized-container">
+        <span className="backup-progress-text">
+          {Math.round(importProgress)}%
+        </span>
+
+        <button
+          className="backup-toggle-btn backup-triangle-left"
+          onClick={() => setIsImportMinimized(false)}
+          aria-label="Expand import progress"
+        >
+          ▶
+        </button>
+      </div>
+    )}
+  </div>
+      )}
+
 
       {showLogoutOverlay && (
         <div className="overlay-delete">

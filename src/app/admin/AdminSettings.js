@@ -1338,27 +1338,92 @@ const AdminSettings = ({ subSection = "overview" }) => {
   }, [selectedUnitId, currentUnit?.imageId, isEditing, imageUpdateTrigger]);
 
   // Fetch gallery images when unit is selected
-  useEffect(() => {
-    if (selectedUnitId && currentUnit?.galleryIds?.length > 0 && !isEditing) {
-      setGalleryImagesLoading(true);
-      const fetchPromises = currentUnit.galleryIds.map((id) =>
-        fetchImageFromFirestore(id).catch(() => null),
-      );
-      Promise.all(fetchPromises)
-        .then((results) => {
-          // Filter out nulls (broken images) so they're not shown as placeholders
-          const filteredResults = results.filter((r) => r !== null);
-          setGalleryImages(filteredResults);
-          setGalleryImagesLoading(false);
-        })
-        .catch((error) => {
-          setGalleryImagesLoading(false);
-        });
-    } else if (!isEditing) {
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadGallery = async () => {
+    // Always stop spinner when editing or no selected unit
+    if (isEditing || !selectedUnitId) {
+      setGalleryImagesLoading(false);
+      if (!isEditing) setGalleryImages([]);
+      return;
+    }
+
+    // Normalize imported gallery IDs (defensive)
+    const rawIds = Array.isArray(currentUnit?.galleryIds) ? currentUnit.galleryIds : [];
+    const validIds = rawIds
+      .map((id) => (typeof id === "string" ? id.trim() : ""))
+      .filter(Boolean);
+
+    if (validIds.length === 0) {
       setGalleryImages([]);
       setGalleryImagesLoading(false);
+      return;
     }
-  }, [selectedUnitId, currentUnit?.galleryIds, isEditing, imageUpdateTrigger]);
+
+    setGalleryImagesLoading(true);
+
+    try {
+      // use cache-first path to avoid long validation stalls in AdminSettings
+      const settled = await Promise.allSettled(
+        validIds.map((id) => fetchImageFromFirestore(id, true))
+      );
+
+      if (cancelled) return;
+
+      const loaded = settled
+        .map((r) => (r.status === "fulfilled" ? r.value : null))
+        .filter((img) => img && img.base64);
+
+      setGalleryImages(loaded);
+    } catch (error) {
+      if (!cancelled) {
+        setGalleryImages([]);
+      }
+    } finally {
+      if (!cancelled) {
+        setGalleryImagesLoading(false);
+      }
+    }
+  };
+
+  loadGallery();
+
+  return () => {
+    cancelled = true;
+  };
+}, [
+  selectedUnitId,
+  isEditing,
+  imageUpdateTrigger,
+  currentUnit?.plateNo,
+  JSON.stringify(currentUnit?.galleryIds || []),
+  fetchImageFromFirestore,
+]);
+
+
+  // useEffect(() => {
+  //   if (selectedUnitId && currentUnit?.galleryIds?.length > 0 && !isEditing) {
+  //     setGalleryImagesLoading(true);
+  //     const fetchPromises = currentUnit.galleryIds.map((id) =>
+  //       fetchImageFromFirestore(id).catch(() => null),
+  //     );
+  //     Promise.all(fetchPromises)
+  //       .then((results) => {
+  //         // Filter out nulls (broken images) so they're not shown as placeholders
+  //         const filteredResults = results.filter((r) => r !== null);
+  //         setGalleryImages(filteredResults);
+  //         setGalleryImagesLoading(false);
+  //       })
+  //       .catch((error) => {
+  //         setGalleryImagesLoading(false);
+  //       });
+  //   } else if (!isEditing) {
+  //     setGalleryImages([]);
+  //     setGalleryImagesLoading(false);
+  //   }
+  // }, [selectedUnitId, currentUnit?.galleryIds, isEditing, imageUpdateTrigger]);
 
   const handleAddMOP = () => {
     setIsAddingMOP(true);

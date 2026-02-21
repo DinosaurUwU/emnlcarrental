@@ -70,6 +70,14 @@ export const UserProvider = ({ children }) => {
   const [hideBackupAnimation, setHideBackupAnimation] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
   const [hideDownloadAnimation, setHideDownloadAnimation] = useState(false);
+  const [showImportSuccess, setShowImportSuccess] = useState(false);
+  const [hideImportAnimation, setHideImportAnimation] = useState(false);
+
+
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isImportMinimized, setIsImportMinimized] = useState(false);
+
 
   const [theme, setTheme] = useState("default"); // fallback theme
 
@@ -6718,146 +6726,300 @@ useEffect(() => {
   };
 
   // FUNCTION TO CREATE DOWNLOAD
-  const createDownload = async (selectedCollections = null) => {
-    if (!user || user.role !== "admin") {
-      console.error("Unauthorized: Only admins can download data");
-      return;
-    }
+const createDownload = async (selectedCollections = null) => {
+  if (!user || user.role !== "admin") {
+    console.error("Unauthorized: Only admins can download data");
+    return;
+  }
 
-    setIsDownloading(true);
+  setIsDownloading(true);
+  setDownloadProgress(0);
+  setIsDownloadMinimized(false);
+
+  const now = new Date();
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Manila",
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(now)
+    .reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+
+  const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+
+  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+  let rootCollections = allCollections;
+  if (Array.isArray(selectedCollections)) {
+    rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+  } else if (selectedCollections && typeof selectedCollections === "object") {
+    rootCollections = allCollections.filter((key) => selectedCollections[key]);
+  }
+
+  if (!rootCollections.length) {
+    console.warn("No collections selected for download");
+    setIsDownloading(false);
     setDownloadProgress(0);
-    setIsDownloadMinimized(false);
+    return;
+  }
 
-    const adminUid = user.uid;
+  const triggerBlobDownload = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
 
-    const now = new Date();
-
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Manila",
-      month: "2-digit",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-      .formatToParts(now)
-      .reduce((acc, part) => {
-        acc[part.type] = part.value;
-        return acc;
-      }, {});
-
-    const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
-
-    const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
-
-    let rootCollections = allCollections;
-
-    if (Array.isArray(selectedCollections)) {
-      rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
-    } else if (selectedCollections && typeof selectedCollections === "object") {
-      rootCollections = allCollections.filter((key) => selectedCollections[key]);
-    }
-
-    if (rootCollections.length === 0) {
-      rootCollections = allCollections;
-    }
-
-
-    try {
-      let totalDocs = 0;
-      for (const collName of rootCollections) {
-        const sourceColl = collection(db, collName);
-        const snapshot = await getDocs(sourceColl);
-        totalDocs += snapshot.size;
-      }
-
-      let copiedDocs = 0;
-      const allData = {};
-
-      // Helper function to truncate strings exceeding Excel's cell limit
-      const truncateForExcel = (value, maxLength = 32767) => {
-        if (typeof value === "string" && value.length > maxLength) {
-          return value.substring(0, maxLength - 3) + "..."; // Add ellipsis to indicate truncation
-        }
-        return value;
-      };
-
-      for (const collName of rootCollections) {
-        const sourceColl = collection(db, collName);
-        const snapshot = await getDocs(sourceColl);
-        const data = snapshot.docs.map((doc) => {
-          const docData = { id: doc.id, ...doc.data() };
-          // Truncate all string fields in the document
-          Object.keys(docData).forEach((key) => {
-            if (typeof docData[key] === "string") {
-              docData[key] = truncateForExcel(docData[key]);
-            }
-          });
-          return docData;
-        });
-        allData[collName] = data;
-        copiedDocs += snapshot.size;
-        setDownloadProgress(Math.min(100, (copiedDocs / totalDocs) * 100));
-      }
-
-      // Create Excel
-      const XLSX = await import("xlsx");
-      const wb = XLSX.utils.book_new();
-      for (const collName in allData) {
-        const ws = XLSX.utils.json_to_sheet(allData[collName]);
-        XLSX.utils.book_append_sheet(wb, ws, collName);
-      }
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const excelUrl = URL.createObjectURL(excelBlob);
-      const excelLink = document.createElement("a");
-      excelLink.href = excelUrl;
-      excelLink.download = `${downloadId}.xlsx`;
-      document.body.appendChild(excelLink);
-      excelLink.click();
-      document.body.removeChild(excelLink);
-      URL.revokeObjectURL(excelUrl);
-
-      // Create JSON (Firestore compatible)
-      const jsonData = JSON.stringify(allData, null, 2);
-      const jsonBlob = new Blob([jsonData], { type: "application/json" });
-      const jsonUrl = URL.createObjectURL(jsonBlob);
-      const jsonLink = document.createElement("a");
-      jsonLink.href = jsonUrl;
-      jsonLink.download = `${downloadId}.json`;
-      document.body.appendChild(jsonLink);
-      jsonLink.click();
-      document.body.removeChild(jsonLink);
-      URL.revokeObjectURL(jsonUrl);
-
-      console.log("Download completed successfully");
-      showActionOverlay({
-        message: "Download completed successfully!",
-        type: "success",
-      });
-
-      setShowDownloadSuccess(true);
-      setHideDownloadAnimation(false);
-
-      setTimeout(() => {
-        setHideDownloadAnimation(true);
-        setTimeout(() => setShowDownloadSuccess(false), 400);
-      }, 5000);
-    } catch (error) {
-      console.error("Error creating download:", error);
-      showActionOverlay({
-        message: "Download failed. Please try again.",
-        type: "warning",
-      });
-    } finally {
-      setIsDownloading(false);
-      setDownloadProgress(0);
-    }
+    // Delay revoke/cleanup so browser has time to start download
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 2000);
   };
+
+  try {
+    let totalDocs = 0;
+    for (const collName of rootCollections) {
+      const sourceColl = collection(db, collName);
+      const snapshot = await getDocs(sourceColl);
+      totalDocs += snapshot.size;
+    }
+
+    let copiedDocs = 0;
+    const allData = {};
+    const excelData = {};
+
+    const sanitizeForExcel = (value, maxLength = 32767) => {
+      if (typeof value === "string") {
+        return value.length > maxLength
+          ? value.substring(0, maxLength - 3) + "..."
+          : value;
+      }
+
+      if (Array.isArray(value)) {
+        return value.map((item) => sanitizeForExcel(item, maxLength));
+      }
+
+      if (value && typeof value === "object") {
+        const out = {};
+        for (const key of Object.keys(value)) {
+          out[key] = sanitizeForExcel(value[key], maxLength);
+        }
+        return out;
+      }
+
+      return value;
+    };
+
+    for (const collName of rootCollections) {
+      const sourceColl = collection(db, collName);
+      const snapshot = await getDocs(sourceColl);
+
+      const rawData = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+
+      allData[collName] = rawData;
+      excelData[collName] = rawData.map((row) => sanitizeForExcel(row));
+
+      copiedDocs += snapshot.size;
+      setDownloadProgress(totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100);
+    }
+
+    // Build Excel
+    const XLSX = await import("xlsx");
+    const wb = XLSX.utils.book_new();
+    for (const collName of rootCollections) {
+      const ws = XLSX.utils.json_to_sheet(excelData[collName] || []);
+      XLSX.utils.book_append_sheet(wb, ws, collName);
+    }
+
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const excelBlob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const jsonData = JSON.stringify(allData, null, 2);
+    const jsonBlob = new Blob([jsonData], { type: "application/json" });
+
+    // Trigger downloads
+    triggerBlobDownload(excelBlob, `${downloadId}.xlsx`);
+    await new Promise((resolve) => setTimeout(resolve, 350)); // spacing helps browser allow both
+    triggerBlobDownload(jsonBlob, `${downloadId}.json`);
+
+    showActionOverlay({
+      message: "Download completed successfully!",
+      type: "success",
+    });
+
+    setShowDownloadSuccess(true);
+    setHideDownloadAnimation(false);
+
+    setTimeout(() => {
+      setHideDownloadAnimation(true);
+      setTimeout(() => setShowDownloadSuccess(false), 400);
+    }, 5000);
+  } catch (error) {
+    console.error("Error creating download:", error);
+    showActionOverlay({
+      message: "Download failed. Please try again.",
+      type: "warning",
+    });
+  } finally {
+    setIsDownloading(false);
+    setDownloadProgress(0);
+  }
+};
+
+
+  // FUNCTION TO IMPORT DATA FROM JSON
+const importDataFromJson = async (
+  importedData,
+  { mode = "merge", selectedCollections = null } = {},
+) => {
+  if (!user || user.role !== "admin") {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  setIsImporting(true);
+  setImportProgress(0);
+  setIsImportMinimized(false);
+
+  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+  let targetCollections = allCollections;
+  if (Array.isArray(selectedCollections)) {
+    targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
+  } else if (selectedCollections && typeof selectedCollections === "object") {
+    targetCollections = allCollections.filter((k) => selectedCollections[k]);
+  }
+
+  if (!targetCollections.length) {
+    setIsImporting(false);
+    setImportProgress(0);
+    return { success: false, error: "No collections selected" };
+  }
+
+  // Convert exported JSON timestamp objects back to Firestore Timestamp
+  const normalizeFirestoreValue = (value) => {
+    if (Array.isArray(value)) {
+      return value.map(normalizeFirestoreValue);
+    }
+
+    if (value && typeof value === "object") {
+      const keys = Object.keys(value);
+
+      if (
+        keys.length === 2 &&
+        keys.includes("seconds") &&
+        keys.includes("nanoseconds") &&
+        typeof value.seconds === "number" &&
+        typeof value.nanoseconds === "number"
+      ) {
+        return new Timestamp(value.seconds, value.nanoseconds);
+      }
+
+      const out = {};
+      for (const key of keys) {
+        out[key] = normalizeFirestoreValue(value[key]);
+      }
+      return out;
+    }
+
+    return value;
+  };
+
+  try {
+    // Count total incoming docs for progress %
+    const totalDocs = targetCollections.reduce((sum, collName) => {
+      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+      return sum + incoming.filter((item) => item?.id).length;
+    }, 0);
+
+    let processedDocs = 0;
+
+    for (const collName of targetCollections) {
+      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+
+      // OVERWRITE: remove docs not present in incoming file
+      if (mode === "overwrite") {
+        const existingSnap = await getDocs(collection(db, collName));
+        const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
+
+        for (const docSnap of existingSnap.docs) {
+          if (!incomingIds.has(docSnap.id)) {
+            await deleteDoc(doc(db, collName, docSnap.id));
+          }
+        }
+      }
+
+      // MERGE/OVERWRITE write pass
+      for (const item of incoming) {
+        if (!item?.id) continue;
+        const { id, ...payload } = item;
+        const normalizedPayload = normalizeFirestoreValue(payload);
+
+        await setDoc(
+          doc(db, collName, id),
+          normalizedPayload,
+          { merge: mode === "merge" },
+        );
+
+        processedDocs += 1;
+        setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+      }
+    }
+
+    setImportProgress(100);
+
+    showActionOverlay({
+      message: `Import completed (${mode}).`,
+      type: "success",
+    });
+
+    setShowImportSuccess(true);
+    setHideImportAnimation(false);
+
+    setTimeout(() => {
+      setHideImportAnimation(true);
+      setTimeout(() => setShowImportSuccess(false), 400);
+    }, 5000);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Import failed:", error);
+    showActionOverlay({
+      message: "Import failed. Please check your file.",
+      type: "warning",
+    });
+    return { success: false, error: error.message };
+  } finally {
+    setTimeout(() => {
+      setIsImporting(false);
+      setImportProgress(0);
+    }, 300);
+  }
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -6992,6 +7154,19 @@ useEffect(() => {
         setIsDownloadMinimized,
         createDownload,
 
+
+        importDataFromJson,
+        isImporting,
+        importProgress,
+        isImportMinimized,
+        setIsImportMinimized,
+        showImportSuccess,
+        setShowImportSuccess,
+        hideImportAnimation,
+        setHideImportAnimation,
+
+
+
         showBackupSuccess,
         setShowBackupSuccess,
         hideBackupAnimation,
@@ -7072,6 +7247,278 @@ useEffect(() => {
     </UserContext.Provider>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const createDownload = async (selectedCollections = null) => {
+  //   if (!user || user.role !== "admin") {
+  //     console.error("Unauthorized: Only admins can download data");
+  //     return;
+  //   }
+
+  //   setIsDownloading(true);
+  //   setDownloadProgress(0);
+  //   setIsDownloadMinimized(false);
+
+  //   const adminUid = user.uid;
+
+  //   const now = new Date();
+
+  //   const parts = new Intl.DateTimeFormat("en-US", {
+  //     timeZone: "Asia/Manila",
+  //     month: "2-digit",
+  //     day: "2-digit",
+  //     year: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     second: "2-digit",
+  //     hour12: false,
+  //   })
+  //     .formatToParts(now)
+  //     .reduce((acc, part) => {
+  //       acc[part.type] = part.value;
+  //       return acc;
+  //     }, {});
+
+  //   const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+
+  //   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+  //   let rootCollections = allCollections;
+
+  //   if (Array.isArray(selectedCollections)) {
+  //     rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+  //   } else if (selectedCollections && typeof selectedCollections === "object") {
+  //     rootCollections = allCollections.filter((key) => selectedCollections[key]);
+  //   }
+
+  //   if (rootCollections.length === 0) {
+  //     rootCollections = allCollections;
+  //   }
+
+
+  //   try {
+  //     let totalDocs = 0;
+  //     for (const collName of rootCollections) {
+  //       const sourceColl = collection(db, collName);
+  //       const snapshot = await getDocs(sourceColl);
+  //       totalDocs += snapshot.size;
+  //     }
+
+  //     let copiedDocs = 0;
+  //     const allData = {};
+
+  //     // Helper function to truncate strings exceeding Excel's cell limit
+  //     const truncateForExcel = (value, maxLength = 32767) => {
+  //       if (typeof value === "string" && value.length > maxLength) {
+  //         return value.substring(0, maxLength - 3) + "..."; // Add ellipsis to indicate truncation
+  //       }
+  //       return value;
+  //     };
+
+  //     for (const collName of rootCollections) {
+  //       const sourceColl = collection(db, collName);
+  //       const snapshot = await getDocs(sourceColl);
+  //       const data = snapshot.docs.map((doc) => {
+  //         const docData = { id: doc.id, ...doc.data() };
+  //         // Truncate all string fields in the document
+  //         Object.keys(docData).forEach((key) => {
+  //           if (typeof docData[key] === "string") {
+  //             docData[key] = truncateForExcel(docData[key]);
+  //           }
+  //         });
+  //         return docData;
+  //       });
+  //       allData[collName] = data;
+  //       copiedDocs += snapshot.size;
+  //       setDownloadProgress(Math.min(100, (copiedDocs / totalDocs) * 100));
+  //     }
+
+  //     // Create Excel
+  //     const XLSX = await import("xlsx");
+  //     const wb = XLSX.utils.book_new();
+  //     for (const collName in allData) {
+  //       const ws = XLSX.utils.json_to_sheet(allData[collName]);
+  //       XLSX.utils.book_append_sheet(wb, ws, collName);
+  //     }
+  //     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  //     const excelBlob = new Blob([excelBuffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const excelUrl = URL.createObjectURL(excelBlob);
+  //     const excelLink = document.createElement("a");
+  //     excelLink.href = excelUrl;
+  //     excelLink.download = `${downloadId}.xlsx`;
+  //     document.body.appendChild(excelLink);
+  //     excelLink.click();
+  //     document.body.removeChild(excelLink);
+  //     URL.revokeObjectURL(excelUrl);
+
+  //     // Create JSON (Firestore compatible)
+  //     const jsonData = JSON.stringify(allData, null, 2);
+  //     const jsonBlob = new Blob([jsonData], { type: "application/json" });
+  //     const jsonUrl = URL.createObjectURL(jsonBlob);
+  //     const jsonLink = document.createElement("a");
+  //     jsonLink.href = jsonUrl;
+  //     jsonLink.download = `${downloadId}.json`;
+  //     document.body.appendChild(jsonLink);
+  //     jsonLink.click();
+  //     document.body.removeChild(jsonLink);
+  //     URL.revokeObjectURL(jsonUrl);
+
+  //     console.log("Download completed successfully");
+  //     showActionOverlay({
+  //       message: "Download completed successfully!",
+  //       type: "success",
+  //     });
+
+  //     setShowDownloadSuccess(true);
+  //     setHideDownloadAnimation(false);
+
+  //     setTimeout(() => {
+  //       setHideDownloadAnimation(true);
+  //       setTimeout(() => setShowDownloadSuccess(false), 400);
+  //     }, 5000);
+  //   } catch (error) {
+  //     console.error("Error creating download:", error);
+  //     showActionOverlay({
+  //       message: "Download failed. Please try again.",
+  //       type: "warning",
+  //     });
+  //   } finally {
+  //     setIsDownloading(false);
+  //     setDownloadProgress(0);
+  //   }
+  // };
+
+
+
+
+
+
+
+
+// const importDataFromJson = async (
+//   importedData,
+//   { mode = "merge", selectedCollections = null } = {},
+// ) => {
+//   if (!user || user.role !== "admin") {
+//     return { success: false, error: "Unauthorized" };
+//   }
+
+//   setIsImporting(true);
+//   setImportProgress(0);
+//   setIsImportMinimized(false);
+
+//   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+//   let targetCollections = allCollections;
+//   if (Array.isArray(selectedCollections)) {
+//     targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
+//   } else if (selectedCollections && typeof selectedCollections === "object") {
+//     targetCollections = allCollections.filter((k) => selectedCollections[k]);
+//   }
+
+//   if (!targetCollections.length) {
+//     setIsImporting(false);
+//     setImportProgress(0);
+//     return { success: false, error: "No collections selected" };
+//   }
+
+//   try {
+//     // Count total incoming docs for progress %
+//     const totalDocs = targetCollections.reduce((sum, collName) => {
+//       const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+//       return sum + incoming.filter((item) => item?.id).length;
+//     }, 0);
+
+//     let processedDocs = 0;
+
+//     for (const collName of targetCollections) {
+//       const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+
+//       // OVERWRITE: remove docs not present in incoming file
+//       if (mode === "overwrite") {
+//         const existingSnap = await getDocs(collection(db, collName));
+//         const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
+
+//         for (const docSnap of existingSnap.docs) {
+//           if (!incomingIds.has(docSnap.id)) {
+//             await deleteDoc(doc(db, collName, docSnap.id));
+//           }
+//         }
+//       }
+
+//       // MERGE/OVERWRITE write pass
+//       for (const item of incoming) {
+//         if (!item?.id) continue;
+//         const { id, ...payload } = item;
+
+//         await setDoc(
+//           doc(db, collName, id),
+//           payload,
+//           { merge: mode === "merge" },
+//         );
+
+//         processedDocs += 1;
+//         setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+//       }
+//     }
+
+//     setImportProgress(100);
+
+//     showActionOverlay({
+//       message: `Import completed (${mode}).`,
+//       type: "success",
+//     });
+
+//     // NEW: show import success overlay
+//     setShowImportSuccess(true);
+//     setHideImportAnimation(false);
+
+//     setTimeout(() => {
+//       setHideImportAnimation(true);
+//       setTimeout(() => setShowImportSuccess(false), 400);
+//     }, 5000);
+
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Import failed:", error);
+//     showActionOverlay({
+//       message: "Import failed. Please check your file.",
+//       type: "warning",
+//     });
+//     return { success: false, error: error.message };
+//   } finally {
+//     setTimeout(() => {
+//       setIsImporting(false);
+//       setImportProgress(0);
+//     }, 300);
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
 
 // const state = useMemo(() => ({
 //   isUpdatingUser,
