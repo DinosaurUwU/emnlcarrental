@@ -10,6 +10,7 @@ import { FiMenu, FiUser} from 'react-icons/fi';
 import { BiSearch, BiSearchAlt } from 'react-icons/bi';
 
 
+
 const Header = ({
   onNavClick,
   onCollapseChange,
