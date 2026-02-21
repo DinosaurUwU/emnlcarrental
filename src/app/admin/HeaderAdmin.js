@@ -67,6 +67,26 @@ const Header = ({
     users: true,
   });
 
+// Selected collections for backup
+  const [selectedBackupCollections, setSelectedBackupCollections] = useState({
+    config: true,
+    images: true,
+    reviews: true,
+    terms: true,
+    units: true,
+    users: true,
+  });
+
+  // Selected collections for download
+  const [selectedDownloadCollections, setSelectedDownloadCollections] = useState({
+    config: true,
+    images: true,
+    reviews: true,
+    terms: true,
+    units: true,
+    users: true,
+  });
+
   const [fetchedImages, setFetchedImages] = useState({});
 
   const [hoveredIcon, setHoveredIcon] = useState(null);
@@ -1780,20 +1800,68 @@ const icons = [
         </div>
       )}
 
+
+
+
+
+
+      {/* DATA BACKUP */}
       {showBackupConfirmDialog && (
         <div className="overlay-delete">
-          <div className="confirm-modal">
+          <div className="confirm-modal" style={{ minWidth: "400px" }}>
             <h3>Start Data Backup?</h3>
-            <p>
-              Are you sure you want to start backing up the data? This may take
-              some time.
+            <p style={{ marginBottom: "15px" }}>
+              Select which collections to backup:
             </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
+              {Object.keys(selectedBackupCollections).map((collection) => (
+                <label
+                  key={collection}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "10px", cursor: "pointer",
+                    padding: "12px 16px", borderRadius: "12px", textTransform: "capitalize",
+                    fontWeight: "600", fontSize: "14px", transition: "all 0.3s ease",
+                    background: selectedBackupCollections[collection] ? "#e8f5e9" : "#fff",
+                    border: selectedBackupCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
+                    boxShadow: selectedBackupCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <div style={{
+                    width: "24px", height: "24px", borderRadius: "8px", display: "flex",
+                    alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", flexShrink: 0,
+                    border: selectedBackupCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
+                    background: selectedBackupCollections[collection] ? "#4caf50" : "#fff",
+                  }}>
+                    {selectedBackupCollections[collection] && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </div>
+                  <input type="checkbox" checked={selectedBackupCollections[collection]}
+                    onChange={() => setSelectedBackupCollections((prev) => ({ ...prev, [collection]: !prev[collection] }))}
+                    style={{ display: "none" }} />
+                  {collection}
+                </label>
+              ))}
+            </div>
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
                 onClick={() => {
-                  createBackup();
+                  const selected = Object.keys(selectedBackupCollections).filter(
+                    (key) => selectedBackupCollections[key]
+                  );
+
+                  if (selected.length === 0) {
+                    console.warn("No collections selected for backup.");
+                    return;
+                  }
+
+                  console.log("Backup started for:", selected);
+                  createBackup(selectedBackupCollections); // or createBackup(selected)
                   setShowBackupConfirmDialog(false);
+
                 }}
               >
                 Yes, Backup
@@ -1809,19 +1877,62 @@ const icons = [
         </div>
       )}
 
+
+      {/* DATA DOWNLOAD */}
       {showDownloadConfirmDialog && (
         <div className="overlay-delete">
-          <div className="confirm-modal">
+          <div className="confirm-modal" style={{ minWidth: "400px" }}>
             <h3>Start Data Download?</h3>
-            <p>
-              Are you sure you want to start downloading the data? This may take
-              some time.
+            <p style={{ marginBottom: "15px" }}>
+              Select which collections to download:
             </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
+              {Object.keys(selectedDownloadCollections).map((collection) => (
+                <label
+                  key={collection}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "10px", cursor: "pointer",
+                    padding: "12px 16px", borderRadius: "12px", textTransform: "capitalize",
+                    fontWeight: "600", fontSize: "14px", transition: "all 0.3s ease",
+                    background: selectedDownloadCollections[collection] ? "#e8f5e9" : "#fff",
+                    border: selectedDownloadCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
+                    boxShadow: selectedDownloadCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <div style={{
+                    width: "24px", height: "24px", borderRadius: "8px", display: "flex",
+                    alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", flexShrink: 0,
+                    border: selectedDownloadCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
+                    background: selectedDownloadCollections[collection] ? "#4caf50" : "#fff",
+                  }}>
+                    {selectedDownloadCollections[collection] && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </div>
+                  <input type="checkbox" checked={selectedDownloadCollections[collection]}
+                    onChange={() => setSelectedDownloadCollections((prev) => ({ ...prev, [collection]: !prev[collection] }))}
+                    style={{ display: "none" }} />
+                  {collection}
+                </label>
+              ))}
+            </div>
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
                 onClick={() => {
-                  createDownload();
+                  const selected = Object.keys(selectedDownloadCollections).filter(
+                    (key) => selectedDownloadCollections[key]
+                  );
+
+                  if (selected.length === 0) {
+                    console.warn("No collections selected for download.");
+                    return;
+                  }
+
+                  console.log("Download started for:", selected);
+                  createDownload(selectedDownloadCollections); // or createDownload(selected)
                   setShowDownloadConfirmDialog(false);
                 }}
               >
@@ -1837,6 +1948,7 @@ const icons = [
           </div>
         </div>
       )}
+
 
 
 
@@ -1891,7 +2003,7 @@ const icons = [
 
 
 
-
+      {/* DATA IMPORT */}
       {showImportConfirmDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal" style={{ minWidth: "400px" }}>
@@ -1901,24 +2013,46 @@ const icons = [
                 ? "This will merge the imported data with existing data. Select which collections to import:"
                 : "This will completely replace existing data. Select which collections to import:"}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", marginBottom: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
               {Object.keys(selectedCollections).map((collection) => (
                 <label
                   key={collection}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
+                    gap: "10px",
                     cursor: "pointer",
-                    padding: "8px 12px",
-                    background: selectedCollections[collection] ? "#e8f5e9" : "#f5f5f5",
-                    borderRadius: "6px",
-                    border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #ddd",
-                    transition: "all 0.2s ease",
+                    padding: "12px 16px",
+                    background: selectedCollections[collection] ? "#e8f5e9" : "#fff",
+                    borderRadius: "12px",
+                    border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
+                    transition: "all 0.3s ease",
                     textTransform: "capitalize",
-                    fontWeight: "500",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    boxShadow: selectedCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
                   }}
                 >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "8px",
+                      border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
+                      background: selectedCollections[collection] ? "#4caf50" : "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {selectedCollections[collection] && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </div>
                   <input
                     type="checkbox"
                     checked={selectedCollections[collection]}
@@ -1928,7 +2062,7 @@ const icons = [
                         [collection]: !prev[collection],
                       }))
                     }
-                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                    style={{ display: "none" }}
                   />
                   {collection}
                 </label>
@@ -1938,7 +2072,6 @@ const icons = [
               <button
                 className="confirm-btn delete"
                 onClick={() => {
-                  // Import function will be added here later
                   const selected = Object.keys(selectedCollections).filter(
                     (key) => selectedCollections[key]
                   );
@@ -1962,6 +2095,7 @@ const icons = [
           </div>
         </div>
       )}
+
 
 
 

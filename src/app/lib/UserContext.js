@@ -6579,7 +6579,7 @@ useEffect(() => {
   };
 
   // FUNCTION TO CREATE BACKUP
-  const createBackup = async () => {
+  const createBackup = async (selectedCollections = null) => {
     if (!user || user.role !== "admin") {
       console.error("Unauthorized: Only admins can create backups");
       return;
@@ -6614,15 +6614,32 @@ useEffect(() => {
     const backupId = `Backup_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
     // Define root collections to backup (add more if needed)
-    // const rootCollections = ["config", "deleted_users", "images", "reviews", "units", "users"];
-    const rootCollections = ["images", "reviews", "units", "users"];
+    const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+    // selectedCollections can be:
+    // - null => default behavior (backup all in allCollections)
+    // - array => ["images", "users"]
+    // - object => { images: true, users: false, ... }
+    let rootCollections = allCollections;
+
+    if (Array.isArray(selectedCollections)) {
+      rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+    } else if (selectedCollections && typeof selectedCollections === "object") {
+      rootCollections = allCollections.filter((key) => selectedCollections[key]);
+    }
+
+    // safety fallback
+    if (rootCollections.length === 0) {
+      rootCollections = allCollections;
+}
+
 
     // Map of known subcollections for each root collection (based on your Firestore structure)
     const subCollMap = {
-      // config: ["appSettings"],
-      // deleted_users: [],
+      config: [],
       images: [],
       reviews: [],
+      terms: [],
       units: [],
       users: [
         "completedBookings",
@@ -6635,6 +6652,7 @@ useEffect(() => {
         "financialReports",
       ],
     };
+
 
     try {
       // Count total documents for progress calculation
@@ -6700,7 +6718,7 @@ useEffect(() => {
   };
 
   // FUNCTION TO CREATE DOWNLOAD
-  const createDownload = async () => {
+  const createDownload = async (selectedCollections = null) => {
     if (!user || user.role !== "admin") {
       console.error("Unauthorized: Only admins can download data");
       return;
@@ -6732,14 +6750,20 @@ useEffect(() => {
 
     const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
-    const rootCollections = [
-      "config",
-      "deleted_users",
-      "images",
-      "reviews",
-      "units",
-      "users",
-    ];
+    const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+    let rootCollections = allCollections;
+
+    if (Array.isArray(selectedCollections)) {
+      rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+    } else if (selectedCollections && typeof selectedCollections === "object") {
+      rootCollections = allCollections.filter((key) => selectedCollections[key]);
+    }
+
+    if (rootCollections.length === 0) {
+      rootCollections = allCollections;
+    }
+
 
     try {
       let totalDocs = 0;
