@@ -950,7 +950,7 @@
 }
 
 .sidebar-header.collapsed {
-  justify-content: space-around !important;
+  justify-content: flex-end !important;
 }
 
 .sidebar-header .logo {
@@ -979,9 +979,11 @@
 }
 
 .sidebar-nav-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
   align-items: center;
-  padding: 15px 20px;
+  column-gap: 12px;
+  padding: 15px 18px;
   color: #333;
   text-decoration: none;
   transition: background 0.3s ease;
@@ -999,35 +1001,48 @@
 }
 
 .sidebar-icon {
-  margin-right: 15px;
-  font-size: 20px;
-  transition: margin-right 0.3s ease;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
 }
 
 .sidebar.collapsed .sidebar-icon {
   margin-right: 0;
 }
 
-.sidebar-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
 .sidebar-text {
   font-weight: 600;
-  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 140px;
+  opacity: 1;
+  transform: translateX(0);
+  transition: max-width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
-.sidebar.collapsed .sidebar-text {
+
+.sidebar-text.is-hidden {
+  max-width: 0;
   opacity: 0;
-  visibility: hidden;
+  transform: translateX(-4px);
 }
 
-.sidebar.collapsed .sidebar-nav-item {
-  justify-content: center;
-  padding: 15px;
-}
+/* .sidebar.collapsed .sidebar-nav-item {
+  grid-template-columns: 24px 0 0;
+  column-gap: 0;
+  padding: 15px 18px;
+} */
 
 /* Dropdown container for the Dashboard nav item */
 .sidebar-nav-item-dropdown {
@@ -1074,13 +1089,19 @@
 .dropdown-arrow {
   width: 16px;
   height: 16px;
-  transition: transform 0.3s ease;
-  margin-left: auto;
+  margin-left: 0;
   transform: rotate(270deg);
+  transition: transform 0.3s ease, opacity 0.2s ease, width 0.2s ease;
 }
 
 .dropdown-arrow.rotated {
   transform: rotate(90deg);
+}
+
+.dropdown-arrow.is-hidden {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 .sidebar.collapsed .dropdown-arrow {
@@ -1232,13 +1253,13 @@
   pointer-events: none;
 }
 
-.sidebar-icon {
+/* .sidebar-icon {
   width: 24px;
   height: 24px;
   cursor: pointer;
   fill: var(--accent-color);
   transition: all 0.3s ease;
-}
+} */
 
 .sidebar-icon.account-icon {
   width: 24px;

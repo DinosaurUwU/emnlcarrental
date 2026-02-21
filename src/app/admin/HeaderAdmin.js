@@ -217,6 +217,9 @@ const Header = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isOverlay, setIsOverlay] = useState(window.innerWidth <= 1024);
 
+  const isSidebarCollapsed = collapsed && !isOverlay;
+
+
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
@@ -786,7 +789,7 @@ const handleImportFilePick = async (event) => {
 />
 
       <div
-        className={`sidebar ${collapsed && !isOverlay ? "collapsed" : ""} ${sidebarOpen ? "open" : ""}`}
+        className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""} ${sidebarOpen ? "open" : ""}`}
       >
         <div className={`sidebar-header ${collapsed ? "collapsed" : ""}`}>
           <div
@@ -848,17 +851,15 @@ const handleImportFilePick = async (event) => {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    {!collapsed && (
-                      <span className="sidebar-text">{item.name}</span>
-                    )}
+                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
+  {item.name}
+</span>
+
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
-                      className={`dropdown-arrow ${rentalDropdownOpen ? "rotated" : ""}`}
-                      style={{
-                        marginLeft: "auto",
-                        transition: "transform 0.3s",
-                      }}
+                      className={`dropdown-arrow ${rentalDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
+
                     />
                   </a>
                   <div
@@ -923,13 +924,15 @@ const handleImportFilePick = async (event) => {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    {!collapsed && (
-                      <span className="sidebar-text">{item.name}</span>
-                    )}
+                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
+  {item.name}
+</span>
+
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
-                      className={`dropdown-arrow ${analyticsDropdownOpen ? "rotated" : ""}`}
+                      className={`dropdown-arrow ${analyticsDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
+
                       style={{
                         marginLeft: "auto",
                         transition: "transform 0.3s",
@@ -1006,13 +1009,15 @@ const handleImportFilePick = async (event) => {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    {!collapsed && (
-                      <span className="sidebar-text">{item.name}</span>
-                    )}
+                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
+  {item.name}
+</span>
+
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
-                      className={`dropdown-arrow ${settingsDropdownOpen ? "rotated" : ""}`}
+                      className={`dropdown-arrow ${settingsDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
+
                       style={{
                         marginLeft: "auto",
                         transition: "transform 0.3s",
@@ -1084,9 +1089,10 @@ const handleImportFilePick = async (event) => {
                 <span className="sidebar-icon">
                   <img src={item.icon} alt={item.name} />
                 </span>
-                {!collapsed && (
-                  <span className="sidebar-text">{item.name}</span>
-                )}
+                <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
+  {item.name}
+</span>
+
               </a>
             );
           })}
