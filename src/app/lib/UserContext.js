@@ -6754,8 +6754,6 @@ const createDownload = async (selectedCollections = null) => {
       return acc;
     }, {});
 
-  const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
-
   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
 
   let rootCollections = allCollections;
@@ -6772,6 +6770,9 @@ const createDownload = async (selectedCollections = null) => {
     return;
   }
 
+  const selectedLabel = `[${rootCollections.join(", ")}]`;
+  const downloadId = `Download_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+
   const triggerBlobDownload = (blob, filename) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -6781,19 +6782,64 @@ const createDownload = async (selectedCollections = null) => {
     document.body.appendChild(a);
     a.click();
 
-    // Delay revoke/cleanup so browser has time to start download
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }, 2000);
   };
 
+  // User subcollections to include in export
+  const userSubcollections = [
+    "receivedMessages",
+    "sentMessages",
+    "userBookingRequest",
+    "adminBookingRequests",
+    "activeBookings",
+    "activeRentals",
+    "completedBookings",
+    "rentalHistory",
+    "pendingBookings",
+    "financialReports",
+  ];
+
+  const exportUserWithSubcollections = async (userDocSnap) => {
+    const userData = {
+      id: userDocSnap.id,
+      ...userDocSnap.data(),
+      _subcollections: {},
+    };
+
+    for (const subName of userSubcollections) {
+      const subRef = collection(db, "users", userDocSnap.id, subName);
+      const subSnap = await getDocs(subRef);
+
+      userData._subcollections[subName] = subSnap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+    }
+
+    return userData;
+  };
+
   try {
     let totalDocs = 0;
+
     for (const collName of rootCollections) {
       const sourceColl = collection(db, collName);
       const snapshot = await getDocs(sourceColl);
       totalDocs += snapshot.size;
+    }
+
+    // approximate progress count for nested users subcollections
+    if (rootCollections.includes("users")) {
+      const usersSnap = await getDocs(collection(db, "users"));
+      for (const userDoc of usersSnap.docs) {
+        for (const subName of userSubcollections) {
+          const subSnap = await getDocs(collection(db, "users", userDoc.id, subName));
+          totalDocs += subSnap.size;
+        }
+      }
     }
 
     let copiedDocs = 0;
@@ -6826,21 +6872,45 @@ const createDownload = async (selectedCollections = null) => {
       const sourceColl = collection(db, collName);
       const snapshot = await getDocs(sourceColl);
 
-      const rawData = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
+      let rawData = [];
+
+      if (collName === "users") {
+        rawData = await Promise.all(snapshot.docs.map((docSnap) => exportUserWithSubcollections(docSnap)));
+
+        copiedDocs += snapshot.size;
+        setDownloadProgress(
+          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+        );
+
+        // count nested docs for progress
+        for (const userRow of rawData) {
+          const subcollections = userRow?._subcollections || {};
+          for (const subName of Object.keys(subcollections)) {
+            copiedDocs += Array.isArray(subcollections[subName]) ? subcollections[subName].length : 0;
+          }
+          setDownloadProgress(
+            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+          );
+        }
+      } else {
+        rawData = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }));
+
+        copiedDocs += snapshot.size;
+        setDownloadProgress(
+          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+        );
+      }
 
       allData[collName] = rawData;
       excelData[collName] = rawData.map((row) => sanitizeForExcel(row));
-
-      copiedDocs += snapshot.size;
-      setDownloadProgress(totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100);
     }
 
-    // Build Excel
     const XLSX = await import("xlsx");
     const wb = XLSX.utils.book_new();
+
     for (const collName of rootCollections) {
       const ws = XLSX.utils.json_to_sheet(excelData[collName] || []);
       XLSX.utils.book_append_sheet(wb, ws, collName);
@@ -6854,9 +6924,8 @@ const createDownload = async (selectedCollections = null) => {
     const jsonData = JSON.stringify(allData, null, 2);
     const jsonBlob = new Blob([jsonData], { type: "application/json" });
 
-    // Trigger downloads
     triggerBlobDownload(excelBlob, `${downloadId}.xlsx`);
-    await new Promise((resolve) => setTimeout(resolve, 350)); // spacing helps browser allow both
+    await new Promise((resolve) => setTimeout(resolve, 350));
     triggerBlobDownload(jsonBlob, `${downloadId}.json`);
 
     showActionOverlay({
@@ -6882,6 +6951,7 @@ const createDownload = async (selectedCollections = null) => {
     setDownloadProgress(0);
   }
 };
+
 
 
   // FUNCTION TO IMPORT DATA FROM JSON
@@ -7262,149 +7332,164 @@ const importDataFromJson = async (
 
 
 
-
 // const createDownload = async (selectedCollections = null) => {
-  //   if (!user || user.role !== "admin") {
-  //     console.error("Unauthorized: Only admins can download data");
-  //     return;
-  //   }
+//   if (!user || user.role !== "admin") {
+//     console.error("Unauthorized: Only admins can download data");
+//     return;
+//   }
 
-  //   setIsDownloading(true);
-  //   setDownloadProgress(0);
-  //   setIsDownloadMinimized(false);
+//   setIsDownloading(true);
+//   setDownloadProgress(0);
+//   setIsDownloadMinimized(false);
 
-  //   const adminUid = user.uid;
+//   const now = new Date();
 
-  //   const now = new Date();
+//   const parts = new Intl.DateTimeFormat("en-US", {
+//     timeZone: "Asia/Manila",
+//     month: "2-digit",
+//     day: "2-digit",
+//     year: "numeric",
+//     hour: "2-digit",
+//     minute: "2-digit",
+//     second: "2-digit",
+//     hour12: false,
+//   })
+//     .formatToParts(now)
+//     .reduce((acc, part) => {
+//       acc[part.type] = part.value;
+//       return acc;
+//     }, {});
 
-  //   const parts = new Intl.DateTimeFormat("en-US", {
-  //     timeZone: "Asia/Manila",
-  //     month: "2-digit",
-  //     day: "2-digit",
-  //     year: "numeric",
-  //     hour: "2-digit",
-  //     minute: "2-digit",
-  //     second: "2-digit",
-  //     hour12: false,
-  //   })
-  //     .formatToParts(now)
-  //     .reduce((acc, part) => {
-  //       acc[part.type] = part.value;
-  //       return acc;
-  //     }, {});
+//   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
 
-  //   const downloadId = `Download_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+//   let rootCollections = allCollections;
+//   if (Array.isArray(selectedCollections)) {
+//     rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+//   } else if (selectedCollections && typeof selectedCollections === "object") {
+//     rootCollections = allCollections.filter((key) => selectedCollections[key]);
+//   }
 
-  //   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+//   if (!rootCollections.length) {
+//     console.warn("No collections selected for download");
+//     setIsDownloading(false);
+//     setDownloadProgress(0);
+//     return;
+//   }
 
-  //   let rootCollections = allCollections;
-
-  //   if (Array.isArray(selectedCollections)) {
-  //     rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
-  //   } else if (selectedCollections && typeof selectedCollections === "object") {
-  //     rootCollections = allCollections.filter((key) => selectedCollections[key]);
-  //   }
-
-  //   if (rootCollections.length === 0) {
-  //     rootCollections = allCollections;
-  //   }
-
-
-  //   try {
-  //     let totalDocs = 0;
-  //     for (const collName of rootCollections) {
-  //       const sourceColl = collection(db, collName);
-  //       const snapshot = await getDocs(sourceColl);
-  //       totalDocs += snapshot.size;
-  //     }
-
-  //     let copiedDocs = 0;
-  //     const allData = {};
-
-  //     // Helper function to truncate strings exceeding Excel's cell limit
-  //     const truncateForExcel = (value, maxLength = 32767) => {
-  //       if (typeof value === "string" && value.length > maxLength) {
-  //         return value.substring(0, maxLength - 3) + "..."; // Add ellipsis to indicate truncation
-  //       }
-  //       return value;
-  //     };
-
-  //     for (const collName of rootCollections) {
-  //       const sourceColl = collection(db, collName);
-  //       const snapshot = await getDocs(sourceColl);
-  //       const data = snapshot.docs.map((doc) => {
-  //         const docData = { id: doc.id, ...doc.data() };
-  //         // Truncate all string fields in the document
-  //         Object.keys(docData).forEach((key) => {
-  //           if (typeof docData[key] === "string") {
-  //             docData[key] = truncateForExcel(docData[key]);
-  //           }
-  //         });
-  //         return docData;
-  //       });
-  //       allData[collName] = data;
-  //       copiedDocs += snapshot.size;
-  //       setDownloadProgress(Math.min(100, (copiedDocs / totalDocs) * 100));
-  //     }
-
-  //     // Create Excel
-  //     const XLSX = await import("xlsx");
-  //     const wb = XLSX.utils.book_new();
-  //     for (const collName in allData) {
-  //       const ws = XLSX.utils.json_to_sheet(allData[collName]);
-  //       XLSX.utils.book_append_sheet(wb, ws, collName);
-  //     }
-  //     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  //     const excelBlob = new Blob([excelBuffer], {
-  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //     });
-  //     const excelUrl = URL.createObjectURL(excelBlob);
-  //     const excelLink = document.createElement("a");
-  //     excelLink.href = excelUrl;
-  //     excelLink.download = `${downloadId}.xlsx`;
-  //     document.body.appendChild(excelLink);
-  //     excelLink.click();
-  //     document.body.removeChild(excelLink);
-  //     URL.revokeObjectURL(excelUrl);
-
-  //     // Create JSON (Firestore compatible)
-  //     const jsonData = JSON.stringify(allData, null, 2);
-  //     const jsonBlob = new Blob([jsonData], { type: "application/json" });
-  //     const jsonUrl = URL.createObjectURL(jsonBlob);
-  //     const jsonLink = document.createElement("a");
-  //     jsonLink.href = jsonUrl;
-  //     jsonLink.download = `${downloadId}.json`;
-  //     document.body.appendChild(jsonLink);
-  //     jsonLink.click();
-  //     document.body.removeChild(jsonLink);
-  //     URL.revokeObjectURL(jsonUrl);
-
-  //     console.log("Download completed successfully");
-  //     showActionOverlay({
-  //       message: "Download completed successfully!",
-  //       type: "success",
-  //     });
-
-  //     setShowDownloadSuccess(true);
-  //     setHideDownloadAnimation(false);
-
-  //     setTimeout(() => {
-  //       setHideDownloadAnimation(true);
-  //       setTimeout(() => setShowDownloadSuccess(false), 400);
-  //     }, 5000);
-  //   } catch (error) {
-  //     console.error("Error creating download:", error);
-  //     showActionOverlay({
-  //       message: "Download failed. Please try again.",
-  //       type: "warning",
-  //     });
-  //   } finally {
-  //     setIsDownloading(false);
-  //     setDownloadProgress(0);
-  //   }
-  // };
+//   const selectedLabel = `[${rootCollections.join(", ")}]`;
+//   const downloadId = `Download_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
 
+//   const triggerBlobDownload = (blob, filename) => {
+//     const url = URL.createObjectURL(blob);
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = filename;
+//     a.style.display = "none";
+//     document.body.appendChild(a);
+//     a.click();
+
+//     // Delay revoke/cleanup so browser has time to start download
+//     setTimeout(() => {
+//       document.body.removeChild(a);
+//       URL.revokeObjectURL(url);
+//     }, 2000);
+//   };
+
+//   try {
+//     let totalDocs = 0;
+//     for (const collName of rootCollections) {
+//       const sourceColl = collection(db, collName);
+//       const snapshot = await getDocs(sourceColl);
+//       totalDocs += snapshot.size;
+//     }
+
+//     let copiedDocs = 0;
+//     const allData = {};
+//     const excelData = {};
+
+//     const sanitizeForExcel = (value, maxLength = 32767) => {
+//       if (typeof value === "string") {
+//         return value.length > maxLength
+//           ? value.substring(0, maxLength - 3) + "..."
+//           : value;
+//       }
+
+//       if (Array.isArray(value)) {
+//         return value.map((item) => sanitizeForExcel(item, maxLength));
+//       }
+
+//       if (value && typeof value === "object") {
+//         const out = {};
+//         for (const key of Object.keys(value)) {
+//           out[key] = sanitizeForExcel(value[key], maxLength);
+//         }
+//         return out;
+//       }
+
+//       return value;
+//     };
+
+//     for (const collName of rootCollections) {
+//       const sourceColl = collection(db, collName);
+//       const snapshot = await getDocs(sourceColl);
+
+//       const rawData = snapshot.docs.map((docSnap) => ({
+//         id: docSnap.id,
+//         ...docSnap.data(),
+//       }));
+
+//       allData[collName] = rawData;
+//       excelData[collName] = rawData.map((row) => sanitizeForExcel(row));
+
+//       copiedDocs += snapshot.size;
+//       setDownloadProgress(totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100);
+//     }
+
+//     // Build Excel
+//     const XLSX = await import("xlsx");
+//     const wb = XLSX.utils.book_new();
+//     for (const collName of rootCollections) {
+//       const ws = XLSX.utils.json_to_sheet(excelData[collName] || []);
+//       XLSX.utils.book_append_sheet(wb, ws, collName);
+//     }
+
+//     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+//     const excelBlob = new Blob([excelBuffer], {
+//       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//     });
+
+//     const jsonData = JSON.stringify(allData, null, 2);
+//     const jsonBlob = new Blob([jsonData], { type: "application/json" });
+
+//     // Trigger downloads
+//     triggerBlobDownload(excelBlob, `${downloadId}.xlsx`);
+//     await new Promise((resolve) => setTimeout(resolve, 350)); // spacing helps browser allow both
+//     triggerBlobDownload(jsonBlob, `${downloadId}.json`);
+
+//     showActionOverlay({
+//       message: "Download completed successfully!",
+//       type: "success",
+//     });
+
+//     setShowDownloadSuccess(true);
+//     setHideDownloadAnimation(false);
+
+//     setTimeout(() => {
+//       setHideDownloadAnimation(true);
+//       setTimeout(() => setShowDownloadSuccess(false), 400);
+//     }, 5000);
+//   } catch (error) {
+//     console.error("Error creating download:", error);
+//     showActionOverlay({
+//       message: "Download failed. Please try again.",
+//       type: "warning",
+//     });
+//   } finally {
+//     setIsDownloading(false);
+//     setDownloadProgress(0);
+//   }
+// };
 
 
 

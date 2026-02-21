@@ -2090,10 +2090,37 @@ const handleImportFilePick = async (event) => {
           <div className="confirm-modal" style={{ minWidth: "400px" }}>
             <h3>{importMode === "merge" ? "Merge Data?" : "Overwrite Data?"}</h3>
             <p style={{ marginBottom: "15px" }}>
-              {importMode === "merge"
-                ? "This will merge the imported data with existing data. Select which collections to import:"
-                : "This will completely replace existing data. Select which collections to import:"}
-            </p>
+  {importMode === "merge" ? (
+    <>
+      This will{" "}
+      <span
+        style={{
+          fontWeight: "700",
+          textTransform: "uppercase",
+          color: "#dc3545",
+        }}
+      >
+        merge the imported data with existing data
+      </span>
+      . Select which collections to import:
+    </>
+  ) : (
+    <>
+      This will{" "}
+      <span
+        style={{
+          fontWeight: "700",
+          textTransform: "uppercase",
+          color: "#dc3545",
+        }}
+      >
+        completely replace existing data
+      </span>
+      . Select which collections to import:
+    </>
+  )}
+</p>
+
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
               {Object.keys(selectedCollections).map((collection) => (
                 <label

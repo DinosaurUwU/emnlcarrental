@@ -3225,59 +3225,93 @@ useEffect(() => {
                   <div className="specs-grid">
                     <div className="spec-item">
                       <label>Transmission</label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={
-                            currentUnit.details?.specifications?.Transmission ||
-                            ""
-                          }
-                          onChange={(e) =>
-                            setEditedUnit({
-                              ...editedUnit,
-                              details: {
-                                ...editedUnit.details,
-                                specifications: {
-                                  ...editedUnit.details.specifications,
-                                  Transmission: e.target.value,
-                                },
-                              },
-                            })
-                          }
-                          className="spec-input"
-                        />
-                      ) : (
-                        <span>
-                          {currentUnit.details?.specifications?.Transmission}
-                        </span>
-                      )}
+{isEditing ? (
+  <select
+    value={currentUnit.details?.specifications?.Transmission || ""}
+    onChange={(e) =>
+      setEditedUnit({
+        ...editedUnit,
+        details: {
+          ...editedUnit.details,
+          specifications: {
+            ...editedUnit.details.specifications,
+            Transmission: e.target.value,
+          },
+        },
+      })
+    }
+    className="spec-input"
+  >
+    <option value="Automatic">Automatic</option>
+    <option value="Manual">Manual</option>
+  </select>
+) : (
+  <span>{currentUnit.details?.specifications?.Transmission}</span>
+)}
+
                     </div>
 
                     <div className="spec-item">
                       <label>Fuel</label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={
-                            currentUnit.details?.specifications?.Fuel || ""
-                          }
-                          onChange={(e) =>
-                            setEditedUnit({
-                              ...editedUnit,
-                              details: {
-                                ...editedUnit.details,
-                                specifications: {
-                                  ...editedUnit.details.specifications,
-                                  Fuel: e.target.value,
-                                },
-                              },
-                            })
-                          }
-                          className="spec-input"
-                        />
-                      ) : (
-                        <span>{currentUnit.details?.specifications?.Fuel}</span>
-                      )}
+{isEditing ? (
+  <select
+    value={currentUnit.details?.specifications?.Fuel || ""}
+    onChange={(e) =>
+      setEditedUnit({
+        ...editedUnit,
+        details: {
+          ...editedUnit.details,
+          specifications: {
+            ...editedUnit.details.specifications,
+            Fuel: e.target.value,
+          },
+        },
+      })
+    }
+    className="spec-input"
+  >
+    <option value="Unleaded Gasoline">Unleaded Gasoline</option>
+    <option value="Diesel">Diesel</option>
+    <option value="Electricity">Electricity</option>
+    <option value="Hybrid">Hybrid</option>
+  </select>
+) : (
+  <span>{currentUnit.details?.specifications?.Fuel}</span>
+)}
+
+                    </div>
+
+                    <div className="spec-item">
+                      <label>Car Type</label>
+{isEditing ? (
+  <select
+    value={currentUnit.carType || ""}
+    onChange={(e) => {
+      const value = e.target.value;
+      setEditedUnit({
+        ...editedUnit,
+        carType: value,
+        details: {
+          ...editedUnit.details,
+          specifications: {
+            ...editedUnit.details?.specifications,
+            Type: value, // Sync to details.specifications.Type
+          },
+        },
+      });
+    }}
+    className="spec-input"
+  >
+    <option value="SEDAN">SEDAN</option>
+    <option value="SUV">SUV</option>
+    <option value="MPV">MPV</option>
+    <option value="VAN">VAN</option>
+    <option value="PICKUP">PICKUP</option>
+  </select>
+) : (
+  <span>{currentUnit.carType}</span>
+)}
+
                     </div>
 
                     <div className="spec-item">
@@ -3296,34 +3330,6 @@ useEffect(() => {
                         />
                       ) : (
                         <span>{currentUnit.brand}</span>
-                      )}
-                    </div>
-
-                    <div className="spec-item">
-                      <label>Car Type</label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={currentUnit.carType || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-
-                            setEditedUnit({
-                              ...editedUnit,
-                              carType: value,
-                              details: {
-                                ...editedUnit.details,
-                                specifications: {
-                                  ...editedUnit.details?.specifications,
-                                  Type: value, // Sync to details.specifications.Type
-                                },
-                              },
-                            });
-                          }}
-                          className="spec-input"
-                        />
-                      ) : (
-                        <span>{currentUnit.carType}</span>
                       )}
                     </div>
 
