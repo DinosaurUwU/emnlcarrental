@@ -1999,10 +1999,6 @@ const icons = [
       )}
 
 
-
-
-
-
       {/* DATA IMPORT */}
       {showImportConfirmDialog && (
         <div className="overlay-delete">
