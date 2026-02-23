@@ -6788,7 +6788,6 @@ const createDownload = async (selectedCollections = null) => {
     }, 2000);
   };
 
-  // User subcollections to include in export
   const userSubcollections = [
     "receivedMessages",
     "sentMessages",
@@ -6802,14 +6801,49 @@ const createDownload = async (selectedCollections = null) => {
     "financialReports",
   ];
 
+  // For admin users: explicit priority requested
+  const adminPrioritySubcollections = [
+    "completedBookings",
+    "financialReports",
+    "receivedMessages",
+    "sentMessages",
+    "activeBookings",
+  ];
+
+  const getOrderedSubcollectionsForRole = (role) => {
+    const normalizedRole = String(role || "").toLowerCase();
+    if (normalizedRole !== "admin") return userSubcollections;
+
+    const remaining = userSubcollections.filter(
+      (name) => !adminPrioritySubcollections.includes(name),
+    );
+
+    return [...adminPrioritySubcollections, ...remaining];
+  };
+
+  // Sort users: admins first, then regular users
+  const sortUsersDocs = (docs) => {
+    return [...docs].sort((a, b) => {
+      const roleA = String(a.data()?.role || "").toLowerCase();
+      const roleB = String(b.data()?.role || "").toLowerCase();
+
+      if (roleA === "admin" && roleB !== "admin") return -1;
+      if (roleA !== "admin" && roleB === "admin") return 1;
+      return a.id.localeCompare(b.id);
+    });
+  };
+
   const exportUserWithSubcollections = async (userDocSnap) => {
+    const userRole = userDocSnap.data()?.role;
+    const orderedSubcollections = getOrderedSubcollectionsForRole(userRole);
+
     const userData = {
       id: userDocSnap.id,
       ...userDocSnap.data(),
       _subcollections: {},
     };
 
-    for (const subName of userSubcollections) {
+    for (const subName of orderedSubcollections) {
       const subRef = collection(db, "users", userDocSnap.id, subName);
       const subSnap = await getDocs(subRef);
 
@@ -6831,11 +6865,16 @@ const createDownload = async (selectedCollections = null) => {
       totalDocs += snapshot.size;
     }
 
-    // approximate progress count for nested users subcollections
+    // include nested users subcollections in progress count
     if (rootCollections.includes("users")) {
       const usersSnap = await getDocs(collection(db, "users"));
-      for (const userDoc of usersSnap.docs) {
-        for (const subName of userSubcollections) {
+      const sortedUsers = sortUsersDocs(usersSnap.docs);
+
+      for (const userDoc of sortedUsers) {
+        const role = userDoc.data()?.role;
+        const orderedSubcollections = getOrderedSubcollectionsForRole(role);
+
+        for (const subName of orderedSubcollections) {
           const subSnap = await getDocs(collection(db, "users", userDoc.id, subName));
           totalDocs += subSnap.size;
         }
@@ -6875,21 +6914,22 @@ const createDownload = async (selectedCollections = null) => {
       let rawData = [];
 
       if (collName === "users") {
-        rawData = await Promise.all(snapshot.docs.map((docSnap) => exportUserWithSubcollections(docSnap)));
+        const sortedUsers = sortUsersDocs(snapshot.docs);
+        rawData = await Promise.all(sortedUsers.map((docSnap) => exportUserWithSubcollections(docSnap)));
 
         copiedDocs += snapshot.size;
         setDownloadProgress(
-          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
         );
 
-        // count nested docs for progress
         for (const userRow of rawData) {
           const subcollections = userRow?._subcollections || {};
           for (const subName of Object.keys(subcollections)) {
             copiedDocs += Array.isArray(subcollections[subName]) ? subcollections[subName].length : 0;
           }
+
           setDownloadProgress(
-            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
           );
         }
       } else {
@@ -6900,7 +6940,7 @@ const createDownload = async (selectedCollections = null) => {
 
         copiedDocs += snapshot.size;
         setDownloadProgress(
-          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100
+          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
         );
       }
 
@@ -6951,6 +6991,7 @@ const createDownload = async (selectedCollections = null) => {
     setDownloadProgress(0);
   }
 };
+
 
 
 
