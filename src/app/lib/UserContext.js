@@ -6725,6 +6725,7 @@ useEffect(() => {
     }
   };
 
+  
   // FUNCTION TO CREATE DOWNLOAD
 const createDownload = async (selectedCollections = null) => {
   if (!user || user.role !== "admin") {
