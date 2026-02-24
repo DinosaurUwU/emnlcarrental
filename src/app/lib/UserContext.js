@@ -6555,6 +6555,26 @@ useEffect(() => {
   };
 
   // FUNCTION TO COPY A COLLECTION RECURSIVELY
+    const WRITE_THROTTLE_MS = 120;
+  const READ_THROTTLE_MS = 20;
+
+  const sleepMs = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const throttledGetDocs = async (...args) => {
+    const snap = await getDocs(...args);
+    if (READ_THROTTLE_MS > 0) await sleepMs(READ_THROTTLE_MS);
+    return snap;
+  };
+
+  const throttledSetDoc = async (...args) => {
+    await setDoc(...args);
+    if (WRITE_THROTTLE_MS > 0) await sleepMs(WRITE_THROTTLE_MS);
+  };
+
+  const throttledDeleteDoc = async (...args) => {
+    await deleteDoc(...args);
+    if (WRITE_THROTTLE_MS > 0) await sleepMs(WRITE_THROTTLE_MS);
+  };
   const copyCollectionRecursive = async (
     sourceColl,
     targetColl,
@@ -6562,13 +6582,12 @@ useEffect(() => {
     onProgress,
   ) => {
     try {
-      const snapshot = await getDocs(sourceColl);
+       const snapshot = await throttledGetDocs(sourceColl);
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
-        await setDoc(doc(targetColl, docSnap.id), data);
+        await throttledSetDoc(doc(targetColl, docSnap.id), data);
         if (onProgress) onProgress();
-        // Add delay to prevent write stream exhaustion
-        await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms delay between writes
+        
         // Recursively copy known subcollections
         for (const subName of subCollNames) {
           const sourceSub = collection(sourceColl, docSnap.id, subName);
@@ -6746,19 +6765,19 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
       for (const collName of rootCollections) {
         if (collName !== "users") {
           const sourceColl = collection(db, collName);
-          const snapshot = await getDocs(sourceColl);
+          const snapshot = await throttledGetDocs(sourceColl);
           totalDocs += snapshot.size;
           continue;
         }
 
-        const usersSnap = await getDocs(collection(db, "users"));
+        const usersSnap = await throttledGetDocs(collection(db, "users"));
         const filteredUsers = filterUsersByScope(usersSnap.docs);
         totalDocs += filteredUsers.length;
 
         for (const userDoc of filteredUsers) {
           const selectedSubs = getSubcollectionsForRole(userDoc.data()?.role);
           for (const subName of selectedSubs) {
-            const subSnap = await getDocs(collection(db, "users", userDoc.id, subName));
+            const subSnap = await throttledGetDocs(collection(db, "users", userDoc.id, subName));
             totalDocs += subSnap.size;
           }
         }
@@ -6795,7 +6814,7 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
           continue;
         }
 
-        const usersSnap = await getDocs(collection(db, "users"));
+        const usersSnap = await throttledGetDocs(collection(db, "users"));
         const filteredUsers = filterUsersByScope(usersSnap.docs);
 
         for (const userDoc of filteredUsers) {
@@ -6809,7 +6828,7 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
             userDoc.id,
           );
 
-          await setDoc(userTargetDoc, userDoc.data());
+          await throttledSetDoc(userTargetDoc, userDoc.data());
           advanceProgress(1);
 
           const selectedSubs = getSubcollectionsForRole(userDoc.data()?.role);
@@ -7061,7 +7080,7 @@ const createDownload = async (selectedCollections = null) => {
 
     for (const subName of selectedSubcollections) {
       const subRef = collection(db, "users", userDocSnap.id, subName);
-      const subSnap = await getDocs(subRef);
+      const subSnap = await throttledGetDocs(subRef);
       userData._subcollections[subName] = subSnap.docs.map((d) => ({
         id: d.id,
         ...d.data(),
@@ -7076,12 +7095,12 @@ const createDownload = async (selectedCollections = null) => {
 
     for (const collName of rootCollections) {
       const sourceColl = collection(db, collName);
-      const snapshot = await getDocs(sourceColl);
+      const snapshot = await throttledGetDocs(sourceColl);
       totalDocs += snapshot.size;
     }
 
     if (rootCollections.includes("users")) {
-      const usersSnap = await getDocs(collection(db, "users"));
+      const usersSnap = await throttledGetDocs(collection(db, "users"));
       const filteredUsers = filterUsersByScope(sortUsersDocs(usersSnap.docs));
 
       totalDocs = totalDocs - usersSnap.size + filteredUsers.length;
@@ -7089,7 +7108,7 @@ const createDownload = async (selectedCollections = null) => {
       for (const userDoc of filteredUsers) {
         const selectedSubcollections = getSubcollectionsForRole(userDoc.data()?.role);
         for (const subName of selectedSubcollections) {
-          const subSnap = await getDocs(collection(db, "users", userDoc.id, subName));
+          const subSnap = await throttledGetDocs(collection(db, "users", userDoc.id, subName));
           totalDocs += subSnap.size;
         }
       }
@@ -7123,7 +7142,7 @@ const createDownload = async (selectedCollections = null) => {
 
     for (const collName of rootCollections) {
       const sourceColl = collection(db, collName);
-      const snapshot = await getDocs(sourceColl);
+       const snapshot = await throttledGetDocs(sourceColl);
 
       let rawData = [];
 
@@ -7413,12 +7432,12 @@ const importDataFromJson = async (
       if (collName !== "users") {
         // OVERWRITE: remove docs not present in incoming file
         if (mode === "overwrite") {
-          const existingSnap = await getDocs(collection(db, collName));
+          const existingSnap = await throttledGetDocs(collection(db, collName));
           const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
 
           for (const docSnap of existingSnap.docs) {
             if (!incomingIds.has(docSnap.id)) {
-              await deleteDoc(doc(db, collName, docSnap.id));
+              await throttledDeleteDoc(doc(db, collName, docSnap.id));
             }
           }
         }
@@ -7429,7 +7448,7 @@ const importDataFromJson = async (
           const { id, ...payload } = item;
           const normalizedPayload = normalizeFirestoreValue(payload);
 
-          await setDoc(
+await throttledSetDoc(
             doc(db, collName, id),
             normalizedPayload,
             { merge: mode === "merge" },
@@ -7447,7 +7466,7 @@ const importDataFromJson = async (
       );
 
       if (mode === "overwrite") {
-        const existingUsersSnap = await getDocs(collection(db, "users"));
+        const existingUsersSnap = await throttledGetDocs(collection(db, "users"));
         const targetExistingUsers = existingUsersSnap.docs.filter((docSnap) =>
           shouldIncludeUserByScope(docSnap.id, docSnap.data()?.role),
         );
@@ -7455,7 +7474,8 @@ const importDataFromJson = async (
 
         for (const docSnap of targetExistingUsers) {
           if (!incomingUserIds.has(docSnap.id)) {
-            await deleteDoc(doc(db, "users", docSnap.id));
+            await throttledDeleteDoc(doc(db, "users", docSnap.id));
+
           }
         }
       }
@@ -7464,7 +7484,7 @@ const importDataFromJson = async (
         const { id: userId, _subcollections = {}, ...userPayload } = userItem;
         const normalizedUserPayload = normalizeFirestoreValue(userPayload);
 
-        await setDoc(
+await throttledSetDoc(
           doc(db, "users", userId),
           normalizedUserPayload,
           { merge: mode === "merge" },
@@ -7481,12 +7501,12 @@ const importDataFromJson = async (
             : [];
 
           if (mode === "overwrite") {
-            const existingSubSnap = await getDocs(collection(db, "users", userId, subName));
+            const existingSubSnap = await throttledGetDocs(collection(db, "users", userId, subName));
             const incomingSubIds = new Set(incomingSub.map((sub) => String(sub.id)));
 
             for (const existingDoc of existingSubSnap.docs) {
               if (!incomingSubIds.has(existingDoc.id)) {
-                await deleteDoc(doc(db, "users", userId, subName, existingDoc.id));
+                await throttledDeleteDoc(doc(db, "users", userId, subName, existingDoc.id));
               }
             }
           }
@@ -7495,7 +7515,7 @@ const importDataFromJson = async (
             const { id: subId, ...subPayload } = subItem;
             const normalizedSubPayload = normalizeFirestoreValue(subPayload);
 
-            await setDoc(
+ await throttledSetDoc(
               doc(db, "users", userId, subName, subId),
               normalizedSubPayload,
               { merge: mode === "merge" },
