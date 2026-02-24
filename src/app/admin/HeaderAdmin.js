@@ -88,6 +88,26 @@ const Header = ({
     users: true,
   });
 
+   const [downloadUsersScope, setDownloadUsersScope] = useState("all");
+  const [selectedDownloadUserIds, setSelectedDownloadUserIds] = useState([]);
+  const [selectedAdminUserSubcollections, setSelectedAdminUserSubcollections] =
+    useState({
+      completedBookings: true,
+      financialReports: true,
+      activeBookings: true,
+      adminBookingRequests: true,
+      sentMessages: true,
+      receivedMessages: true,
+    });
+  const [selectedRegularUserSubcollections, setSelectedRegularUserSubcollections] =
+    useState({
+      rentalHistory: true,
+      activeRentals: true,
+      userBookingRequest: true,
+      sentMessages: true,
+      receivedMessages: true,
+    });
+
   const [fetchedImages, setFetchedImages] = useState({});
 
   const [hoveredIcon, setHoveredIcon] = useState(null);
@@ -219,6 +239,23 @@ const Header = ({
 
   const isSidebarCollapsed = collapsed && !isOverlay;
 
+    const usersForDownload = [...(adminAccounts || []), ...(userAccounts || [])]
+    .filter(
+      (account, index, arr) =>
+        account?.id &&
+        arr.findIndex((candidate) => candidate?.id === account.id) === index,
+    )
+    .map((account) => ({
+      id: account.id,
+      email: account.email || account.id,
+      role: String(account.role || "").toLowerCase() === "admin" ? "admin" : "user",
+    }))
+    .sort((a, b) => a.email.localeCompare(b.email));
+
+  const downloadAdminSubcollectionKeys = Object.keys(selectedAdminUserSubcollections);
+  const downloadRegularSubcollectionKeys = Object.keys(
+    selectedRegularUserSubcollections,
+  );
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -1977,7 +2014,342 @@ const handleImportFilePick = async (event) => {
 
 
       {/* DATA DOWNLOAD */}
-      {showDownloadConfirmDialog && (
+{showDownloadConfirmDialog && (
+        <div className="overlay-delete">
+          <div className="confirm-modal" style={{ minWidth: "400px", maxWidth: "640px" }}>
+            <h3>Start Data Download?</h3>
+            <p style={{ marginBottom: "15px" }}>
+              Select which collections to download:
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              {Object.keys(selectedDownloadCollections).map((collection) => (
+                <label
+                  key={collection}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    textTransform: "capitalize",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    transition: "all 0.3s ease",
+                    background: selectedDownloadCollections[collection] ? "#e8f5e9" : "#fff",
+                    border: selectedDownloadCollections[collection]
+                      ? "2px solid #4caf50"
+                      : "2px solid #e0e0e0",
+                    boxShadow: selectedDownloadCollections[collection]
+                      ? "0 2px 8px rgba(76, 175, 80, 0.2)"
+                      : "0 1px 3px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                      flexShrink: 0,
+                      border: selectedDownloadCollections[collection]
+                        ? "2px solid #4caf50"
+                        : "2px solid #bdbdbd",
+                      background: selectedDownloadCollections[collection] ? "#4caf50" : "#fff",
+                    }}
+                  >
+                    {selectedDownloadCollections[collection] && (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedDownloadCollections[collection]}
+                    onChange={() =>
+                      setSelectedDownloadCollections((prev) => ({
+                        ...prev,
+                        [collection]: !prev[collection],
+                      }))
+                    }
+                    style={{ display: "none" }}
+                  />
+                  {collection}
+                </label>
+              ))}
+            </div>
+
+            {selectedDownloadCollections.users && (
+              <div
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "12px",
+                  padding: "14px",
+                  marginBottom: "16px",
+                  background: "#fafafa",
+                }}
+              >
+                <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: "13px" }}>
+                  Users Download Options
+                </p>
+
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
+                  {[
+                    { key: "all", label: "All Users" },
+                    { key: "admin", label: "Admins Only" },
+                    { key: "user", label: "Users Only" },
+                    { key: "specific", label: "Specific Users" },
+                  ].map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setDownloadUsersScope(option.key)}
+                      style={{
+                        border:
+                          downloadUsersScope === option.key
+                            ? "2px solid #4caf50"
+                            : "1px solid #bdbdbd",
+                        background: downloadUsersScope === option.key ? "#e8f5e9" : "#fff",
+                        borderRadius: "10px",
+                        padding: "6px 10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {downloadUsersScope === "specific" && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      Select user IDs:
+                    </p>
+                    <div
+                      style={{
+                        border: "1px solid #dedede",
+                        borderRadius: "10px",
+                        maxHeight: "150px",
+                        overflowY: "auto",
+                        padding: "8px",
+                        background: "#fff",
+                      }}
+                    >
+                      {usersForDownload.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: "12px", color: "#777" }}>
+                          No users available.
+                        </p>
+                      ) : (
+                        usersForDownload.map((account) => (
+                          <label
+                            key={account.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "5px 0",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedDownloadUserIds.includes(account.id)}
+                              onChange={() => {
+                                setSelectedDownloadUserIds((prev) =>
+                                  prev.includes(account.id)
+                                    ? prev.filter((id) => id !== account.id)
+                                    : [...prev, account.id],
+                                );
+                              }}
+                            />
+                            <span>
+                              {account.email} ({account.role})
+                            </span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      Admin subcollections
+                    </p>
+                    {downloadAdminSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedAdminUserSubcollections[key]}
+                          onChange={() =>
+                            setSelectedAdminUserSubcollections((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      User subcollections
+                    </p>
+                    {downloadRegularSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRegularUserSubcollections[key]}
+                          onChange={() =>
+                            setSelectedRegularUserSubcollections((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={() => {
+                  const selected = Object.keys(selectedDownloadCollections).filter(
+                    (key) => selectedDownloadCollections[key],
+                  );
+
+                  if (selected.length === 0) {
+                    console.warn("No collections selected for download.");
+                    return;
+                  }
+
+                  const selectedAdminSubs = downloadAdminSubcollectionKeys.filter(
+                    (key) => selectedAdminUserSubcollections[key],
+                  );
+                  const selectedUserSubs = downloadRegularSubcollectionKeys.filter(
+                    (key) => selectedRegularUserSubcollections[key],
+                  );
+
+                  if (selectedDownloadCollections.users) {
+                    if (
+                      downloadUsersScope === "specific" &&
+                      selectedDownloadUserIds.length === 0
+                    ) {
+                      console.warn("No specific users selected for users download.");
+                      return;
+                    }
+
+                    const selectedSpecificUsers = usersForDownload.filter((account) =>
+                      selectedDownloadUserIds.includes(account.id),
+                    );
+                    const hasSelectedAdmin = selectedSpecificUsers.some(
+                      (account) => account.role === "admin",
+                    );
+                    const hasSelectedUser = selectedSpecificUsers.some(
+                      (account) => account.role === "user",
+                    );
+
+                    if (
+                      (downloadUsersScope === "all" &&
+                        selectedAdminSubs.length === 0 &&
+                        selectedUserSubs.length === 0) ||
+                      (downloadUsersScope === "admin" &&
+                        selectedAdminSubs.length === 0) ||
+                      (downloadUsersScope === "user" &&
+                        selectedUserSubs.length === 0) ||
+                      (downloadUsersScope === "specific" &&
+                        ((hasSelectedAdmin && selectedAdminSubs.length === 0) ||
+                          (hasSelectedUser && selectedUserSubs.length === 0)))
+                    ) {
+                      console.warn(
+                        "Select at least one users subcollection for the chosen scope.",
+                      );
+                      return;
+                    }
+                  }
+
+                  console.log("Download started for:", selected);
+                  createDownload({
+                    collections: selectedDownloadCollections,
+                    users: {
+                      scope: downloadUsersScope,
+                      specificUserIds: selectedDownloadUserIds,
+                      subcollectionsByRole: {
+                        admin: selectedAdminSubs,
+                        user: selectedUserSubs,
+                      },
+                    },
+                  });
+                  setShowDownloadConfirmDialog(false);
+                }}
+              >
+                Yes, Download
+              </button>
+              <button
+                className="confirm-btn cancel"
+                onClick={() => setShowDownloadConfirmDialog(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* {showDownloadConfirmDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal" style={{ minWidth: "400px" }}>
             <h3>Start Data Download?</h3>
@@ -2045,7 +2417,7 @@ const handleImportFilePick = async (event) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
 
 
