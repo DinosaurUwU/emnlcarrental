@@ -6587,7 +6587,7 @@ useEffect(() => {
   };
 
   // FUNCTION TO CREATE BACKUP
-  const createBackup = async (selectedCollections = null) => {
+ const createBackup = async (selectedCollections = null) => {
     if (!user || user.role !== "admin") {
       console.error("Unauthorized: Only admins can create backups");
       return;
@@ -6599,17 +6599,16 @@ useEffect(() => {
 
     const adminUid = user.uid;
 
-    // BACKUP DATA ID
     const now = new Date();
 
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Manila",
-      month: "2-digit", // 01
-      day: "2-digit", // 10
-      year: "numeric", // 2026
-      hour: "2-digit", // 01
-      minute: "2-digit", // 10
-      second: "2-digit", // 20
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
       hour12: false,
     })
       .formatToParts(now)
@@ -6618,84 +6617,226 @@ useEffect(() => {
         return acc;
       }, {});
 
-    // Backup ID
     const backupId = `Backup_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
-    // Define root collections to backup (add more if needed)
     const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
 
-    // selectedCollections can be:
-    // - null => default behavior (backup all in allCollections)
-    // - array => ["images", "users"]
-    // - object => { images: true, users: false, ... }
+    const adminAvailableSubcollections = [
+      "completedBookings",
+      "financialReports",
+      "activeBookings",
+      "adminBookingRequests",
+      "sentMessages",
+      "receivedMessages",
+    ];
+
+    const userAvailableSubcollections = [
+      "rentalHistory",
+      "activeRentals",
+      "userBookingRequest",
+      "sentMessages",
+      "receivedMessages",
+    ];
+
+    const defaultUsersOptions = {
+      scope: "all",
+      specificUserIds: [],
+      subcollectionsByRole: {
+        admin: adminAvailableSubcollections,
+        user: userAvailableSubcollections,
+      },
+    };
+
     let rootCollections = allCollections;
+    let usersOptions = defaultUsersOptions;
 
     if (Array.isArray(selectedCollections)) {
       rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
     } else if (selectedCollections && typeof selectedCollections === "object") {
-      rootCollections = allCollections.filter((key) => selectedCollections[key]);
+      const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
+        selectedCollections,
+        "collections",
+      );
+
+      if (hasCollectionsKey) {
+        const selectedRoot = selectedCollections.collections;
+        if (Array.isArray(selectedRoot)) {
+          rootCollections = allCollections.filter((key) => selectedRoot.includes(key));
+        } else if (selectedRoot && typeof selectedRoot === "object") {
+          rootCollections = allCollections.filter((key) => selectedRoot[key]);
+        }
+      } else {
+        rootCollections = allCollections.filter((key) => selectedCollections[key]);
+      }
+
+      if (
+        selectedCollections.users &&
+        typeof selectedCollections.users === "object"
+      ) {
+        const usersConfig = selectedCollections.users;
+        const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
+        const normalizedScope =
+          scopeRaw === "admin" ||
+          scopeRaw === "user" ||
+          scopeRaw === "specific"
+            ? scopeRaw
+            : "all";
+
+        const specificUserIds = Array.isArray(usersConfig.specificUserIds)
+          ? [...new Set(usersConfig.specificUserIds.filter(Boolean).map((id) => String(id)))]
+          : [];
+
+        const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
+        const userSubsRaw = usersConfig.subcollectionsByRole?.user;
+
+        const adminSubs = Array.isArray(adminSubsRaw)
+          ? adminAvailableSubcollections.filter((name) => adminSubsRaw.includes(name))
+          : adminAvailableSubcollections;
+
+        const userSubs = Array.isArray(userSubsRaw)
+          ? userAvailableSubcollections.filter((name) => userSubsRaw.includes(name))
+          : userAvailableSubcollections;
+
+        usersOptions = {
+          scope: normalizedScope,
+          specificUserIds,
+          subcollectionsByRole: {
+            admin: adminSubs,
+            user: userSubs,
+          },
+        };
+      }
     }
 
-    // safety fallback
     if (rootCollections.length === 0) {
       rootCollections = allCollections;
-}
+    }
 
+    const normalizeUserRole = (roleValue) =>
+      String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
 
-    // Map of known subcollections for each root collection (based on your Firestore structure)
-    const subCollMap = {
-      config: [],
-      images: [],
-      reviews: [],
-      terms: [],
-      units: [],
-      users: [
-        "completedBookings",
-        "receivedMessages",
-        "sentMessages",
-        "rentalHistory",
-        "userBookingRequest",
-        "adminBookingRequests",
-        "completedBookings",
-        "financialReports",
-      ],
+    const filterUsersByScope = (docs) => {
+      if (usersOptions.scope === "specific") {
+        const idSet = new Set(usersOptions.specificUserIds);
+        return docs.filter((docSnap) => idSet.has(docSnap.id));
+      }
+
+      if (usersOptions.scope === "admin") {
+        return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "admin");
+      }
+
+      if (usersOptions.scope === "user") {
+        return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "user");
+      }
+
+      return docs;
     };
 
+    const getSubcollectionsForRole = (roleValue) => {
+      return normalizeUserRole(roleValue) === "admin"
+        ? usersOptions.subcollectionsByRole.admin
+        : usersOptions.subcollectionsByRole.user;
+    };
 
     try {
-      // Count total documents for progress calculation
       let totalDocs = 0;
+
       for (const collName of rootCollections) {
-        const sourceColl = collection(db, collName);
-        const snapshot = await getDocs(sourceColl);
-        totalDocs += snapshot.size;
+        if (collName !== "users") {
+          const sourceColl = collection(db, collName);
+          const snapshot = await getDocs(sourceColl);
+          totalDocs += snapshot.size;
+          continue;
+        }
+
+        const usersSnap = await getDocs(collection(db, "users"));
+        const filteredUsers = filterUsersByScope(usersSnap.docs);
+        totalDocs += filteredUsers.length;
+
+        for (const userDoc of filteredUsers) {
+          const selectedSubs = getSubcollectionsForRole(userDoc.data()?.role);
+          for (const subName of selectedSubs) {
+            const subSnap = await getDocs(collection(db, "users", userDoc.id, subName));
+            totalDocs += subSnap.size;
+          }
+        }
       }
 
       let copiedDocs = 0;
+      const advanceProgress = (count = 1) => {
+        copiedDocs += count;
+        setBackupProgress(
+          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
+        );
+      };
 
-      // Copy each root collection recursively
       for (const collName of rootCollections) {
-        const sourceColl = collection(db, collName);
-        const targetColl = collection(
-          db,
-          "users",
-          adminUid,
-          "backups",
-          backupId,
-          collName,
-        );
-        await copyCollectionRecursive(
-          sourceColl,
-          targetColl,
-          subCollMap[collName] || [],
-          () => {
-            copiedDocs++;
-            setBackupProgress(Math.min(100, (copiedDocs / totalDocs) * 100));
-          },
-        );
+        if (collName !== "users") {
+          const sourceColl = collection(db, collName);
+          const targetColl = collection(
+            db,
+            "users",
+            adminUid,
+            "backups",
+            backupId,
+            collName,
+          );
+
+          await copyCollectionRecursive(
+            sourceColl,
+            targetColl,
+            [],
+            () => {
+              advanceProgress(1);
+            },
+          );
+          continue;
+        }
+
+        const usersSnap = await getDocs(collection(db, "users"));
+        const filteredUsers = filterUsersByScope(usersSnap.docs);
+
+        for (const userDoc of filteredUsers) {
+          const userTargetDoc = doc(
+            db,
+            "users",
+            adminUid,
+            "backups",
+            backupId,
+            "users",
+            userDoc.id,
+          );
+
+          await setDoc(userTargetDoc, userDoc.data());
+          advanceProgress(1);
+
+          const selectedSubs = getSubcollectionsForRole(userDoc.data()?.role);
+
+          for (const subName of selectedSubs) {
+            const sourceSub = collection(db, "users", userDoc.id, subName);
+            const targetSub = collection(
+              db,
+              "users",
+              adminUid,
+              "backups",
+              backupId,
+              "users",
+              userDoc.id,
+              subName,
+            );
+
+            await copyCollectionRecursive(
+              sourceSub,
+              targetSub,
+              [],
+              () => {
+                advanceProgress(1);
+              },
+            );
+          }
+        }
       }
 
-      // Update the admin's backupAt timestamp
       await updateDoc(doc(db, "users", adminUid), {
         backupAt: new Date().toISOString(),
       });
@@ -7642,7 +7783,143 @@ const importDataFromJson = async (
 
 
 
+//   const createBackup = async (selectedCollections = null) => {
+//     if (!user || user.role !== "admin") {
+//       console.error("Unauthorized: Only admins can create backups");
+//       return;
+//     }
 
+//     setIsBackingUp(true);
+//     setBackupProgress(0);
+//     setIsBackupMinimized(false);
+
+//     const adminUid = user.uid;
+
+//     // BACKUP DATA ID
+//     const now = new Date();
+
+//     const parts = new Intl.DateTimeFormat("en-US", {
+//       timeZone: "Asia/Manila",
+//       month: "2-digit", // 01
+//       day: "2-digit", // 10
+//       year: "numeric", // 2026
+//       hour: "2-digit", // 01
+//       minute: "2-digit", // 10
+//       second: "2-digit", // 20
+//       hour12: false,
+//     })
+//       .formatToParts(now)
+//       .reduce((acc, part) => {
+//         acc[part.type] = part.value;
+//         return acc;
+//       }, {});
+
+//     // Backup ID
+//     const backupId = `Backup_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+
+//     // Define root collections to backup (add more if needed)
+//     const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+//     // selectedCollections can be:
+//     // - null => default behavior (backup all in allCollections)
+//     // - array => ["images", "users"]
+//     // - object => { images: true, users: false, ... }
+//     let rootCollections = allCollections;
+
+//     if (Array.isArray(selectedCollections)) {
+//       rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+//     } else if (selectedCollections && typeof selectedCollections === "object") {
+//       rootCollections = allCollections.filter((key) => selectedCollections[key]);
+//     }
+
+//     // safety fallback
+//     if (rootCollections.length === 0) {
+//       rootCollections = allCollections;
+// }
+
+
+//     // Map of known subcollections for each root collection (based on your Firestore structure)
+//     const subCollMap = {
+//       config: [],
+//       images: [],
+//       reviews: [],
+//       terms: [],
+//       units: [],
+//       users: [
+//         "completedBookings",
+//         "receivedMessages",
+//         "sentMessages",
+//         "rentalHistory",
+//         "userBookingRequest",
+//         "adminBookingRequests",
+//         "completedBookings",
+//         "financialReports",
+//       ],
+//     };
+
+
+//     try {
+//       // Count total documents for progress calculation
+//       let totalDocs = 0;
+//       for (const collName of rootCollections) {
+//         const sourceColl = collection(db, collName);
+//         const snapshot = await getDocs(sourceColl);
+//         totalDocs += snapshot.size;
+//       }
+
+//       let copiedDocs = 0;
+
+//       // Copy each root collection recursively
+//       for (const collName of rootCollections) {
+//         const sourceColl = collection(db, collName);
+//         const targetColl = collection(
+//           db,
+//           "users",
+//           adminUid,
+//           "backups",
+//           backupId,
+//           collName,
+//         );
+//         await copyCollectionRecursive(
+//           sourceColl,
+//           targetColl,
+//           subCollMap[collName] || [],
+//           () => {
+//             copiedDocs++;
+//             setBackupProgress(Math.min(100, (copiedDocs / totalDocs) * 100));
+//           },
+//         );
+//       }
+
+//       // Update the admin's backupAt timestamp
+//       await updateDoc(doc(db, "users", adminUid), {
+//         backupAt: new Date().toISOString(),
+//       });
+
+//       console.log("Backup completed successfully");
+//       showActionOverlay({
+//         message: "Backup completed successfully!",
+//         type: "success",
+//       });
+
+//       setShowBackupSuccess(true);
+//       setHideBackupAnimation(false);
+
+//       setTimeout(() => {
+//         setHideBackupAnimation(true);
+//         setTimeout(() => setShowBackupSuccess(false), 400);
+//       }, 5000);
+//     } catch (error) {
+//       console.error("Error creating backup:", error);
+//       showActionOverlay({
+//         message: "Backup failed. Please try again.",
+//         type: "warning",
+//       });
+//     } finally {
+//       setIsBackingUp(false);
+//       setBackupProgress(0);
+//     }
+//   };
 
 // const createDownload = async (selectedCollections = null) => {
 //   if (!user || user.role !== "admin") {

@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu, FiUser} from 'react-icons/fi';
-import { BiSearch, BiSearchAlt } from 'react-icons/bi';
-
-
+import { FiMenu, FiUser } from "react-icons/fi";
+import { BiSearch, BiSearchAlt } from "react-icons/bi";
 
 const Header = ({
   onNavClick,
@@ -58,7 +56,7 @@ const Header = ({
   const [showImportConfirmDialog, setShowImportConfirmDialog] = useState(false);
   const [importMode, setImportMode] = useState(null); // "merge" or "overwrite"
 
-    // Selected collections for import
+  // Selected collections for import
   const [selectedCollections, setSelectedCollections] = useState({
     config: true,
     images: true,
@@ -68,7 +66,7 @@ const Header = ({
     users: true,
   });
 
-// Selected collections for backup
+  // Selected collections for backup
   const [selectedBackupCollections, setSelectedBackupCollections] = useState({
     config: true,
     images: true,
@@ -78,17 +76,42 @@ const Header = ({
     users: true,
   });
 
-  // Selected collections for download
-  const [selectedDownloadCollections, setSelectedDownloadCollections] = useState({
-    config: true,
-    images: true,
-    reviews: true,
-    terms: true,
-    units: true,
-    users: true,
+  const [backupUsersScope, setBackupUsersScope] = useState("all");
+  const [selectedBackupUserIds, setSelectedBackupUserIds] = useState([]);
+  const [
+    selectedBackupAdminUserSubcollections,
+    setSelectedBackupAdminUserSubcollections,
+  ] = useState({
+    completedBookings: true,
+    financialReports: true,
+    activeBookings: true,
+    adminBookingRequests: true,
+    sentMessages: true,
+    receivedMessages: true,
+  });
+  const [
+    selectedBackupRegularUserSubcollections,
+    setSelectedBackupRegularUserSubcollections,
+  ] = useState({
+    rentalHistory: true,
+    activeRentals: true,
+    userBookingRequest: true,
+    sentMessages: true,
+    receivedMessages: true,
   });
 
-   const [downloadUsersScope, setDownloadUsersScope] = useState("all");
+  // Selected collections for download
+  const [selectedDownloadCollections, setSelectedDownloadCollections] =
+    useState({
+      config: true,
+      images: true,
+      reviews: true,
+      terms: true,
+      units: true,
+      users: true,
+    });
+
+  const [downloadUsersScope, setDownloadUsersScope] = useState("all");
   const [selectedDownloadUserIds, setSelectedDownloadUserIds] = useState([]);
   const [selectedAdminUserSubcollections, setSelectedAdminUserSubcollections] =
     useState({
@@ -99,14 +122,16 @@ const Header = ({
       sentMessages: true,
       receivedMessages: true,
     });
-  const [selectedRegularUserSubcollections, setSelectedRegularUserSubcollections] =
-    useState({
-      rentalHistory: true,
-      activeRentals: true,
-      userBookingRequest: true,
-      sentMessages: true,
-      receivedMessages: true,
-    });
+  const [
+    selectedRegularUserSubcollections,
+    setSelectedRegularUserSubcollections,
+  ] = useState({
+    rentalHistory: true,
+    activeRentals: true,
+    userBookingRequest: true,
+    sentMessages: true,
+    receivedMessages: true,
+  });
 
   const [fetchedImages, setFetchedImages] = useState({});
 
@@ -147,7 +172,6 @@ const Header = ({
     fetchImageFromFirestore,
     updateAdminProfilePic,
     resetAdminProfilePic,
-    
 
     createBackup,
     isBackingUp,
@@ -155,13 +179,11 @@ const Header = ({
     isBackupMinimized,
     setIsBackupMinimized,
 
-
     isDownloading,
     downloadProgress,
     isDownloadMinimized,
     setIsDownloadMinimized,
     createDownload,
-
 
     importDataFromJson,
     isImporting,
@@ -172,8 +194,6 @@ const Header = ({
     setShowImportSuccess,
     hideImportAnimation,
     setHideImportAnimation,
-
-
 
     showBackupSuccess,
     setShowBackupSuccess,
@@ -188,7 +208,6 @@ const Header = ({
   } = useUser();
 
   const importFileInputRef = useRef(null);
-
 
   const [pendingTheme, setPendingTheme] = useState(theme);
 
@@ -239,7 +258,7 @@ const Header = ({
 
   const isSidebarCollapsed = collapsed && !isOverlay;
 
-    const usersForDownload = [...(adminAccounts || []), ...(userAccounts || [])]
+  const usersForDownload = [...(adminAccounts || []), ...(userAccounts || [])]
     .filter(
       (account, index, arr) =>
         account?.id &&
@@ -248,11 +267,14 @@ const Header = ({
     .map((account) => ({
       id: account.id,
       email: account.email || account.id,
-      role: String(account.role || "").toLowerCase() === "admin" ? "admin" : "user",
+      role:
+        String(account.role || "").toLowerCase() === "admin" ? "admin" : "user",
     }))
     .sort((a, b) => a.email.localeCompare(b.email));
 
-  const downloadAdminSubcollectionKeys = Object.keys(selectedAdminUserSubcollections);
+  const downloadAdminSubcollectionKeys = Object.keys(
+    selectedAdminUserSubcollections,
+  );
   const downloadRegularSubcollectionKeys = Object.keys(
     selectedRegularUserSubcollections,
   );
@@ -268,25 +290,29 @@ const Header = ({
     (account) => account.role === "user",
   );
 
-    const [importUsersScope, setImportUsersScope] = useState("all");
+  const [importUsersScope, setImportUsersScope] = useState("all");
   const [selectedImportUserIds, setSelectedImportUserIds] = useState([]);
-  const [selectedImportAdminUserSubcollections, setSelectedImportAdminUserSubcollections] =
-    useState({
-      completedBookings: true,
-      financialReports: true,
-      activeBookings: true,
-      adminBookingRequests: true,
-      sentMessages: true,
-      receivedMessages: true,
-    });
-  const [selectedImportRegularUserSubcollections, setSelectedImportRegularUserSubcollections] =
-    useState({
-      rentalHistory: true,
-      activeRentals: true,
-      userBookingRequest: true,
-      sentMessages: true,
-      receivedMessages: true,
-    });
+  const [
+    selectedImportAdminUserSubcollections,
+    setSelectedImportAdminUserSubcollections,
+  ] = useState({
+    completedBookings: true,
+    financialReports: true,
+    activeBookings: true,
+    adminBookingRequests: true,
+    sentMessages: true,
+    receivedMessages: true,
+  });
+  const [
+    selectedImportRegularUserSubcollections,
+    setSelectedImportRegularUserSubcollections,
+  ] = useState({
+    rentalHistory: true,
+    activeRentals: true,
+    userBookingRequest: true,
+    sentMessages: true,
+    receivedMessages: true,
+  });
 
   const useAdminSubcollections =
     downloadUsersScope === "all" ||
@@ -298,7 +324,7 @@ const Header = ({
     downloadUsersScope === "user" ||
     (downloadUsersScope === "specific" && specificScopeHasUser);
 
-      const importAdminSubcollectionKeys = Object.keys(
+  const importAdminSubcollectionKeys = Object.keys(
     selectedImportAdminUserSubcollections,
   );
   const importRegularSubcollectionKeys = Object.keys(
@@ -325,6 +351,34 @@ const Header = ({
     importUsersScope === "all" ||
     importUsersScope === "user" ||
     (importUsersScope === "specific" && importSpecificScopeHasUser);
+
+  const backupAdminSubcollectionKeys = Object.keys(
+    selectedBackupAdminUserSubcollections,
+  );
+  const backupRegularSubcollectionKeys = Object.keys(
+    selectedBackupRegularUserSubcollections,
+  );
+
+  const selectedSpecificUsersForBackup = usersForDownload.filter((account) =>
+    selectedBackupUserIds.includes(account.id),
+  );
+
+  const backupSpecificScopeHasAdmin = selectedSpecificUsersForBackup.some(
+    (account) => account.role === "admin",
+  );
+  const backupSpecificScopeHasUser = selectedSpecificUsersForBackup.some(
+    (account) => account.role === "user",
+  );
+
+  const useBackupAdminSubcollections =
+    backupUsersScope === "all" ||
+    backupUsersScope === "admin" ||
+    (backupUsersScope === "specific" && backupSpecificScopeHasAdmin);
+
+  const useBackupUserSubcollections =
+    backupUsersScope === "all" ||
+    backupUsersScope === "user" ||
+    (backupUsersScope === "specific" && backupSpecificScopeHasUser);
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -406,11 +460,17 @@ const Header = ({
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         } catch {
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         }
       });
@@ -555,7 +615,7 @@ const Header = ({
         return (
           <img src="/assets/november-logo.png" className="header-admin-logo" />
         );
-        case "clover":
+      case "clover":
         return (
           <img src="/assets/clover-logo.png" className="header-admin-logo" />
         );
@@ -583,19 +643,18 @@ const Header = ({
     { name: "Admin", id: "settings", icon: "/assets/settings.png" },
   ];
 
-const icons = [
-  {
-    outline: BiSearch,
-    filled: BiSearchAlt,  // close icon when hovered
-    alt: "Search",
-  },
-  {
-    outline: FiUser,
-    filled: FiUser,  // same icon when hovered
-    alt: "Account",
-  },
-];
-
+  const icons = [
+    {
+      outline: BiSearch,
+      filled: BiSearchAlt, // close icon when hovered
+      alt: "Search",
+    },
+    {
+      outline: FiUser,
+      filled: FiUser, // same icon when hovered
+      alt: "Account",
+    },
+  ];
 
   // SEARCH FUNCTION
   const routes = [
@@ -849,64 +908,62 @@ const icons = [
     }
   };
 
-const handleImportFilePick = async (event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+  const handleImportFilePick = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  // Close dialogs immediately when import starts
-  setShowImportConfirmDialog(false);
-  setShowImportDialog(false);
+    // Close dialogs immediately when import starts
+    setShowImportConfirmDialog(false);
+    setShowImportDialog(false);
 
-  try {
-    const raw = await file.text();
-    const parsed = JSON.parse(raw);
+    try {
+      const raw = await file.text();
+      const parsed = JSON.parse(raw);
 
-    const selected = Object.keys(selectedCollections).filter(
-      (key) => selectedCollections[key],
-    );
+      const selected = Object.keys(selectedCollections).filter(
+        (key) => selectedCollections[key],
+      );
 
-    if (selected.length === 0) {
-      console.warn("No collections selected for import.");
-      return;
-    }
+      if (selected.length === 0) {
+        console.warn("No collections selected for import.");
+        return;
+      }
 
-await importDataFromJson(parsed, {
-      mode: importMode || "merge",
-      selectedCollections: {
-        collections: selectedCollections,
-        users: {
-          scope: importUsersScope,
-          specificUserIds: selectedImportUserIds,
-          subcollectionsByRole: {
-            admin: importAdminSubcollectionKeys.filter(
-              (key) => selectedImportAdminUserSubcollections[key],
-            ),
-            user: importRegularSubcollectionKeys.filter(
-              (key) => selectedImportRegularUserSubcollections[key],
-            ),
+      await importDataFromJson(parsed, {
+        mode: importMode || "merge",
+        selectedCollections: {
+          collections: selectedCollections,
+          users: {
+            scope: importUsersScope,
+            specificUserIds: selectedImportUserIds,
+            subcollectionsByRole: {
+              admin: importAdminSubcollectionKeys.filter(
+                (key) => selectedImportAdminUserSubcollections[key],
+              ),
+              user: importRegularSubcollectionKeys.filter(
+                (key) => selectedImportRegularUserSubcollections[key],
+              ),
+            },
           },
         },
-      },
-    });
-  } catch (error) {
-    console.error("Invalid import file:", error);
-  } finally {
-    event.target.value = "";
-    setImportMode(null);
-  }
-};
-
-
+      });
+    } catch (error) {
+      console.error("Invalid import file:", error);
+    } finally {
+      event.target.value = "";
+      setImportMode(null);
+    }
+  };
 
   return (
     <>
-    <input
-  ref={importFileInputRef}
-  type="file"
-  accept=".json,application/json"
-  style={{ display: "none" }}
-  onChange={handleImportFilePick}
-/>
+      <input
+        ref={importFileInputRef}
+        type="file"
+        accept=".json,application/json"
+        style={{ display: "none" }}
+        onChange={handleImportFilePick}
+      />
 
       <div
         className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""} ${sidebarOpen ? "open" : ""}`}
@@ -971,15 +1028,16 @@ await importDataFromJson(parsed, {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
-  {item.name}
-</span>
+                    <span
+                      className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
+                    >
+                      {item.name}
+                    </span>
 
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
                       className={`dropdown-arrow ${rentalDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
-
                     />
                   </a>
                   <div
@@ -1044,15 +1102,16 @@ await importDataFromJson(parsed, {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
-  {item.name}
-</span>
+                    <span
+                      className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
+                    >
+                      {item.name}
+                    </span>
 
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
                       className={`dropdown-arrow ${analyticsDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
-
                       style={{
                         marginLeft: "auto",
                         transition: "transform 0.3s",
@@ -1129,15 +1188,16 @@ await importDataFromJson(parsed, {
                     <span className="sidebar-icon">
                       <img src={item.icon} alt={item.name} />
                     </span>
-                    <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
-  {item.name}
-</span>
+                    <span
+                      className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
+                    >
+                      {item.name}
+                    </span>
 
                     <img
                       src="/assets/prv-btn.png"
                       alt="Arrow"
                       className={`dropdown-arrow ${settingsDropdownOpen ? "rotated" : ""} ${isSidebarCollapsed ? "is-hidden" : ""}`}
-
                       style={{
                         marginLeft: "auto",
                         transition: "transform 0.3s",
@@ -1192,12 +1252,6 @@ await importDataFromJson(parsed, {
               );
             }
 
-
-
-            
-
-
-
             // Default for other nav items (Reports, Messages)
             return (
               <a
@@ -1215,10 +1269,11 @@ await importDataFromJson(parsed, {
                 <span className="sidebar-icon">
                   <img src={item.icon} alt={item.name} />
                 </span>
-                <span className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}>
-  {item.name}
-</span>
-
+                <span
+                  className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
+                >
+                  {item.name}
+                </span>
               </a>
             );
           })}
@@ -1231,10 +1286,10 @@ await importDataFromJson(parsed, {
       >
         {/* Icons in main content area */}
         <div className="main-icons">
-          <FiMenu 
-  className="hamburger-icon"
-  onClick={() => setSidebarOpen(!sidebarOpen)}
-/>
+          <FiMenu
+            className="hamburger-icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          />
           <div
             className="logo"
             style={{ marginLeft: "30px", pointerEvents: "none" }}
@@ -1286,52 +1341,52 @@ await importDataFromJson(parsed, {
               )}
             </div>
 
-{icons.map((icon, index) => {
- const showFilled = hoveredIcon === index || 
-    (icon.alt === "Search" && searchExpanded);
-  const IconComponent = showFilled ? icon.filled : icon.outline;
+            {icons.map((icon, index) => {
+              const showFilled =
+                hoveredIcon === index ||
+                (icon.alt === "Search" && searchExpanded);
+              const IconComponent = showFilled ? icon.filled : icon.outline;
 
-  if (icon.alt === "Account" && user?.profilePic) {
-    return (
-      <img
-        key={index}
-        src={user.profilePic}
-        alt="User Profile"
-        className="main-icon account-icon"
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src = "/assets/account.svg";
-        }}
-        onClick={() => setAccountDropdownOpen((prev) => !prev)}
-      />
-    );
-  }
+              if (icon.alt === "Account" && user?.profilePic) {
+                return (
+                  <img
+                    key={index}
+                    src={user.profilePic}
+                    alt="User Profile"
+                    className="main-icon account-icon"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/assets/account.svg";
+                    }}
+                    onClick={() => setAccountDropdownOpen((prev) => !prev)}
+                  />
+                );
+              }
 
-  return (
-    <IconComponent
-      key={index}
-      className={`main-icon ${icon.alt === "Account" ? "account-icon" : ""}`}
-      onMouseEnter={() => setHoveredIcon(index)}
-      onMouseLeave={() => setHoveredIcon(null)}
-      onClick={() => {
-        if (icon.alt === "Search") {
-          if (searchExpanded) {
-            setFadingOut(true);
-            setTimeout(() => {
-              setSearchExpanded(false);
-              setFadingOut(false);
-            }, 300);
-          } else {
-            setSearchExpanded(true);
-          }
-        } else if (icon.alt === "Account") {
-          setAccountDropdownOpen((prev) => !prev);
-        }
-      }}
-    />
-  );
-})}
-
+              return (
+                <IconComponent
+                  key={index}
+                  className={`main-icon ${icon.alt === "Account" ? "account-icon" : ""}`}
+                  onMouseEnter={() => setHoveredIcon(index)}
+                  onMouseLeave={() => setHoveredIcon(null)}
+                  onClick={() => {
+                    if (icon.alt === "Search") {
+                      if (searchExpanded) {
+                        setFadingOut(true);
+                        setTimeout(() => {
+                          setSearchExpanded(false);
+                          setFadingOut(false);
+                        }, 300);
+                      } else {
+                        setSearchExpanded(true);
+                      }
+                    } else if (icon.alt === "Account") {
+                      setAccountDropdownOpen((prev) => !prev);
+                    }
+                  }}
+                />
+              );
+            })}
           </div>
 
           {/* Account dropdown */}
@@ -1340,15 +1395,15 @@ await importDataFromJson(parsed, {
               accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
             }`}
           >
-              <div
-    className="dropdown-item"
-    onClick={() => {
-  setAccountDropdownOpen(false);
-  router.push("/");
-}}
-  >
-    Home
-  </div>
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setAccountDropdownOpen(false);
+                router.push("/");
+              }}
+            >
+              Home
+            </div>
             <div
               className="dropdown-item"
               onClick={() => {
@@ -1543,7 +1598,7 @@ await importDataFromJson(parsed, {
                           </div>
                         </div>
 
-                                                <div
+                        <div
                           className="client-summary-box profit"
                           onClick={() => setShowImportDialog(true)}
                           style={{ cursor: "pointer" }}
@@ -1556,7 +1611,6 @@ await importDataFromJson(parsed, {
                             <img src="/assets/export.png" alt="Import" />
                           </div>
                         </div>
-
                       </div>
 
                       <div
@@ -1641,7 +1695,10 @@ await importDataFromJson(parsed, {
                               >
                                 <td>
                                   <img
-                                    src={image?.base64 || "/assets/images/default.png"}
+                                    src={
+                                      image?.base64 ||
+                                      "/assets/images/default.png"
+                                    }
                                     alt={booking.carName || "Car Image"}
                                     className="booking-car-image"
                                   />
@@ -2017,69 +2074,392 @@ await importDataFromJson(parsed, {
         </div>
       )}
 
-
-
-
-
-
-
       {/* DATA BACKUP */}
       {showBackupConfirmDialog && (
         <div className="overlay-delete">
-          <div className="confirm-modal" style={{ minWidth: "400px" }}>
+          <div
+            className="confirm-modal"
+            style={{ minWidth: "400px", maxWidth: "640px" }}
+          >
             <h3>Start Data Backup?</h3>
             <p style={{ marginBottom: "15px" }}>
               Select which collections to backup:
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
               {Object.keys(selectedBackupCollections).map((collection) => (
                 <label
                   key={collection}
                   style={{
-                    display: "flex", alignItems: "center", gap: "10px", cursor: "pointer",
-                    padding: "12px 16px", borderRadius: "12px", textTransform: "capitalize",
-                    fontWeight: "600", fontSize: "14px", transition: "all 0.3s ease",
-                    background: selectedBackupCollections[collection] ? "#e8f5e9" : "#fff",
-                    border: selectedBackupCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
-                    boxShadow: selectedBackupCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    textTransform: "capitalize",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    transition: "all 0.3s ease",
+                    background: selectedBackupCollections[collection]
+                      ? "#e8f5e9"
+                      : "#fff",
+                    border: selectedBackupCollections[collection]
+                      ? "2px solid #4caf50"
+                      : "2px solid #e0e0e0",
+                    boxShadow: selectedBackupCollections[collection]
+                      ? "0 2px 8px rgba(76, 175, 80, 0.2)"
+                      : "0 1px 3px rgba(0,0,0,0.08)",
                   }}
                 >
-                  <div style={{
-                    width: "24px", height: "24px", borderRadius: "8px", display: "flex",
-                    alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", flexShrink: 0,
-                    border: selectedBackupCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
-                    background: selectedBackupCollections[collection] ? "#4caf50" : "#fff",
-                  }}>
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                      flexShrink: 0,
+                      border: selectedBackupCollections[collection]
+                        ? "2px solid #4caf50"
+                        : "2px solid #bdbdbd",
+                      background: selectedBackupCollections[collection]
+                        ? "#4caf50"
+                        : "#fff",
+                    }}
+                  >
                     {selectedBackupCollections[collection] && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     )}
                   </div>
-                  <input type="checkbox" checked={selectedBackupCollections[collection]}
-                    onChange={() => setSelectedBackupCollections((prev) => ({ ...prev, [collection]: !prev[collection] }))}
-                    style={{ display: "none" }} />
+                  <input
+                    type="checkbox"
+                    checked={selectedBackupCollections[collection]}
+                    onChange={() =>
+                      setSelectedBackupCollections((prev) => ({
+                        ...prev,
+                        [collection]: !prev[collection],
+                      }))
+                    }
+                    style={{ display: "none" }}
+                  />
                   {collection}
                 </label>
               ))}
             </div>
+
+            {selectedBackupCollections.users && (
+              <div
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "12px",
+                  padding: "14px",
+                  marginBottom: "16px",
+                  background: "#fafafa",
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                  }}
+                >
+                  Users Backup Options
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexWrap: "wrap",
+                    marginBottom: "12px",
+                  }}
+                >
+                  {[
+                    { key: "all", label: "All Users" },
+                    { key: "admin", label: "Admins Only" },
+                    { key: "user", label: "Users Only" },
+                    { key: "specific", label: "Specific Users" },
+                  ].map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setBackupUsersScope(option.key)}
+                      style={{
+                        border:
+                          backupUsersScope === option.key
+                            ? "2px solid #4caf50"
+                            : "1px solid #bdbdbd",
+                        background:
+                          backupUsersScope === option.key ? "#e8f5e9" : "#fff",
+                        borderRadius: "10px",
+                        padding: "6px 10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {backupUsersScope === "specific" && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
+                      Select user IDs:
+                    </p>
+                    <div
+                      style={{
+                        border: "1px solid #dedede",
+                        borderRadius: "10px",
+                        maxHeight: "150px",
+                        overflowY: "auto",
+                        padding: "8px",
+                        background: "#fff",
+                      }}
+                    >
+                      {usersForDownload.length === 0 ? (
+                        <p
+                          style={{ margin: 0, fontSize: "12px", color: "#777" }}
+                        >
+                          No users available.
+                        </p>
+                      ) : (
+                        usersForDownload.map((account) => (
+                          <label
+                            key={account.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "5px 0",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBackupUserIds.includes(
+                                account.id,
+                              )}
+                              onChange={() => {
+                                setSelectedBackupUserIds((prev) =>
+                                  prev.includes(account.id)
+                                    ? prev.filter((id) => id !== account.id)
+                                    : [...prev, account.id],
+                                );
+                              }}
+                            />
+                            <span>
+                              {account.email} ({account.role})
+                            </span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <div
+                    style={{ opacity: useBackupAdminSubcollections ? 1 : 0.45 }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
+                      Admin subcollections
+                    </p>
+                    {backupAdminSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: useBackupAdminSubcollections
+                            ? "pointer"
+                            : "not-allowed",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={!useBackupAdminSubcollections}
+                          checked={
+                            useBackupAdminSubcollections
+                              ? selectedBackupAdminUserSubcollections[key]
+                              : false
+                          }
+                          onChange={() =>
+                            setSelectedBackupAdminUserSubcollections(
+                              (prev) => ({
+                                ...prev,
+                                [key]: !prev[key],
+                              }),
+                            )
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{ opacity: useBackupUserSubcollections ? 1 : 0.45 }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
+                      User subcollections
+                    </p>
+                    {backupRegularSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: useBackupUserSubcollections
+                            ? "pointer"
+                            : "not-allowed",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={!useBackupUserSubcollections}
+                          checked={
+                            useBackupUserSubcollections
+                              ? selectedBackupRegularUserSubcollections[key]
+                              : false
+                          }
+                          onChange={() =>
+                            setSelectedBackupRegularUserSubcollections(
+                              (prev) => ({
+                                ...prev,
+                                [key]: !prev[key],
+                              }),
+                            )
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
                 onClick={() => {
-                  const selected = Object.keys(selectedBackupCollections).filter(
-                    (key) => selectedBackupCollections[key]
-                  );
+                  const selected = Object.keys(
+                    selectedBackupCollections,
+                  ).filter((key) => selectedBackupCollections[key]);
 
                   if (selected.length === 0) {
                     console.warn("No collections selected for backup.");
                     return;
                   }
 
-                  console.log("Backup started for:", selected);
-                  createBackup(selectedBackupCollections); // or createBackup(selected)
-                  setShowBackupConfirmDialog(false);
+                  const selectedAdminSubs = backupAdminSubcollectionKeys.filter(
+                    (key) => selectedBackupAdminUserSubcollections[key],
+                  );
+                  const selectedUserSubs =
+                    backupRegularSubcollectionKeys.filter(
+                      (key) => selectedBackupRegularUserSubcollections[key],
+                    );
 
+                  if (selectedBackupCollections.users) {
+                    if (
+                      backupUsersScope === "specific" &&
+                      selectedBackupUserIds.length === 0
+                    ) {
+                      console.warn(
+                        "No specific users selected for users backup.",
+                      );
+                      return;
+                    }
+
+                    if (
+                      (backupUsersScope === "all" &&
+                        selectedAdminSubs.length === 0 &&
+                        selectedUserSubs.length === 0) ||
+                      (backupUsersScope === "admin" &&
+                        selectedAdminSubs.length === 0) ||
+                      (backupUsersScope === "user" &&
+                        selectedUserSubs.length === 0) ||
+                      (backupUsersScope === "specific" &&
+                        ((backupSpecificScopeHasAdmin &&
+                          selectedAdminSubs.length === 0) ||
+                          (backupSpecificScopeHasUser &&
+                            selectedUserSubs.length === 0)))
+                    ) {
+                      console.warn(
+                        "Select at least one users subcollection for the chosen scope.",
+                      );
+                      return;
+                    }
+                  }
+
+                  console.log("Backup started for:", selected);
+                  createBackup({
+                    collections: selectedBackupCollections,
+                    users: {
+                      scope: backupUsersScope,
+                      specificUserIds: selectedBackupUserIds,
+                      subcollectionsByRole: {
+                        admin: selectedAdminSubs,
+                        user: selectedUserSubs,
+                      },
+                    },
+                  });
+                  setShowBackupConfirmDialog(false);
                 }}
               >
                 Yes, Backup
@@ -2095,11 +2475,13 @@ await importDataFromJson(parsed, {
         </div>
       )}
 
-
       {/* DATA DOWNLOAD */}
-{showDownloadConfirmDialog && (
+      {showDownloadConfirmDialog && (
         <div className="overlay-delete">
-          <div className="confirm-modal" style={{ minWidth: "400px", maxWidth: "640px" }}>
+          <div
+            className="confirm-modal"
+            style={{ minWidth: "400px", maxWidth: "640px" }}
+          >
             <h3>Start Data Download?</h3>
             <p style={{ marginBottom: "15px" }}>
               Select which collections to download:
@@ -2126,7 +2508,9 @@ await importDataFromJson(parsed, {
                     fontWeight: "600",
                     fontSize: "14px",
                     transition: "all 0.3s ease",
-                    background: selectedDownloadCollections[collection] ? "#e8f5e9" : "#fff",
+                    background: selectedDownloadCollections[collection]
+                      ? "#e8f5e9"
+                      : "#fff",
                     border: selectedDownloadCollections[collection]
                       ? "2px solid #4caf50"
                       : "2px solid #e0e0e0",
@@ -2148,7 +2532,9 @@ await importDataFromJson(parsed, {
                       border: selectedDownloadCollections[collection]
                         ? "2px solid #4caf50"
                         : "2px solid #bdbdbd",
-                      background: selectedDownloadCollections[collection] ? "#4caf50" : "#fff",
+                      background: selectedDownloadCollections[collection]
+                        ? "#4caf50"
+                        : "#fff",
                     }}
                   >
                     {selectedDownloadCollections[collection] && (
@@ -2192,11 +2578,24 @@ await importDataFromJson(parsed, {
                   background: "#fafafa",
                 }}
               >
-                <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: "13px" }}>
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                  }}
+                >
                   Users Download Options
                 </p>
 
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexWrap: "wrap",
+                    marginBottom: "12px",
+                  }}
+                >
                   {[
                     { key: "all", label: "All Users" },
                     { key: "admin", label: "Admins Only" },
@@ -2212,7 +2611,10 @@ await importDataFromJson(parsed, {
                           downloadUsersScope === option.key
                             ? "2px solid #4caf50"
                             : "1px solid #bdbdbd",
-                        background: downloadUsersScope === option.key ? "#e8f5e9" : "#fff",
+                        background:
+                          downloadUsersScope === option.key
+                            ? "#e8f5e9"
+                            : "#fff",
                         borderRadius: "10px",
                         padding: "6px 10px",
                         fontSize: "12px",
@@ -2227,7 +2629,13 @@ await importDataFromJson(parsed, {
 
                 {downloadUsersScope === "specific" && (
                   <div style={{ marginBottom: "12px" }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       Select user IDs:
                     </p>
                     <div
@@ -2241,7 +2649,9 @@ await importDataFromJson(parsed, {
                       }}
                     >
                       {usersForDownload.length === 0 ? (
-                        <p style={{ margin: 0, fontSize: "12px", color: "#777" }}>
+                        <p
+                          style={{ margin: 0, fontSize: "12px", color: "#777" }}
+                        >
                           No users available.
                         </p>
                       ) : (
@@ -2259,7 +2669,9 @@ await importDataFromJson(parsed, {
                           >
                             <input
                               type="checkbox"
-                              checked={selectedDownloadUserIds.includes(account.id)}
+                              checked={selectedDownloadUserIds.includes(
+                                account.id,
+                              )}
                               onChange={() => {
                                 setSelectedDownloadUserIds((prev) =>
                                   prev.includes(account.id)
@@ -2278,9 +2690,21 @@ await importDataFromJson(parsed, {
                   </div>
                 )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
- <div style={{ opacity: useAdminSubcollections ? 1 : 0.45 }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ opacity: useAdminSubcollections ? 1 : 0.45 }}>
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       Admin subcollections
                     </p>
                     {downloadAdminSubcollectionKeys.map((key) => (
@@ -2292,7 +2716,9 @@ await importDataFromJson(parsed, {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: useAdminSubcollections ? "pointer" : "not-allowed",
+                          cursor: useAdminSubcollections
+                            ? "pointer"
+                            : "not-allowed",
                         }}
                       >
                         <input
@@ -2315,8 +2741,14 @@ await importDataFromJson(parsed, {
                     ))}
                   </div>
 
-<div style={{ opacity: useUserSubcollections ? 1 : 0.45 }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                  <div style={{ opacity: useUserSubcollections ? 1 : 0.45 }}>
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       User subcollections
                     </p>
                     {downloadRegularSubcollectionKeys.map((key) => (
@@ -2328,7 +2760,9 @@ await importDataFromJson(parsed, {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: useUserSubcollections ? "pointer" : "not-allowed",
+                          cursor: useUserSubcollections
+                            ? "pointer"
+                            : "not-allowed",
                         }}
                       >
                         <input
@@ -2358,33 +2792,37 @@ await importDataFromJson(parsed, {
               <button
                 className="confirm-btn delete"
                 onClick={() => {
-                  const selected = Object.keys(selectedDownloadCollections).filter(
-                    (key) => selectedDownloadCollections[key],
-                  );
+                  const selected = Object.keys(
+                    selectedDownloadCollections,
+                  ).filter((key) => selectedDownloadCollections[key]);
 
                   if (selected.length === 0) {
                     console.warn("No collections selected for download.");
                     return;
                   }
 
-                  const selectedAdminSubs = downloadAdminSubcollectionKeys.filter(
-                    (key) => selectedAdminUserSubcollections[key],
-                  );
-                  const selectedUserSubs = downloadRegularSubcollectionKeys.filter(
-                    (key) => selectedRegularUserSubcollections[key],
-                  );
+                  const selectedAdminSubs =
+                    downloadAdminSubcollectionKeys.filter(
+                      (key) => selectedAdminUserSubcollections[key],
+                    );
+                  const selectedUserSubs =
+                    downloadRegularSubcollectionKeys.filter(
+                      (key) => selectedRegularUserSubcollections[key],
+                    );
 
                   if (selectedDownloadCollections.users) {
                     if (
                       downloadUsersScope === "specific" &&
                       selectedDownloadUserIds.length === 0
                     ) {
-                      console.warn("No specific users selected for users download.");
+                      console.warn(
+                        "No specific users selected for users download.",
+                      );
                       return;
                     }
 
-                    const selectedSpecificUsers = usersForDownload.filter((account) =>
-                      selectedDownloadUserIds.includes(account.id),
+                    const selectedSpecificUsers = usersForDownload.filter(
+                      (account) => selectedDownloadUserIds.includes(account.id),
                     );
                     const hasSelectedAdmin = selectedSpecificUsers.some(
                       (account) => account.role === "admin",
@@ -2439,8 +2877,6 @@ await importDataFromJson(parsed, {
           </div>
         </div>
       )}
-
-
 
       {/* {showDownloadConfirmDialog && (
         <div className="overlay-delete">
@@ -2512,21 +2948,26 @@ await importDataFromJson(parsed, {
         </div>
       )} */}
 
-
-
-
-
-
-
-
-
       {showImportDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3>Import Data</h3>
             <p>Choose how you want to import the data:</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                marginTop: "15px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "center",
+                }}
+              >
                 <button
                   className="confirm-btn delete"
                   style={{ flex: 1, margin: 0 }}
@@ -2561,45 +3002,53 @@ await importDataFromJson(parsed, {
         </div>
       )}
 
-
       {/* DATA IMPORT */}
       {showImportConfirmDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal" style={{ minWidth: "400px" }}>
-            <h3>{importMode === "merge" ? "Merge Data?" : "Overwrite Data?"}</h3>
+            <h3>
+              {importMode === "merge" ? "Merge Data?" : "Overwrite Data?"}
+            </h3>
             <p style={{ marginBottom: "15px" }}>
-  {importMode === "merge" ? (
-    <>
-      This will{" "}
-      <span
-        style={{
-          fontWeight: "700",
-          textTransform: "uppercase",
-          color: "#dc3545",
-        }}
-      >
-        merge the imported data with existing data
-      </span>
-      . Select which collections to import:
-    </>
-  ) : (
-    <>
-      This will{" "}
-      <span
-        style={{
-          fontWeight: "700",
-          textTransform: "uppercase",
-          color: "#dc3545",
-        }}
-      >
-        completely replace existing data
-      </span>
-      . Select which collections to import:
-    </>
-  )}
-</p>
+              {importMode === "merge" ? (
+                <>
+                  This will{" "}
+                  <span
+                    style={{
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      color: "#dc3545",
+                    }}
+                  >
+                    merge the imported data with existing data
+                  </span>
+                  . Select which collections to import:
+                </>
+              ) : (
+                <>
+                  This will{" "}
+                  <span
+                    style={{
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      color: "#dc3545",
+                    }}
+                  >
+                    completely replace existing data
+                  </span>
+                  . Select which collections to import:
+                </>
+              )}
+            </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
               {Object.keys(selectedCollections).map((collection) => (
                 <label
                   key={collection}
@@ -2609,14 +3058,20 @@ await importDataFromJson(parsed, {
                     gap: "10px",
                     cursor: "pointer",
                     padding: "12px 16px",
-                    background: selectedCollections[collection] ? "#e8f5e9" : "#fff",
+                    background: selectedCollections[collection]
+                      ? "#e8f5e9"
+                      : "#fff",
                     borderRadius: "12px",
-                    border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
+                    border: selectedCollections[collection]
+                      ? "2px solid #4caf50"
+                      : "2px solid #e0e0e0",
                     transition: "all 0.3s ease",
                     textTransform: "capitalize",
                     fontWeight: "600",
                     fontSize: "14px",
-                    boxShadow: selectedCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    boxShadow: selectedCollections[collection]
+                      ? "0 2px 8px rgba(76, 175, 80, 0.2)"
+                      : "0 1px 3px rgba(0,0,0,0.08)",
                   }}
                 >
                   <div
@@ -2624,8 +3079,12 @@ await importDataFromJson(parsed, {
                       width: "24px",
                       height: "24px",
                       borderRadius: "8px",
-                      border: selectedCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
-                      background: selectedCollections[collection] ? "#4caf50" : "#fff",
+                      border: selectedCollections[collection]
+                        ? "2px solid #4caf50"
+                        : "2px solid #bdbdbd",
+                      background: selectedCollections[collection]
+                        ? "#4caf50"
+                        : "#fff",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -2634,7 +3093,16 @@ await importDataFromJson(parsed, {
                     }}
                   >
                     {selectedCollections[collection] && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     )}
@@ -2654,7 +3122,7 @@ await importDataFromJson(parsed, {
                 </label>
               ))}
             </div>
-                        {selectedCollections.users && (
+            {selectedCollections.users && (
               <div
                 style={{
                   border: "1px solid #e0e0e0",
@@ -2664,11 +3132,24 @@ await importDataFromJson(parsed, {
                   background: "#fafafa",
                 }}
               >
-                <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: "13px" }}>
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                  }}
+                >
                   Users Import Options
                 </p>
 
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexWrap: "wrap",
+                    marginBottom: "12px",
+                  }}
+                >
                   {[
                     { key: "all", label: "All Users" },
                     { key: "admin", label: "Admins Only" },
@@ -2684,7 +3165,8 @@ await importDataFromJson(parsed, {
                           importUsersScope === option.key
                             ? "2px solid #4caf50"
                             : "1px solid #bdbdbd",
-                        background: importUsersScope === option.key ? "#e8f5e9" : "#fff",
+                        background:
+                          importUsersScope === option.key ? "#e8f5e9" : "#fff",
                         borderRadius: "10px",
                         padding: "6px 10px",
                         fontSize: "12px",
@@ -2699,7 +3181,13 @@ await importDataFromJson(parsed, {
 
                 {importUsersScope === "specific" && (
                   <div style={{ marginBottom: "12px" }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       Select user IDs:
                     </p>
                     <div
@@ -2713,7 +3201,9 @@ await importDataFromJson(parsed, {
                       }}
                     >
                       {usersForDownload.length === 0 ? (
-                        <p style={{ margin: 0, fontSize: "12px", color: "#777" }}>
+                        <p
+                          style={{ margin: 0, fontSize: "12px", color: "#777" }}
+                        >
                           No users available.
                         </p>
                       ) : (
@@ -2731,7 +3221,9 @@ await importDataFromJson(parsed, {
                           >
                             <input
                               type="checkbox"
-                              checked={selectedImportUserIds.includes(account.id)}
+                              checked={selectedImportUserIds.includes(
+                                account.id,
+                              )}
                               onChange={() => {
                                 setSelectedImportUserIds((prev) =>
                                   prev.includes(account.id)
@@ -2750,9 +3242,23 @@ await importDataFromJson(parsed, {
                   </div>
                 )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div style={{ opacity: useImportAdminSubcollections ? 1 : 0.45 }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <div
+                    style={{ opacity: useImportAdminSubcollections ? 1 : 0.45 }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       Admin subcollections
                     </p>
                     {importAdminSubcollectionKeys.map((key) => (
@@ -2764,7 +3270,9 @@ await importDataFromJson(parsed, {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: useImportAdminSubcollections ? "pointer" : "not-allowed",
+                          cursor: useImportAdminSubcollections
+                            ? "pointer"
+                            : "not-allowed",
                         }}
                       >
                         <input
@@ -2776,10 +3284,12 @@ await importDataFromJson(parsed, {
                               : false
                           }
                           onChange={() =>
-                            setSelectedImportAdminUserSubcollections((prev) => ({
-                              ...prev,
-                              [key]: !prev[key],
-                            }))
+                            setSelectedImportAdminUserSubcollections(
+                              (prev) => ({
+                                ...prev,
+                                [key]: !prev[key],
+                              }),
+                            )
                           }
                         />
                         <span>{key}</span>
@@ -2787,8 +3297,16 @@ await importDataFromJson(parsed, {
                     ))}
                   </div>
 
-                  <div style={{ opacity: useImportUserSubcollections ? 1 : 0.45 }}>
-                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                  <div
+                    style={{ opacity: useImportUserSubcollections ? 1 : 0.45 }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                      }}
+                    >
                       User subcollections
                     </p>
                     {importRegularSubcollectionKeys.map((key) => (
@@ -2800,7 +3318,9 @@ await importDataFromJson(parsed, {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: useImportUserSubcollections ? "pointer" : "not-allowed",
+                          cursor: useImportUserSubcollections
+                            ? "pointer"
+                            : "not-allowed",
                         }}
                       >
                         <input
@@ -2812,10 +3332,12 @@ await importDataFromJson(parsed, {
                               : false
                           }
                           onChange={() =>
-                            setSelectedImportRegularUserSubcollections((prev) => ({
-                              ...prev,
-                              [key]: !prev[key],
-                            }))
+                            setSelectedImportRegularUserSubcollections(
+                              (prev) => ({
+                                ...prev,
+                                [key]: !prev[key],
+                              }),
+                            )
                           }
                         />
                         <span>{key}</span>
@@ -2828,47 +3350,59 @@ await importDataFromJson(parsed, {
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
-onClick={() => {
-  const selected = Object.keys(selectedCollections).filter(
-    (key) => selectedCollections[key]
-  );
+                onClick={() => {
+                  const selected = Object.keys(selectedCollections).filter(
+                    (key) => selectedCollections[key],
+                  );
 
-  if (selected.length === 0) {
-    console.warn("No collections selected for import.");
-    return;
-  }
+                  if (selected.length === 0) {
+                    console.warn("No collections selected for import.");
+                    return;
+                  }
 
-  if (selectedCollections.users) {
-    const selectedAdminSubs = importAdminSubcollectionKeys.filter(
-      (key) => selectedImportAdminUserSubcollections[key],
-    );
-    const selectedUserSubs = importRegularSubcollectionKeys.filter(
-      (key) => selectedImportRegularUserSubcollections[key],
-    );
+                  if (selectedCollections.users) {
+                    const selectedAdminSubs =
+                      importAdminSubcollectionKeys.filter(
+                        (key) => selectedImportAdminUserSubcollections[key],
+                      );
+                    const selectedUserSubs =
+                      importRegularSubcollectionKeys.filter(
+                        (key) => selectedImportRegularUserSubcollections[key],
+                      );
 
-    if (importUsersScope === "specific" && selectedImportUserIds.length === 0) {
-      console.warn("No specific users selected for users import.");
-      return;
-    }
+                    if (
+                      importUsersScope === "specific" &&
+                      selectedImportUserIds.length === 0
+                    ) {
+                      console.warn(
+                        "No specific users selected for users import.",
+                      );
+                      return;
+                    }
 
-    if (
-      (importUsersScope === "all" &&
-        selectedAdminSubs.length === 0 &&
-        selectedUserSubs.length === 0) ||
-      (importUsersScope === "admin" && selectedAdminSubs.length === 0) ||
-      (importUsersScope === "user" && selectedUserSubs.length === 0) ||
-      (importUsersScope === "specific" &&
-        ((importSpecificScopeHasAdmin && selectedAdminSubs.length === 0) ||
-          (importSpecificScopeHasUser && selectedUserSubs.length === 0)))
-    ) {
-      console.warn("Select at least one users subcollection for the chosen scope.");
-      return;
-    }
-  }
+                    if (
+                      (importUsersScope === "all" &&
+                        selectedAdminSubs.length === 0 &&
+                        selectedUserSubs.length === 0) ||
+                      (importUsersScope === "admin" &&
+                        selectedAdminSubs.length === 0) ||
+                      (importUsersScope === "user" &&
+                        selectedUserSubs.length === 0) ||
+                      (importUsersScope === "specific" &&
+                        ((importSpecificScopeHasAdmin &&
+                          selectedAdminSubs.length === 0) ||
+                          (importSpecificScopeHasUser &&
+                            selectedUserSubs.length === 0)))
+                    ) {
+                      console.warn(
+                        "Select at least one users subcollection for the chosen scope.",
+                      );
+                      return;
+                    }
+                  }
 
-  importFileInputRef.current?.click();
-}}
-
+                  importFileInputRef.current?.click();
+                }}
               >
                 Yes, {importMode === "merge" ? "Merge" : "Overwrite"}
               </button>
@@ -2885,17 +3419,6 @@ onClick={() => {
           </div>
         </div>
       )}
-
-
-
-
-
-
-
-
-
-
-
 
       {showResetConfirmDialog && (
         <div className="overlay-delete">
@@ -3078,48 +3601,49 @@ onClick={() => {
       )}
 
       {isImporting && (
-  <div className={`backup-progress ${isImportMinimized ? "backup-minimized" : ""}`}>
-    {!isImportMinimized ? (
-      <div className="backup-progress-container">
-        <span className="backup-progress-label">Importing Data</span>
+        <div
+          className={`backup-progress ${isImportMinimized ? "backup-minimized" : ""}`}
+        >
+          {!isImportMinimized ? (
+            <div className="backup-progress-container">
+              <span className="backup-progress-label">Importing Data</span>
 
-        <div className="backup-progress-bar">
-          <div
-            className="backup-progress-fill"
-            style={{ width: `${importProgress}%` }}
-          />
+              <div className="backup-progress-bar">
+                <div
+                  className="backup-progress-fill"
+                  style={{ width: `${importProgress}%` }}
+                />
+              </div>
+
+              <span className="backup-progress-text">
+                {Math.round(importProgress)}%
+              </span>
+
+              <button
+                className="backup-toggle-btn"
+                onClick={() => setIsImportMinimized(true)}
+                aria-label="Minimize import progress"
+              >
+                ◀
+              </button>
+            </div>
+          ) : (
+            <div className="backup-minimized-container">
+              <span className="backup-progress-text">
+                {Math.round(importProgress)}%
+              </span>
+
+              <button
+                className="backup-toggle-btn backup-triangle-left"
+                onClick={() => setIsImportMinimized(false)}
+                aria-label="Expand import progress"
+              >
+                ▶
+              </button>
+            </div>
+          )}
         </div>
-
-        <span className="backup-progress-text">
-          {Math.round(importProgress)}%
-        </span>
-
-        <button
-          className="backup-toggle-btn"
-          onClick={() => setIsImportMinimized(true)}
-          aria-label="Minimize import progress"
-        >
-          ◀
-        </button>
-      </div>
-    ) : (
-      <div className="backup-minimized-container">
-        <span className="backup-progress-text">
-          {Math.round(importProgress)}%
-        </span>
-
-        <button
-          className="backup-toggle-btn backup-triangle-left"
-          onClick={() => setIsImportMinimized(false)}
-          aria-label="Expand import progress"
-        >
-          ▶
-        </button>
-      </div>
-    )}
-  </div>
       )}
-
 
       {showLogoutOverlay && (
         <div className="overlay-delete">
@@ -3755,6 +4279,5 @@ onClick={() => {
 };
 
 // export default Header;
-
 
 export default React.memo(Header);
