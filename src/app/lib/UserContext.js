@@ -6994,7 +6994,6 @@ const createDownload = async (selectedCollections = null) => {
 };
 
 
-
   // FUNCTION TO IMPORT DATA FROM JSON
 const importDataFromJson = async (
   importedData,
