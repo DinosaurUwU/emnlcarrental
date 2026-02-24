@@ -268,6 +268,26 @@ const Header = ({
     (account) => account.role === "user",
   );
 
+    const [importUsersScope, setImportUsersScope] = useState("all");
+  const [selectedImportUserIds, setSelectedImportUserIds] = useState([]);
+  const [selectedImportAdminUserSubcollections, setSelectedImportAdminUserSubcollections] =
+    useState({
+      completedBookings: true,
+      financialReports: true,
+      activeBookings: true,
+      adminBookingRequests: true,
+      sentMessages: true,
+      receivedMessages: true,
+    });
+  const [selectedImportRegularUserSubcollections, setSelectedImportRegularUserSubcollections] =
+    useState({
+      rentalHistory: true,
+      activeRentals: true,
+      userBookingRequest: true,
+      sentMessages: true,
+      receivedMessages: true,
+    });
+
   const useAdminSubcollections =
     downloadUsersScope === "all" ||
     downloadUsersScope === "admin" ||
@@ -277,6 +297,34 @@ const Header = ({
     downloadUsersScope === "all" ||
     downloadUsersScope === "user" ||
     (downloadUsersScope === "specific" && specificScopeHasUser);
+
+      const importAdminSubcollectionKeys = Object.keys(
+    selectedImportAdminUserSubcollections,
+  );
+  const importRegularSubcollectionKeys = Object.keys(
+    selectedImportRegularUserSubcollections,
+  );
+
+  const selectedSpecificUsersForImport = usersForDownload.filter((account) =>
+    selectedImportUserIds.includes(account.id),
+  );
+
+  const importSpecificScopeHasAdmin = selectedSpecificUsersForImport.some(
+    (account) => account.role === "admin",
+  );
+  const importSpecificScopeHasUser = selectedSpecificUsersForImport.some(
+    (account) => account.role === "user",
+  );
+
+  const useImportAdminSubcollections =
+    importUsersScope === "all" ||
+    importUsersScope === "admin" ||
+    (importUsersScope === "specific" && importSpecificScopeHasAdmin);
+
+  const useImportUserSubcollections =
+    importUsersScope === "all" ||
+    importUsersScope === "user" ||
+    (importUsersScope === "specific" && importSpecificScopeHasUser);
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -822,9 +870,23 @@ const handleImportFilePick = async (event) => {
       return;
     }
 
-    await importDataFromJson(parsed, {
+await importDataFromJson(parsed, {
       mode: importMode || "merge",
-      selectedCollections,
+      selectedCollections: {
+        collections: selectedCollections,
+        users: {
+          scope: importUsersScope,
+          specificUserIds: selectedImportUserIds,
+          subcollectionsByRole: {
+            admin: importAdminSubcollectionKeys.filter(
+              (key) => selectedImportAdminUserSubcollections[key],
+            ),
+            user: importRegularSubcollectionKeys.filter(
+              (key) => selectedImportRegularUserSubcollections[key],
+            ),
+          },
+        },
+      },
     });
   } catch (error) {
     console.error("Invalid import file:", error);
@@ -2592,6 +2654,177 @@ const handleImportFilePick = async (event) => {
                 </label>
               ))}
             </div>
+                        {selectedCollections.users && (
+              <div
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "12px",
+                  padding: "14px",
+                  marginBottom: "16px",
+                  background: "#fafafa",
+                }}
+              >
+                <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: "13px" }}>
+                  Users Import Options
+                </p>
+
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
+                  {[
+                    { key: "all", label: "All Users" },
+                    { key: "admin", label: "Admins Only" },
+                    { key: "user", label: "Users Only" },
+                    { key: "specific", label: "Specific Users" },
+                  ].map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setImportUsersScope(option.key)}
+                      style={{
+                        border:
+                          importUsersScope === option.key
+                            ? "2px solid #4caf50"
+                            : "1px solid #bdbdbd",
+                        background: importUsersScope === option.key ? "#e8f5e9" : "#fff",
+                        borderRadius: "10px",
+                        padding: "6px 10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {importUsersScope === "specific" && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      Select user IDs:
+                    </p>
+                    <div
+                      style={{
+                        border: "1px solid #dedede",
+                        borderRadius: "10px",
+                        maxHeight: "150px",
+                        overflowY: "auto",
+                        padding: "8px",
+                        background: "#fff",
+                      }}
+                    >
+                      {usersForDownload.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: "12px", color: "#777" }}>
+                          No users available.
+                        </p>
+                      ) : (
+                        usersForDownload.map((account) => (
+                          <label
+                            key={account.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "5px 0",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedImportUserIds.includes(account.id)}
+                              onChange={() => {
+                                setSelectedImportUserIds((prev) =>
+                                  prev.includes(account.id)
+                                    ? prev.filter((id) => id !== account.id)
+                                    : [...prev, account.id],
+                                );
+                              }}
+                            />
+                            <span>
+                              {account.email} ({account.role})
+                            </span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div style={{ opacity: useImportAdminSubcollections ? 1 : 0.45 }}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      Admin subcollections
+                    </p>
+                    {importAdminSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: useImportAdminSubcollections ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={!useImportAdminSubcollections}
+                          checked={
+                            useImportAdminSubcollections
+                              ? selectedImportAdminUserSubcollections[key]
+                              : false
+                          }
+                          onChange={() =>
+                            setSelectedImportAdminUserSubcollections((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div style={{ opacity: useImportUserSubcollections ? 1 : 0.45 }}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
+                      User subcollections
+                    </p>
+                    {importRegularSubcollectionKeys.map((key) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "12px",
+                          marginBottom: "6px",
+                          cursor: useImportUserSubcollections ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={!useImportUserSubcollections}
+                          checked={
+                            useImportUserSubcollections
+                              ? selectedImportRegularUserSubcollections[key]
+                              : false
+                          }
+                          onChange={() =>
+                            setSelectedImportRegularUserSubcollections((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
+                        />
+                        <span>{key}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
@@ -2603,6 +2836,34 @@ onClick={() => {
   if (selected.length === 0) {
     console.warn("No collections selected for import.");
     return;
+  }
+
+  if (selectedCollections.users) {
+    const selectedAdminSubs = importAdminSubcollectionKeys.filter(
+      (key) => selectedImportAdminUserSubcollections[key],
+    );
+    const selectedUserSubs = importRegularSubcollectionKeys.filter(
+      (key) => selectedImportRegularUserSubcollections[key],
+    );
+
+    if (importUsersScope === "specific" && selectedImportUserIds.length === 0) {
+      console.warn("No specific users selected for users import.");
+      return;
+    }
+
+    if (
+      (importUsersScope === "all" &&
+        selectedAdminSubs.length === 0 &&
+        selectedUserSubs.length === 0) ||
+      (importUsersScope === "admin" && selectedAdminSubs.length === 0) ||
+      (importUsersScope === "user" && selectedUserSubs.length === 0) ||
+      (importUsersScope === "specific" &&
+        ((importSpecificScopeHasAdmin && selectedAdminSubs.length === 0) ||
+          (importSpecificScopeHasUser && selectedUserSubs.length === 0)))
+    ) {
+      console.warn("Select at least one users subcollection for the chosen scope.");
+      return;
+    }
   }
 
   importFileInputRef.current?.click();
