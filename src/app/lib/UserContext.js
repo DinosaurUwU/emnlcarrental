@@ -6617,7 +6617,6 @@ useEffect(() => {
         return acc;
       }, {});
 
-    const backupId = `Backup_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
     const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
 
@@ -6711,6 +6710,9 @@ useEffect(() => {
     if (rootCollections.length === 0) {
       rootCollections = allCollections;
     }
+
+    const selectedLabel = `[${rootCollections.join(", ")}]`;
+const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
     const normalizeUserRole = (roleValue) =>
       String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
