@@ -2170,37 +2170,37 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-{entriesLoading ? (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "100%",
-      minHeight: "220px",
-    }}
-  >
-    <div
-      className="spinner"
-      style={{
-        width: "40px",
-        height: "40px",
-        border: "4px solid #ccc",
-        borderTop: "4px solid #28a745",
-        borderRadius: "50%",
-        animation: "spin 1s linear infinite",
-      }}
-    />
-    <style>{`
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `}</style>
-  </div>
-) : (
+
 
                   <tbody>
-                    {mopTypes.length > 0 ? (
+
+  {entriesLoading ? (
+    <tr>
+      <td colSpan="3" style={{ padding: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: "220px",
+          }}
+        >
+          <div
+            className="spinner"
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid #ccc",
+              borderTop: "4px solid #28a745",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+        </div>
+      </td>
+    </tr>
+  ) : mopTypes.length > 0 ? (
                       mopTypes.map((type) => (
                         <tr
                           key={type}
@@ -2229,9 +2229,12 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
+
+
+
                   </tbody>
 
-)}
+
 
                 </table>
               )}
@@ -2246,37 +2249,37 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-{entriesLoading ? (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "100%",
-      minHeight: "220px",
-    }}
-  >
-    <div
-      className="spinner"
-      style={{
-        width: "40px",
-        height: "40px",
-        border: "4px solid #ccc",
-        borderTop: "4px solid #28a745",
-        borderRadius: "50%",
-        animation: "spin 1s linear infinite",
-      }}
-    />
-    <style>{`
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `}</style>
-  </div>
-) : (
+
 
                   <tbody>
-                    {popTypesRevenue.length > 0 ? (
+
+  {entriesLoading ? (
+    <tr>
+      <td colSpan="3" style={{ padding: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: "220px",
+          }}
+        >
+          <div
+            className="spinner"
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid #ccc",
+              borderTop: "4px solid #28a745",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+        </div>
+      </td>
+    </tr>
+  ) : popTypesRevenue.length > 0 ? (
                       popTypesRevenue.map((type) => (
                         <tr
                           key={type}
@@ -2305,9 +2308,11 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
+
+
                   </tbody>
 
-)}
+
 
                 </table>
               )}
@@ -2322,36 +2327,37 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-{entriesLoading ? (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "220px",
-    }}
-  >
-    <div
-      className="spinner"
-      style={{
-        width: "40px",
-        height: "40px",
-        border: "4px solid #ccc",
-        borderTop: "4px solid #28a745",
-        borderRadius: "50%",
-        animation: "spin 1s linear infinite",
-      }}
-    />
-    <style>{`
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `}</style>
-  </div>
-) : (
+
 
                   <tbody>
-                    {popTypesExpense.length > 0 ? (
+
+  {entriesLoading ? (
+    <tr>
+      <td colSpan="3" style={{ padding: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: "220px",
+          }}
+        >
+          <div
+            className="spinner"
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid #ccc",
+              borderTop: "4px solid #28a745",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+        </div>
+      </td>
+    </tr>
+  ) : popTypesExpense.length > 0 ? (
                       popTypesExpense.map((type) => (
                         <tr
                           key={type}
@@ -2380,9 +2386,12 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
+
+
+
                   </tbody>
 
-)}
+
 
                 </table>
               )}
