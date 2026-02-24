@@ -32,12 +32,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
     compressAndConvertToBase64,
     deleteUnit,
     createReview,
-    deleteReview,
     updateReview,
     fetchReviews,
     clearImageCache,
     updateImageCache,
+    loadFinancialReport,
+setRevenueGrid,
+setExpenseGrid,
+
   } = useUser();
+const [entriesLoading, setEntriesLoading] = useState(false);
+const entriesHydratedRef = useRef(false);
 
   const [showAdminError, setShowAdminError] = useState(false);
   const [adminErrorMessage, setAdminErrorMessage] = useState("");
@@ -73,7 +78,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [hideSavedAnimation, setHideSavedAnimation] = useState(false);
   const [showEditConfirmDialog, setShowEditConfirmDialog] = useState(false);
 
-  const [confirmInput, setConfirmInput] = useState("");
   const [selectedMopPop, setSelectedMopPop] = useState("MOP");
 
   const [selectedMopType, setSelectedMopType] = useState("");
@@ -202,7 +206,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     contact: ["/assets/images/default.png"],
   });
 
-  const [reviews, setReviews] = useState([]);
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -355,52 +358,71 @@ const AdminSettings = ({ subSection = "overview" }) => {
     event.target.value = "";
   };
 
-  const handleSaveReviews = async () => {
-    setIsSavingContent(true);
+
+useEffect(() => {
+  if (!(subSection === "entries" || subSection === "overview")) return;
+  if (entriesHydratedRef.current) return;
+
+  let cancelled = false;
+
+  const hasAnyValue = (grid) => {
+    if (!grid || typeof grid !== "object") return false;
+    return Object.values(grid).some((monthRows) =>
+      Object.values(monthRows || {}).some(
+        (row) => Array.isArray(row) && row.some((cell) => String(cell || "").trim() !== ""),
+      ),
+    );
+  };
+
+  const hydrateEntries = async () => {
+    setEntriesLoading(true);
     try {
-      for (let i = 0; i < testimonials.length; i++) {
-        const testimonial = testimonials[i];
-        let imgToSave = testimonial.img;
+      const currentYear = new Date().getFullYear();
+      const yearsToLoad = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
-        // Compress if there's a new file
-        if (testimonialImageFiles[i]) {
-          const compressed = await compressAndConvertToBase64(
-            testimonialImageFiles[i],
-          );
-          imgToSave = compressed.base64;
-        }
+      const revenueByYear = {};
+      const expenseByYear = {};
 
-        const testimonialToSave = { ...testimonial, img: imgToSave };
+      for (const year of yearsToLoad) {
+        const [revRes, expRes] = await Promise.all([
+          loadFinancialReport("revenue", year),
+          loadFinancialReport("expense", year),
+        ]);
 
-        if (testimonial.id) {
-          await updateReview(testimonial.id, testimonialToSave);
-        } else {
-          const result = await createReview(testimonialToSave);
-          if (result.success) {
-            setTestimonials((prev) =>
-              prev.map((t, idx) => (idx === i ? { ...t, id: result.id } : t)),
-            );
-          } else {
-            setAdminErrorMessage(
-              `Failed to create review for ${testimonial.name}: ${result.error}`,
-            );
-            setShowAdminError(true);
-          }
-        }
+        if (cancelled) return;
+
+        const revGrid = revRes?.gridData || {};
+        const expGrid = expRes?.gridData || {};
+
+        if (hasAnyValue(revGrid)) revenueByYear[year] = revGrid;
+        if (hasAnyValue(expGrid)) expenseByYear[year] = expGrid;
       }
-      setOriginalTestimonials([...testimonials]);
-      setShowContentSavedSuccess(true);
-      setIsEditingContent(false);
 
-      // Reset files after save
-      setTestimonialImageFiles(new Array(testimonials.length).fill(null));
-    } catch (error) {
-      setAdminErrorMessage("Save failed: " + error.message);
-      setShowAdminError(true);
+      if (cancelled) return;
+
+      if (Object.keys(revenueByYear).length > 0) {
+        setRevenueGrid((prev) => ({ ...prev, ...revenueByYear }));
+      }
+      if (Object.keys(expenseByYear).length > 0) {
+        setExpenseGrid((prev) => ({ ...prev, ...expenseByYear }));
+      }
+
+      entriesHydratedRef.current = true;
+    } catch (err) {
+      console.error("Failed to hydrate Entries data:", err);
     } finally {
-      setIsSavingContent(false);
+      if (!cancelled) setEntriesLoading(false);
     }
   };
+
+  hydrateEntries();
+
+  return () => {
+    cancelled = true;
+  };
+}, [subSection, loadFinancialReport, setRevenueGrid, setExpenseGrid]);
+
+
 
 
   // Load reviews from Firestore on mount
@@ -2147,6 +2169,36 @@ useEffect(() => {
                       <th>Recent Transaction</th>
                     </tr>
                   </thead>
+
+{entriesLoading ? (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+      minHeight: "220px",
+    }}
+  >
+    <div
+      className="spinner"
+      style={{
+        width: "40px",
+        height: "40px",
+        border: "4px solid #ccc",
+        borderTop: "4px solid #28a745",
+        borderRadius: "50%",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+) : (
+
                   <tbody>
                     {mopTypes.length > 0 ? (
                       mopTypes.map((type) => (
@@ -2178,6 +2230,9 @@ useEffect(() => {
                       </tr>
                     )}
                   </tbody>
+
+)}
+
                 </table>
               )}
 
@@ -2190,6 +2245,36 @@ useEffect(() => {
                       <th>Recent Transaction</th>
                     </tr>
                   </thead>
+
+{entriesLoading ? (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+      minHeight: "220px",
+    }}
+  >
+    <div
+      className="spinner"
+      style={{
+        width: "40px",
+        height: "40px",
+        border: "4px solid #ccc",
+        borderTop: "4px solid #28a745",
+        borderRadius: "50%",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+) : (
+
                   <tbody>
                     {popTypesRevenue.length > 0 ? (
                       popTypesRevenue.map((type) => (
@@ -2221,6 +2306,9 @@ useEffect(() => {
                       </tr>
                     )}
                   </tbody>
+
+)}
+
                 </table>
               )}
 
@@ -2233,6 +2321,35 @@ useEffect(() => {
                       <th>Recent Transaction</th>
                     </tr>
                   </thead>
+
+{entriesLoading ? (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "220px",
+    }}
+  >
+    <div
+      className="spinner"
+      style={{
+        width: "40px",
+        height: "40px",
+        border: "4px solid #ccc",
+        borderTop: "4px solid #28a745",
+        borderRadius: "50%",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+) : (
+
                   <tbody>
                     {popTypesExpense.length > 0 ? (
                       popTypesExpense.map((type) => (
@@ -2264,6 +2381,9 @@ useEffect(() => {
                       </tr>
                     )}
                   </tbody>
+
+)}
+
                 </table>
               )}
 
