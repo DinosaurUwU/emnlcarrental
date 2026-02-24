@@ -257,6 +257,27 @@ const Header = ({
     selectedRegularUserSubcollections,
   );
 
+  const selectedSpecificUsersForDownload = usersForDownload.filter((account) =>
+    selectedDownloadUserIds.includes(account.id),
+  );
+
+  const specificScopeHasAdmin = selectedSpecificUsersForDownload.some(
+    (account) => account.role === "admin",
+  );
+  const specificScopeHasUser = selectedSpecificUsersForDownload.some(
+    (account) => account.role === "user",
+  );
+
+  const useAdminSubcollections =
+    downloadUsersScope === "all" ||
+    downloadUsersScope === "admin" ||
+    (downloadUsersScope === "specific" && specificScopeHasAdmin);
+
+  const useUserSubcollections =
+    downloadUsersScope === "all" ||
+    downloadUsersScope === "user" ||
+    (downloadUsersScope === "specific" && specificScopeHasUser);
+
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
@@ -2196,7 +2217,7 @@ const handleImportFilePick = async (event) => {
                 )}
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div>
+ <div style={{ opacity: useAdminSubcollections ? 1 : 0.45 }}>
                     <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
                       Admin subcollections
                     </p>
@@ -2209,12 +2230,17 @@ const handleImportFilePick = async (event) => {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: "pointer",
+                          cursor: useAdminSubcollections ? "pointer" : "not-allowed",
                         }}
                       >
                         <input
                           type="checkbox"
-                          checked={selectedAdminUserSubcollections[key]}
+                          disabled={!useAdminSubcollections}
+                          checked={
+                            useAdminSubcollections
+                              ? selectedAdminUserSubcollections[key]
+                              : false
+                          }
                           onChange={() =>
                             setSelectedAdminUserSubcollections((prev) => ({
                               ...prev,
@@ -2227,7 +2253,7 @@ const handleImportFilePick = async (event) => {
                     ))}
                   </div>
 
-                  <div>
+<div style={{ opacity: useUserSubcollections ? 1 : 0.45 }}>
                     <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "12px" }}>
                       User subcollections
                     </p>
@@ -2240,12 +2266,17 @@ const handleImportFilePick = async (event) => {
                           gap: "8px",
                           fontSize: "12px",
                           marginBottom: "6px",
-                          cursor: "pointer",
+                          cursor: useUserSubcollections ? "pointer" : "not-allowed",
                         }}
                       >
                         <input
                           type="checkbox"
-                          checked={selectedRegularUserSubcollections[key]}
+                          disabled={!useUserSubcollections}
+                          checked={
+                            useUserSubcollections
+                              ? selectedRegularUserSubcollections[key]
+                              : false
+                          }
                           onChange={() =>
                             setSelectedRegularUserSubcollections((prev) => ({
                               ...prev,

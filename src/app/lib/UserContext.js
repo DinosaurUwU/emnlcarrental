@@ -7069,6 +7069,581 @@ const createDownload = async (selectedCollections = null) => {
 
 
 
+
+
+
+  // FUNCTION TO IMPORT DATA FROM JSON
+const importDataFromJson = async (
+  importedData,
+  { mode = "merge", selectedCollections = null } = {},
+) => {
+  if (!user || user.role !== "admin") {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  setIsImporting(true);
+  setImportProgress(0);
+  setIsImportMinimized(false);
+
+  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+  const adminAvailableSubcollections = [
+    "completedBookings",
+    "financialReports",
+    "activeBookings",
+    "adminBookingRequests",
+    "sentMessages",
+    "receivedMessages",
+  ];
+
+  const userAvailableSubcollections = [
+    "rentalHistory",
+    "activeRentals",
+    "userBookingRequest",
+    "sentMessages",
+    "receivedMessages",
+  ];
+
+  const defaultUsersOptions = {
+    scope: "all",
+    specificUserIds: [],
+    subcollectionsByRole: {
+      admin: adminAvailableSubcollections,
+      user: userAvailableSubcollections,
+    },
+  };
+
+  let targetCollections = allCollections;
+  let usersOptions = defaultUsersOptions;
+
+  if (Array.isArray(selectedCollections)) {
+    targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
+  } else if (selectedCollections && typeof selectedCollections === "object") {
+    const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
+      selectedCollections,
+      "collections",
+    );
+
+    if (hasCollectionsKey) {
+      const selectedRoot = selectedCollections.collections;
+      if (Array.isArray(selectedRoot)) {
+        targetCollections = allCollections.filter((k) => selectedRoot.includes(k));
+      } else if (selectedRoot && typeof selectedRoot === "object") {
+        targetCollections = allCollections.filter((k) => selectedRoot[k]);
+      }
+    } else {
+      targetCollections = allCollections.filter((k) => selectedCollections[k]);
+    }
+
+    if (
+      selectedCollections.users &&
+      typeof selectedCollections.users === "object"
+    ) {
+      const usersConfig = selectedCollections.users;
+      const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
+      const normalizedScope =
+        scopeRaw === "admin" ||
+        scopeRaw === "user" ||
+        scopeRaw === "specific"
+          ? scopeRaw
+          : "all";
+
+      const specificUserIds = Array.isArray(usersConfig.specificUserIds)
+        ? [...new Set(usersConfig.specificUserIds.filter(Boolean).map((id) => String(id)))]
+        : [];
+
+      const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
+      const userSubsRaw = usersConfig.subcollectionsByRole?.user;
+
+      const adminSubs = Array.isArray(adminSubsRaw)
+        ? adminAvailableSubcollections.filter((name) => adminSubsRaw.includes(name))
+        : adminAvailableSubcollections;
+
+      const userSubs = Array.isArray(userSubsRaw)
+        ? userAvailableSubcollections.filter((name) => userSubsRaw.includes(name))
+        : userAvailableSubcollections;
+
+      usersOptions = {
+        scope: normalizedScope,
+        specificUserIds,
+        subcollectionsByRole: {
+          admin: adminSubs,
+          user: userSubs,
+        },
+      };
+    }
+  }
+
+  if (!targetCollections.length) {
+    setIsImporting(false);
+    setImportProgress(0);
+    return { success: false, error: "No collections selected" };
+  }
+
+  const normalizeUserRole = (roleValue) =>
+    String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
+
+  const getSubcollectionsForRole = (roleValue) => {
+    return normalizeUserRole(roleValue) === "admin"
+      ? usersOptions.subcollectionsByRole.admin
+      : usersOptions.subcollectionsByRole.user;
+  };
+
+  const shouldIncludeUserByScope = (userId, roleValue) => {
+    if (usersOptions.scope === "specific") {
+      return usersOptions.specificUserIds.includes(String(userId));
+    }
+    if (usersOptions.scope === "admin") {
+      return normalizeUserRole(roleValue) === "admin";
+    }
+    if (usersOptions.scope === "user") {
+      return normalizeUserRole(roleValue) === "user";
+    }
+    return true;
+  };
+
+  // Convert exported JSON timestamp objects back to Firestore Timestamp
+  const normalizeFirestoreValue = (value) => {
+    if (Array.isArray(value)) {
+      return value.map(normalizeFirestoreValue);
+    }
+
+    if (value && typeof value === "object") {
+      const keys = Object.keys(value);
+
+      if (
+        keys.length === 2 &&
+        keys.includes("seconds") &&
+        keys.includes("nanoseconds") &&
+        typeof value.seconds === "number" &&
+        typeof value.nanoseconds === "number"
+      ) {
+        return new Timestamp(value.seconds, value.nanoseconds);
+      }
+
+      const out = {};
+      for (const key of keys) {
+        out[key] = normalizeFirestoreValue(value[key]);
+      }
+      return out;
+    }
+
+    return value;
+  };
+
+  try {
+    // Count total incoming docs for progress %
+    let totalDocs = 0;
+
+    for (const collName of targetCollections) {
+      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+
+      if (collName !== "users") {
+        totalDocs += incoming.filter((item) => item?.id).length;
+        continue;
+      }
+
+      const filteredUsers = incoming.filter(
+        (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
+      );
+
+      totalDocs += filteredUsers.length;
+
+      for (const userItem of filteredUsers) {
+        const selectedSubs = getSubcollectionsForRole(userItem.role);
+        const subcollections = userItem?._subcollections || {};
+
+        for (const subName of selectedSubs) {
+          const incomingSub = Array.isArray(subcollections[subName])
+            ? subcollections[subName].filter((subItem) => subItem?.id)
+            : [];
+          totalDocs += incomingSub.length;
+        }
+      }
+    }
+
+    let processedDocs = 0;
+
+    for (const collName of targetCollections) {
+      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+
+      if (collName !== "users") {
+        // OVERWRITE: remove docs not present in incoming file
+        if (mode === "overwrite") {
+          const existingSnap = await getDocs(collection(db, collName));
+          const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
+
+          for (const docSnap of existingSnap.docs) {
+            if (!incomingIds.has(docSnap.id)) {
+              await deleteDoc(doc(db, collName, docSnap.id));
+            }
+          }
+        }
+
+        // MERGE/OVERWRITE write pass
+        for (const item of incoming) {
+          if (!item?.id) continue;
+          const { id, ...payload } = item;
+          const normalizedPayload = normalizeFirestoreValue(payload);
+
+          await setDoc(
+            doc(db, collName, id),
+            normalizedPayload,
+            { merge: mode === "merge" },
+          );
+
+          processedDocs += 1;
+          setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+        }
+
+        continue;
+      }
+
+      const filteredUsers = incoming.filter(
+        (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
+      );
+
+      if (mode === "overwrite") {
+        const existingUsersSnap = await getDocs(collection(db, "users"));
+        const targetExistingUsers = existingUsersSnap.docs.filter((docSnap) =>
+          shouldIncludeUserByScope(docSnap.id, docSnap.data()?.role),
+        );
+        const incomingUserIds = new Set(filteredUsers.map((u) => String(u.id)));
+
+        for (const docSnap of targetExistingUsers) {
+          if (!incomingUserIds.has(docSnap.id)) {
+            await deleteDoc(doc(db, "users", docSnap.id));
+          }
+        }
+      }
+
+      for (const userItem of filteredUsers) {
+        const { id: userId, _subcollections = {}, ...userPayload } = userItem;
+        const normalizedUserPayload = normalizeFirestoreValue(userPayload);
+
+        await setDoc(
+          doc(db, "users", userId),
+          normalizedUserPayload,
+          { merge: mode === "merge" },
+        );
+
+        processedDocs += 1;
+        setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+
+        const selectedSubs = getSubcollectionsForRole(userPayload.role);
+
+        for (const subName of selectedSubs) {
+          const incomingSub = Array.isArray(_subcollections[subName])
+            ? _subcollections[subName].filter((subItem) => subItem?.id)
+            : [];
+
+          if (mode === "overwrite") {
+            const existingSubSnap = await getDocs(collection(db, "users", userId, subName));
+            const incomingSubIds = new Set(incomingSub.map((sub) => String(sub.id)));
+
+            for (const existingDoc of existingSubSnap.docs) {
+              if (!incomingSubIds.has(existingDoc.id)) {
+                await deleteDoc(doc(db, "users", userId, subName, existingDoc.id));
+              }
+            }
+          }
+
+          for (const subItem of incomingSub) {
+            const { id: subId, ...subPayload } = subItem;
+            const normalizedSubPayload = normalizeFirestoreValue(subPayload);
+
+            await setDoc(
+              doc(db, "users", userId, subName, subId),
+              normalizedSubPayload,
+              { merge: mode === "merge" },
+            );
+
+            processedDocs += 1;
+            setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+          }
+        }
+      }
+    }
+
+    setImportProgress(100);
+
+    showActionOverlay({
+      message: `Import completed (${mode}).`,
+      type: "success",
+    });
+
+    setShowImportSuccess(true);
+    setHideImportAnimation(false);
+
+    setTimeout(() => {
+      setHideImportAnimation(true);
+      setTimeout(() => setShowImportSuccess(false), 400);
+    }, 5000);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Import failed:", error);
+    showActionOverlay({
+      message: "Import failed. Please check your file.",
+      type: "warning",
+    });
+    return { success: false, error: error.message };
+  } finally {
+    setTimeout(() => {
+      setIsImporting(false);
+      setImportProgress(0);
+    }, 300);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  return (
+    <UserContext.Provider
+      value={{
+        clearImageCache,
+        updateImageCache,
+        signInWithFacebook,
+        isUpdatingUser,
+        linkAccount,
+        unlinkAccount,
+        forgotPassword,
+        sendVerificationEmail,
+        showVerifyOverlay,
+        setShowVerifyOverlay,
+        rememberUser,
+        clearRememberMe,
+        isRemembered,
+
+        savePrivacyPolicy,
+        saveTermsConditions,
+        fetchPrivacyPolicy,
+        fetchTermsConditions,
+
+        adminAccounts,
+        userAccounts,
+        blockedUsers,
+        blockUsers,
+        unblockUser,
+        confirmBlockUser,
+        confirmUnblockUser,
+        reloadAndSyncUser,
+
+        showBlockedUserOverlay,
+        setShowBlockedUserOverlay,
+        blockedUserReason,
+        adminContactInfo,
+
+        showBlockUserReason,
+        setShowBlockUserReason,
+        showUnblockUserConfirm,
+        setShowUnblockUserConfirm,
+        blockReason,
+        setBlockReason,
+        userToProcess,
+        setUserToProcess,
+
+        user,
+        setUser,
+        updateUser,
+        revertUserData,
+        deleteUserAccount,
+
+        logout,
+        markMessageAsRead,
+
+        sendMessage,
+        deleteMessage,
+        sentMessages,
+        userMessages,
+
+        saveBookingToFirestore,
+        unitData,
+        allUnitData,
+        fleetDetailsUnits,
+        activeBookings,
+
+        paymentEntries,
+        setPaymentEntries,
+        addPaymentEntry,
+        updatePaymentEntry,
+        removePaymentEntry,
+
+        triggerAutoFill,
+        autoFillTrigger,
+
+        triggerCancelFill,
+        cancelTrigger,
+        setCancelTrigger,
+
+        hasServerChange,
+        setHasServerChange,
+        serverChangeCounter,
+
+        saveFinancialReport,
+        loadFinancialReport,
+
+        mopTypes,
+        setMopTypes: updateMopTypes,
+
+        popTypesRevenue,
+        popTypesExpense,
+        setPopTypesRevenue: updatePopTypesRevenue,
+        setPopTypesExpense: updatePopTypesExpense,
+
+        referralSources,
+        setReferralSources: updateReferralSources,
+
+        revenueGrid,
+        expenseGrid,
+        setRevenueGrid,
+        setExpenseGrid,
+
+        imageCache,
+        deleteImageFromFirestore,
+        uploadImageToFirestore,
+        imageUpdateTrigger,
+        updateUnitGalleryImages,
+        fetchImageFromFirestore,
+        compressAndConvertToBase64,
+        updateUnitImage,
+        deleteUnit,
+
+        createReview,
+        deleteReview,
+        updateReview,
+        fetchReviews,
+
+        updateAdminProfilePic,
+        resetAdminProfilePic,
+        createBackup,
+
+        isBackingUp,
+        backupProgress,
+        isBackupMinimized,
+        setIsBackupMinimized,
+
+        isDownloading,
+        downloadProgress,
+        isDownloadMinimized,
+        setIsDownloadMinimized,
+        createDownload,
+
+
+        importDataFromJson,
+        isImporting,
+        importProgress,
+        isImportMinimized,
+        setIsImportMinimized,
+        showImportSuccess,
+        setShowImportSuccess,
+        hideImportAnimation,
+        setHideImportAnimation,
+
+
+
+        showBackupSuccess,
+        setShowBackupSuccess,
+        hideBackupAnimation,
+        setHideBackupAnimation,
+        showDownloadSuccess,
+        setShowDownloadSuccess,
+        hideDownloadAnimation,
+        setHideDownloadAnimation,
+
+        completedBookingsAnalytics,
+        calendarEvents,
+
+        generatePerDayCalendarEvents,
+        submitUserBookingRequest,
+
+        saveBookingFormData,
+        loadSavedBookingFormData,
+        clearSavedBookingFormData,
+
+        updateUserBookingRequest,
+
+        updateAdminToUserBookingRequest,
+        updateActiveBooking,
+        updateBalanceDueBooking,
+        markBookingAsPaid,
+
+        cancelUserBookingRequest,
+        userBookingRequests,
+        fetchUserBookingRequests,
+
+        userActiveRentals,
+        fetchUserActiveRentals,
+        moveUserBookingToActiveRentals,
+
+        rejectBookingRequest,
+        resubmitUserBookingRequest,
+
+        adminBookingRequests,
+        fetchAdminBookingRequests,
+        compressAndConvertFileToBase64,
+
+        userRentalHistory,
+        serverTimestamp,
+        markRentalAsCompleted,
+        markUserRentalAsCompleted,
+        triggerForceFinishRental,
+        cancelRental,
+        extendRentalDuration,
+        reserveUnit,
+        authLoading,
+        isLoggedIn: !!user,
+        isAdmin: user?.role === "admin",
+        adminUid,
+        fetchAdminUid,
+        updateUnitData,
+
+        theme,
+        updateTheme,
+
+        sendEmail,
+        isActivatingBooking,
+
+        actionOverlay,
+        showActionOverlay,
+        hideCancelAnimation,
+        setHideCancelAnimation,
+        setActionOverlay,
+
+        hasGoogle: (user?.providerData || []).some(
+          (p) => p.providerId === "google.com",
+        ),
+        hasEmail: (user?.providerData || []).some(
+          (p) => p.providerId === "password",
+        ),
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
 // const createDownload = async (selectedCollections = null) => {
 //   if (!user || user.role !== "admin") {
 //     console.error("Unauthorized: Only admins can download data");
@@ -7335,384 +7910,133 @@ const createDownload = async (selectedCollections = null) => {
 //   }
 // };
 
-
-  // FUNCTION TO IMPORT DATA FROM JSON
-const importDataFromJson = async (
-  importedData,
-  { mode = "merge", selectedCollections = null } = {},
-) => {
-  if (!user || user.role !== "admin") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  setIsImporting(true);
-  setImportProgress(0);
-  setIsImportMinimized(false);
-
-  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
-
-  let targetCollections = allCollections;
-  if (Array.isArray(selectedCollections)) {
-    targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
-  } else if (selectedCollections && typeof selectedCollections === "object") {
-    targetCollections = allCollections.filter((k) => selectedCollections[k]);
-  }
-
-  if (!targetCollections.length) {
-    setIsImporting(false);
-    setImportProgress(0);
-    return { success: false, error: "No collections selected" };
-  }
-
-  // Convert exported JSON timestamp objects back to Firestore Timestamp
-  const normalizeFirestoreValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.map(normalizeFirestoreValue);
-    }
-
-    if (value && typeof value === "object") {
-      const keys = Object.keys(value);
-
-      if (
-        keys.length === 2 &&
-        keys.includes("seconds") &&
-        keys.includes("nanoseconds") &&
-        typeof value.seconds === "number" &&
-        typeof value.nanoseconds === "number"
-      ) {
-        return new Timestamp(value.seconds, value.nanoseconds);
-      }
-
-      const out = {};
-      for (const key of keys) {
-        out[key] = normalizeFirestoreValue(value[key]);
-      }
-      return out;
-    }
-
-    return value;
-  };
-
-  try {
-    // Count total incoming docs for progress %
-    const totalDocs = targetCollections.reduce((sum, collName) => {
-      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
-      return sum + incoming.filter((item) => item?.id).length;
-    }, 0);
-
-    let processedDocs = 0;
-
-    for (const collName of targetCollections) {
-      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
-
-      // OVERWRITE: remove docs not present in incoming file
-      if (mode === "overwrite") {
-        const existingSnap = await getDocs(collection(db, collName));
-        const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
-
-        for (const docSnap of existingSnap.docs) {
-          if (!incomingIds.has(docSnap.id)) {
-            await deleteDoc(doc(db, collName, docSnap.id));
-          }
-        }
-      }
-
-      // MERGE/OVERWRITE write pass
-      for (const item of incoming) {
-        if (!item?.id) continue;
-        const { id, ...payload } = item;
-        const normalizedPayload = normalizeFirestoreValue(payload);
-
-        await setDoc(
-          doc(db, collName, id),
-          normalizedPayload,
-          { merge: mode === "merge" },
-        );
-
-        processedDocs += 1;
-        setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
-      }
-    }
-
-    setImportProgress(100);
-
-    showActionOverlay({
-      message: `Import completed (${mode}).`,
-      type: "success",
-    });
-
-    setShowImportSuccess(true);
-    setHideImportAnimation(false);
-
-    setTimeout(() => {
-      setHideImportAnimation(true);
-      setTimeout(() => setShowImportSuccess(false), 400);
-    }, 5000);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Import failed:", error);
-    showActionOverlay({
-      message: "Import failed. Please check your file.",
-      type: "warning",
-    });
-    return { success: false, error: error.message };
-  } finally {
-    setTimeout(() => {
-      setIsImporting(false);
-      setImportProgress(0);
-    }, 300);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-  return (
-    <UserContext.Provider
-      value={{
-        clearImageCache,
-        updateImageCache,
-        signInWithFacebook,
-        isUpdatingUser,
-        linkAccount,
-        unlinkAccount,
-        forgotPassword,
-        sendVerificationEmail,
-        showVerifyOverlay,
-        setShowVerifyOverlay,
-        rememberUser,
-        clearRememberMe,
-        isRemembered,
-
-        savePrivacyPolicy,
-        saveTermsConditions,
-        fetchPrivacyPolicy,
-        fetchTermsConditions,
-
-        adminAccounts,
-        userAccounts,
-        blockedUsers,
-        blockUsers,
-        unblockUser,
-        confirmBlockUser,
-        confirmUnblockUser,
-        reloadAndSyncUser,
-
-        showBlockedUserOverlay,
-        setShowBlockedUserOverlay,
-        blockedUserReason,
-        adminContactInfo,
-
-        showBlockUserReason,
-        setShowBlockUserReason,
-        showUnblockUserConfirm,
-        setShowUnblockUserConfirm,
-        blockReason,
-        setBlockReason,
-        userToProcess,
-        setUserToProcess,
-
-        user,
-        setUser,
-        updateUser,
-        revertUserData,
-        deleteUserAccount,
-
-        logout,
-        markMessageAsRead,
-
-        sendMessage,
-        deleteMessage,
-        sentMessages,
-        userMessages,
-
-        saveBookingToFirestore,
-        unitData,
-        allUnitData,
-        fleetDetailsUnits,
-        activeBookings,
-
-        paymentEntries,
-        setPaymentEntries,
-        addPaymentEntry,
-        updatePaymentEntry,
-        removePaymentEntry,
-
-        triggerAutoFill,
-        autoFillTrigger,
-
-        triggerCancelFill,
-        cancelTrigger,
-        setCancelTrigger,
-
-        hasServerChange,
-        setHasServerChange,
-        serverChangeCounter,
-
-        saveFinancialReport,
-        loadFinancialReport,
-
-        mopTypes,
-        setMopTypes: updateMopTypes,
-
-        popTypesRevenue,
-        popTypesExpense,
-        setPopTypesRevenue: updatePopTypesRevenue,
-        setPopTypesExpense: updatePopTypesExpense,
-
-        referralSources,
-        setReferralSources: updateReferralSources,
-
-        revenueGrid,
-        expenseGrid,
-        setRevenueGrid,
-        setExpenseGrid,
-
-        imageCache,
-        deleteImageFromFirestore,
-        uploadImageToFirestore,
-        imageUpdateTrigger,
-        updateUnitGalleryImages,
-        fetchImageFromFirestore,
-        compressAndConvertToBase64,
-        updateUnitImage,
-        deleteUnit,
-
-        createReview,
-        deleteReview,
-        updateReview,
-        fetchReviews,
-
-        updateAdminProfilePic,
-        resetAdminProfilePic,
-        createBackup,
-
-        isBackingUp,
-        backupProgress,
-        isBackupMinimized,
-        setIsBackupMinimized,
-
-        isDownloading,
-        downloadProgress,
-        isDownloadMinimized,
-        setIsDownloadMinimized,
-        createDownload,
-
-
-        importDataFromJson,
-        isImporting,
-        importProgress,
-        isImportMinimized,
-        setIsImportMinimized,
-        showImportSuccess,
-        setShowImportSuccess,
-        hideImportAnimation,
-        setHideImportAnimation,
-
-
-
-        showBackupSuccess,
-        setShowBackupSuccess,
-        hideBackupAnimation,
-        setHideBackupAnimation,
-        showDownloadSuccess,
-        setShowDownloadSuccess,
-        hideDownloadAnimation,
-        setHideDownloadAnimation,
-
-        completedBookingsAnalytics,
-        calendarEvents,
-
-        generatePerDayCalendarEvents,
-        submitUserBookingRequest,
-
-        saveBookingFormData,
-        loadSavedBookingFormData,
-        clearSavedBookingFormData,
-
-        updateUserBookingRequest,
-
-        updateAdminToUserBookingRequest,
-        updateActiveBooking,
-        updateBalanceDueBooking,
-        markBookingAsPaid,
-
-        cancelUserBookingRequest,
-        userBookingRequests,
-        fetchUserBookingRequests,
-
-        userActiveRentals,
-        fetchUserActiveRentals,
-        moveUserBookingToActiveRentals,
-
-        rejectBookingRequest,
-        resubmitUserBookingRequest,
-
-        adminBookingRequests,
-        fetchAdminBookingRequests,
-        compressAndConvertFileToBase64,
-
-        userRentalHistory,
-        serverTimestamp,
-        markRentalAsCompleted,
-        markUserRentalAsCompleted,
-        triggerForceFinishRental,
-        cancelRental,
-        extendRentalDuration,
-        reserveUnit,
-        authLoading,
-        isLoggedIn: !!user,
-        isAdmin: user?.role === "admin",
-        adminUid,
-        fetchAdminUid,
-        updateUnitData,
-
-        theme,
-        updateTheme,
-
-        sendEmail,
-        isActivatingBooking,
-
-        actionOverlay,
-        showActionOverlay,
-        hideCancelAnimation,
-        setHideCancelAnimation,
-        setActionOverlay,
-
-        hasGoogle: (user?.providerData || []).some(
-          (p) => p.providerId === "google.com",
-        ),
-        hasEmail: (user?.providerData || []).some(
-          (p) => p.providerId === "password",
-        ),
-      }}
-    >
-      {children}
-    </UserContext.Provider>
-  );
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// const importDataFromJson = async (
+//   importedData,
+//   { mode = "merge", selectedCollections = null } = {},
+// ) => {
+//   if (!user || user.role !== "admin") {
+//     return { success: false, error: "Unauthorized" };
+//   }
+
+//   setIsImporting(true);
+//   setImportProgress(0);
+//   setIsImportMinimized(false);
+
+//   const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+
+//   let targetCollections = allCollections;
+//   if (Array.isArray(selectedCollections)) {
+//     targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
+//   } else if (selectedCollections && typeof selectedCollections === "object") {
+//     targetCollections = allCollections.filter((k) => selectedCollections[k]);
+//   }
+
+//   if (!targetCollections.length) {
+//     setIsImporting(false);
+//     setImportProgress(0);
+//     return { success: false, error: "No collections selected" };
+//   }
+
+//   // Convert exported JSON timestamp objects back to Firestore Timestamp
+//   const normalizeFirestoreValue = (value) => {
+//     if (Array.isArray(value)) {
+//       return value.map(normalizeFirestoreValue);
+//     }
+
+//     if (value && typeof value === "object") {
+//       const keys = Object.keys(value);
+
+//       if (
+//         keys.length === 2 &&
+//         keys.includes("seconds") &&
+//         keys.includes("nanoseconds") &&
+//         typeof value.seconds === "number" &&
+//         typeof value.nanoseconds === "number"
+//       ) {
+//         return new Timestamp(value.seconds, value.nanoseconds);
+//       }
+
+//       const out = {};
+//       for (const key of keys) {
+//         out[key] = normalizeFirestoreValue(value[key]);
+//       }
+//       return out;
+//     }
+
+//     return value;
+//   };
+
+//   try {
+//     // Count total incoming docs for progress %
+//     const totalDocs = targetCollections.reduce((sum, collName) => {
+//       const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+//       return sum + incoming.filter((item) => item?.id).length;
+//     }, 0);
+
+//     let processedDocs = 0;
+
+//     for (const collName of targetCollections) {
+//       const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
+
+//       // OVERWRITE: remove docs not present in incoming file
+//       if (mode === "overwrite") {
+//         const existingSnap = await getDocs(collection(db, collName));
+//         const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
+
+//         for (const docSnap of existingSnap.docs) {
+//           if (!incomingIds.has(docSnap.id)) {
+//             await deleteDoc(doc(db, collName, docSnap.id));
+//           }
+//         }
+//       }
+
+//       // MERGE/OVERWRITE write pass
+//       for (const item of incoming) {
+//         if (!item?.id) continue;
+//         const { id, ...payload } = item;
+//         const normalizedPayload = normalizeFirestoreValue(payload);
+
+//         await setDoc(
+//           doc(db, collName, id),
+//           normalizedPayload,
+//           { merge: mode === "merge" },
+//         );
+
+//         processedDocs += 1;
+//         setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+//       }
+//     }
+
+//     setImportProgress(100);
+
+//     showActionOverlay({
+//       message: `Import completed (${mode}).`,
+//       type: "success",
+//     });
+
+//     setShowImportSuccess(true);
+//     setHideImportAnimation(false);
+
+//     setTimeout(() => {
+//       setHideImportAnimation(true);
+//       setTimeout(() => setShowImportSuccess(false), 400);
+//     }, 5000);
+
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Import failed:", error);
+//     showActionOverlay({
+//       message: "Import failed. Please check your file.",
+//       type: "warning",
+//     });
+//     return { success: false, error: error.message };
+//   } finally {
+//     setTimeout(() => {
+//       setIsImporting(false);
+//       setImportProgress(0);
+//     }, 300);
+//   }
+// };
 
 // const createDownload = async (selectedCollections = null) => {
 //   if (!user || user.role !== "admin") {
