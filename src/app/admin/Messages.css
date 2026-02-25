@@ -605,6 +605,28 @@ body.modal-open {
   gap: 8px;
 }
 
+.conversation-chat-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.fleet-link-btn {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  background: var(--accent-color);
+  color: #fff;
+  transition: background 0.3s ease;
+}
+
+.fleet-link-btn:hover {
+  background: var(--supporting-color);
+}
+
 .conversation-chat-input {
   flex: 1;
   min-height: 44px;
@@ -634,5 +656,9 @@ body.modal-open {
 
   .conversation-chat-panel {
     min-height: 420px;
+  }
+
+    .conversation-chat-actions {
+    min-width: 110px;
   }
 }

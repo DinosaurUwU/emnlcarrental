@@ -191,6 +191,31 @@ const Messages = () => {
     setChatInput("");
   };
 
+  const sendFleetDetailsLink = () => {
+    if (!user?.uid || !selectedThread?.id) return;
+
+    const fleetUrl = `${window.location.origin}/fleet-details`;
+    const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
+
+    const contactInfo = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      message: quickMessage,
+      recipientUid: selectedThread.id,
+      senderUid: user.uid,
+      isAdminSender: true,
+      recipientName: selectedThread.participant?.name,
+      recipientEmail: selectedThread.participant?.email,
+      recipientPhone: selectedThread.participant?.contact,
+    };
+
+    sendMessage(contactInfo);
+
+    setMessageSuccessMessage("Fleet details link sent!");
+    setShowMessageSuccess(true);
+  };
+
   const closeMessageSuccess = () => {
     setShowMessageSuccess(false);
     setMessageSuccessMessage("");
@@ -240,7 +265,7 @@ const Messages = () => {
     return message?.formattedDateTime || "No timestamp";
   };
 
-  
+
 
    const formatElapsed = (message) => {
     const ts = message?.startTimestamp;
@@ -672,7 +697,7 @@ const Messages = () => {
                     <div className="conversation-chat-body">
                       {selectedThread.messages.map((msg) => {
                         const isMine = msg.senderUid === user?.uid;
-                        const plain = (msg.content || "").replace(/<[^>]+>/g, "");
+                        const htmlContent = msg.content || "";
 
                         return (
                           <div
@@ -680,7 +705,10 @@ const Messages = () => {
                             className={`conversation-chat-row ${isMine ? "mine" : "other"}`}
                           >
                             <div className={`conversation-bubble ${isMine ? "mine" : "other"}`}>
-                              <div className="conversation-bubble-text">{plain}</div>
+                              <div
+  className="conversation-bubble-text"
+  dangerouslySetInnerHTML={{ __html: htmlContent }}
+/>
                               <div className="conversation-bubble-time">
                                 {formatMessageTimestamp(msg)}
                               </div>
@@ -697,9 +725,17 @@ const Messages = () => {
                         placeholder="Type your message..."
                         className="conversation-chat-input"
                       />
-                      <button className="reply-btn" onClick={sendConversationMessage}>
-                        Send
-                      </button>
+                      <div className="conversation-chat-actions">
+                        <button
+                          className="fleet-link-btn"
+                          onClick={sendFleetDetailsLink}
+                        >
+                          Send Fleet Link
+                        </button>
+                        <button className="reply-btn" onClick={sendConversationMessage}>
+                          Send
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
