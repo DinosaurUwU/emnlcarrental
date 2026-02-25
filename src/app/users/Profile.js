@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useUser } from "../lib/UserContext";
@@ -85,10 +85,11 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
 
   const dropdownRef = useRef(null);
-  const [activeTab, setActiveTab] = useState("inbox");
-  const [selectedMessageSource, setSelectedMessageSource] = useState("inbox");
+  const [activeTab, setActiveTab] = useState("notifications");
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [selectedMessageIds, setSelectedMessageIds] = useState([]);
   const [selectedOption, setSelectedOption] = useState("none");
+  const [chatInput, setChatInput] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [showHistoryDetailsOverlay, setShowHistoryDetailsOverlay] =
@@ -704,62 +705,190 @@ setShowProfileWarning(true);
     };
   }, []);
 
-  const openMessageOverlay = (message, source) => {
+  const notificationMessages = useMemo(() => {
+    return [...(userMessages || [])]
+      .filter((m) => m?.isNotification === true)
+      .sort(
+        (a, b) =>
+          (b.startTimestamp?.toDate?.().getTime() || 0) -
+          (a.startTimestamp?.toDate?.().getTime() || 0),
+      );
+  }, [userMessages]);
+
+  const processedNotifications = useMemo(() => {
+    return notificationMessages.slice(0, 50);
+  }, [notificationMessages]);
+
+  const chatMessages = useMemo(() => {
+    const inboxChat = (userMessages || [])
+      .filter((m) => !m?.isNotification)
+      .map((m) => ({ ...m, _source: "inbox" }));
+
+    const sentChat = (sentMessages || [])
+      .filter((m) => !m?.isNotification)
+      .map((m) => ({ ...m, _source: "sentbox" }));
+
+    return [...inboxChat, ...sentChat];
+  }, [userMessages, sentMessages]);
+
+  const conversationThreads = useMemo(() => {
+    if (!user?.uid) return [];
+
+    const map = new Map();
+    const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+
+    for (const msg of chatMessages) {
+      const senderUid = msg?.senderUid || "";
+      const recipientUid = msg?.recipientUid || "";
+      const otherUid = senderUid === user.uid ? recipientUid : senderUid;
+      if (!otherUid) continue;
+
+      if (!map.has(otherUid)) {
+        map.set(otherUid, {
+          id: otherUid,
+          participant: {
+            name:
+              senderUid === user.uid
+                ? msg?.recipientName || msg?.recipientEmail || otherUid
+                : msg?.name || msg?.email || otherUid,
+            email:
+              senderUid === user.uid
+                ? msg?.recipientEmail || "No email"
+                : msg?.email || "No email",
+            contact:
+              senderUid === user.uid
+                ? msg?.recipientContact || "No contact"
+                : msg?.contact || "No contact",
+            profilePic: msg?.profilePic || "/assets/profile.png",
+          },
+          messages: [],
+          unreadCount: 0,
+          latest: null,
+        });
+      }
+
+      const thread = map.get(otherUid);
+      thread.messages.push(msg);
+
+      if (msg._source === "inbox" && !msg.readStatus) {
+        thread.unreadCount += 1;
+      }
+
+      if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
+        thread.latest = msg;
+      }
+    }
+
+    return Array.from(map.values())
+      .map((thread) => ({
+        ...thread,
+        messages: [...thread.messages].sort((a, b) => getMs(a) - getMs(b)),
+      }))
+      .sort((a, b) => getMs(b.latest) - getMs(a.latest));
+  }, [chatMessages, user?.uid]);
+
+  const selectedThread = useMemo(() => {
+    return (
+      conversationThreads.find((thread) => thread.id === selectedConversationId) ||
+      null
+    );
+  }, [conversationThreads, selectedConversationId]);
+
+  const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
-    setSelectedMessageSource(source);
     setIsClosing(false);
     setShowDeleteOverlay(false);
 
-    console.log(
-      "Opening message overlay with:",
-      message,
-      "from source:",
-      source,
-    );
-  };
-
-  // Close message overlay
-  const closeMessageOverlay = () => {
-    setIsClosing(true);
-    setReplyMode(false);
-    setTimeout(() => {
-      setSelectedMessage(null);
-      setIsClosing(false); // Reset for next time
-    }, 500); // Matches fade-out duration (0.5s)
-  };
-
-  // Toggle reply mode when Reply button is clicked
-  const toggleReply = () => {
-    setReplyMode(!replyMode);
-  };
-
-  const sendReply = () => {
-    if (replyText.trim() === "") return;
-
-    if (!user || !user.uid || !selectedMessage?.senderUid) {
-      console.error("❌ Missing user or recipientUid in sendReply");
-      return;
+    if (!message.readStatus) {
+      markMessageAsRead(message.id);
     }
+  };
+
+  const closeMessageOverlay = () => {
+    setSelectedMessage(null);
+    setIsClosing(false);
+  };
+
+  const sendConversationMessage = () => {
+    if (!chatInput.trim()) return;
+    if (!user || !user.uid || !selectedThread?.id) return;
 
     const contactInfo = {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      message: replyText,
-      recipientUid: selectedMessage.senderUid,
+      message: chatInput.trim(),
+      recipientUid: selectedThread.id,
       senderUid: user.uid,
       isAdminSender: false,
-      recipientName: selectedMessage.name,
-      recipientEmail: selectedMessage.email,
-      recipientPhone: selectedMessage.contact,
+      recipientName: selectedThread.participant?.name,
+      recipientEmail: selectedThread.participant?.email,
+      recipientPhone: selectedThread.participant?.contact,
     };
 
     sendMessage(contactInfo);
+    setChatInput("");
+    setProfileSuccessMessage("Message sent successfully!");
+    setShowProfileSuccess(true);
+  };
 
-   setProfileSuccessMessage("Message sent successfully!");
-setShowProfileSuccess(true);
+  const formatMessageTimestamp = (message) => {
+    const ts = message?.startTimestamp;
 
-    setReplyText("");
+    if (ts?.toDate) {
+      const d = ts.toDate();
+      const datePart = d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "Asia/Manila",
+      });
+      const timePart = d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      });
+      return `${datePart} | ${timePart}`;
+    }
+
+    if (typeof ts?.seconds === "number") {
+      const d = new Date(ts.seconds * 1000);
+      const datePart = d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "Asia/Manila",
+      });
+      const timePart = d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      });
+      return `${datePart} | ${timePart}`;
+    }
+
+    return message?.formattedDateTime || "No timestamp";
+  };
+
+  const formatElapsed = (message) => {
+    const ts = message?.startTimestamp;
+    const nowMs = Date.now();
+
+    let msgMs = 0;
+    if (ts?.toDate) msgMs = ts.toDate().getTime();
+    else if (typeof ts?.seconds === "number") msgMs = ts.seconds * 1000;
+    else return "";
+
+    const diff = Math.max(0, nowMs - msgMs);
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (diff < hour) return `${Math.max(1, Math.floor(diff / minute))}m`;
+    if (diff < day) return `${Math.floor(diff / hour)}h`;
+    return `${Math.floor(diff / day)}d`;
   };
 
   const closeProfileError = () => {
@@ -1364,11 +1493,12 @@ const closeProfileSuccess = () => {
               <button
                 className="confirm-btn revert"
                 onClick={() => {
-                  deleteMessage(messageToDelete.id, activeTab);
+                  const deleteType = messageToDelete?._source || "inbox";
+                  deleteMessage(messageToDelete.id, deleteType);
                   handleMessagesDeleted(1);
                   setShowDeleteOverlay(false);
                   setMessageToDelete(null);
-                  openMessageOverlay(false);
+                  setSelectedMessage(null);
                 }}
               >
                 Delete
@@ -1404,11 +1534,10 @@ const closeProfileSuccess = () => {
                 <button
                   className="confirm-btn revert"
                   onClick={() => {
-                    deleteMessage(messageToDelete, activeTab);
+                    deleteMessage(messageToDelete, "inbox");
                     handleMessagesDeleted(messageToDelete.length);
                     setShowDeleteOverlay(false);
                     setMessageToDelete(null);
-                    openMessageOverlay(false);
                     setSelectedMessageIds([]);
                   }}
                 >
@@ -1726,441 +1855,362 @@ const closeProfileSuccess = () => {
           </div>
         </div>
 
-        {/* Messages Section */}
+               {/* Messages Section */}
         <div className="user-messages-container">
           <h3>Messages & Notifications</h3>
 
           <div className="message-tabs-controls">
             <div className="message-tabs">
               <button
-                className={activeTab === "inbox" ? "active-tab" : ""}
+                className={activeTab === "notifications" ? "active-tab" : ""}
                 onClick={() => {
-                  setActiveTab("inbox");
+                  setActiveTab("notifications");
                   setSelectedMessageIds([]);
                 }}
               >
-                Inbox
+                Notifications
               </button>
               <button
-                className={activeTab === "sentbox" ? "active-tab" : ""}
+                className={activeTab === "conversations" ? "active-tab" : ""}
                 onClick={() => {
-                  setActiveTab("sentbox");
+                  setActiveTab("conversations");
                   setSelectedMessageIds([]);
                 }}
               >
-                Sentbox
+                Conversations
               </button>
             </div>
 
-            <div className="checkbox-dropdown-wrapper">
-              <div className="message-action-icons">
-                {activeTab === "inbox" && selectedMessageIds.length > 0 && (
-                  <>
-                    {userMessages
-                      .filter((message) =>
-                        selectedMessageIds.includes(message.id),
-                      )
-                      .some((message) => !message.readStatus) && (
+            {activeTab === "notifications" && (
+              <div className="checkbox-dropdown-wrapper">
+                <div className="message-action-icons">
+                  {selectedMessageIds.length > 0 && (
+                    <>
+                      {notificationMessages
+                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .some((message) => !message.readStatus) && (
+                        <img
+                          src="/assets/open-envelope.png"
+                          alt="Mark as Read"
+                          className="message-action-icon"
+                          title="Mark as Read"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectedMessageIds.forEach((id) => {
+                              const msg = notificationMessages.find((m) => m.id === id);
+                              if (msg && !msg.readStatus) markMessageAsRead(id);
+                            });
+                          }}
+                        />
+                      )}
+
+                      {notificationMessages
+                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .some((message) => message.readStatus) && (
+                        <img
+                          src="/assets/close-envelope.png"
+                          alt="Mark as Unread"
+                          className="message-action-icon"
+                          title="Mark as Unread"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectedMessageIds.forEach((id) => {
+                              const msg = notificationMessages.find((m) => m.id === id);
+                              if (msg && msg.readStatus) markMessageAsRead(id);
+                            });
+                          }}
+                        />
+                      )}
+
                       <img
-                        src="/assets/open-envelope.png"
-                        alt="Mark as Read"
+                        src="/assets/delete.png"
+                        alt="Delete"
                         className="message-action-icon"
-                        title="Mark as Read"
+                        title="Delete Selected"
                         onClick={(e) => {
                           e.stopPropagation();
-                          selectedMessageIds.forEach((id) => {
-                            const msg = userMessages.find(
-                              (msg) => msg.id === id,
-                            );
-                            if (msg && !msg.readStatus) {
-                              markMessageAsRead(id);
-                            }
-                          });
+                          const messagesToDelete = notificationMessages.filter((msg) =>
+                            selectedMessageIds.includes(msg.id),
+                          );
+
+                          if (messagesToDelete.length > 0) {
+                            setMessageToDelete(messagesToDelete);
+                            setShowDeleteOverlay(true);
+                          }
                         }}
                       />
-                    )}
+                    </>
+                  )}
+                </div>
 
-                    {userMessages
-                      .filter((msg) => selectedMessageIds.includes(msg.id))
-                      .some((msg) => msg.readStatus) && (
-                      <img
-                        src="/assets/close-envelope.png"
-                        alt="Mark as Unread"
-                        className="message-action-icon"
-                        title="Mark as Unread"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          selectedMessageIds.forEach((id) => {
-                            const msg = userMessages.find(
-                              (msg) => msg.id === id,
-                            );
-                            if (msg && msg.readStatus) {
-                              markMessageAsRead(id);
-                            }
-                          });
-                        }}
-                      />
-                    )}
+                <input
+                  type="checkbox"
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate =
+                        selectedMessageIds.length > 0 &&
+                        selectedMessageIds.length < processedNotifications.length;
+                    }
+                  }}
+                  className="message-tabs-checkbox"
+                  checked={
+                    processedNotifications.length > 0 &&
+                    selectedMessageIds.length === processedNotifications.length
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMessageIds(processedNotifications.map((msg) => msg.id));
+                    } else {
+                      setSelectedMessageIds([]);
+                    }
+                  }}
+                  title="Select All"
+                />
 
-                    <img
-                      src="/assets/delete.png"
-                      alt="Delete"
-                      className="message-action-icon"
-                      title="Delete Selected"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const messagesToDelete =
-                          activeTab === "inbox"
-                            ? userMessages.filter((msg) =>
-                                selectedMessageIds.includes(msg.id),
-                              )
-                            : sentMessages.filter((msg) =>
-                                selectedMessageIds.includes(msg.id),
-                              );
+                <select
+                  className="message-tabs-select hide-text"
+                  onChange={(e) => {
+                    const option = e.target.value;
+                    setSelectedOption(option);
 
-                        if (messagesToDelete.length > 0) {
-                          setMessageToDelete(messagesToDelete);
-                          setShowDeleteOverlay(true);
-                        }
-                      }}
-                    />
-                  </>
-                )}
-                {activeTab === "sentbox" && selectedMessageIds.length > 0 && (
-                  <img
-                    src="/assets/delete.png"
-                    alt="Delete"
-                    className="message-action-icon"
-                    title="Delete Selected"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const messagesToDelete = sentMessages.filter((msg) =>
-                        selectedMessageIds.includes(msg.id),
-                      );
+                    let selected = [];
+                    if (option === "all") {
+                      selected = notificationMessages.map((msg) => msg.id);
+                    } else if (option === "unread") {
+                      selected = notificationMessages
+                        .filter((msg) => !msg.readStatus)
+                        .map((msg) => msg.id);
+                    } else if (option === "read") {
+                      selected = notificationMessages
+                        .filter((msg) => msg.readStatus)
+                        .map((msg) => msg.id);
+                    } else {
+                      selected = [];
+                    }
 
-                      if (messagesToDelete.length > 0) {
-                        setMessageToDelete(messagesToDelete);
-                        setShowDeleteOverlay(true);
-                      }
-                    }}
-                  />
-                )}
+                    setSelectedMessageIds(selected);
+                    e.target.selectedIndex = 0;
+                  }}
+                  title="More select options"
+                >
+                  <option value="none">&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;</option>
+                  <option value="all">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</option>
+                  <option value="unread">&nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;</option>
+                  <option value="read">&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;</option>
+                </select>
               </div>
-
-              <input
-                type="checkbox"
-                ref={(el) => {
-                  if (el) {
-                    el.indeterminate =
-                      selectedMessageIds.length > 0 &&
-                      selectedMessageIds.length <
-                        (activeTab === "inbox"
-                          ? userMessages.length
-                          : sentMessages.length);
-                  }
-                }}
-                className="message-tabs-checkbox"
-                checked={
-                  (activeTab === "inbox" &&
-                    userMessages.length > 0 &&
-                    selectedMessageIds.length === userMessages.length) ||
-                  (activeTab === "sentbox" &&
-                    sentMessages.length > 0 &&
-                    selectedMessageIds.length === sentMessages.length)
-                }
-                onChange={(e) => {
-                  const currentMessages =
-                    activeTab === "inbox" ? userMessages : sentMessages;
-                  if (e.target.checked) {
-                    setSelectedMessageIds(currentMessages.map((msg) => msg.id));
-                  } else {
-                    setSelectedMessageIds([]);
-                  }
-                }}
-                title="Select All"
-              />
-
-              <select
-                className="message-tabs-select hide-text"
-                onChange={(e) => {
-                  const option = e.target.value;
-                  setSelectedOption(option);
-
-                  let selected = [];
-                  const currentMessages =
-                    activeTab === "inbox" ? userMessages : sentMessages;
-
-                  if (option === "all") {
-                    selected = currentMessages.map((msg) => msg.id);
-                  } else if (option === "unread") {
-                    selected = currentMessages
-                      .filter((msg) => !msg.readStatus)
-                      .map((msg) => msg.id);
-                  } else if (option === "read") {
-                    selected = currentMessages
-                      .filter((msg) => msg.readStatus)
-                      .map((msg) => msg.id);
-                  } else if (option === "none") {
-                    selected = [];
-                  }
-
-                  setSelectedMessageIds(selected);
-                  e.target.selectedIndex = 0;
-                }}
-                title="More select options"
-              >
-                <option value="none">
-                  &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
-                </option>
-                <option value="all">
-                  &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
-                </option>
-                {activeTab === "inbox" && (
-                  <>
-                    <option value="unread">
-                      &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
-                    </option>
-                    <option value="read">
-                      &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
-                    </option>
-                  </>
-                )}
-              </select>
-            </div>
+            )}
           </div>
 
           <div className="messages-list">
-            {activeTab === "inbox" && (
+            {activeTab === "notifications" && (
               <>
-                {userMessages && userMessages.length > 0 ? (
-                  [...userMessages]
-                    .sort(
-                      (a, b) =>
-                        (b.startTimestamp?.toDate?.().getTime() || 0) -
-                        (a.startTimestamp?.toDate?.().getTime() || 0),
-                    )
-
-                    .map((message) => (
-                      <div
-                        key={message.id}
-                        className="user-message-item"
-                        style={{
-                          opacity: selectedMessageIds.includes(message.id)
-                            ? 1
-                            : message.readStatus
-                              ? 0.5
-                              : 1,
-                          fontWeight: message.readStatus ? "lighter" : "bolder",
-                          backgroundColor: selectedMessageIds.includes(
-                            message.id,
-                          )
-                            ? "#c8e6c9"
-                            : "transparent",
-                        }}
-                        onClick={() => {
-                          if (!message.readStatus) {
-                            markMessageAsRead(message.id);
+                {processedNotifications.length > 0 ? (
+                  processedNotifications.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`user-message-item notification-item ${
+                        message.readStatus ? "is-read" : "is-unread"
+                      } ${selectedMessageIds.includes(message.id) ? "is-selected" : ""}`}
+                      onClick={() => openNotificationOverlay(message)}
+                    >
+                      <div className="message-read-toggle">
+                        <img
+                          src={
+                            message.readStatus
+                              ? "/assets/open-envelope.png"
+                              : "/assets/close-envelope.png"
                           }
-                          openMessageOverlay(message, "inbox");
-                        }}
-                      >
-                        <div className="message-read-toggle">
-                          <img
-                            src={
-                              message.readStatus
-                                ? "/assets/open-envelope.png"
-                                : "/assets/close-envelope.png"
-                            }
-                            alt={
-                              message.readStatus
-                                ? "Mark as Unread"
-                                : "Mark as Read"
-                            }
-                            className="mark-read-icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markMessageAsRead(message.id);
-                            }}
-                          />
+                          alt={message.readStatus ? "Mark as Unread" : "Mark as Read"}
+                          className="mark-read-icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markMessageAsRead(message.id);
+                          }}
+                        />
 
-                          <img
-                            src={
-                              hoveredMessageId === message.id
-                                ? "/assets/delete-hover.png"
-                                : "/assets/delete.png"
-                            }
-                            alt="Delete"
-                            className="delete-icon"
-                            onMouseEnter={() => setHoveredMessageId(message.id)}
-                            onMouseLeave={() => setHoveredMessageId(null)}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMessageToDelete(message);
-                              setShowDeleteOverlay(true);
-                            }}
-                          />
-                          <input
-                            type="checkbox"
-                            className="message-checkbox"
-                            checked={selectedMessageIds.includes(message.id)}
-                            onChange={(e) => {
-                              setSelectedMessageIds((prev) =>
-                                e.target.checked
-                                  ? [...prev, message.id]
-                                  : prev.filter((id) => id !== message.id),
-                              );
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
+                        <img
+                          src={
+                            hoveredMessageId === message.id
+                              ? "/assets/delete-hover.png"
+                              : "/assets/delete.png"
+                          }
+                          alt="Delete"
+                          className="delete-icon"
+                          onMouseEnter={() => setHoveredMessageId(message.id)}
+                          onMouseLeave={() => setHoveredMessageId(null)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMessageToDelete({ ...message, _source: "inbox" });
+                            setShowDeleteOverlay(true);
+                          }}
+                        />
+                        <input
+                          type="checkbox"
+                          className="message-checkbox"
+                          checked={selectedMessageIds.includes(message.id)}
+                          onChange={(e) => {
+                            setSelectedMessageIds((prev) =>
+                              e.target.checked
+                                ? [...prev, message.id]
+                                : prev.filter((id) => id !== message.id),
+                            );
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
 
-                        <div className="message-header">
-                          <img
-                            src={message.profilePic}
-                            alt="Profile"
-                            className="message-profile-pic"
-                          />
-                          <div className="message-info">
-                            <div className="message-name">{message.name}</div>
-                            <div className="message-contact">
-                              <span className="message-email">
-                                {message.email}
-                              </span>
-                              <span className="message-phone">
-                                {" "}
-                                <a
-                                  href={`tel:${
-                                    message.contact
-                                      ? message.contact.replace(/\s/g, "")
-                                      : ""
-                                  }`}
-                                >
-                                  {message.contact || "No contact"}
-                                </a>
-                              </span>
-                            </div>
-                            <div className="message-date">
-                              {message.formattedDateTime || "No timestamp"}
-                            </div>
+                      <div className="message-header">
+                        <img
+                          src={message.profilePic || "/assets/profile.png"}
+                          alt="Profile"
+                          className="message-profile-pic"
+                        />
+                        <div className="message-info">
+                          <div className="message-name">{message.name}</div>
+                          <div className="message-contact">
+                            <span className="message-email">{message.email}</span>
+                            <span className="message-phone">Notification</span>
+                          </div>
+                          <div className="message-date">
+                            {formatMessageTimestamp(message)}
                           </div>
                         </div>
-
-                        <div className="message-text">
-                          {message.content
-                            ? message.content
-                                .replace(/<[^>]+>/g, "")
-                                .substring(0, 90) +
-                              (message.content.length > 90 ? "..." : "")
-                            : ""}
-                        </div>
                       </div>
-                    ))
+
+                      <div className="message-text">
+                        {message.content
+                          ? message.content.replace(/<[^>]+>/g, "").substring(0, 90) +
+                            (message.content.length > 90 ? "..." : "")
+                          : ""}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <p className="empty-message">No received messages yet.</p>
+                  <p className="empty-message">No notifications yet.</p>
                 )}
               </>
             )}
 
-            {activeTab === "sentbox" && (
-              <>
-                {sentMessages && sentMessages.length > 0 ? (
-                  [...sentMessages]
-
-                    .sort(
-                      (a, b) =>
-                        (b.startTimestamp?.toDate?.().getTime() || 0) -
-                        (a.startTimestamp?.toDate?.().getTime() || 0),
-                    )
-
-                    .map((message) => (
-                      <div
-                        key={message.id}
-                        className="user-message-item"
-                        style={{
-                          backgroundColor: selectedMessageIds.includes(
-                            message.id,
-                          )
-                            ? "#c8e6c9"
-                            : "transparent",
-                        }}
-                        onClick={() => openMessageOverlay(message, "sentbox")}
-                      >
-                        <div className="message-read-toggle">
-                          <img
-                            src={
-                              hoveredMessageId === message.id
-                                ? "/assets/delete-hover.png"
-                                : "/assets/delete.png"
-                            }
-                            alt="Delete"
-                            className="delete-icon"
-                            onMouseEnter={() => setHoveredMessageId(message.id)}
-                            onMouseLeave={() => setHoveredMessageId(null)}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMessageToDelete(message);
-                              setShowDeleteOverlay(true);
-                            }}
-                          />
-
-                          <input
-                            type="checkbox"
-                            className="message-checkbox"
-                            checked={selectedMessageIds.includes(message.id)}
-                            onChange={(e) => {
-                              setSelectedMessageIds((prev) =>
-                                e.target.checked
-                                  ? [...prev, message.id]
-                                  : prev.filter((id) => id !== message.id),
-                              );
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        <div className="message-header">
-                          <img
-                            src={message.profilePic}
-                            alt="Profile"
-                            className="message-profile-pic"
-                          />
-                          <div className="message-info">
-                            <div className="message-name">From: You</div>
-                            <div className="message-contact">
-                              <span className="message-email">
-                                To: {message.recipientEmail}
-                              </span>
-                              <span className="message-phone">
-                                {" "}
-                                <a
-                                  href={`tel:${message.recipientContact.replace(
-                                    /\s/g,
-                                    "",
-                                  )}`}
-                                >
-                                  {message.recipientContact}
-                                </a>
-                              </span>
+            {activeTab === "conversations" && (
+              <div className="profile-conversation-layout">
+                <div className="profile-thread-list">
+                  {conversationThreads.length === 0 ? (
+                    <p className="empty-message profile-thread-empty">
+                      No conversations yet.
+                    </p>
+                  ) : (
+                    conversationThreads.map((thread) => {
+                      const lastText = (thread.latest?.content || "").replace(/<[^>]+>/g, "");
+                      return (
+                        <div
+                          key={thread.id}
+                          className={`profile-thread-item ${
+                            selectedConversationId === thread.id ? "active" : ""
+                          }`}
+                          onClick={() => {
+                            setSelectedConversationId(thread.id);
+                            thread.messages.forEach((msg) => {
+                              if (msg._source === "inbox" && !msg.readStatus) {
+                                markMessageAsRead(msg.id);
+                              }
+                            });
+                          }}
+                        >
+                          <div className="profile-thread-row">
+                            <img
+                              src={thread.participant.profilePic || "/assets/profile.png"}
+                              alt="Profile"
+                              className="message-profile-pic"
+                            />
+                            <div className="profile-thread-texts">
+                              <div className="profile-thread-top">
+                                <div className="profile-thread-name">
+                                  {thread.participant.name}
+                                </div>
+                                <div className="profile-thread-time">
+                                  {formatElapsed(thread.latest)}
+                                </div>
+                              </div>
+                              <div className="profile-thread-preview">
+                                {lastText || "No message"}
+                              </div>
                             </div>
-                            <div className="message-date">
-                              {message.formattedDateTime || "No timestamp"}
-                            </div>
+                            {thread.unreadCount > 0 && (
+                              <span className="profile-thread-unread">
+                                {thread.unreadCount}
+                              </span>
+                            )}
                           </div>
                         </div>
+                      );
+                    })
+                  )}
+                </div>
 
-                        <div className="message-text">
-                          {message.content
-                            ? message.content
-                                .replace(/<[^>]+>/g, "")
-                                .substring(0, 90) +
-                              (message.content.length > 90 ? "..." : "")
-                            : ""}
+                <div className="profile-chat-panel">
+                  {!selectedThread ? (
+                    <div className="profile-chat-empty">
+                      Select a conversation to start chatting.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="profile-chat-header">
+                        <img
+                          src={selectedThread.participant.profilePic || "/assets/profile.png"}
+                          alt="Profile"
+                          className="message-profile-pic"
+                        />
+                        <div className="profile-chat-user">
+                          <div className="profile-chat-name">
+                            {selectedThread.participant.name}
+                          </div>
+                          <div className="profile-chat-email">
+                            {selectedThread.participant.email}
+                          </div>
                         </div>
                       </div>
-                    ))
-                ) : (
-                  <p className="empty-message">No sent messages yet.</p>
-                )}
-              </>
+
+                      <div className="profile-chat-body">
+                        {selectedThread.messages.map((msg) => {
+                          const isMine = msg.senderUid === user?.uid;
+                          return (
+                            <div
+                              key={`${msg._source}-${msg.id}`}
+                              className={`profile-chat-row ${isMine ? "mine" : "other"}`}
+                            >
+                              <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
+                                <div
+                                  className="profile-chat-text"
+                                  dangerouslySetInnerHTML={{ __html: msg.content || "" }}
+                                />
+                                <div className="profile-chat-time">
+                                  {formatMessageTimestamp(msg)}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="profile-chat-composer">
+                        <textarea
+                          className="profile-chat-input"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          placeholder="Type your message..."
+                        />
+                        <button
+                          className="reply-btn"
+                          onClick={sendConversationMessage}
+                        >
+                          Send
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -3368,106 +3418,39 @@ const closeProfileSuccess = () => {
         </div>
       </div>
 
-      {/* Message Overlay */}
+      {/* Message Overlay - Notifications Only */}
       {selectedMessage && (
-        <div
-          className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}
-        >
+        <div className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}>
           <div className="message-overlay-content">
             <button className="close-btn" onClick={closeMessageOverlay}>
-              ✖
+              ×
             </button>
 
             <div className="overlay-header">
-              {/* Inbox Section */}
-              {selectedMessageSource === "inbox" ? (
-                <>
-                  <img
-                    src={selectedMessage.profilePic}
-                    alt="Profile"
-                    className="overlay-profile-pic"
-                  />
+              <img
+                src={selectedMessage.profilePic || "/assets/profile.png"}
+                alt="Profile"
+                className="overlay-profile-pic"
+              />
 
-                  <div>
-                    <h3>{selectedMessage.name}</h3>
+              <div>
+                <h3>{selectedMessage.name}</h3>
 
-                    <p className="message-contact">
-                      <span className="message-email">
-                        {selectedMessage.email}
-                      </span>
-                      <span className="message-phone">
-                        <a
-                          href={`tel:${
-                            selectedMessage.contact
-                              ? selectedMessage.contact.replace(/\s/g, "")
-                              : ""
-                          }`}
-                        >
-                          {selectedMessage.contact || "No contact"}
-                        </a>
-                      </span>
-                    </p>
+                <p className="message-contact">
+                  <span className="message-email">{selectedMessage.email}</span>
+                  <span className="message-phone">Notification</span>
+                </p>
 
-                    <p className="message-date">
-                      {selectedMessage.formattedDateTime || "No timestamp"}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                /* Sent Section */
-                <>
-                  <img
-                    src={selectedMessage.profilePic}
-                    alt="Profile"
-                    className="overlay-profile-pic"
-                  />
-                  <div>
-                    <h3>From: You</h3>
-                    <p className="message-contact">
-                      <span className="message-email">
-                        To: {selectedMessage.recipientEmail}
-                      </span>
-                      <span className="message-phone">
-                        <a
-                          href={`tel:${
-                            selectedMessage.recipientContact
-                              ? selectedMessage.recipientContact.replace(
-                                  /\s/g,
-                                  "",
-                                )
-                              : ""
-                          }`}
-                        >
-                          {selectedMessage.recipientContact || "No contact"}
-                        </a>
-                      </span>
-                    </p>
-                    <p className="message-date">
-                      {selectedMessage.formattedDateTime || "No timestamp"}
-                    </p>
-                  </div>
-                </>
-              )}
+                <p className="message-date">
+                  {formatMessageTimestamp(selectedMessage)}
+                </p>
+              </div>
             </div>
 
-            {/* Display full message */}
-            {/* <p className="full-message">{selectedMessage.content}</p> */}
-
-            {/* Display full message */}
             <div
               className="full-message"
               dangerouslySetInnerHTML={{ __html: selectedMessage.content }}
             ></div>
-
-            {/* Reply Textarea (Only for Inbox) */}
-            {selectedMessageSource === "inbox" && replyMode && (
-              <textarea
-                className="reply-textarea"
-                placeholder="Type your reply..."
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-              />
-            )}
 
             <div className="overlay-actions">
               <img
@@ -3481,22 +3464,10 @@ const closeProfileSuccess = () => {
                 onMouseEnter={() => setDeleteIsHovered(true)}
                 onMouseLeave={() => setDeleteIsHovered(false)}
                 onClick={() => {
-                  setMessageToDelete(selectedMessage);
+                  setMessageToDelete({ ...selectedMessage, _source: "inbox" });
                   setShowDeleteOverlay(true);
                 }}
               />
-
-              <div className="button-group">
-                {selectedMessageSource === "inbox" &&
-                  !selectedMessage.isNotification && (
-                    <button
-                      className="reply-btn"
-                      onClick={replyMode ? sendReply : toggleReply}
-                    >
-                      {replyMode ? "Send" : "Reply"}
-                    </button>
-                  )}
-              </div>
             </div>
           </div>
         </div>
