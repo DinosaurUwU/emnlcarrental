@@ -3487,7 +3487,6 @@ const closeProfileSuccess = () => {
               />
 
               <div className="button-group">
-                <button className="forward-btn">Forward</button>
                 {selectedMessageSource === "inbox" &&
                   !selectedMessage.isNotification && (
                     <button

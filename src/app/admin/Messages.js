@@ -67,16 +67,12 @@ const Messages = () => {
     setReplyMode(false);
   };
 
-  const closeMessage = () => {
-    setClosing(true);
-
-    setTimeout(() => {
-      setSelectedMessage(null);
-      setClosing(false);
-      setReplyMode(false);
-      setReplyText("");
-    }, 300);
-  };
+const closeMessage = () => {
+  setReplyMode(false);
+  setReplyText("");
+  setClosing(false);
+  setSelectedMessage(null);
+};
 
   const toggleReply = () => {
     setReplyMode(!replyMode);
@@ -649,11 +645,9 @@ const Messages = () => {
         </div>
 
         {/* Message Overlay */}
-        {(selectedMessage || closing) && (
+        {selectedMessage && (
           <div
-            className={`admin-message-overlay ${
-              closing ? "fade-out" : "fade-in"
-            }`}
+className="admin-message-overlay fade-in"
           >
             <div className="admin-message-content">
               <button className="admin-close-btn" onClick={closeMessage}>
@@ -741,7 +735,6 @@ const Messages = () => {
                 </div>
 
                 <div className="message-actions-right">
-                  <button className="forward-btn">Forward</button>
                   {activeTab === "inbox" &&
                     !selectedMessage?.isNotification && (
                       <button
