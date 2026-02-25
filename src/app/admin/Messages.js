@@ -241,6 +241,7 @@ const Messages = () => {
   };
 
   
+
    const formatElapsed = (message) => {
     const ts = message?.startTimestamp;
     const now = Date.now();
