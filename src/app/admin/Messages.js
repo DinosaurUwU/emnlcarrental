@@ -240,6 +240,7 @@ const Messages = () => {
     return message?.formattedDateTime || "No timestamp";
   };
 
+  
    const formatElapsed = (message) => {
     const ts = message?.startTimestamp;
     const now = Date.now();
