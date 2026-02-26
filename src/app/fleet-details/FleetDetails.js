@@ -88,13 +88,14 @@ const buildUnitImageMap = (units, cache) => {
   for (const unit of units) {
     if (!unit.imageId) continue;
 
-    if (fleetCardImageMemory[unit.imageId]) {
-      map[unit.imageId] = fleetCardImageMemory[unit.imageId];
+    // Prefer latest cache first; fallback to in-memory only if cache missing.
+    if (cache[unit.imageId]) {
+      map[unit.imageId] = cache[unit.imageId];
       continue;
     }
 
-    if (cache[unit.imageId]) {
-      map[unit.imageId] = cache[unit.imageId];
+    if (fleetCardImageMemory[unit.imageId]) {
+      map[unit.imageId] = fleetCardImageMemory[unit.imageId];
     }
   }
 
@@ -365,23 +366,24 @@ useEffect(() => {
 
   let cancelled = false;
 
-  const missingIds = fleetDetailsUnits
-    .map((u) => u.imageId)
-    .filter(Boolean)
-    .filter((id) => !fetchedImages[id]);
-
-  if (missingIds.length === 0) return;
+  const unitImageIds = Array.from(
+    new Set(
+      fleetDetailsUnits
+        .map((u) => u.imageId)
+        .filter(Boolean),
+    ),
+  );
 
   (async () => {
     const results = await Promise.all(
-      missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null))
+      unitImageIds.map((id) => fetchImageFromFirestore(id, false).catch(() => null)),
     );
 
     if (cancelled) return;
 
     const patch = {};
     results.forEach((img, i) => {
-      const id = missingIds[i];
+      const id = unitImageIds[i];
       if (!img) return;
       patch[id] = img;
       fleetCardImageMemory[id] = img;
@@ -395,7 +397,7 @@ useEffect(() => {
   return () => {
     cancelled = true;
   };
-}, [fleetDetailsUnits, fetchedImages, fetchImageFromFirestore]);
+}, [fleetDetailsUnits, fetchImageFromFirestore, imageUpdateTrigger]);
 
 
 
