@@ -10,10 +10,28 @@ import Footer from "../component/Footer";
 import "./FleetDetails.css";
 
 // Module-level carousel images (loaded once at import time)
+// const fleetCarouselImages = (() => {
+//   const importAll = (r) => r.keys().map(r);
+//   return importAll(require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/));
+// })();
+
+const normalizeImageSrc = (img) => {
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  return img.default || img.src || "";
+};
+
 const fleetCarouselImages = (() => {
   const importAll = (r) => r.keys().map(r);
-  return importAll(require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/));
+  return importAll(
+    require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/),
+  ).map(normalizeImageSrc);
 })();
+
+  const isValidImageSrc = (src) =>
+    typeof src === "string" &&
+    src.trim() !== "" &&
+    (src.startsWith("data:image/") || src.startsWith("http") || src.startsWith("/"));
 
 const fleetCardImageMemory = {};
 
@@ -122,20 +140,50 @@ const buildUnitImageMap = (units, cache) => {
 
 
   // Derive carousel images synchronously from cache (instant)
+  // const carouselImages = useMemo(() => {
+  //   const maxImages = 20;
+  //   const cachedImages = [];
+    
+  //   for (let i = 0; i < maxImages; i++) {
+  //     const imageId = `FleetPage_${i}`;
+  //     if (imageCache[imageId]) {
+  //       cachedImages.push(imageCache[imageId].base64);
+  //     }
+  //   }
+    
+  //   // Use cached images if available, otherwise use module-level fallback (instant)
+  //   return cachedImages.length > 0 ? cachedImages : fleetCarouselImages;
+  // }, [imageCache]);
+
   const carouselImages = useMemo(() => {
     const maxImages = 20;
-    const cachedImages = [];
-    
-    for (let i = 0; i < maxImages; i++) {
+
+    const cachedImages = Array.from({ length: maxImages }, (_, i) => {
       const imageId = `FleetPage_${i}`;
-      if (imageCache[imageId]) {
-        cachedImages.push(imageCache[imageId].base64);
-      }
-    }
-    
-    // Use cached images if available, otherwise use module-level fallback (instant)
-    return cachedImages.length > 0 ? cachedImages : fleetCarouselImages;
+      const cached = imageCache[imageId]?.base64;
+      return isValidImageSrc(cached) ? cached : null;
+    }).filter(Boolean);
+
+    return cachedImages.length > 0
+      ? cachedImages
+      : fleetCarouselImages.length > 0
+        ? fleetCarouselImages
+        : ["/assets/images/default.png"];
   }, [imageCache]);
+
+  useEffect(() => {
+    const maxImages = 20;
+    const missingIds = Array.from({ length: maxImages }, (_, i) => `FleetPage_${i}`)
+      .filter((id) => !isValidImageSrc(imageCache[id]?.base64));
+
+    if (missingIds.length === 0) return;
+
+    (async () => {
+      await Promise.all(
+        missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
+      );
+    })();
+  }, [imageCache, fetchImageFromFirestore]);
 
 
 

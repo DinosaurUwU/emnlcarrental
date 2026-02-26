@@ -201,7 +201,7 @@ object-fit: contain;
   top: 50%;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1101;
+  z-index: 1000;
   pointer-events: auto;
   background-color: #fffafab3;
   width: 23%;

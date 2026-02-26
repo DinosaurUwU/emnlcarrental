@@ -7,10 +7,25 @@ import "photoswipe/style.css";
 
 import "./Carousel.css";
 
+// const importAll = (r) => r.keys().map(r);
+// const images = importAll(
+//   require.context("../../public/assets/images/carousel_js", false, /\.(png|jpe?g|svg)$/),
+// );
+
 const importAll = (r) => r.keys().map(r);
+const normalizeImageSrc = (img) => {
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  return img.default || img.src || "";
+};
+
 const images = importAll(
-  require.context("../../public/assets/images/carousel_js", false, /\.(png|jpe?g|svg)$/),
-);
+  require.context(
+    "../../public/assets/images/carousel_js",
+    false,
+    /\.(png|jpe?g|svg)$/,
+  ),
+).map(normalizeImageSrc);
 
 const textContent = [
   {
@@ -49,23 +64,44 @@ const textContent = [
 
 function Carousel() {
   const { fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
+    const isValidImageSrc = (src) =>
+    typeof src === "string" &&
+    src.trim() !== "" &&
+    (src.startsWith("data:image/") || src.startsWith("http") || src.startsWith("/"));
   // const [carouselImages, setCarouselImages] = useState([]);
 
   // Derive images synchronously from cache (instant)
   // Uses module-level `images` as fallback (already loaded at import time)
+  // const carouselImages = useMemo(() => {
+  //   const numImages = 5;
+  //   const cachedImages = [];
+    
+  //   for (let i = 0; i < numImages; i++) {
+  //     const imageId = `LandingPage_${i}`;
+  //     if (imageCache[imageId]) {
+  //       cachedImages.push(imageCache[imageId].base64);
+  //     }
+  //   }
+    
+  //   // Use cached images if available, otherwise use module-level fallback (instant)
+  //   return cachedImages.length > 0 ? cachedImages : images.slice(0, numImages);
+  // }, [imageCache]);
+
   const carouselImages = useMemo(() => {
     const numImages = 5;
-    const cachedImages = [];
-    
-    for (let i = 0; i < numImages; i++) {
+    const fallbackImages = images.slice(0, numImages);
+
+    const cachedImages = Array.from({ length: numImages }, (_, i) => {
       const imageId = `LandingPage_${i}`;
-      if (imageCache[imageId]) {
-        cachedImages.push(imageCache[imageId].base64);
-      }
-    }
-    
-    // Use cached images if available, otherwise use module-level fallback (instant)
-    return cachedImages.length > 0 ? cachedImages : images.slice(0, numImages);
+      const cached = imageCache[imageId]?.base64;
+      return isValidImageSrc(cached) ? cached : null;
+    }).filter(Boolean);
+
+    return cachedImages.length > 0
+      ? cachedImages
+      : fallbackImages.length > 0
+        ? fallbackImages
+        : ["/assets/images/default.png"];
   }, [imageCache]);
 
 
@@ -77,6 +113,20 @@ function Carousel() {
   const lastTriggerRef = useRef(imageUpdateTrigger);
 
   const carouselGalleryRef = useRef(null);
+
+  useEffect(() => {
+    const numImages = 5;
+    const missingIds = Array.from({ length: numImages }, (_, i) => `LandingPage_${i}`)
+      .filter((id) => !isValidImageSrc(imageCache[id]?.base64));
+
+    if (missingIds.length === 0) return;
+
+    (async () => {
+      await Promise.all(
+        missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
+      );
+    })();
+  }, [imageCache, fetchImageFromFirestore]);
 
   // useEffect(() => {
   //   const fetchCarouselImages = async () => {
