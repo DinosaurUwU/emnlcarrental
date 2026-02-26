@@ -40,7 +40,7 @@ const fleetCardImageMemory = {};
   const FleetDetails = () => {
   const { openBooking } = useBooking();
 
-  const { fleetDetailsUnits, fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
+  const { fleetDetailsUnits, fetchImageFromFirestore, imageCache, imageUpdateTrigger, activeBookings } = useUser();
   const lastTriggerRef = useRef(imageUpdateTrigger);
   // const [carouselImages, setCarouselImages] = useState([]);
 
@@ -617,6 +617,24 @@ useEffect(() => {
     (unit) => unit.carType.toLowerCase() === "pickup",
   );
 
+  const activeBookingPlateSet = useMemo(() => {
+  return new Set(
+    (activeBookings || [])
+      .filter((booking) => {
+        const status = String(booking?.status || "").toLowerCase();
+        return status === "active" || status === "pending";
+      })
+      .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
+      .filter(Boolean),
+  );
+}, [activeBookings]);
+
+const isUnitBooked = (car) => {
+  const plate = String(car?.plateNo || car?.id || "").trim().toUpperCase();
+  if (plate && activeBookingPlateSet.has(plate)) return true;
+  return !!car?.hidden;
+};
+
   const specificationOrder = [
     "Type",
     "Color",
@@ -1018,11 +1036,9 @@ useEffect(() => {
                       </h3>
 
                       <p
-                        className={`availability ${
-                          car.hidden ? "rented" : "available"
-                        }`}
-                      >
-                        {car.hidden ? "Ongoing Rent" : "Available"}
+                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
+>
+  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1106,11 +1122,9 @@ useEffect(() => {
                       </h3>
 
                       <p
-                        className={`availability ${
-                          car.hidden ? "rented" : "available"
-                        }`}
-                      >
-                        {car.hidden ? "Ongoing Rent" : "Available"}
+                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
+>
+  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1194,11 +1208,9 @@ useEffect(() => {
                       </h3>
 
                       <p
-                        className={`availability ${
-                          car.hidden ? "rented" : "available"
-                        }`}
-                      >
-                        {car.hidden ? "Ongoing Rent" : "Available"}
+                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
+>
+  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1282,11 +1294,9 @@ useEffect(() => {
                       </h3>
 
                       <p
-                        className={`availability ${
-                          car.hidden ? "rented" : "available"
-                        }`}
-                      >
-                        {car.hidden ? "Ongoing Rent" : "Available"}
+                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
+>
+  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1370,11 +1380,9 @@ useEffect(() => {
                         {car.name}
                       </h3>
                       <p
-                        className={`availability ${
-                          car.hidden ? "rented" : "available"
-                        }`}
-                      >
-                        {car.hidden ? "Ongoing Rent" : "Available"}
+                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
+>
+  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1419,11 +1427,9 @@ useEffect(() => {
                 </h3>
 
                 <p
-                  className={`overlay-availability ${
-                    expandedCard.hidden ? "rented" : "available"
-                  }`}
-                >
-                  {expandedCard.hidden ? "Ongoing Rent" : "Available"}
+                  className={`overlay-availability ${isUnitBooked(expandedCard) ? "rented" : "available"}`}
+>
+  {isUnitBooked(expandedCard) ? "Ongoing Rent" : "Available"}
                 </p>
 
                 {/* Scrollable Car Details */}

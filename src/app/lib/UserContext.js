@@ -7515,7 +7515,6 @@ await throttledSetDoc(
             const { id: subId, ...subPayload } = subItem;
             const normalizedSubPayload = normalizeFirestoreValue(subPayload);
 
-            
  await throttledSetDoc(
               doc(db, "users", userId, subName, subId),
               normalizedSubPayload,
@@ -7528,6 +7527,34 @@ await throttledSetDoc(
         }
       }
     }
+
+    if (targetCollections.includes("units") && mode === "overwrite" && adminUid) {
+  const activeBookingsSnap = await throttledGetDocs(
+    collection(db, "users", adminUid, "activeBookings"),
+  );
+
+  const activePlateSet = new Set(
+    activeBookingsSnap.docs
+      .map((snap) => String(snap.data()?.plateNo || "").trim())
+      .filter(Boolean),
+  );
+
+  const unitsSnap = await throttledGetDocs(collection(db, "units"));
+
+  for (const unitSnap of unitsSnap.docs) {
+    const unitData = unitSnap.data() || {};
+    const plateNo = String(unitData.plateNo || unitSnap.id || "").trim();
+    const shouldBeHidden = activePlateSet.has(plateNo);
+
+    if (unitData.hidden !== shouldBeHidden) {
+      await throttledSetDoc(
+        doc(db, "units", unitSnap.id),
+        { hidden: shouldBeHidden },
+        { merge: true },
+      );
+    }
+  }
+}
 
     setImportProgress(100);
 
