@@ -15,7 +15,7 @@
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  transition: all 0.5s ease;
+  transition: height 0.5s ease, border-radius 0.5s ease, box-shadow 0.5s ease;
   overflow: hidden;
 }
 
@@ -35,24 +35,24 @@
 
 
 .Header__main.expanded {
-  padding-bottom: 50px;
+  height: 120px;
 }
 
 .Header__search {
   position: absolute;
-  bottom: 5px;
+  bottom: 10px;
   left: 0;
   width: 100%;
-  transition: max-height 0.3s ease-in-out;
   max-height: 0;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: max-height 0.3s ease-in-out;
 }
 
 .Header__main.expanded .Header__search {
-  max-height: 50px;
+  max-height: 60px;
 }
 
 .Header__search input {

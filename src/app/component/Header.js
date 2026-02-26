@@ -17,6 +17,7 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [interactionReady, setInteractionReady] = useState(false);
 
   const headerMainRef = useRef(null);
   const pathname = usePathname();
@@ -161,29 +162,47 @@ function Header() {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 750);
+    handleResize(); // run once on mount so state is correct after login redirect
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
-    if (headerMainRef.current) {
-      headerMainRef.current.classList.toggle("expanded", searchOpen);
-    }
-  }, [searchOpen]);
+    // Force-clear stuck global body lock state after auth/page transitions
+    document.body.classList.remove("modal-open", "no-scroll");
+    document.body.style.top = "";
+
+    // Reset transient header UI state on every route change
+    setSearchOpen(false);
+    setMenuOpen(false);
+    setAccountOpen(false);
+    setSearchText("");
+    setSearchResults([]);
+  }, [pathname]);
+
+    useEffect(() => {
+    // Prevent post-login ghost click from instantly toggling search/account/menu
+    setInteractionReady(false);
+    const timer = setTimeout(() => setInteractionReady(true), 350);
+    return () => clearTimeout(timer);
+  }, [pathname, user?.uid]);
 
   const toggleSearch = () => {
+    if (!interactionReady) return;
     setSearchOpen((prev) => !prev);
     setAccountOpen(false);
     setMenuOpen(false);
   };
 
   const toggleAccount = () => {
+    if (!interactionReady) return;
     setAccountOpen((prev) => !prev);
     setSearchOpen(false);
     setMenuOpen(false);
   };
 
   const toggleMenu = () => {
+    if (!interactionReady) return;
     setMenuOpen((prev) => !prev);
     setAccountOpen(false);
     setSearchOpen(false);
@@ -315,7 +334,7 @@ function Header() {
         ref={headerMainRef}
         className={`Header__main ${menuOpen ? "menu-open" : ""} ${
           accountOpen ? "show-account" : ""
-        }`}
+        } ${searchOpen ? "expanded" : ""}`}
       >
         <div className="Header__left">{getLogoForTheme()}</div>
 
@@ -708,23 +727,25 @@ function Header() {
             </span>
           )}
 
-          <div className={`Header__search ${searchOpen ? "open" : ""}`}>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search..."
-              value={searchText}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchText(value); // Keep user's original case
+           {interactionReady && searchOpen && (
+            <div className="Header__search open">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search..."
+                value={searchText}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchText(value);
 
-                const matches = searchIndex.filter(
-                  (entry) => entry.keyword.includes(value.toLowerCase()), // Still match in lowercase
-                );
-                setSearchResults(value ? matches : []);
-              }}
-            />
-          </div>
+                  const matches = searchIndex.filter((entry) =>
+                    entry.keyword.includes(value.toLowerCase()),
+                  );
+                  setSearchResults(value ? matches : []);
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 

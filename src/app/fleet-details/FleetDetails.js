@@ -52,6 +52,17 @@ const fleetCardImageMemory = {};
   const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
 
+    useEffect(() => {
+    // Defensive cleanup for login/logout redirects that can leave body locked
+    document.body.classList.remove("modal-open", "no-scroll");
+    document.body.style.top = "";
+
+    return () => {
+      document.body.classList.remove("no-scroll");
+      document.body.style.top = "";
+    };
+  }, []);
+
 const buildUnitImageMap = (units, cache) => {
   const map = {};
   if (!units?.length) return map;
@@ -627,6 +638,8 @@ useEffect(() => {
   };
 
   const scrollToSection = (sectionRef) => {
+    if (!sectionRef?.current) return;
+
     const offset = 200;
     const elementPosition =
       sectionRef.current.getBoundingClientRect().top + window.pageYOffset;
@@ -647,49 +660,50 @@ useEffect(() => {
   }, [category]);
 
   useLayoutEffect(() => {
-    const handleScroll = () => {
-      const suvSection = sedanRef.current;
+    const updateNavbarTop = () => {
+      const sedanSection = sedanRef.current;
       const navbarOverlay = navbarOverlayRef.current;
+      if (!navbarOverlay) return;
 
-      if (suvSection && navbarOverlay) {
-        const suvSectionTop = suvSection.getBoundingClientRect().top;
-        const currentWidth = window.innerWidth;
+      // If sections are not mounted yet, keep it in a safe visible default.
+      if (!sedanSection) {
+        navbarOverlay.style.top = window.innerWidth <= 768 ? "44%" : "58%";
+        return;
+      }
 
-        if (suvSectionTop <= 300) {
-          navbarOverlay.style.top = "12%";
-        } else {
-          if (currentWidth <= 768) {
-            // interpolate top between 58% (768px) → 44% (390px)
-            const minWidth = 390;
-            const maxWidth = 768;
-            const maxTop = 58;
-            const minTop = 43;
+      const sectionTop = sedanSection.getBoundingClientRect().top;
+      const currentWidth = window.innerWidth;
 
-            // clamp the width within range
-            const clampedWidth = Math.min(
-              Math.max(currentWidth, minWidth),
-              maxWidth,
-            );
+      if (sectionTop <= 300) {
+        navbarOverlay.style.top = "12%";
+      } else if (currentWidth <= 768) {
+        const minWidth = 390;
+        const maxWidth = 768;
+        const maxTop = 58;
+        const minTop = 43;
 
-            // linear interpolation factor
-            const t = (clampedWidth - minWidth) / (maxWidth - minWidth);
+        const clampedWidth = Math.min(Math.max(currentWidth, minWidth), maxWidth);
+        const t = (clampedWidth - minWidth) / (maxWidth - minWidth);
+        const interpolatedTop = minTop + t * (maxTop - minTop);
 
-            // interpolate top
-            const interpolatedTop = minTop + t * (maxTop - minTop);
-
-            navbarOverlay.style.top = `${interpolatedTop}%`;
-          } else {
-            navbarOverlay.style.top = "58%";
-          }
-        }
+        navbarOverlay.style.top = `${interpolatedTop}%`;
+      } else {
+        navbarOverlay.style.top = "58%";
       }
     };
 
-    handleScroll(); // Set initial position
+    // Run after paint so refs are ready after async/login route transitions.
+    const raf = window.requestAnimationFrame(updateNavbarTop);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("scroll", updateNavbarTop, { passive: true });
+    window.addEventListener("resize", updateNavbarTop);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", updateNavbarTop);
+      window.removeEventListener("resize", updateNavbarTop);
+    };
+  }, [fleetDetailsUnits.length]);
 
   const openOverlay = (car, event) => {
     console.log("Car clicked:", car);
@@ -749,7 +763,7 @@ useEffect(() => {
 
   return (
     <div className="fleet-details">
-      <Header openBooking={openBooking} s />
+       <Header openBooking={openBooking} />
 
       <div className="navbar-overlay" ref={navbarOverlayRef}>
         <div className="navbar">
@@ -881,7 +895,7 @@ useEffect(() => {
       </div>
 
       {sedanUnits.length > 0 && (
-        <section className="sedan-diagonal-section" ref={sedanRef}>
+        <section className="sedan-diagonal-section">
           <div className="sedan-diagonal-strip">
             <div className="sedan-diagonal-scroll">
               <div className="diagonal-text">
@@ -973,7 +987,7 @@ useEffect(() => {
       )}
 
       {suvUnits.length > 0 && (
-        <section className="suv-diagonal-section" ref={suvRef}>
+        <section className="suv-diagonal-section">
           <div className="suv-diagonal-strip">
             <div className="suv-diagonal-scroll">
               <div className="diagonal-text">SUV SUV SUV SUV SUV SUV&nbsp;</div>
@@ -1061,7 +1075,7 @@ useEffect(() => {
       )}
 
       {mpvUnits.length > 0 && (
-        <section className="mpv-diagonal-section" ref={mpvRef}>
+        <section className="mpv-diagonal-section">
           <div className="mpv-diagonal-strip">
             <div className="mpv-diagonal-scroll">
               <div className="diagonal-text">MPV MPV MPV MPV MPV MPV&nbsp;</div>
@@ -1149,7 +1163,7 @@ useEffect(() => {
       )}
 
       {vanUnits.length > 0 && (
-        <section className="van-diagonal-section" ref={vanRef}>
+        <section className="van-diagonal-section">
           <div className="van-diagonal-strip">
             <div className="van-diagonal-scroll">
               <div className="diagonal-text">VAN VAN VAN VAN VAN VAN&nbsp;</div>
@@ -1237,7 +1251,7 @@ useEffect(() => {
       )}
 
       {pickupUnits.length > 0 && (
-        <section className="pickup-diagonal-section" ref={pickupRef}>
+        <section className="pickup-diagonal-section">
           <div className="pickup-diagonal-strip">
             <div className="pickup-diagonal-scroll">
               <div className="diagonal-text">
