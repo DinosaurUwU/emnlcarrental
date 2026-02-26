@@ -3350,16 +3350,58 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
     }
   };
 
-  // (ADMIN) RESERVE RENTAL
-  const reserveUnit = async (unitId) => {
-    try {
-      const unitRef = doc(db, "units", String(unitId));
-      await updateDoc(unitRef, { hidden: false });
-      console.log("✅ Unit unhidden (reserved):", unitId);
-    } catch (error) {
-      console.error("🔥 Error in reserveUnit:", error);
+
+// (ADMIN) RESERVE RENTAL (FLAG ACTIVE BOOKING AS RESERVED)
+const reserveUnit = async (rentalId) => {
+  try {
+    const bookingRef = doc(
+      db,
+      "users",
+      adminUid,
+      "activeBookings",
+      String(rentalId),
+    );
+    const bookingSnap = await getDoc(bookingRef);
+
+    if (!bookingSnap.exists()) {
+      console.warn("⚠️ Active booking not found for reserve:", rentalId);
+      return;
     }
-  };
+
+    const bookingData = bookingSnap.data() || {};
+    await updateDoc(bookingRef, { reservation: true });
+
+    const renterUid = bookingData.createdBy;
+    if (renterUid && renterUid !== "admin" && renterUid !== adminUid) {
+      const userRentalRef = doc(
+        db,
+        "users",
+        renterUid,
+        "activeRentals",
+        String(rentalId),
+      );
+      const userRentalSnap = await getDoc(userRentalRef);
+      if (userRentalSnap.exists()) {
+        await updateDoc(userRentalRef, { reservation: true });
+      }
+    }
+
+    console.log("✅ Booking reserved:", rentalId);
+  } catch (error) {
+    console.error("🔥 Error in reserveUnit:", error);
+  }
+};
+
+  // (ADMIN) RESERVE RENTAL
+  // const reserveUnit = async (unitId) => {
+  //   try {
+  //     const unitRef = doc(db, "units", String(unitId));
+  //     await updateDoc(unitRef, { hidden: false });
+  //     console.log("✅ Unit unhidden (reserved):", unitId);
+  //   } catch (error) {
+  //     console.error("🔥 Error in reserveUnit:", error);
+  //   }
+  // };
 
   // (ADMIN & USER) MARK MESSAGES AS READ/UNREAD
   const markMessageAsRead = async (messageId) => {

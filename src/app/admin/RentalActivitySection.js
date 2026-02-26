@@ -7500,6 +7500,11 @@ const RentalActivitySection = ({ subSection }) => {
                           {rental.status}
                         </span>
 
+                        {rental.reservation === true && (
+  <span className="ongoing-unit-status-badge reserved">Reserved</span>
+)}
+
+
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -7618,11 +7623,11 @@ const RentalActivitySection = ({ subSection }) => {
                                 <div className="more-dropdown">
                                   <button
                                     className="action-button reserve"
-                                    onClick={() => {
-                                      setReserveUnitId(rental.plateNo);
-                                      setShowReserveConfirm(true);
-                                      setShowMoreFor(null);
-                                    }}
+onClick={() => {
+  setReserveUnitId(rental.id);
+  setShowReserveConfirm(true);
+  setShowMoreFor(null);
+}}
                                   >
                                     Reserve
                                   </button>
