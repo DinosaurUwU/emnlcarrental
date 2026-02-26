@@ -2201,6 +2201,54 @@ Call them now to check if they want to extend. If no response, call them when re
     return () => clearInterval(intervalId);
   }, [adminUid, activeBookings]);
 
+  // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE BOOKINGS (ADMIN) - NEW APPROACH: TRIGGERED BY ACTIVE BOOKINGS CHANGES
+  useEffect(() => {
+  if (!adminUid || user?.role !== "admin") return;
+
+  const syncUnitsHiddenFromActiveBookings = async () => {
+    try {
+      const activePlateSet = new Set(
+        (activeBookings || [])
+          .filter((booking) => {
+            const status = String(booking?.status || "").toLowerCase();
+            return status === "active" || status === "pending";
+          })
+          .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
+          .filter(Boolean),
+      );
+
+      const unitsSnap = await getDocs(collection(db, "units"));
+      const updateTasks = [];
+
+      unitsSnap.docs.forEach((unitSnap) => {
+        const unitData = unitSnap.data() || {};
+        const plate = String(unitData.plateNo || unitSnap.id || "")
+          .trim()
+          .toUpperCase();
+
+        if (!plate) return;
+
+        const shouldBeHidden = activePlateSet.has(plate);
+        const currentHidden = !!unitData.hidden;
+
+        if (currentHidden !== shouldBeHidden) {
+          updateTasks.push(
+            updateDoc(doc(db, "units", unitSnap.id), { hidden: shouldBeHidden }),
+          );
+        }
+      });
+
+      if (updateTasks.length > 0) {
+        await Promise.all(updateTasks);
+      }
+    } catch (error) {
+      console.error("Error syncing units.hidden from activeBookings:", error);
+    }
+  };
+
+  syncUnitsHiddenFromActiveBookings();
+}, [adminUid, user?.role, activeBookings]);
+
   // (ADMIN) EXTEND RENTAL
   const extendRentalDuration = async (rentalId, addedSeconds) => {
     console.log("🧪 adminUid:", adminUid);
