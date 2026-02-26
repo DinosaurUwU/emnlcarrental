@@ -2201,6 +2201,7 @@ Call them now to check if they want to extend. If no response, call them when re
     return () => clearInterval(intervalId);
   }, [adminUid, activeBookings]);
 
+  
   // (ADMIN) EXTEND RENTAL
   const extendRentalDuration = async (rentalId, addedSeconds) => {
     console.log("🧪 adminUid:", adminUid);
