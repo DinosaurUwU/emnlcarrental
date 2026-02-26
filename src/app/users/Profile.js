@@ -86,7 +86,6 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
 
   const dropdownRef = useRef(null);
   const [activeTab, setActiveTab] = useState("notifications");
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [selectedMessageIds, setSelectedMessageIds] = useState([]);
   const [selectedOption, setSelectedOption] = useState("none");
   const [chatInput, setChatInput] = useState("");
@@ -731,68 +730,53 @@ setShowProfileWarning(true);
     return [...inboxChat, ...sentChat];
   }, [userMessages, sentMessages]);
 
-  const conversationThreads = useMemo(() => {
-    if (!user?.uid) return [];
+  const adminConversation = useMemo(() => {
+    if (!user?.uid) return null;
 
-    const map = new Map();
     const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+    const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
 
-    for (const msg of chatMessages) {
+    if (sorted.length === 0) return null;
+
+    const getOtherUid = (msg) => {
       const senderUid = msg?.senderUid || "";
       const recipientUid = msg?.recipientUid || "";
-      const otherUid = senderUid === user.uid ? recipientUid : senderUid;
-      if (!otherUid) continue;
+      return senderUid === user.uid ? recipientUid : senderUid;
+    };
 
-      if (!map.has(otherUid)) {
-        map.set(otherUid, {
-          id: otherUid,
-          participant: {
-            name:
-              senderUid === user.uid
-                ? msg?.recipientName || msg?.recipientEmail || otherUid
-                : msg?.name || msg?.email || otherUid,
-            email:
-              senderUid === user.uid
-                ? msg?.recipientEmail || "No email"
-                : msg?.email || "No email",
-            contact:
-              senderUid === user.uid
-                ? msg?.recipientContact || "No contact"
-                : msg?.contact || "No contact",
-            profilePic: msg?.profilePic || "/assets/profile.png",
-          },
-          messages: [],
-          unreadCount: 0,
-          latest: null,
-        });
-      }
+    const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
+    const adminUid = firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "admin";
 
-      const thread = map.get(otherUid);
-      thread.messages.push(msg);
+    const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
+    const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
 
-      if (msg._source === "inbox" && !msg.readStatus) {
-        thread.unreadCount += 1;
-      }
+    const participant = incoming
+      ? {
+          name: incoming?.name || incoming?.email || "Admin",
+          email: incoming?.email || "No email",
+          contact: incoming?.contact || "No contact",
+          profilePic: incoming?.profilePic || "/assets/profile.png",
+        }
+      : outgoing
+        ? {
+            name: outgoing?.recipientName || outgoing?.recipientEmail || "Admin",
+            email: outgoing?.recipientEmail || "No email",
+            contact: outgoing?.recipientPhone || "No contact",
+            profilePic: outgoing?.profilePic || "/assets/profile.png",
+          }
+        : {
+            name: "Admin",
+            email: "No email",
+            contact: "No contact",
+            profilePic: "/assets/profile.png",
+          };
 
-      if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
-        thread.latest = msg;
-      }
-    }
-
-    return Array.from(map.values())
-      .map((thread) => ({
-        ...thread,
-        messages: [...thread.messages].sort((a, b) => getMs(a) - getMs(b)),
-      }))
-      .sort((a, b) => getMs(b.latest) - getMs(a.latest));
+    return {
+      id: adminUid,
+      participant,
+      messages: sorted,
+    };
   }, [chatMessages, user?.uid]);
-
-  const selectedThread = useMemo(() => {
-    return (
-      conversationThreads.find((thread) => thread.id === selectedConversationId) ||
-      null
-    );
-  }, [conversationThreads, selectedConversationId]);
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -809,21 +793,31 @@ setShowProfileWarning(true);
     setIsClosing(false);
   };
 
+    useEffect(() => {
+    if (activeTab !== "conversations" || !adminConversation) return;
+
+    adminConversation.messages.forEach((msg) => {
+      if (msg._source === "inbox" && !msg.readStatus) {
+        markMessageAsRead(msg.id);
+      }
+    });
+  }, [activeTab, adminConversation, markMessageAsRead]);
+
   const sendConversationMessage = () => {
     if (!chatInput.trim()) return;
-    if (!user || !user.uid || !selectedThread?.id) return;
+    if (!user || !user.uid || !adminConversation?.id) return;
 
     const contactInfo = {
       name: user.name,
       email: user.email,
       phone: user.phone,
       message: chatInput.trim(),
-      recipientUid: selectedThread.id,
+      recipientUid: adminConversation.id,
       senderUid: user.uid,
       isAdminSender: false,
-      recipientName: selectedThread.participant?.name,
-      recipientEmail: selectedThread.participant?.email,
-      recipientPhone: selectedThread.participant?.contact,
+      recipientName: adminConversation.participant?.name,
+      recipientEmail: adminConversation.participant?.email,
+      recipientPhone: adminConversation.participant?.contact,
     };
 
     sendMessage(contactInfo);
@@ -2002,7 +1996,7 @@ const closeProfileSuccess = () => {
             )}
           </div>
 
-          <div className="messages-list">
+          <div className={`messages-list ${activeTab === "conversations" ? "conversations-mode" : ""}`}>
             {activeTab === "notifications" && (
               <>
                 {processedNotifications.length > 0 ? (
@@ -2092,123 +2086,67 @@ const closeProfileSuccess = () => {
               </>
             )}
 
-            {activeTab === "conversations" && (
-              <div className="profile-conversation-layout">
-                <div className="profile-thread-list">
-                  {conversationThreads.length === 0 ? (
-                    <p className="empty-message profile-thread-empty">
-                      No conversations yet.
-                    </p>
-                  ) : (
-                    conversationThreads.map((thread) => {
-                      const lastText = (thread.latest?.content || "").replace(/<[^>]+>/g, "");
-                      return (
-                        <div
-                          key={thread.id}
-                          className={`profile-thread-item ${
-                            selectedConversationId === thread.id ? "active" : ""
-                          }`}
-                          onClick={() => {
-                            setSelectedConversationId(thread.id);
-                            thread.messages.forEach((msg) => {
-                              if (msg._source === "inbox" && !msg.readStatus) {
-                                markMessageAsRead(msg.id);
-                              }
-                            });
-                          }}
-                        >
-                          <div className="profile-thread-row">
-                            <img
-                              src={thread.participant.profilePic || "/assets/profile.png"}
-                              alt="Profile"
-                              className="message-profile-pic"
-                            />
-                            <div className="profile-thread-texts">
-                              <div className="profile-thread-top">
-                                <div className="profile-thread-name">
-                                  {thread.participant.name}
-                                </div>
-                                <div className="profile-thread-time">
-                                  {formatElapsed(thread.latest)}
-                                </div>
-                              </div>
-                              <div className="profile-thread-preview">
-                                {lastText || "No message"}
-                              </div>
-                            </div>
-                            {thread.unreadCount > 0 && (
-                              <span className="profile-thread-unread">
-                                {thread.unreadCount}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
+{activeTab === "conversations" && (
+              <div className="profile-conversation-layout single-pane">
                 <div className="profile-chat-panel">
-                  {!selectedThread ? (
-                    <div className="profile-chat-empty">
-                      Select a conversation to start chatting.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="profile-chat-header">
-                        <img
-                          src={selectedThread.participant.profilePic || "/assets/profile.png"}
-                          alt="Profile"
-                          className="message-profile-pic"
-                        />
-                        <div className="profile-chat-user">
-                          <div className="profile-chat-name">
-                            {selectedThread.participant.name}
-                          </div>
-                          <div className="profile-chat-email">
-                            {selectedThread.participant.email}
-                          </div>
-                        </div>
+                  <div className="profile-chat-header">
+                    <img
+                      src={adminConversation?.participant?.profilePic || "/assets/profile.png"}
+                      alt="Profile"
+                      className="message-profile-pic"
+                    />
+                    <div className="profile-chat-user">
+                      <div className="profile-chat-name">
+                        {adminConversation?.participant?.name || "Admin"}
                       </div>
+                      <div className="profile-chat-email">
+                        {adminConversation?.participant?.email || "No email"}
+                      </div>
+                    </div>
+                  </div>
 
-                      <div className="profile-chat-body">
-                        {selectedThread.messages.map((msg) => {
-                          const isMine = msg.senderUid === user?.uid;
-                          return (
-                            <div
-                              key={`${msg._source}-${msg.id}`}
-                              className={`profile-chat-row ${isMine ? "mine" : "other"}`}
-                            >
-                              <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
-                                <div
-                                  className="profile-chat-text"
-                                  dangerouslySetInnerHTML={{ __html: msg.content || "" }}
-                                />
-                                <div className="profile-chat-time">
-                                  {formatMessageTimestamp(msg)}
-                                </div>
+                  <div className="profile-chat-body">
+                    {!adminConversation || adminConversation.messages.length === 0 ? (
+                      <div className="profile-chat-empty">No conversation yet.</div>
+                    ) : (
+                      adminConversation.messages.map((msg) => {
+                        const isMine = msg.senderUid === user?.uid;
+                        return (
+                          <div
+                            key={`${msg._source}-${msg.id}`}
+                            className={`profile-chat-row ${isMine ? "mine" : "other"}`}
+                          >
+                            <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
+                              <div
+                                className="profile-chat-text"
+                                dangerouslySetInnerHTML={{ __html: msg.content || "" }}
+                              />
+                              <div className="profile-chat-time">
+                                {formatMessageTimestamp(msg)}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
 
-                      <div className="profile-chat-composer">
-                        <textarea
-                          className="profile-chat-input"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          placeholder="Type your message..."
-                        />
-                        <button
-                          className="reply-btn"
-                          onClick={sendConversationMessage}
-                        >
-                          Send
-                        </button>
-                      </div>
-                    </>
-                  )}
+                  <div className="profile-chat-composer">
+                    <textarea
+                      className="profile-chat-input"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Type your message..."
+                    />
+                    <button
+                      className="reply-btn"
+                      onClick={sendConversationMessage}
+                      disabled={!adminConversation?.id}
+                      title={!adminConversation?.id ? "No admin conversation found yet" : "Send"}
+                    >
+                      Send
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

@@ -497,6 +497,18 @@ body.modal-open {
   padding-top: 10px;
 }
 
+.user-messages-container .messages-list.conversations-mode {
+  display: block;
+  height: auto;
+  overflow-y: visible;
+  padding-right: 0;
+  padding-top: 0;
+}
+
+.user-messages-container .messages-list.conversations-mode::-webkit-scrollbar {
+  width: 0;
+}
+
 .user-messages-container .messages-list::-webkit-scrollbar {
   width: 5px;
 }
@@ -717,7 +729,7 @@ body.modal-open {
   align-items: center;
   padding: 10px 0px;
   padding-right: 0px;
-  margin: 0 0px 0 10px;
+  margin: 0 0px 0 0px;
   gap: 5px;
   border-bottom: 2px solid var(--supporting-color);
 }
@@ -867,98 +879,23 @@ body.modal-open {
 
 /* Conversations (Profile) */
 .profile-conversation-layout {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 12px;
+  display: block;
   height: 300px;
 }
 
-.profile-thread-list {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow-y: auto;
-  background: #fff;
-}
-
-.profile-thread-empty {
-  padding: 16px;
-}
-
-.profile-thread-item {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.profile-thread-item.active {
-  background: #e8f5e9;
-}
-
-.profile-thread-item:hover {
-  background: #f3f9f4;
-}
-
-.profile-thread-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-thread-texts {
-  min-width: 0;
-  flex: 1;
-}
-
-.profile-thread-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.profile-thread-name {
-  font-weight: 700;
-  color: var(--accent-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.profile-thread-time {
-  font-size: 11px;
-  color: #777;
-  flex-shrink: 0;
-}
-
-.profile-thread-preview {
-  font-size: 12px;
-  color: #555;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.profile-thread-unread {
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  background: #dc3545;
-  color: #fff;
-  font-size: 11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
+.profile-conversation-layout.single-pane {
+  display: block;
 }
 
 .profile-chat-panel {
+  margin: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   background: #fff;
   min-height: 0;
+  height: 100%;
 }
 
 .profile-chat-empty {
@@ -997,6 +934,15 @@ body.modal-open {
   overflow-y: auto;
   padding: 10px;
   background: #f7f7f7;
+}
+
+.profile-chat-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.profile-chat-body::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
 }
 
 .profile-chat-row {
@@ -1066,12 +1012,7 @@ body.modal-open {
 
 @media (max-width: 900px) {
   .profile-conversation-layout {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  .profile-thread-list {
-    max-height: 220px;
+    height: 360px;
   }
 
   .profile-chat-panel {
@@ -1285,10 +1226,22 @@ body.modal-open {
   gap: 10px;
 }
 
-.user-message-overlay .reply-btn {
-  margin: 0px !important;
-  background: var(--accent-color);
+.reply-btn{
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.reply-btn {
+  background: #007bff;
   color: white;
+}
+
+.reply-btn:hover {
+  background: #0056b3;
 }
 
 .user-message-overlay .forward-btn {
