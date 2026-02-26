@@ -3450,76 +3450,192 @@ const RentalActivitySection = ({ subSection }) => {
       {showReserveConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
-            <h3>Reserve this unit again?</h3>
-            <p>This will re-initiate a rental request for this unit.</p>
+            <h3>Reserve this unit for the next renter?</h3>
+<p>This will flag the current booking as reserved and open this unit in Bookings for the next booking draft.</p>
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
+                // onClick={async () => {
+                //   setShowReserveConfirm(false);
+
+                //   setProcessingBooking({
+                //     isProcessing: true,
+                //     message: "Reserving Unit...",
+                //     textClass: "submitting-text",
+                //   });
+
+                //   try {
+                //     await reserveUnit(reserveUnitId);
+
+                //     setProcessingBooking({
+                //       isProcessing: false,
+                //       message: "",
+                //       textClass: "submitting-text",
+                //     });
+
+                //     setHideCancelAnimation(false);
+                //     setActionOverlay({
+                //       isVisible: true,
+                //       message: "Unit Reserved Successfully!",
+                //       type: "success",
+                //     });
+
+                //     setTimeout(() => {
+                //       setHideCancelAnimation(true);
+                //       setTimeout(
+                //         () =>
+                //           setActionOverlay({
+                //             ...actionOverlay,
+                //             isVisible: false,
+                //           }),
+                //         400,
+                //       );
+                //     }, 5000);
+                //   } catch (err) {
+                //     console.error("❌ Failed to reserve unit:", err);
+
+                //     setProcessingBooking({
+                //       isProcessing: false,
+                //       message: "",
+                //       textClass: "submitting-text",
+                //     });
+
+                //     setHideCancelAnimation(false);
+                //     setActionOverlay({
+                //       isVisible: true,
+                //       message: "Failed to Reserve Unit!",
+                //       type: "warning",
+                //     });
+
+                //     setTimeout(() => {
+                //       setHideCancelAnimation(true);
+                //       setTimeout(
+                //         () =>
+                //           setActionOverlay({
+                //             ...actionOverlay,
+                //             isVisible: false,
+                //           }),
+                //         400,
+                //       );
+                //     }, 5000);
+                //   }
+                // }}
                 onClick={async () => {
-                  setShowReserveConfirm(false);
+  setShowReserveConfirm(false);
 
-                  setProcessingBooking({
-                    isProcessing: true,
-                    message: "Reserving Unit...",
-                    textClass: "submitting-text",
-                  });
+  setProcessingBooking({
+    isProcessing: true,
+    message: "Preparing Reservation...",
+    textClass: "submitting-text",
+  });
 
-                  try {
-                    await reserveUnit(reserveUnitId);
+  try {
+    await reserveUnit(reserveUnitId);
 
-                    setProcessingBooking({
-                      isProcessing: false,
-                      message: "",
-                      textClass: "submitting-text",
-                    });
+    const sourceBooking = (activeBookings || []).find(
+      (b) => String(b.id) === String(reserveUnitId),
+    );
 
-                    setHideCancelAnimation(false);
-                    setActionOverlay({
-                      isVisible: true,
-                      message: "Unit Reserved Successfully!",
-                      type: "success",
-                    });
+    if (sourceBooking) {
+      const unitId = String(sourceBooking.plateNo || "");
+      const nextStartDate = sourceBooking.endDate || "";
+      const nextStartTime = sourceBooking.endTime || "";
 
-                    setTimeout(() => {
-                      setHideCancelAnimation(true);
-                      setTimeout(
-                        () =>
-                          setActionOverlay({
-                            ...actionOverlay,
-                            isVisible: false,
-                          }),
-                        400,
-                      );
-                    }, 5000);
-                  } catch (err) {
-                    console.error("❌ Failed to reserve unit:", err);
+      if (sourceBooking.carType) {
+        setFilterType(String(sourceBooking.carType).toUpperCase());
+      }
 
-                    setProcessingBooking({
-                      isProcessing: false,
-                      message: "",
-                      textClass: "submitting-text",
-                    });
+      setSelectedUnitId(unitId);
 
-                    setHideCancelAnimation(false);
-                    setActionOverlay({
-                      isVisible: true,
-                      message: "Failed to Reserve Unit!",
-                      type: "warning",
-                    });
+      setFormData((prev) => ({
+        ...prev,
+        [unitId]: {
+          drivingOption: prev[unitId]?.drivingOption || "Self-Drive",
+          pickupOption: prev[unitId]?.pickupOption || "Pickup",
+          startDate: nextStartDate,
+          startTime: nextStartTime,
+          endDate: prev[unitId]?.endDate || "",
+          endTime: prev[unitId]?.endTime || "",
+          assignedDriver: prev[unitId]?.assignedDriver || "",
+          dropoffLocation: prev[unitId]?.dropoffLocation || "",
+          location: prev[unitId]?.location || "",
+          purpose: prev[unitId]?.purpose || "",
+          driverLicense: prev[unitId]?.driverLicense || null,
+          firstName: prev[unitId]?.firstName || "",
+          middleName: prev[unitId]?.middleName || "",
+          surname: prev[unitId]?.surname || "",
+          contact: prev[unitId]?.contact || "",
+          email: prev[unitId]?.email || "",
+          occupation: prev[unitId]?.occupation || "",
+          address: prev[unitId]?.address || "",
+          referralSource: prev[unitId]?.referralSource || "",
+          additionalMessage: prev[unitId]?.additionalMessage || "",
+          discountType: prev[unitId]?.discountType || "peso",
+          discountValue: Number(prev[unitId]?.discountValue || 0),
+          reservation: true,
+        },
+      }));
 
-                    setTimeout(() => {
-                      setHideCancelAnimation(true);
-                      setTimeout(
-                        () =>
-                          setActionOverlay({
-                            ...actionOverlay,
-                            isVisible: false,
-                          }),
-                        400,
-                      );
-                    }, 5000);
-                  }
-                }}
+      setTimeout(() => {
+        document
+          .querySelector(".available-units-column .select-container")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+
+    setProcessingBooking({
+      isProcessing: false,
+      message: "",
+      textClass: "submitting-text",
+    });
+
+    setHideCancelAnimation(false);
+    setActionOverlay({
+      isVisible: true,
+      message: "Reserved flag set. Continue in Bookings to create the next rental.",
+      type: "success",
+    });
+
+    setTimeout(() => {
+      setHideCancelAnimation(true);
+      setTimeout(
+        () =>
+          setActionOverlay({
+            ...actionOverlay,
+            isVisible: false,
+          }),
+        400,
+      );
+    }, 5000);
+  } catch (err) {
+    console.error("❌ Failed to reserve unit:", err);
+
+    setProcessingBooking({
+      isProcessing: false,
+      message: "",
+      textClass: "submitting-text",
+    });
+
+    setHideCancelAnimation(false);
+    setActionOverlay({
+      isVisible: true,
+      message: "Failed to prepare reservation draft!",
+      type: "warning",
+    });
+
+    setTimeout(() => {
+      setHideCancelAnimation(true);
+      setTimeout(
+        () =>
+          setActionOverlay({
+            ...actionOverlay,
+            isVisible: false,
+          }),
+        400,
+      );
+    }, 5000);
+  }
+}}
               >
                 Yes, Reserve
               </button>
@@ -7500,11 +7616,6 @@ const RentalActivitySection = ({ subSection }) => {
                           {rental.status}
                         </span>
 
-                        {rental.reservation === true && (
-  <span className="ongoing-unit-status-badge reserved">Reserved</span>
-)}
-
-
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -7785,6 +7896,13 @@ onClick={() => {
                       }
 
                       const unitForm = formData[selectedUnitId] || {};
+                      const reservedActiveBooking = (activeBookings || []).find(
+  (booking) =>
+    String(booking?.plateNo || "").toUpperCase() ===
+      String(selectedUnit?.plateNo || "").toUpperCase() &&
+    booking?.reservation === true &&
+    ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
+);
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
@@ -7844,6 +7962,9 @@ onClick={() => {
                         <>
                           <div className="sticky-banner-group">
                             <div className="selected-unit-image">
+                              {reservedActiveBooking && (
+  <span className="selected-unit-reserved-badge">Reserved</span>
+)}
                               {(() => {
                                 if (!selectedUnit) {
                                   return (
