@@ -115,18 +115,16 @@ function Carousel() {
   const carouselGalleryRef = useRef(null);
 
   useEffect(() => {
-    const numImages = 5;
-    const missingIds = Array.from({ length: numImages }, (_, i) => `LandingPage_${i}`)
-      .filter((id) => !isValidImageSrc(imageCache[id]?.base64));
-
-    if (missingIds.length === 0) return;
+    const landingIds = Array.from({ length: 5 }, (_, i) => `LandingPage_${i}`);
+    const fleetIds = Array.from({ length: 20 }, (_, i) => `FleetPage_${i}`);
+    const ids = [...landingIds, ...fleetIds];
 
     (async () => {
       await Promise.all(
-        missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
+        ids.map((id) => fetchImageFromFirestore(id, false).catch(() => null)),
       );
     })();
-  }, [imageCache, fetchImageFromFirestore]);
+  }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
   // useEffect(() => {
   //   const fetchCarouselImages = async () => {
