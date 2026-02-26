@@ -538,6 +538,12 @@
   background-color: #dc3545;
 }
 
+.ongoing-unit-status-badge.reserved {
+  left: auto;
+  right: 8px;
+  background-color: #6c757d;
+}
+
 .edit-unit-status-badge {
   position: absolute;
   top: 8px;
