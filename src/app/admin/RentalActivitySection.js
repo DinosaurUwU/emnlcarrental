@@ -973,58 +973,153 @@ if (hasConflict) {
       bookingUid,
     };
 
-    // Save to Firestore
-    // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-    await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-        if (sourceReservedBookingId) {
-      await updateActiveBooking(sourceReservedBookingId, {
-        reservation: false,
-      });
-      setReserveUnitId(null);
-    }
+//     // Save to Firestore
+//     // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+//     await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+//         if (sourceReservedBookingId) {
+//       await updateActiveBooking(sourceReservedBookingId, {
+//         reservation: false,
+//       });
+//       setReserveUnitId(null);
+//     }
 
-    setFormData((prev) => ({
-  ...prev,
-  [confirmUnitId]: {
-    ...(prev[confirmUnitId] || {}),
-    reservation: false,
-  },
-}));
+//     setFormData((prev) => ({
+//   ...prev,
+//   [confirmUnitId]: {
+//     ...(prev[confirmUnitId] || {}),
+//     reservation: false,
+//   },
+// }));
 
-    // 🟢 Merge new booking into existing paymentEntries first
-    triggerAutoFill((prevPaymentEntries) => ({
-      ...prevPaymentEntries,
-      [bookingUid]: (localPaymentEntries || []).map((entry) => ({
-        ...entry,
-        carName: currentUnit.name,
-        bookingId: bookingUid,
-      })),
-    }));
+//     // 🟢 Merge new booking into existing paymentEntries first
+//     triggerAutoFill((prevPaymentEntries) => ({
+//       ...prevPaymentEntries,
+//       [bookingUid]: (localPaymentEntries || []).map((entry) => ({
+//         ...entry,
+//         carName: currentUnit.name,
+//         bookingId: bookingUid,
+//       })),
+//     }));
 
-    // UI cleanup
-    setShowBookingConfirmOverlay(false);
-    console.log("Clearing form for unit ID:", clearUnitId); // Debug
-    console.log("Confirming booking for unit ID:", confirmUnitId); // Debug
-    console.log("CURRENT UNIT:", currentUnit); // Debug
-    console.log("BOOKING DATA:", bookingData); // Debug
-    console.log("PRICING:", discountedRate); // Debug
+//     // UI cleanup
+//     setShowBookingConfirmOverlay(false);
+//     console.log("Clearing form for unit ID:", clearUnitId); // Debug
+//     console.log("Confirming booking for unit ID:", confirmUnitId); // Debug
+//     console.log("CURRENT UNIT:", currentUnit); // Debug
+//     console.log("BOOKING DATA:", bookingData); // Debug
+//     console.log("PRICING:", discountedRate); // Debug
 
-    handleClearForm(confirmUnitId);
+//     handleClearForm(confirmUnitId);
 
-    setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
-    setShowSuccessBooking(true);
+//     setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
+//     setShowSuccessBooking(true);
 
-    setSelectedUnitId(null);
+//     setSelectedUnitId(null);
 
+//     setTimeout(() => {
+//       setHideAnimation(true);
+
+//       setTimeout(() => {
+//         setShowSuccessBooking(false);
+//         setHideAnimation(false);
+//       }, 400);
+//     }, 5000);
+//   };
+
+// Save to Firestore with processing -> result overlay flow
+setProcessingBooking({
+  isProcessing: true,
+  message: "Creating Booking...",
+  textClass: "submitting-text",
+});
+
+try {
+  await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+
+  if (sourceReservedBookingId) {
+    await updateActiveBooking(sourceReservedBookingId, {
+      reservation: false,
+    });
+    setReserveUnitId(null);
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    [confirmUnitId]: {
+      ...(prev[confirmUnitId] || {}),
+      reservation: false,
+    },
+  }));
+
+  triggerAutoFill((prevPaymentEntries) => ({
+    ...prevPaymentEntries,
+    [bookingUid]: (localPaymentEntries || []).map((entry) => ({
+      ...entry,
+      carName: currentUnit.name,
+      bookingId: bookingUid,
+    })),
+  }));
+
+  setShowBookingConfirmOverlay(false);
+  handleClearForm(confirmUnitId);
+
+  setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
+  setShowSuccessBooking(true);
+  setSelectedUnitId(null);
+
+  setHideCancelAnimation(false);
+  setActionOverlay({
+    isVisible: true,
+    message: "Booking created successfully!",
+    type: "success",
+  });
+
+  setTimeout(() => {
+    setHideCancelAnimation(true);
     setTimeout(() => {
-      setHideAnimation(true);
+      setActionOverlay((prev) => ({
+        ...prev,
+        isVisible: false,
+      }));
+      setHideCancelAnimation(false);
+    }, 400);
+  }, 5000);
 
-      setTimeout(() => {
-        setShowSuccessBooking(false);
-        setHideAnimation(false);
-      }, 400);
-    }, 5000);
-  };
+  setTimeout(() => {
+    setHideAnimation(true);
+    setTimeout(() => {
+      setShowSuccessBooking(false);
+      setHideAnimation(false);
+    }, 400);
+  }, 5000);
+} catch (error) {
+  console.error("❌ Failed to confirm booking:", error);
+
+  setHideCancelAnimation(false);
+  setActionOverlay({
+    isVisible: true,
+    message: "Failed to create booking. Please try again.",
+    type: "warning",
+  });
+
+  setTimeout(() => {
+    setHideCancelAnimation(true);
+    setTimeout(() => {
+      setActionOverlay((prev) => ({
+        ...prev,
+        isVisible: false,
+      }));
+      setHideCancelAnimation(false);
+    }, 400);
+  }, 5000);
+} finally {
+  setProcessingBooking({
+    isProcessing: false,
+    message: "",
+    textClass: "submitting-text",
+  });
+}
+};
 
   const toggleExpand = (unitId) => {
     setExpandedUnits((prev) => ({
@@ -2311,6 +2406,9 @@ if (hasConflict) {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
+            {selectedBooking?.reservation === true && (
+  <div className="confirm-reserved-flag">Reserved Booking</div>
+)}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -2806,6 +2904,9 @@ if (hasConflict) {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
+            {selectedBooking?.reservation === true && (
+  <div className="confirm-reserved-flag">Reserved Booking</div>
+)}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -7790,6 +7891,18 @@ if (hasConflict) {
                           {rental.status}
                         </span>
 
+                        {rental.reservation === true && (
+  <span className="ongoing-unit-status-badge reserved-booking">
+    Reserved Booking
+  </span>
+)}
+
+{rental.reservationConflict === true && (
+                          <span className="ongoing-unit-status-badge reservation-conflict">
+                            Conflict
+                          </span>
+                        )}
+
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -8137,7 +8250,7 @@ onClick={() => {
                           <div className="sticky-banner-group">
                             <div className="selected-unit-image">
                               {reservedActiveBooking && (
-  <span className="selected-unit-reserved-badge">Reserved</span>
+  <span className="selected-unit-reserved-badge">Reserved Booking</span>
 )}
                               {(() => {
                                 if (!selectedUnit) {
@@ -9277,6 +9390,19 @@ onClick={() => {
                           : "Unpaid"
                         : booking.status}
                     </span>
+
+                    {booking?.reservation === true && (
+  <span className="ongoing-unit-status-badge reserved-booking">
+    Reserved Booking
+  </span>
+)}
+
+{booking?.reservationConflict === true && (
+                      <span className="ongoing-unit-status-badge reservation-conflict">
+                        Conflict
+                      </span>
+                    )}
+
 
                     <button
                       className="ongoing-unit-details-button"

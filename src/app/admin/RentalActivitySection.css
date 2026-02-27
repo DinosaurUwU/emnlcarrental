@@ -539,8 +539,13 @@
 }
 
 .ongoing-unit-status-badge.reserved-booking {
-  left: 120px;
+  left: 90px;
   background-color: #6c757d;
+}
+
+.ongoing-unit-status-badge.reservation-conflict {
+  left: 243px;
+  background-color: #dc3545;
 }
 
 .edit-unit-status-badge {

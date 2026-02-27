@@ -2391,6 +2391,84 @@ Call them now to check if they want to extend. If no response, call them when re
         );
       }
 
+            // Detect conflicts: extended ACTIVE booking vs same-unit reserved PENDING bookings
+      const parseBookingMs = (booking, edge) => {
+        const tsKey = edge === "start" ? "startTimestamp" : "endTimestamp";
+        const dateKey = edge === "start" ? "startDate" : "endDate";
+        const timeKey = edge === "start" ? "startTime" : "endTime";
+
+        if (booking?.[tsKey]?.toDate) return booking[tsKey].toDate().getTime();
+
+        if (booking?.[dateKey] && booking?.[timeKey]) {
+          const d = new Date(`${booking[dateKey]}T${booking[timeKey]}:00`);
+          if (!Number.isNaN(d.getTime())) return d.getTime();
+        }
+
+        return edge === "start" ? 0 : Number.MAX_SAFE_INTEGER;
+      };
+
+      const extendedStartMs = startTimestamp?.getTime?.() || parseBookingMs(rentalData, "start");
+      const extendedEndMs = endTimestamp.toDate().getTime();
+
+      const activeBookingsSnap = await getDocs(
+        collection(db, "users", adminUid, "activeBookings"),
+      );
+
+      const conflictChecks = activeBookingsSnap.docs
+        .filter((snap) => snap.id !== String(rentalId))
+        .map((snap) => ({ id: snap.id, ...snap.data() }))
+        .filter((booking) => {
+          const sameUnit =
+            String(booking?.plateNo || "").toUpperCase() ===
+            String(rentalData?.plateNo || "").toUpperCase();
+          const isPending =
+            String(booking?.status || "").toLowerCase() === "pending";
+          const isReserved = booking?.reservation === true;
+          return sameUnit && isPending && isReserved;
+        });
+
+      for (const pendingBooking of conflictChecks) {
+        const pendingStartMs = parseBookingMs(pendingBooking, "start");
+        const pendingEndMs = parseBookingMs(pendingBooking, "end");
+
+        const hasOverlap =
+          extendedStartMs < pendingEndMs && extendedEndMs > pendingStartMs;
+
+        if (!hasOverlap) continue;
+
+        const conflictPatch = {
+          reservationConflict: true,
+          conflictReason:
+            "Active rental was extended and now overlaps this reserved booking.",
+          conflictDetectedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        await updateDoc(
+          doc(db, "users", adminUid, "activeBookings", pendingBooking.id),
+          conflictPatch,
+        );
+
+        const pendingCreatedBy = pendingBooking?.createdBy;
+        if (
+          pendingCreatedBy &&
+          pendingCreatedBy !== "admin" &&
+          pendingCreatedBy !== adminUid
+        ) {
+          const userPendingRef = doc(
+            db,
+            "users",
+            pendingCreatedBy,
+            "activeRentals",
+            pendingBooking.id,
+          );
+          const userPendingSnap = await getDoc(userPendingRef);
+          if (userPendingSnap.exists()) {
+            await updateDoc(userPendingRef, conflictPatch);
+          }
+        }
+      }
+
       // EXTENSION EMAIL (TEMPLATE 3)
       // Build full name
       const fullName = `${rentalData.firstName || ""} ${
