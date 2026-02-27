@@ -3276,6 +3276,7 @@ const RentalActivitySection = ({ subSection }) => {
         </div>
       )}
 
+
       {showCancelConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
@@ -7215,7 +7216,7 @@ const RentalActivitySection = ({ subSection }) => {
                             />
                           </td>
                           <td>{customer.name}</td>
-                          <td>{customer.contactNumber}</td>
+                          <td>{customer.contactNumber || "N/A"}</td>
                           <td>{customer.email}</td>
                         </tr>
                       );
