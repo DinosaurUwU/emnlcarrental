@@ -2181,8 +2181,15 @@ Call them now to check if they want to extend. If no response, call them when re
       const now = new Date();
 
       activeBookings.forEach(async (booking) => {
+        // if (
+        //   booking.status === "Pending" &&
+        //   now >= booking.startTimestamp?.toDate?.()
+        // ) {
+        const hasConflict = booking?.reservationConflict === true;
+        
         if (
           booking.status === "Pending" &&
+          !hasConflict &&
           now >= booking.startTimestamp?.toDate?.()
         ) {
           try {
@@ -2201,53 +2208,232 @@ Call them now to check if they want to extend. If no response, call them when re
     return () => clearInterval(intervalId);
   }, [adminUid, activeBookings]);
 
-  // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE BOOKINGS (ADMIN) - NEW APPROACH: TRIGGERED BY ACTIVE BOOKINGS CHANGES
+
+
+//   // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE BOOKINGS (ADMIN) - NEW APPROACH: TRIGGERED BY ACTIVE BOOKINGS CHANGES
+//   useEffect(() => {
+//   if (!adminUid || user?.role !== "admin") return;
+
+//   const syncUnitsHiddenFromActiveBookings = async () => {
+//     try {
+//       const activePlateSet = new Set(
+//         (activeBookings || [])
+//           .filter((booking) => {
+//             const status = String(booking?.status || "").toLowerCase();
+//             return status === "active" || status === "pending";
+//           })
+//           .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
+//           .filter(Boolean),
+//       );
+
+//       const unitsSnap = await getDocs(collection(db, "units"));
+//       const updateTasks = [];
+
+//       unitsSnap.docs.forEach((unitSnap) => {
+//         const unitData = unitSnap.data() || {};
+//         const plate = String(unitData.plateNo || unitSnap.id || "")
+//           .trim()
+//           .toUpperCase();
+
+//         if (!plate) return;
+
+//         const shouldBeHidden = activePlateSet.has(plate);
+//         const currentHidden = !!unitData.hidden;
+
+//         if (currentHidden !== shouldBeHidden) {
+//           updateTasks.push(
+//             updateDoc(doc(db, "units", unitSnap.id), { hidden: shouldBeHidden }),
+//           );
+//         }
+//       });
+
+//       if (updateTasks.length > 0) {
+//         await Promise.all(updateTasks);
+//       }
+//     } catch (error) {
+//       console.error("Error syncing units.hidden from activeBookings:", error);
+//     }
+//   };
+
+//   syncUnitsHiddenFromActiveBookings();
+// }, [adminUid, user?.role, activeBookings]);
+
+
+
+  // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE/PENDING BOOKINGS
   useEffect(() => {
-  if (!adminUid || user?.role !== "admin") return;
+    if (!adminUid || user?.role !== "admin") return;
 
-  const syncUnitsHiddenFromActiveBookings = async () => {
-    try {
-      const activePlateSet = new Set(
-        (activeBookings || [])
-          .filter((booking) => {
-            const status = String(booking?.status || "").toLowerCase();
-            return status === "active" || status === "pending";
-          })
-          .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
-          .filter(Boolean),
-      );
+    const syncUnitsHiddenFromActiveBookings = async () => {
+      try {
+        const activePlateSet = new Set(
+          (activeBookings || [])
+            .filter((booking) => {
+              const status = String(booking?.status || "").toLowerCase();
+              return status === "active" || status === "pending";
+            })
+            .map((booking) =>
+              String(booking?.plateNo || "").trim().toUpperCase(),
+            )
+            .filter(Boolean),
+        );
 
-      const unitsSnap = await getDocs(collection(db, "units"));
-      const updateTasks = [];
+        const unitsSnap = await getDocs(collection(db, "units"));
+        const updateTasks = [];
 
-      unitsSnap.docs.forEach((unitSnap) => {
-        const unitData = unitSnap.data() || {};
-        const plate = String(unitData.plateNo || unitSnap.id || "")
-          .trim()
-          .toUpperCase();
+        unitsSnap.docs.forEach((unitSnap) => {
+          const unitData = unitSnap.data() || {};
+          const plate = String(unitData.plateNo || unitSnap.id || "")
+            .trim()
+            .toUpperCase();
 
-        if (!plate) return;
+          if (!plate) return;
 
-        const shouldBeHidden = activePlateSet.has(plate);
-        const currentHidden = !!unitData.hidden;
+          const shouldBeHidden = activePlateSet.has(plate);
+          const currentHidden = !!unitData.hidden;
 
-        if (currentHidden !== shouldBeHidden) {
-          updateTasks.push(
-            updateDoc(doc(db, "units", unitSnap.id), { hidden: shouldBeHidden }),
-          );
+          if (currentHidden !== shouldBeHidden) {
+            updateTasks.push(
+              updateDoc(doc(db, "units", unitSnap.id), {
+                hidden: shouldBeHidden,
+              }),
+            );
+          }
+        });
+
+        if (updateTasks.length > 0) {
+          await Promise.all(updateTasks);
         }
-      });
-
-      if (updateTasks.length > 0) {
-        await Promise.all(updateTasks);
+      } catch (error) {
+        console.error("Error syncing units.hidden from activeBookings:", error);
       }
-    } catch (error) {
-      console.error("Error syncing units.hidden from activeBookings:", error);
-    }
-  };
+    };
 
-  syncUnitsHiddenFromActiveBookings();
-}, [adminUid, user?.role, activeBookings]);
+    syncUnitsHiddenFromActiveBookings();
+  }, [adminUid, user?.role, activeBookings]);
+
+  // RECONCILE reservationConflict FLAGS WHEN ACTIVE/PENDING BOOKINGS CHANGE
+  useEffect(() => {
+    if (!adminUid || user?.role !== "admin") return;
+
+    const toMs = (booking, edge) => {
+      const tsKey = edge === "start" ? "startTimestamp" : "endTimestamp";
+      const dateKey = edge === "start" ? "startDate" : "endDate";
+      const timeKey = edge === "start" ? "startTime" : "endTime";
+
+      if (booking?.[tsKey]?.toDate) return booking[tsKey].toDate().getTime();
+      if (booking?.[dateKey] && booking?.[timeKey]) {
+        const d = new Date(`${booking[dateKey]}T${booking[timeKey]}:00`);
+        if (!Number.isNaN(d.getTime())) return d.getTime();
+      }
+      return edge === "start" ? 0 : Number.MAX_SAFE_INTEGER;
+    };
+
+    const reconcileReservationConflicts = async () => {
+      try {
+        const snap = await getDocs(
+          collection(db, "users", adminUid, "activeBookings"),
+        );
+        const bookings = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+        const activeByPlate = {};
+        bookings
+          .filter((b) => String(b?.status || "").toLowerCase() === "active")
+          .forEach((b) => {
+            const plate = String(b?.plateNo || "").toUpperCase();
+            if (!plate) return;
+            if (!activeByPlate[plate]) activeByPlate[plate] = [];
+            activeByPlate[plate].push({
+              startMs: toMs(b, "start"),
+              endMs: toMs(b, "end"),
+            });
+          });
+
+        const reservedPending = bookings.filter((b) => {
+          const isPending = String(b?.status || "").toLowerCase() === "pending";
+          const isReserved = b?.reservation === true;
+          return isPending && isReserved;
+        });
+
+        for (const pending of reservedPending) {
+          const plate = String(pending?.plateNo || "").toUpperCase();
+          const pendingStartMs = toMs(pending, "start");
+          const pendingEndMs = toMs(pending, "end");
+
+          const overlapsActive = (activeByPlate[plate] || []).some(
+            (w) => w.startMs < pendingEndMs && w.endMs > pendingStartMs,
+          );
+
+          const currentlyConflict = pending?.reservationConflict === true;
+
+          if (overlapsActive && !currentlyConflict) {
+            const conflictPatch = {
+              reservationConflict: true,
+              conflictReason:
+                "Active rental was extended and now overlaps this reserved booking.",
+              conflictDetectedAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
+            };
+
+            await updateDoc(
+              doc(db, "users", adminUid, "activeBookings", pending.id),
+              conflictPatch,
+            );
+
+            const uid = pending?.createdBy;
+            if (uid && uid !== "admin" && uid !== adminUid) {
+              const userPendingRef = doc(
+                db,
+                "users",
+                uid,
+                "activeRentals",
+                pending.id,
+              );
+              const userPendingSnap = await getDoc(userPendingRef);
+              if (userPendingSnap.exists()) {
+                await updateDoc(userPendingRef, conflictPatch);
+              }
+            }
+          }
+
+          if (!overlapsActive && currentlyConflict) {
+            const clearPatch = {
+              reservationConflict: false,
+              conflictReason: deleteField(),
+              conflictDetectedAt: deleteField(),
+              updatedAt: serverTimestamp(),
+            };
+
+            await updateDoc(
+              doc(db, "users", adminUid, "activeBookings", pending.id),
+              clearPatch,
+            );
+
+            const uid = pending?.createdBy;
+            if (uid && uid !== "admin" && uid !== adminUid) {
+              const userPendingRef = doc(
+                db,
+                "users",
+                uid,
+                "activeRentals",
+                pending.id,
+              );
+              const userPendingSnap = await getDoc(userPendingRef);
+              if (userPendingSnap.exists()) {
+                await updateDoc(userPendingRef, clearPatch);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error reconciling reservation conflicts:", error);
+      }
+    };
+
+    reconcileReservationConflicts();
+  }, [adminUid, user?.role, activeBookings]);
+
+
 
   // (ADMIN) EXTEND RENTAL
   const extendRentalDuration = async (rentalId, addedSeconds) => {

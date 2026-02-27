@@ -7992,7 +7992,7 @@ try {
                               Cancel
                             </button>
 
-                            <button
+                            {/* <button
                               className="action-button finish"
                               onClick={() => {
                                 setFinishRentalId(rental.id);
@@ -8000,7 +8000,18 @@ try {
                               }}
                             >
                               Finish
-                            </button>
+                            </button> */}
+                            {String(rental.status || "").toLowerCase() !== "pending" && (
+  <button
+    className="action-button finish"
+    onClick={() => {
+      setFinishRentalId(rental.id);
+      setShowFinishConfirm(true);
+    }}
+  >
+    Finish
+  </button>
+)}
 
                             {/* More button with dropdown */}
                             <div className="action-more">
@@ -8019,7 +8030,7 @@ try {
 
                               {showMoreFor === rental.id && (
                                 <div className="more-dropdown">
-                                  <button
+                                  {/* <button
                                     className="action-button reserve"
 onClick={() => {
   setReserveUnitId(rental.id);
@@ -8028,7 +8039,21 @@ onClick={() => {
 }}
                                   >
                                     Reserve
-                                  </button>
+                                  </button> */}
+                                  {String(rental.status || "").toLowerCase() !== "pending" && (
+  <button
+    className="action-button reserve"
+    onClick={() => {
+      setReserveUnitId(rental.id);
+      setShowReserveConfirm(true);
+      setShowMoreFor(null);
+    }}
+  >
+    Reserve
+  </button>
+)}
+
+
                                   <button
                                     className="action-button extend"
                                     onClick={() => {
@@ -8188,8 +8213,15 @@ onClick={() => {
     String(booking?.plateNo || "").toUpperCase() ===
       String(selectedUnit?.plateNo || "").toUpperCase() &&
     booking?.reservation === true &&
-    ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
+    String(booking?.status || "").toLowerCase() === "active",
 );
+//                       const reservedActiveBooking = (activeBookings || []).find(
+//   (booking) =>
+//     String(booking?.plateNo || "").toUpperCase() ===
+//       String(selectedUnit?.plateNo || "").toUpperCase() &&
+//     booking?.reservation === true &&
+//     ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
+// );
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";

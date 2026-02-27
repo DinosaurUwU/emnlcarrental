@@ -1012,6 +1012,7 @@
 }
 
 .selected-unit-reserved-badge {
+  pointer-events: none;
   position: absolute;
   top: 8px;
   left: 8px;
@@ -1572,8 +1573,9 @@
 }
 
 .confirm-reserved-flag {
+  pointer-events: none;
   display: inline-block;
-  margin: 4px 0 10px;
+  margin: 0px 0 10px;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.75rem;
