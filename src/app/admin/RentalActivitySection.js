@@ -699,15 +699,38 @@ const RentalActivitySection = ({ subSection }) => {
   };
 
   // const handleConfirmBooking = () => {
-    const handleConfirmBooking = async () => {
-    const currentUnit = unitData.find((u) => u.id === confirmUnitId);
+  //   const handleConfirmBooking = async () => {
+  //   const currentUnit = unitData.find((u) => u.id === confirmUnitId);
 
-    const sourceReservedBookingId =
-  unitForm.reservation === true && reserveUnitId
-    ? String(reserveUnitId)
-    : null;
+  //   const sourceReservedBookingId =
+  // unitForm.reservation === true && reserveUnitId
+  //   ? String(reserveUnitId)
+  //   : null;
 
-    const unitForm = formData[confirmUnitId] || {};
+  //   const unitForm = formData[confirmUnitId] || {};
+
+  const handleConfirmBooking = async () => {
+  const unitForm = formData[confirmUnitId] || {};
+  const currentUnit =
+    allUnitData.find((u) => u.id === confirmUnitId) ||
+    unitData.find((u) => u.id === confirmUnitId) ||
+    null;
+
+  if (!currentUnit) {
+    setHideAnimation(false);
+    setRentalErrorMessage("Selected unit not found. Please re-select the car.");
+    setShowRentalError(true);
+    setTimeout(() => {
+      setHideAnimation(true);
+      setTimeout(() => setShowRentalError(false), 400);
+    }, 3000);
+    return;
+  }
+
+  const sourceReservedBookingId =
+    unitForm.reservation === true && reserveUnitId
+      ? String(reserveUnitId)
+      : null;
 
     // Check for unit conflict BEFORE processing
     const isUnitInUse = activeBookings.some(
@@ -1602,10 +1625,20 @@ const RentalActivitySection = ({ subSection }) => {
                 <div className="admin-confirm-details">
                   {/* Car info to additional message */}
                   {(() => {
-                    const currentUnit = unitData.find(
-                      (u) => u.id === confirmUnitId,
-                    );
+                    // const currentUnit = unitData.find(
+                    //   (u) => u.id === confirmUnitId,
+                    // );
+
+                    const currentUnit =
+                      allUnitData.find((u) => u.id === confirmUnitId) ||
+                      unitData.find((u) => u.id === confirmUnitId) ||
+                      null;
+
+
                     const unitForm = formData[confirmUnitId] || {};
+
+                    if (!currentUnit) return null;
+
                     const drivingOption =
                       unitForm.drivingOption || "Self-Drive";
                     const pickupOption = unitForm.pickupOption || "Pickup";
@@ -1741,10 +1774,18 @@ const RentalActivitySection = ({ subSection }) => {
               {/* Second section: personal info to summary */}
               <div className="admin-confirm-details">
                 {(() => {
-                  const currentUnit = unitData.find(
-                    (u) => u.id === confirmUnitId,
-                  );
+                  // const currentUnit = unitData.find(
+                  //   (u) => u.id === confirmUnitId,
+                  // );
+                  const currentUnit =
+                  allUnitData.find((u) => u.id === confirmUnitId) ||
+                  unitData.find((u) => u.id === confirmUnitId) ||
+                  null;
+
                   const unitForm = formData[confirmUnitId] || {};
+
+                  if (!currentUnit) return null;
+
                   const duration = getRentalDuration(unitForm);
                   const rentalDays = duration?.diffDays || 1;
 
