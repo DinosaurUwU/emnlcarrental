@@ -698,8 +698,14 @@ const RentalActivitySection = ({ subSection }) => {
     return await markRentalAsCompleted(completedRental);
   };
 
-  const handleConfirmBooking = () => {
+  // const handleConfirmBooking = () => {
+    const handleConfirmBooking = async () => {
     const currentUnit = unitData.find((u) => u.id === confirmUnitId);
+
+    const sourceReservedBookingId =
+  unitForm.reservation === true && reserveUnitId
+    ? String(reserveUnitId)
+    : null;
 
     const unitForm = formData[confirmUnitId] || {};
 
@@ -862,7 +868,14 @@ const RentalActivitySection = ({ subSection }) => {
     };
 
     // Save to Firestore
-    saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+    // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+    await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+        if (sourceReservedBookingId) {
+      await updateActiveBooking(sourceReservedBookingId, {
+        reservation: false,
+      });
+      setReserveUnitId(null);
+    }
 
     // 🟢 Merge new booking into existing paymentEntries first
     triggerAutoFill((prevPaymentEntries) => ({
