@@ -516,6 +516,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   color: white;
   text-transform: uppercase;
+  pointer-events: none;
 }
 
 .ongoing-unit-status-badge.pending {
