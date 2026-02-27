@@ -727,25 +727,107 @@ const RentalActivitySection = ({ subSection }) => {
     return;
   }
 
-  const sourceReservedBookingId =
-    unitForm.reservation === true && reserveUnitId
-      ? String(reserveUnitId)
-      : null;
+const sourceReservedBooking = (activeBookings || []).find((booking) => {
+  const samePlate =
+    String(booking?.plateNo || "").toUpperCase() ===
+    String(currentUnit?.plateNo || "").toUpperCase();
 
-    // Check for unit conflict BEFORE processing
-    const isUnitInUse = activeBookings.some(
-      (booking) => booking.plateNo === currentUnit.plateNo,
-    );
+  const openStatus = ["active", "pending"].includes(
+    String(booking?.status || "").toLowerCase(),
+  );
 
-    if (isUnitInUse) {
-      setHideAnimation(false);
-      setShowUnitConflict(true);
-      setTimeout(() => {
-        setHideAnimation(true);
-        setTimeout(() => setShowUnitConflict(false), 400);
-      }, 3000);
-      return;
-    }
+  return samePlate && openStatus && booking?.reservation === true;
+});
+
+const sourceReservedBookingId = sourceReservedBooking
+  ? String(sourceReservedBooking.id)
+  : unitForm.reservation === true && reserveUnitId
+    ? String(reserveUnitId)
+    : null;
+
+const isReservedFlow = !!sourceReservedBookingId || unitForm.reservation === true;
+
+  // const sourceReservedBookingId =
+  //   unitForm.reservation === true && reserveUnitId
+  //     ? String(reserveUnitId)
+  //     : null;
+
+    // // Check for unit conflict BEFORE processing
+    // const isUnitInUse = activeBookings.some(
+    //   (booking) => booking.plateNo === currentUnit.plateNo,
+    // );
+
+    // if (isUnitInUse) {
+    //   setHideAnimation(false);
+    //   setShowUnitConflict(true);
+    //   setTimeout(() => {
+    //     setHideAnimation(true);
+    //     setTimeout(() => setShowUnitConflict(false), 400);
+    //   }, 3000);
+    //   return;
+    // }
+
+    // Check for unit conflict BEFORE processing (time-window aware)
+const requestedStart = new Date(`${unitForm.startDate}T${unitForm.startTime}:00`);
+const requestedEnd = new Date(`${unitForm.endDate}T${unitForm.endTime}:00`);
+
+const requestedStartMs = requestedStart.getTime();
+const requestedEndMs = requestedEnd.getTime();
+
+const toMs = (bookingDate, bookingTime, bookingTs, fallbackMs) => {
+  if (bookingTs?.toDate) return bookingTs.toDate().getTime();
+  if (bookingDate && bookingTime) return new Date(`${bookingDate}T${bookingTime}:00`).getTime();
+  return fallbackMs;
+};
+
+const sameUnitOpenBookings = (activeBookings || []).filter((booking) => {
+  const samePlate =
+    String(booking?.plateNo || "").toUpperCase() ===
+    String(currentUnit?.plateNo || "").toUpperCase();
+
+  const openStatus = ["active", "pending"].includes(
+    String(booking?.status || "").toLowerCase(),
+  );
+
+  return samePlate && openStatus;
+});
+
+const hasConflict = sameUnitOpenBookings.some((booking) => {
+  const existingStartMs = toMs(
+    booking.startDate,
+    booking.startTime,
+    booking.startTimestamp,
+    0,
+  );
+
+  const existingEndMs = toMs(
+    booking.endDate,
+    booking.endTime,
+    booking.endTimestamp,
+    Number.MAX_SAFE_INTEGER,
+  );
+
+  // Reserved-flow source booking: allow only if new booking starts at/after source end.
+  if (
+    sourceReservedBookingId &&
+    String(booking.id) === String(sourceReservedBookingId)
+  ) {
+    return requestedStartMs < existingEndMs;
+  }
+
+  // Normal overlap rule.
+  return requestedStartMs < existingEndMs && requestedEndMs > existingStartMs;
+});
+
+if (hasConflict) {
+  setHideAnimation(false);
+  setShowUnitConflict(true);
+  setTimeout(() => {
+    setHideAnimation(true);
+    setTimeout(() => setShowUnitConflict(false), 400);
+  }, 5000);
+  return;
+}
 
     const duration = getRentalDuration(unitForm);
 
@@ -861,7 +943,8 @@ const RentalActivitySection = ({ subSection }) => {
       discountValue: Number(unitForm.discountValue || 0),
 
       // Include reservation toggle
-      reservation: !!unitForm.reservation,
+      // reservation: !!unitForm.reservation,
+      reservation: isReservedFlow,
 
       // Breakdown of pricing
       discountedRate,
@@ -899,6 +982,14 @@ const RentalActivitySection = ({ subSection }) => {
       });
       setReserveUnitId(null);
     }
+
+    setFormData((prev) => ({
+  ...prev,
+  [confirmUnitId]: {
+    ...(prev[confirmUnitId] || {}),
+    reservation: false,
+  },
+}));
 
     // 🟢 Merge new booking into existing paymentEntries first
     triggerAutoFill((prevPaymentEntries) => ({
@@ -1596,6 +1687,7 @@ const RentalActivitySection = ({ subSection }) => {
 
       {/* BOOKING FORM RENTAL DETAILS */}
       {showBookingConfirmOverlay && confirmUnitId && (
+        
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
             <button
@@ -1619,6 +1711,34 @@ const RentalActivitySection = ({ subSection }) => {
             <p className="confirm-text">
               Please review your booking details before proceeding.
             </p>
+{(() => {
+  const confirmUnit =
+    allUnitData.find((u) => u.id === confirmUnitId) ||
+    unitData.find((u) => u.id === confirmUnitId) ||
+    null;
+
+  const confirmPlate = String(confirmUnit?.plateNo || "")
+    .trim()
+    .toUpperCase();
+
+  const hasReservedSource =
+    !!confirmPlate &&
+    (activeBookings || []).some(
+      (booking) =>
+        String(booking?.plateNo || "").trim().toUpperCase() === confirmPlate &&
+        booking?.reservation === true &&
+        ["active", "pending"].includes(
+          String(booking?.status || "").toLowerCase(),
+        ),
+    );
+
+  const isReservedDraft = formData[confirmUnitId]?.reservation === true;
+
+  return isReservedDraft || hasReservedSource ? (
+    <div className="confirm-reserved-flag">Reserved Unit</div>
+  ) : null;
+})()}
+
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
