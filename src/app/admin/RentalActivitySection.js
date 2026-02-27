@@ -3276,7 +3276,6 @@ const RentalActivitySection = ({ subSection }) => {
         </div>
       )}
 
-
       {showCancelConfirm && (
         <div className="overlay-delete">
           <div className="confirm-modal">
