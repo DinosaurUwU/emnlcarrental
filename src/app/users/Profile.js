@@ -138,43 +138,124 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
 
   const [fetchedImages, setFetchedImages] = useState({});
 
+  // useEffect(() => {
+  //   if (!unitData || unitData.length === 0) return;
+
+  //   const fetchProfileImages = async () => {
+  //     const promises = unitData.map(async (unit) => {
+  //       if (!unit.imageId) return null;
+
+  //       try {
+  //         const { base64, updatedAt } = await fetchImageFromFirestore(
+  //           unit.imageId,
+  //         );
+
+  //         return { [unit.imageId]: { base64, updatedAt } };
+  //       } catch {
+  //         return {
+  //           [unit.imageId]: {
+  //             base64: "/assets/images/default.png",
+  //             updatedAt: Date.now(),
+  //           },
+  //         };
+  //       }
+  //     });
+
+  //     const results = await Promise.all(promises);
+
+  //     const merged = results
+  //       .filter(Boolean)
+  //       .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+
+  //     setFetchedImages((prev) => ({
+  //       ...prev,
+  //       ...merged,
+  //     }));
+  //   };
+
+  //   fetchProfileImages();
+  // }, [unitData, imageUpdateTrigger]);
+
   useEffect(() => {
-    if (!unitData || unitData.length === 0) return;
+  if (
+    (!unitData || unitData.length === 0) &&
+    (!userActiveRentals || userActiveRentals.length === 0) &&
+    (!userBookingRequests || userBookingRequests.length === 0) &&
+    (!userRentalHistory || userRentalHistory.length === 0)
+  ) {
+    return;
+  }
 
-    const fetchProfileImages = async () => {
-      const promises = unitData.map(async (unit) => {
-        if (!unit.imageId) return null;
+  const fetchProfileImages = async () => {
+    const imageIds = new Set();
 
+    unitData.forEach((unit) => {
+      if (unit?.imageId) imageIds.add(unit.imageId);
+
+      const plate = String(unit?.plateNo || "").trim();
+      if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
+    });
+
+    const allRentals = [
+      ...(userActiveRentals || []),
+      ...(userBookingRequests || []),
+      ...(userRentalHistory || []),
+    ];
+
+    allRentals.forEach((rental) => {
+      if (rental?.imageId) imageIds.add(rental.imageId);
+
+      const plate = String(rental?.plateNo || "").trim();
+      if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
+
+      const unitByName = unitData.find(
+        (u) =>
+          String(u?.name || "").trim().toLowerCase() ===
+          String(rental?.carName || "").trim().toLowerCase(),
+      );
+      if (unitByName?.imageId) imageIds.add(unitByName.imageId);
+    });
+
+    if (imageIds.size === 0) return;
+
+    const results = await Promise.all(
+      [...imageIds].map(async (id) => {
         try {
-          const { base64, updatedAt } = await fetchImageFromFirestore(
-            unit.imageId,
-          );
-
-          return { [unit.imageId]: { base64, updatedAt } };
+          const image = await fetchImageFromFirestore(id);
+          return image
+            ? { [id]: image }
+            : {
+                [id]: {
+                  base64: "/assets/images/default.png",
+                  updatedAt: Date.now(),
+                },
+              };
         } catch {
           return {
-            [unit.imageId]: {
+            [id]: {
               base64: "/assets/images/default.png",
               updatedAt: Date.now(),
             },
           };
         }
-      });
+      }),
+    );
 
-      const results = await Promise.all(promises);
+    setFetchedImages((prev) => ({
+      ...prev,
+      ...Object.assign({}, ...results.filter(Boolean)),
+    }));
+  };
 
-      const merged = results
-        .filter(Boolean)
-        .reduce((acc, cur) => ({ ...acc, ...cur }), {});
-
-      setFetchedImages((prev) => ({
-        ...prev,
-        ...merged,
-      }));
-    };
-
-    fetchProfileImages();
-  }, [unitData, imageUpdateTrigger]);
+  fetchProfileImages();
+}, [
+  unitData,
+  userActiveRentals,
+  userBookingRequests,
+  userRentalHistory,
+  imageUpdateTrigger,
+  fetchImageFromFirestore,
+]);
 
   useEffect(() => {
     if (user) {
@@ -927,6 +1008,10 @@ const closeProfileSuccess = () => {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
+
+            {selectedBooking?.reservation === true && (
+  <div className="profile-overlay-reserved-badge">Reserved Booking</div>
+)}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -2231,7 +2316,31 @@ const closeProfileSuccess = () => {
                         </div>
 
                         <div className="ongoing-unit-image-wrapper">
-                          {(() => {
+{(() => {
+  const normalizedPlate = String(rental?.plateNo || "")
+    .trim()
+    .toUpperCase();
+
+  const unit =
+    unitData.find(
+      (u) =>
+        String(u?.plateNo || "").trim().toUpperCase() === normalizedPlate,
+    ) ||
+    unitData.find(
+      (u) =>
+        String(u?.name || "").trim().toLowerCase() ===
+        String(rental?.carName || "").trim().toLowerCase(),
+    );
+
+  const imageId =
+    rental.imageId ||
+    unit?.imageId ||
+    (normalizedPlate ? `${normalizedPlate}_main` : null);
+
+  const image = imageId ? fetchedImages[imageId] : null;
+
+
+                          /* {(() => {
                             const unit = unitData.find(
                               (u) => u.plateNo === rental.plateNo,
                             );
@@ -2240,7 +2349,7 @@ const closeProfileSuccess = () => {
                               unit?.imageId ||
                               `${rental.plateNo}_main`;
 
-                            const image = fetchedImages[imageId];
+                            const image = fetchedImages[imageId]; */
 
                             return (
                               <img
@@ -2603,7 +2712,30 @@ const closeProfileSuccess = () => {
                         </div>
 
                         <div className="ongoing-unit-image-wrapper">
+
                           {(() => {
+  const normalizedPlate = String(rental?.plateNo || "")
+    .trim()
+    .toUpperCase();
+
+  const unit =
+    unitData.find(
+      (u) =>
+        String(u?.plateNo || "").trim().toUpperCase() === normalizedPlate,
+    ) ||
+    unitData.find(
+      (u) =>
+        String(u?.name || "").trim().toLowerCase() ===
+        String(rental?.carName || "").trim().toLowerCase(),
+    );
+
+  const imageId =
+    rental.imageId ||
+    unit?.imageId ||
+    (normalizedPlate ? `${normalizedPlate}_main` : null);
+
+  const image = imageId ? fetchedImages[imageId] : null;
+                          /* {(() => {
                             const unit = unitData.find(
                               (u) => u.plateNo === rental.plateNo,
                             );
@@ -2612,7 +2744,7 @@ const closeProfileSuccess = () => {
                               unit?.imageId ||
                               `${rental.plateNo}_main`;
 
-                            const image = fetchedImages[imageId];
+                            const image = fetchedImages[imageId]; */
 
                             return (
                               <img
@@ -2837,6 +2969,10 @@ const closeProfileSuccess = () => {
                 <p className="confirm-text">
                   Detailed information about this rental.
                 </p>
+
+                {selectedHistoryRental?.reservation === true && (
+  <div className="profile-overlay-reserved-badge">Reserved Booking</div>
+)}
 
                 <div className="admin-confirm-details">
                   <div className="admin-confirm-scroll-container">

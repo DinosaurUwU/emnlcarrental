@@ -1514,6 +1514,19 @@ body.modal-open {
   pointer-events: none;
 }
 
+.profile-overlay-reserved-badge {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #6c757d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
 @media (max-width: 1100px) {
   .profile-main {
     flex-direction: column;
