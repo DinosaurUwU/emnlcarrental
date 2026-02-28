@@ -2077,6 +2077,10 @@ if (!user) {
               Please review your booking details before proceeding.
             </p>
 
+            {bookingPreviewData?.reservation === true && (
+  <div className="confirm-reserved-badge">Reserved Booking</div>
+)}
+
             <div className="confirm-details">
               <div className="confirm-scroll-container">
                 <div className="confirm-details">

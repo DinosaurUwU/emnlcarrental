@@ -2261,6 +2261,10 @@ const closeProfileSuccess = () => {
                           {rental.status}
                         </span>
 
+                        {rental.reservation === true && (
+  <span className="profile-reserved-booking-badge">Reserved Booking</span>
+)}
+
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -2628,6 +2632,9 @@ const closeProfileSuccess = () => {
                         >
                           {rental.status}
                         </span>
+                        {rental.reservation === true && (
+  <span className="profile-reserved-booking-badge">Reserved Booking</span>
+)}
 
                         <button
                           className="ongoing-unit-details-button"
