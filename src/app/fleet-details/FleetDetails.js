@@ -1541,14 +1541,25 @@ const isUnitBooked = (car) => {
                   className="view-details"
                   onClick={(event) => {
                     openBooking(event, {
-                      carName: expandedCard.name,
-                      carType: expandedCard.carType,
-                      image:
-                        fetchedImages[expandedCard.imageId]?.base64 ||
-                        "/assets/images/default.png",
-                      drivingOption: "Self-Drive",
-                      pickupOption: "Pickup",
-                    });
+  carId: expandedCard.id,
+  carName: expandedCard.name,
+  carType: expandedCard.carType,
+  image:
+    fetchedImages[expandedCard.imageId]?.base64 ||
+    "/assets/images/default.png",
+  drivingOption: "Self-Drive",
+  pickupOption: "Pickup",
+  isReservedRequest: isUnitBooked(expandedCard),
+});
+                    // openBooking(event, {
+                    //   carName: expandedCard.name,
+                    //   carType: expandedCard.carType,
+                    //   image:
+                    //     fetchedImages[expandedCard.imageId]?.base64 ||
+                    //     "/assets/images/default.png",
+                    //   drivingOption: "Self-Drive",
+                    //   pickupOption: "Pickup",
+                    // });
                   }}
                 >
                   Book Now

@@ -197,6 +197,8 @@ useEffect(() => {
 
   const [filteredUnits, setFilteredUnits] = useState(allUnitData || []);
   const selectedUnit = allUnitData.find((unit) => unit.id === selectedCarId);
+  const lockedReservedRequest = Boolean(prefillData?.isReservedRequest);
+const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedRequest);
 
   useEffect(() => {
     if (!allUnitData || allUnitData.length === 0) {
@@ -640,22 +642,42 @@ useEffect(() => {
     // Car selection
     setSelectedCarType(prefillData.carType || "ALL");
 
-    if (prefillData.carId) {
-      const unitById = unitData.find((u) => u.id === prefillData.carId);
-      if (unitById) {
-        setSelectedCarId(unitById.id);
-      } else {
-        setSelectedCarId(prefillData.carId);
-      }
-    }
+    // if (prefillData.carId) {
+    //   const unitById = unitData.find((u) => u.id === prefillData.carId);
+    //   if (unitById) {
+    //     setSelectedCarId(unitById.id);
+    //   } else {
+    //     setSelectedCarId(prefillData.carId);
+    //   }
+    // }
 
-    // Fallback: also look for carName if provided
-    if (prefillData.carName) {
-      const unitByName = unitData.find((u) => u.name === prefillData.carName);
-      if (unitByName) {
-        setSelectedCarId(unitByName.id);
-      }
-    }
+    // // Fallback: also look for carName if provided
+    // if (prefillData.carName) {
+    //   const unitByName = unitData.find((u) => u.name === prefillData.carName);
+    //   if (unitByName) {
+    //     setSelectedCarId(unitByName.id);
+    //   }
+    // }
+
+    if (prefillData.carId) {
+  const unitById =
+    allUnitData.find((u) => u.id === prefillData.carId) ||
+    unitData.find((u) => u.id === prefillData.carId);
+
+  if (unitById) {
+    setSelectedCarId(unitById.id);
+  } else {
+    setSelectedCarId(prefillData.carId);
+  }
+} else if (prefillData.carName) {
+  const unitByName =
+    allUnitData.find((u) => u.name === prefillData.carName) ||
+    unitData.find((u) => u.name === prefillData.carName);
+
+  if (unitByName) {
+    setSelectedCarId(unitByName.id);
+  }
+}
 
     // Drive/Drop options
     setDriveType(prefillData.drivingOption || "Self-Drive");
@@ -692,8 +714,13 @@ useEffect(() => {
     }
 
     // Image handling
-    const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
-                         unitData.find((u) => u.name === prefillData.carName);
+    // const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
+    //                      unitData.find((u) => u.name === prefillData.carName);
+    const selectedUnit =
+  allUnitData.find((u) => u.id === prefillData.carId) ||
+  allUnitData.find((u) => u.name === prefillData.carName) ||
+  unitData.find((u) => u.id === prefillData.carId) ||
+  unitData.find((u) => u.name === prefillData.carName);
     if (selectedUnit?.imageId) {
       fetchImageFromFirestore(selectedUnit.imageId)
         .then(({ base64 }) => {
@@ -786,13 +813,37 @@ useEffect(() => {
 
 
 
+// useEffect(() => {
+//   if (prefillData?.carId && unitData.length > 0 && selectedCarId !== prefillData.carId) {
+//     const unitById = unitData.find((u) => u.id === prefillData.carId);
+//     if (unitById) {
+//       setSelectedCarId(unitById.id);
+      
+//       // Also update image
+//       if (unitById.imageId) {
+//         fetchImageFromFirestore(unitById.imageId)
+//           .then(({ base64 }) => {
+//             setPreviewImage(base64 || "/assets/images/image1.png");
+//           })
+//           .catch(() => {
+//             setPreviewImage("/assets/images/image1.png");
+//           });
+//       }
+//     }
+//   }
+// }, [unitData, prefillData]);
+
 useEffect(() => {
-  if (prefillData?.carId && unitData.length > 0 && selectedCarId !== prefillData.carId) {
-    const unitById = unitData.find((u) => u.id === prefillData.carId);
+  if (!prefillData || allUnitData.length === 0) return;
+
+  if (prefillData.carId && selectedCarId !== prefillData.carId) {
+    const unitById =
+      allUnitData.find((u) => u.id === prefillData.carId) ||
+      unitData.find((u) => u.id === prefillData.carId);
+
     if (unitById) {
       setSelectedCarId(unitById.id);
-      
-      // Also update image
+
       if (unitById.imageId) {
         fetchImageFromFirestore(unitById.imageId)
           .then(({ base64 }) => {
@@ -803,8 +854,19 @@ useEffect(() => {
           });
       }
     }
+    return;
   }
-}, [unitData, prefillData]);
+
+  if (!prefillData.carId && prefillData.carName && !selectedCarId) {
+    const unitByName =
+      allUnitData.find((u) => u.name === prefillData.carName) ||
+      unitData.find((u) => u.name === prefillData.carName);
+
+    if (unitByName) {
+      setSelectedCarId(unitByName.id);
+    }
+  }
+}, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
 
 
   // useEffect(() => {
@@ -935,7 +997,10 @@ useEffect(() => {
     }, []);
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    const selectedUnit =
+  allUnitData.find((unit) => unit.id === selectedCarId) ||
+  unitData.find((unit) => unit.id === selectedCarId);
 
     return (
       <div className="quotation-summary">
@@ -1040,7 +1105,10 @@ useEffect(() => {
     const end = endDate ? new Date(`${endDate}T${endTime || "10:00"}`) : null;
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    const selectedUnit =
+  allUnitData.find((unit) => unit.id === selectedCarId) ||
+  unitData.find((unit) => unit.id === selectedCarId);
 
     let diffDays = 1;
     let extraHours = 0;
@@ -1129,7 +1197,10 @@ useEffect(() => {
     if (!selectedCarId) return "";
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    const selectedUnit =
+  allUnitData.find((unit) => unit.id === selectedCarId) ||
+  unitData.find((unit) => unit.id === selectedCarId);
 
     if (!selectedUnit) return "";
 
@@ -1192,7 +1263,10 @@ useEffect(() => {
     const extraHours = Math.round(diffHours % 24);
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    const selectedUnit =
+  allUnitData.find((unit) => unit.id === selectedCarId) ||
+  unitData.find((unit) => unit.id === selectedCarId);
 
     const extraHourCharge =
       extraHours > 0 ? extraHours * (selectedUnit?.extension || 0) : 0;
@@ -1238,7 +1312,10 @@ useEffect(() => {
     }
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+    const selectedUnit =
+  allUnitData.find((unit) => unit.id === selectedCarId) ||
+  unitData.find((unit) => unit.id === selectedCarId);
 
     if (!selectedUnit) return;
 
@@ -1332,6 +1409,7 @@ useEffect(() => {
       totalPrice: total,
       totalDurationInSeconds,
       startTimestamp,
+      reservation: isReservedUnitSelected,
 
       isEditing: isEditing && !isRejected,
       isResubmitting: isRejected,
@@ -2282,13 +2360,13 @@ if (!user) {
             <div className="fill-up-form">
               <h3 className="fixed-header">FILL-UP FORM</h3>
 
-
               <div className="form-row car-selection-row">
                 <div>
                   <label className="pickacar">Car Type:</label>
                   <select
                     value={selectedCarType}
                     onChange={(e) => setSelectedCarType(e.target.value)}
+                    disabled={lockedReservedRequest}
                   >
                     <option value="ALL">ALL</option>
                     <option value="SEDAN">SEDAN</option>
@@ -2300,7 +2378,10 @@ if (!user) {
                 </div>
 
                 <div>
-                  <label className="pickacar">Pick a Car:</label>
+                  <label className="pickacar">Pick a Car:                   {isReservedUnitSelected && (
+  <span className="reserved-unit-inline-badge">Reservation</span>
+)}</label>
+
 
                   <select
                     value={selectedCarId}
@@ -2339,6 +2420,7 @@ if (!user) {
                       }
                     }}
                     required
+                    disabled={lockedReservedRequest}
                   >
                     <option value="" disabled hidden>
                       Pick a Car
