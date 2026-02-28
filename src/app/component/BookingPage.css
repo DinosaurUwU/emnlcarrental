@@ -467,6 +467,18 @@
   border-top: 2px solid var(--accent-color);
 }
 
+.reserved-unit-inline-badge {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #6c757d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
 .form-row input,
 .form-row select {
   flex: 1;
