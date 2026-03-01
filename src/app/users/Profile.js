@@ -133,6 +133,7 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
 
+  
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);
 
