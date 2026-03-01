@@ -133,7 +133,6 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
 
-  
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);
 
@@ -1010,13 +1009,28 @@ const closeProfileSuccess = () => {
               Detailed information about this rental.
             </p>
 
-            {selectedBooking?.reservation === true && (
-  <div className="profile-overlay-reserved-badge">Reserved Booking</div>
-)}
+<div className="profile-overlay-badge-row">
+  {selectedBooking?.reservation === true && (
+    <div className="profile-overlay-reserved-badge">Reserved Booking</div>
+  )}
+
+  {typeof selectedBooking?.status === "string" && (
+    <div className={`profile-overlay-status-badge status-${selectedBooking.status.toLowerCase()}`}>
+      {selectedBooking.status}
+    </div>
+  )}
+</div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
+                  <div className="confirm-row">
+                    <strong className="confirm-label">Rejection Reason:</strong>
+                    <span className="confirm-value" style={{color: "#dc3545"}}>
+                      {selectedBooking.rejectionReason || "None"}
+                    </span>
+                  </div>
+
                   <div className="confirm-row">
                     <strong className="confirm-label">Car Selected:</strong>
                     <span className="confirm-value">
@@ -2375,6 +2389,12 @@ const closeProfileSuccess = () => {
   <span className="profile-reserved-booking-badge">Reserved Booking</span>
 )}
 
+{typeof rental.status === "string" && (
+  <span className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}>
+    {rental.status}
+  </span>
+)}
+
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -2769,6 +2789,8 @@ const closeProfileSuccess = () => {
   <span className="profile-reserved-booking-badge">Reserved Booking</span>
 )}
 
+
+
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -2973,6 +2995,12 @@ const closeProfileSuccess = () => {
 
                 {selectedHistoryRental?.reservation === true && (
   <div className="profile-overlay-reserved-badge">Reserved Booking</div>
+)}
+
+{typeof selectedHistoryRental?.status === "string" && (
+  <span className={`profile-reserved-booking-badge status-${selectedHistoryRental.status.toLowerCase()}`}>
+    {selectedHistoryRental.status}
+  </span>
 )}
 
                 <div className="admin-confirm-details">

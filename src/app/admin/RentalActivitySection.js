@@ -7737,6 +7737,12 @@ try {
                             Edit
                           </button>
 
+                          {rental.reservation === true && (
+  <span className="edit-unit-status-badge request-reserved-badge">
+    Reserved Booking
+  </span>
+)}
+
                           <button
                             className="ongoing-unit-details-button"
                             onClick={() => {

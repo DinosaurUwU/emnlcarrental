@@ -1516,7 +1516,7 @@ body.modal-open {
 
 .profile-overlay-reserved-badge {
   display: inline-block;
-  margin: 0 0 10px;
+  margin: 0 0 0px;
   padding: 5px 12px;
   border-radius: 999px;
   background: #6c757d;
@@ -1525,6 +1525,38 @@ body.modal-open {
   font-weight: 700;
   letter-spacing: 0.2px;
   text-transform: uppercase;
+}
+
+.profile-overlay-badge-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.profile-overlay-status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.profile-overlay-status-badge.status-pending {
+  background: #ffc107;
+  color: #1f1f1f;
+}
+
+.profile-overlay-status-badge.status-active {
+  background: #198754;
+}
+
+.profile-overlay-status-badge.status-rejected {
+  background: #dc3545;
 }
 
 @media (max-width: 1100px) {

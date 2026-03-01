@@ -571,6 +571,12 @@
   background-color: var(--supporting-color);
 }
 
+.request-reserved-badge {
+  left: 65px;
+  background-color: #6c757d;
+  pointer-events: none;
+}
+
 .ongoing-unit-action-buttons {
   display: flex;
   justify-content: space-between;
