@@ -1015,8 +1015,8 @@ const closeProfileSuccess = () => {
   )}
 
   {typeof selectedBooking?.status === "string" && (
-    <div className={`profile-overlay-status-badge status-${selectedBooking.status.toLowerCase()}`}>
-      {selectedBooking.status}
+    <div className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}>
+      {selectedBooking?.status}
     </div>
   )}
 </div>
@@ -2999,8 +2999,8 @@ const closeProfileSuccess = () => {
 )}
 
 {typeof selectedHistoryRental?.status === "string" && (
-  <span className={`profile-reserved-booking-badge status-${selectedHistoryRental.status.toLowerCase()}`}>
-    {selectedHistoryRental.status}
+  <span className={`profile-reserved-booking-badge status-${selectedHistoryRental?.status.toLowerCase()}`}>
+    {selectedHistoryRental?.status}
   </span>
 )}
 

@@ -2406,9 +2406,17 @@ try {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
-            {selectedBooking?.reservation === true && (
-  <div className="confirm-reserved-flag">Reserved Booking</div>
-)}
+<div className="confirm-flag-row">
+  {selectedBooking?.reservation === true && (
+    <div className="confirm-reserved-flag">Reserved Booking</div>
+  )}
+
+  {typeof selectedBooking?.status === "string" && (
+    <div className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}>
+      {selectedBooking.status}
+    </div>
+  )}
+</div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -2904,9 +2912,17 @@ try {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
-            {selectedBooking?.reservation === true && (
-  <div className="confirm-reserved-flag">Reserved Booking</div>
-)}
+<div className="confirm-flag-row">
+  {selectedBooking?.reservation === true && (
+    <div className="confirm-reserved-flag">Reserved Booking</div>
+  )}
+
+  {typeof selectedBooking?.status === "string" && (
+    <div className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}>
+      {selectedBooking.status}
+    </div>
+  )}
+</div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -7891,23 +7907,25 @@ try {
                           })()}
                         </div>
 
-                        <span
-                          className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-                        >
-                          {rental.status}
-                        </span>
-
-                        {rental.reservation === true && (
-  <span className="ongoing-unit-status-badge reserved-booking">
-    Reserved Booking
+<div className="ongoing-unit-status-row">
+  <span
+    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+  >
+    {rental.status}
   </span>
-)}
 
-{rental.reservationConflict === true && (
-                          <span className="ongoing-unit-status-badge reservation-conflict">
-                            Conflict
-                          </span>
-                        )}
+  {rental.reservation === true && (
+    <span className="ongoing-unit-status-badge reserved-booking">
+      Reserved Booking
+    </span>
+  )}
+
+  {rental.reservationConflict === true && (
+    <span className="ongoing-unit-status-badge reservation-conflict">
+      Conflict
+    </span>
+  )}
+</div>
 
                         <button
                           className="ongoing-unit-details-button"
@@ -9420,29 +9438,31 @@ onClick={() => {
                       })()}
                     </div>
 
-                    <span
-                      className={`ongoing-unit-status-badge ${
-                        booking.balanceDue === 0 ? "paid" : "unpaid"
-                      }`}
-                    >
-                      {booking.status === "Completed"
-                        ? booking.balanceDue === 0
-                          ? "Pending for ( Mark as Paid )"
-                          : "Unpaid"
-                        : booking.status}
-                    </span>
-
-                    {booking?.reservation === true && (
-  <span className="ongoing-unit-status-badge reserved-booking">
-    Reserved Booking
+<div className="ongoing-unit-status-row">
+  <span
+    className={`ongoing-unit-status-badge ${
+      booking.balanceDue === 0 ? "paid" : "unpaid"
+    }`}
+  >
+    {booking.status === "Completed"
+      ? booking.balanceDue === 0
+        ? "Pending for ( Mark as Paid )"
+        : "Unpaid"
+      : booking.status}
   </span>
-)}
 
-{booking?.reservationConflict === true && (
-                      <span className="ongoing-unit-status-badge reservation-conflict">
-                        Conflict
-                      </span>
-                    )}
+  {booking?.reservation === true && (
+    <span className="ongoing-unit-status-badge reserved-booking">
+      Reserved Booking
+    </span>
+  )}
+
+  {booking?.reservationConflict === true && (
+    <span className="ongoing-unit-status-badge reservation-conflict">
+      Conflict
+    </span>
+  )}
+</div>
 
 
                     <button

@@ -519,6 +519,30 @@
   pointer-events: none;
 }
 
+.ongoing-unit-status-row {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.ongoing-unit-status-row .ongoing-unit-status-badge {
+  position: static;
+  margin: 0;
+}
+
+.ongoing-unit-status-row .ongoing-unit-status-badge.reserved-booking {
+  left: auto;
+}
+
+.ongoing-unit-status-row .ongoing-unit-status-badge.reservation-conflict {
+  left: auto;
+}
+
 .ongoing-unit-status-badge.pending {
   background-color: #ffc107;
 }
@@ -1591,6 +1615,40 @@
   color: #fff;
   background-color: #6c757d;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-flag-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.confirm-status-flag {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-status-flag.status-pending {
+  background-color: #ffc107;
+  color: #1f1f1f;
+}
+
+.confirm-status-flag.status-active {
+  background-color: #198754;
+}
+
+.confirm-status-flag.status-rejected {
+  background-color: #dc3545;
 }
 
 .admin-confirm-scroll-container {
