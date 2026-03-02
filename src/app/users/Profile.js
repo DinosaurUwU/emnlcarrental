@@ -2994,6 +2994,7 @@ const closeProfileSuccess = () => {
                   Detailed information about this rental.
                 </p>
 
+
                 {selectedHistoryRental?.reservation === true && (
   <div className="profile-overlay-reserved-badge">Reserved Booking</div>
 )}
