@@ -2735,6 +2735,7 @@ const closeProfileSuccess = () => {
 
                         <div className="ongoing-unit-image-wrapper">
 
+
                           {(() => {
   const normalizedPlate = String(rental?.plateNo || "")
     .trim()
