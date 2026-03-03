@@ -2380,6 +2380,7 @@ const closeProfileSuccess = () => {
                           })()}
                         </div>
 
+
 <div className="profile-status-row">
   <span
     className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
