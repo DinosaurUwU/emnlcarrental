@@ -2380,22 +2380,25 @@ const closeProfileSuccess = () => {
                           })()}
                         </div>
 
-                        <span
-                          className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-                        >
-                          {rental.status}
-                        </span>
-
-                        {rental.reservation === true && (
-  <span className="profile-reserved-booking-badge">Reserved Booking</span>
-)}
-
-{typeof rental.status === "string" && (
-  <span className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}>
+<div className="profile-status-row">
+  <span
+    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+  >
     {rental.status}
   </span>
-)}
 
+  {rental.reservation === true && (
+    <span className="profile-reserved-booking-badge">Reserved Booking</span>
+  )}
+
+  {typeof rental.status === "string" && (
+    <span
+      className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}
+    >
+      {rental.status}
+    </span>
+  )}
+</div>
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -2783,14 +2786,17 @@ const closeProfileSuccess = () => {
                           })()}
                         </div>
 
-                        <span
-                          className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-                        >
-                          {rental.status}
-                        </span>
-                        {rental.reservation === true && (
-  <span className="profile-reserved-booking-badge">Reserved Booking</span>
-)}
+<div className="profile-status-row">
+  <span
+    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+  >
+    {rental.status}
+  </span>
+
+  {rental.reservation === true && (
+    <span className="profile-reserved-booking-badge">Reserved Booking</span>
+  )}
+</div>
 
 
 
@@ -2997,15 +3003,19 @@ const closeProfileSuccess = () => {
                 </p>
 
 
-                {selectedHistoryRental?.reservation === true && (
-  <div className="profile-overlay-reserved-badge">Reserved Booking</div>
-)}
+<div className="profile-overlay-badge-row">
+  {selectedHistoryRental?.reservation === true && (
+    <div className="profile-overlay-reserved-badge">Reserved Booking</div>
+  )}
 
-{typeof selectedHistoryRental?.status === "string" && (
-  <span className={`profile-reserved-booking-badge status-${selectedHistoryRental?.status.toLowerCase()}`}>
-    {selectedHistoryRental?.status}
-  </span>
-)}
+  {typeof selectedHistoryRental?.status === "string" && (
+    <span
+      className={`profile-overlay-status-badge status-${selectedHistoryRental.status.toLowerCase()}`}
+    >
+      {selectedHistoryRental.status}
+    </span>
+  )}
+</div>
 
                 <div className="admin-confirm-details">
                   <div className="admin-confirm-scroll-container">
