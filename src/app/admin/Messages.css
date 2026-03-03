@@ -161,14 +161,15 @@ body.modal-open {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s;
-  border-left: 4px solid var(--accent-color);
+  border-left: 5px solid var(--accent-color);
   box-shadow: 0 0 5px var(--accent-color);
   transition: all 0.5s ease;
 }
 
 .message-item:hover {
-  background: #ddd;
+  background: #c2f8c3;
   box-shadow: 0 0 10px var(--accent-color);
+    border-left: 5px solid #28a745;
 }
 
 /* Profile Picture */
@@ -187,7 +188,7 @@ body.modal-open {
   align-items: center;
   gap: 10px;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-color);
 }
 
 .message-name {

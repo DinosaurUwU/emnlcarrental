@@ -50,7 +50,6 @@ const Login = () => {
     }, 400);
   };
 
-  
   const setCarouselInterval = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
@@ -71,29 +70,23 @@ const Login = () => {
   // Google Login Only
   // =========================
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsSubmitting(true);
-      await signInWithPopup(auth, provider);
-      // UserContext onAuthStateChanged will handle user state
-    } catch (error) {
-      setIsSubmitting(false);
-
-      // Handle popup closed by user - respond fast, no overlay
-      if (error.code === "auth/popup-closed-by-user") {
-        console.log("ℹ️ User closed the popup");
-        // Still show overlay for closed popup
-        setErrorMessage("Sign-in was cancelled");
-        setShowErrorOverlay(true);
-        return;
-      }
-
-      // Show overlay for real errors
+const handleGoogleSignIn = async () => {
+  try {
+    setIsSubmitting(true);
+    await signInWithPopup(auth, provider);
+    // onIdTokenChanged in UserContext will handle route/user setup
+  } catch (error) {
+    if (error.code === "auth/popup-closed-by-user") {
+      setErrorMessage("Sign-in was cancelled");
+    } else {
       console.error("Google Sign-In Error:", error);
       setErrorMessage(error.message || "Google Sign-In failed");
-      setShowErrorOverlay(true);
     }
-  };
+    setShowErrorOverlay(true);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const closeErrorOverlay = () => {
     setShowErrorOverlay(false);
