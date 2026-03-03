@@ -133,11 +133,12 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
 
-  const [adminMeta, setAdminMeta] = useState({
+const [adminMeta, setAdminMeta] = useState({
   uid: "",
   name: "",
   email: "",
   contact: "",
+  profilePic: "/assets/profile.png",
 });
 
 useEffect(() => {
@@ -147,12 +148,13 @@ useEffect(() => {
     const admin = await fetchAdminUid();
     if (!mounted || !admin) return;
 
-    setAdminMeta({
-      uid: admin.uid || "",
-      name: admin.name || "",
-      email: admin.email || "",
-      contact: admin.contact || "",
-    });
+setAdminMeta({
+  uid: admin.uid || "",
+  name: admin.name || "",
+  email: admin.email || "",
+  contact: admin.contact || "",
+  profilePic: admin.profilePic || "/assets/profile.png",
+});
   };
 
   loadAdminMeta();
@@ -862,30 +864,33 @@ setShowProfileWarning(true);
   const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
   const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
 
-  const participant = incoming
+const participant = incoming
+  ? {
+      name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
+      email: incoming?.email || adminMeta.email || "No email",
+      contact: incoming?.contact || adminMeta.contact || "No contact",
+      profilePic:
+        incoming?.profilePic ||
+        adminMeta.profilePic ||
+        "/assets/profile.png",
+    }
+  : outgoing
     ? {
-        name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
-        email: incoming?.email || adminMeta.email || "No email",
-        contact: incoming?.contact || adminMeta.contact || "No contact",
-        profilePic: incoming?.profilePic || "/assets/profile.png",
+        name:
+          outgoing?.recipientName ||
+          outgoing?.recipientEmail ||
+          adminMeta.name ||
+          "Admin",
+        email: outgoing?.recipientEmail || adminMeta.email || "No email",
+        contact: outgoing?.recipientContact || adminMeta.contact || "No contact",
+        profilePic: adminMeta.profilePic || "/assets/profile.png",
       }
-    : outgoing
-      ? {
-          name:
-            outgoing?.recipientName ||
-            outgoing?.recipientEmail ||
-            adminMeta.name ||
-            "Admin",
-          email: outgoing?.recipientEmail || adminMeta.email || "No email",
-          contact: outgoing?.recipientPhone || adminMeta.contact || "No contact",
-          profilePic: outgoing?.profilePic || "/assets/profile.png",
-        }
-      : {
-          name: adminMeta.name || "Admin",
-          email: adminMeta.email || "No email",
-          contact: adminMeta.contact || "No contact",
-          profilePic: "/assets/profile.png",
-        };
+    : {
+        name: adminMeta.name || "Admin",
+        email: adminMeta.email || "No email",
+        contact: adminMeta.contact || "No contact",
+        profilePic: adminMeta.profilePic || "/assets/profile.png",
+      };
 
   return {
     id: resolvedAdminUid,
@@ -2288,7 +2293,7 @@ const closeProfileSuccess = () => {
                           <div className="message-name">{message.name}</div>
                           <div className="message-contact">
                             <span className="message-email">{message.email}</span>
-                            <span className="message-phone">Notification</span>
+                            <span className="message-phone">{" "}Notification</span>
                           </div>
                           <div className="message-date">
                             {formatMessageTimestamp(message)}
@@ -2297,11 +2302,15 @@ const closeProfileSuccess = () => {
                       </div>
 
                       <div className="message-text">
-                        {message.content
-                          ? message.content.replace(/<[^>]+>/g, "").substring(0, 90) +
-                            (message.content.length > 90 ? "..." : "")
-                          : ""}
-                      </div>
+  {message.content
+    ? message.content
+        .replace(/<br\s*\/?>/gi, " ")
+        .replace(/<\/p>/gi, " ")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    : ""}
+</div>
                     </div>
                   ))
                 ) : (

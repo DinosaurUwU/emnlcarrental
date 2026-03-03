@@ -38,6 +38,9 @@ const Messages = () => {
 
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [chatInput, setChatInput] = useState("");
+  const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
+  useState(false);
+const [threadToDelete, setThreadToDelete] = useState(null);
 
   const notificationMessages = useMemo(() => {
     return [...(userMessages || [])]
@@ -166,6 +169,40 @@ const Messages = () => {
       }
     });
   };
+
+  const deleteConversationThread = async (thread) => {
+  if (!thread?.id) return;
+
+  const inboxIds = (thread.messages || [])
+    .filter((m) => m?._source === "inbox" && m?.id)
+    .map((m) => m.id);
+
+  const sentIds = (thread.messages || [])
+    .filter((m) => m?._source === "sentbox" && m?.id)
+    .map((m) => m.id);
+
+  if (inboxIds.length > 0) {
+    await deleteMessage(inboxIds, "inbox");
+  }
+
+  if (sentIds.length > 0) {
+    await deleteMessage(sentIds, "sentbox");
+  }
+
+  const deletedCount = inboxIds.length + sentIds.length;
+  handleMessagesDeleted(deletedCount > 0 ? deletedCount : 1);
+
+  if (selectedConversationId === thread.id) {
+    setSelectedConversationId(null);
+    setChatInput("");
+  }
+
+  setShowDeleteConversationOverlay(false);
+  setThreadToDelete(null);
+};
+
+
+
 
   const sendConversationMessage = () => {
     if (!chatInput.trim()) return;
@@ -599,13 +636,13 @@ const Messages = () => {
                     </div>
 
                     <p className="message-preview">
-                      {(() => {
-                        const cleanText = (message.content || "").replace(/<[^>]+>/g, "");
-                        return cleanText.length > 90
-                          ? `${cleanText.substring(0, 90)}...`
-                          : cleanText;
-                      })()}
-                    </p>
+  {(message.content || "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/p>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim()}
+</p>
                   </div>
                 ))
               ) : (
@@ -652,18 +689,40 @@ const Messages = () => {
                             alt="Avatar"
                             className="avatar"
                           />
-                          <div className="thread-texts">
-                            <div className="thread-top-row">
-                              <div className="thread-name">{thread.participant.name}</div>
-                              <div className="thread-time">
-                                {formatElapsed(thread.latest)}
-                              </div>
-                            </div>
-                            <div className="thread-preview">{lastText || "No message"}</div>
-                          </div>
-                          {thread.unreadCount > 0 && (
-                            <span className="thread-unread-badge">{thread.unreadCount}</span>
-                          )}
+<div className="thread-texts">
+  <div className="thread-top-row">
+    <div className="thread-name">{thread.participant.name}</div>
+    <div className="thread-time">{formatElapsed(thread.latest)}</div>
+  </div>
+
+  <div className="thread-bottom-row">
+    <div className="thread-preview">{lastText || "No message"}</div>
+    {thread.unreadCount > 0 && (
+      <span className="thread-unread-badge">{thread.unreadCount}</span>
+    )}
+  </div>
+</div>
+
+<div className="thread-row-actions">
+  <button
+    type="button"
+    className="thread-delete-btn"
+    title="Delete conversation"
+    onClick={(e) => {
+      e.stopPropagation();
+      setThreadToDelete(thread);
+      setShowDeleteConversationOverlay(true);
+    }}
+  >
+    <img
+      src="/assets/delete.png"
+      alt="Delete conversation"
+      className="message-action-icon"
+      onMouseEnter={(e) => (e.currentTarget.src = "/assets/delete-hover.png")}
+      onMouseLeave={(e) => (e.currentTarget.src = "/assets/delete.png")}
+    />
+  </button>
+</div>
                         </div>
                       </div>
                     );
@@ -797,6 +856,35 @@ const Messages = () => {
             </div>
           </div>
         )}
+
+        {showDeleteConversationOverlay && threadToDelete && (
+  <div className="overlay-revert">
+    <div className="confirm-modal">
+      <h3>Delete Conversation</h3>
+      <p>
+        This will delete all messages in this conversation from your admin inbox
+        and sentbox. Continue?
+      </p>
+      <div className="confirm-buttons">
+        <button
+          className="confirm-btn revert"
+          onClick={() => deleteConversationThread(threadToDelete)}
+        >
+          Yes, Delete
+        </button>
+        <button
+          className="confirm-btn cancel"
+          onClick={() => {
+            setShowDeleteConversationOverlay(false);
+            setThreadToDelete(null);
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
         {showMessagesDeletedOverlay && (
           <div

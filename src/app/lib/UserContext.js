@@ -1989,37 +1989,75 @@ Call them now to check if they want to extend. If no response, call them when re
 
   // (ADMIN) FETCH ADMINUID FOR CONTACT.JS
   const fetchAdminUid = async () => {
-    try {
-      const settingsRef = doc(db, "config", "appSettings");
-      const settingsSnap = await getDoc(settingsRef);
+  try {
+    const settingsRef = doc(db, "config", "appSettings");
+    const settingsSnap = await getDoc(settingsRef);
 
-      if (settingsSnap.exists()) {
-        const data = settingsSnap.data();
-        const uid = data.adminUid;
-        const name = data.adminName;
-        const email = data.adminEmail;
-        const contact = data.adminContact;
+    if (settingsSnap.exists()) {
+      const data = settingsSnap.data();
+      const uid = data.adminUid;
+      const name = data.adminName;
+      const email = data.adminEmail;
+      const contact = data.adminContact;
 
-        if (uid) {
-          setAdminUid(uid);
-          setAdminName(name);
-          setAdminEmail(email);
-          setAdminContact(contact);
-
-          return { uid, name, email, contact };
-        } else {
-          console.warn("⚠️ adminUid field is missing in appSettings.");
-          return null;
+      if (uid) {
+        let profilePic = "/assets/profile.png";
+        const adminUserSnap = await getDoc(doc(db, "users", uid));
+        if (adminUserSnap.exists()) {
+          profilePic = adminUserSnap.data()?.profilePic || "/assets/profile.png";
         }
+
+        setAdminUid(uid);
+        setAdminName(name);
+        setAdminEmail(email);
+        setAdminContact(contact);
+
+        return { uid, name, email, contact, profilePic };
       } else {
-        console.warn("⚠️ appSettings document does not exist.");
+        console.warn("⚠️ adminUid field is missing in appSettings.");
         return null;
       }
-    } catch (err) {
-      console.error("🔥 Error fetching admin UID from appSettings:", err);
+    } else {
+      console.warn("⚠️ appSettings document does not exist.");
       return null;
     }
-  };
+  } catch (err) {
+    console.error("🔥 Error fetching admin UID from appSettings:", err);
+    return null;
+  }
+};
+  // const fetchAdminUid = async () => {
+  //   try {
+  //     const settingsRef = doc(db, "config", "appSettings");
+  //     const settingsSnap = await getDoc(settingsRef);
+
+  //     if (settingsSnap.exists()) {
+  //       const data = settingsSnap.data();
+  //       const uid = data.adminUid;
+  //       const name = data.adminName;
+  //       const email = data.adminEmail;
+  //       const contact = data.adminContact;
+
+  //       if (uid) {
+  //         setAdminUid(uid);
+  //         setAdminName(name);
+  //         setAdminEmail(email);
+  //         setAdminContact(contact);
+
+  //         return { uid, name, email, contact };
+  //       } else {
+  //         console.warn("⚠️ adminUid field is missing in appSettings.");
+  //         return null;
+  //       }
+  //     } else {
+  //       console.warn("⚠️ appSettings document does not exist.");
+  //       return null;
+  //     }
+  //   } catch (err) {
+  //     console.error("🔥 Error fetching admin UID from appSettings:", err);
+  //     return null;
+  //   }
+  // };
 
   // (ADMIN GLOBAL) FETCH ADMINUID FOR GLOBAL USE
   useEffect(() => {
