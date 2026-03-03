@@ -50,6 +50,7 @@ const Login = () => {
     }, 400);
   };
 
+  
   const setCarouselInterval = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
