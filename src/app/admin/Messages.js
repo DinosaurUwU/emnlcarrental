@@ -82,40 +82,89 @@ const [threadToDelete, setThreadToDelete] = useState(null);
       const otherUid = senderUid === user.uid ? recipientUid : senderUid;
       if (!otherUid) continue;
 
-      if (!map.has(otherUid)) {
-        map.set(otherUid, {
-          id: otherUid,
-          participant: {
-            name:
-              senderUid === user.uid
-                ? msg?.recipientName || msg?.recipientEmail || otherUid
-                : msg?.name || msg?.email || otherUid,
-            email:
-              senderUid === user.uid
-                ? msg?.recipientEmail || "No email"
-                : msg?.email || "No email",
-            contact:
-              senderUid === user.uid
-                ? msg?.recipientContact || "No contact"
-                : msg?.contact || "No contact",
-            profilePic: msg?.profilePic || "/assets/profile.png",
-          },
-          messages: [],
-          unreadCount: 0,
-          latest: null,
-        });
-      }
+if (!map.has(otherUid)) {
+  map.set(otherUid, {
+    id: otherUid,
+    participant: {
+      name:
+        senderUid === user.uid
+          ? msg?.recipientName || msg?.recipientEmail || otherUid
+          : msg?.name || msg?.email || otherUid,
+      email:
+        senderUid === user.uid
+          ? msg?.recipientEmail || "No email"
+          : msg?.email || "No email",
+      contact:
+        senderUid === user.uid
+          ? msg?.recipientContact || msg?.recipientPhone || "No contact"
+          : msg?.contact || msg?.phone || "No contact",
+      profilePic: msg?.profilePic || "/assets/profile.png",
+    },
+    messages: [],
+    unreadCount: 0,
+    latest: null,
+  });
+}
 
-      const thread = map.get(otherUid);
-      thread.messages.push(msg);
+const thread = map.get(otherUid);
+thread.messages.push(msg);
 
-      if (msg._source === "inbox" && !msg.readStatus) {
-        thread.unreadCount += 1;
-      }
+const isIncomingFromClient = senderUid !== user.uid;
 
-      if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
-        thread.latest = msg;
-      }
+const candidateName = isIncomingFromClient
+  ? msg?.name || msg?.email
+  : msg?.recipientName || msg?.recipientEmail;
+
+const candidateEmail = isIncomingFromClient
+  ? msg?.email
+  : msg?.recipientEmail;
+
+const candidateContact = isIncomingFromClient
+  ? msg?.contact || msg?.phone
+  : msg?.recipientContact || msg?.recipientPhone;
+
+const candidateProfilePic = isIncomingFromClient
+  ? msg?.profilePic
+  : null;
+
+// Upgrade fallback values when better data appears in newer/other messages
+if (
+  (!thread.participant?.name || thread.participant.name === otherUid) &&
+  candidateName
+) {
+  thread.participant.name = candidateName;
+}
+
+if (
+  (!thread.participant?.email || thread.participant.email === "No email") &&
+  candidateEmail
+) {
+  thread.participant.email = candidateEmail;
+}
+
+if (
+  (!thread.participant?.contact || thread.participant.contact === "No contact") &&
+  candidateContact
+) {
+  thread.participant.contact = candidateContact;
+}
+
+if (
+  (!thread.participant?.profilePic ||
+    thread.participant.profilePic === "/assets/profile.png") &&
+  candidateProfilePic
+) {
+  thread.participant.profilePic = candidateProfilePic;
+}
+
+if (msg._source === "inbox" && !msg.readStatus) {
+  thread.unreadCount += 1;
+}
+
+if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
+  thread.latest = msg;
+}
+
     }
 
     const threads = Array.from(map.values())
@@ -748,7 +797,7 @@ const [threadToDelete, setThreadToDelete] = useState(null);
                           {selectedThread.participant.name}
                         </div>
                         <div className="conversation-chat-email">
-                          {selectedThread.participant.email}
+                          {selectedThread.participant.email} | {selectedThread.participant.contact}
                         </div>
                       </div>
                     </div>
