@@ -3702,72 +3702,137 @@ const reserveUnit = async (rentalId) => {
   };
 
   // (ADMIN & USER) SEND MESSAGE BETWEEN USERS
-  const sendMessage = async ({
-    name,
-    email,
-    phone,
-    message,
-    recipientUid,
-    senderUid,
-    isAdminSender,
-    recipientName,
-    recipientEmail,
-    recipientPhone,
-  }) => {
-    if (!senderUid || !recipientUid) {
-      console.error("❌ Missing senderUid or recipientUid.");
-      return;
-    }
+const sendMessage = async ({
+  name,
+  email,
+  phone,
+  message,
+  recipientUid,
+  senderUid,
+  isAdminSender,
+  recipientName,
+  recipientEmail,
+  recipientPhone,
+}) => {
+  if (!senderUid || !recipientUid) {
+    console.error("❌ Missing senderUid or recipientUid.");
+    return { success: false, error: "Missing senderUid or recipientUid." };
+  }
 
-    try {
-      const senderSentRef = collection(db, "users", senderUid, "sentMessages");
-      const recipientInboxRef = collection(
-        db,
-        "users",
-        recipientUid,
-        "receivedMessages",
-      );
+  try {
+    const senderSentRef = collection(db, "users", senderUid, "sentMessages");
+    const recipientInboxRef = collection(
+      db,
+      "users",
+      recipientUid,
+      "receivedMessages",
+    );
 
-      const newMessage = {
-        senderUid,
-        recipientUid,
-        name,
-        email,
-        contact: phone,
-        content: message,
-        recipientName,
-        recipientEmail,
-        recipientContact: recipientPhone,
-        date: new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        time: new Date().toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        startTimestamp: serverTimestamp(),
-        profilePic: user.profilePic || null,
-        readStatus: false,
-      };
+    const newMessage = {
+      senderUid,
+      recipientUid,
+      name,
+      email,
+      contact: phone,
+      content: message,
+      recipientName,
+      recipientEmail,
+      recipientContact: recipientPhone,
+      date: new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      startTimestamp: serverTimestamp(),
+      profilePic: user.profilePic || null,
+      readStatus: false,
+    };
 
-      await setDoc(doc(senderSentRef), newMessage);
-      await setDoc(doc(recipientInboxRef), newMessage);
+    await setDoc(doc(senderSentRef), newMessage);
+    await setDoc(doc(recipientInboxRef), newMessage);
 
-      console.log("✅ Message sent between users:", newMessage);
+    console.log("✅ Message sent between users:", newMessage);
 
-      if (!isAdminSender) {
-        setSentMessages((prev) => [
-          ...prev,
-          { id: new Date().getTime().toString(), ...newMessage },
-        ]);
-      }
-    } catch (err) {
-      console.error("🔥 Error sending message:", err);
-    }
-  };
+    // IMPORTANT: do not push to local sent state here.
+    // onSnapshot(sentMessages) will add exactly one real message with resolved timestamp.
+    return { success: true };
+  } catch (err) {
+    console.error("🔥 Error sending message:", err);
+    return { success: false, error: err?.message || "Failed to send message." };
+  }
+};
+
+  // const sendMessage = async ({
+  //   name,
+  //   email,
+  //   phone,
+  //   message,
+  //   recipientUid,
+  //   senderUid,
+  //   isAdminSender,
+  //   recipientName,
+  //   recipientEmail,
+  //   recipientPhone,
+  // }) => {
+  //   if (!senderUid || !recipientUid) {
+  //     console.error("❌ Missing senderUid or recipientUid.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const senderSentRef = collection(db, "users", senderUid, "sentMessages");
+  //     const recipientInboxRef = collection(
+  //       db,
+  //       "users",
+  //       recipientUid,
+  //       "receivedMessages",
+  //     );
+
+  //     const newMessage = {
+  //       senderUid,
+  //       recipientUid,
+  //       name,
+  //       email,
+  //       contact: phone,
+  //       content: message,
+  //       recipientName,
+  //       recipientEmail,
+  //       recipientContact: recipientPhone,
+  //       date: new Date().toLocaleDateString("en-US", {
+  //         weekday: "long",
+  //         year: "numeric",
+  //         month: "long",
+  //         day: "numeric",
+  //       }),
+  //       time: new Date().toLocaleTimeString("en-US", {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       }),
+  //       startTimestamp: serverTimestamp(),
+  //       profilePic: user.profilePic || null,
+  //       readStatus: false,
+  //     };
+
+  //     await setDoc(doc(senderSentRef), newMessage);
+  //     await setDoc(doc(recipientInboxRef), newMessage);
+
+  //     console.log("✅ Message sent between users:", newMessage);
+
+  //     if (!isAdminSender) {
+  //       setSentMessages((prev) => [
+  //         ...prev,
+  //         { id: new Date().getTime().toString(), ...newMessage },
+  //       ]);
+  //     }
+  //   } catch (err) {
+  //     console.error("🔥 Error sending message:", err);
+  //   }
+  // };
 
   // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
   useEffect(() => {

@@ -191,7 +191,6 @@ body.modal-open {
   border-bottom: 1px solid var(--accent-color);
 }
 
-
 .message-name {
   color: var(--accent-color);
 }

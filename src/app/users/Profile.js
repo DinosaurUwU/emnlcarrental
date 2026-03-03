@@ -38,13 +38,13 @@ const Profile = ({ openBooking }) => {
     unlinkAccount,
 
     showActionOverlay,
-    sendVerificationEmail,
-    showVerifyOverlay,
     setShowVerifyOverlay,
     reloadAndSyncUser,
     unitData,
     fetchImageFromFirestore,
     imageUpdateTrigger,
+    adminUid,
+  fetchAdminUid,
   } = useUser();
 
   const [showProfileError, setShowProfileError] = useState(false);
@@ -132,6 +132,35 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   );
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
+
+  const [adminMeta, setAdminMeta] = useState({
+  uid: "",
+  name: "",
+  email: "",
+  contact: "",
+});
+
+useEffect(() => {
+  let mounted = true;
+
+  const loadAdminMeta = async () => {
+    const admin = await fetchAdminUid();
+    if (!mounted || !admin) return;
+
+    setAdminMeta({
+      uid: admin.uid || "",
+      name: admin.name || "",
+      email: admin.email || "",
+      contact: admin.contact || "",
+    });
+  };
+
+  loadAdminMeta();
+
+  return () => {
+    mounted = false;
+  };
+}, [fetchAdminUid]);
 
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);
@@ -812,52 +841,106 @@ setShowProfileWarning(true);
   }, [userMessages, sentMessages]);
 
   const adminConversation = useMemo(() => {
-    if (!user?.uid) return null;
+  if (!user?.uid) return null;
 
-    const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
-    const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
+  const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+  const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
 
-    if (sorted.length === 0) return null;
+  const getOtherUid = (msg) => {
+    const senderUid = msg?.senderUid || "";
+    const recipientUid = msg?.recipientUid || "";
+    return senderUid === user.uid ? recipientUid : senderUid;
+  };
 
-    const getOtherUid = (msg) => {
-      const senderUid = msg?.senderUid || "";
-      const recipientUid = msg?.recipientUid || "";
-      return senderUid === user.uid ? recipientUid : senderUid;
-    };
+  const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
+  const resolvedAdminUid =
+    (firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "") ||
+    adminUid ||
+    adminMeta.uid ||
+    null;
 
-    const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
-    const adminUid = firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "admin";
+  const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
+  const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
 
-    const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
-    const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
-
-    const participant = incoming
+  const participant = incoming
+    ? {
+        name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
+        email: incoming?.email || adminMeta.email || "No email",
+        contact: incoming?.contact || adminMeta.contact || "No contact",
+        profilePic: incoming?.profilePic || "/assets/profile.png",
+      }
+    : outgoing
       ? {
-          name: incoming?.name || incoming?.email || "Admin",
-          email: incoming?.email || "No email",
-          contact: incoming?.contact || "No contact",
-          profilePic: incoming?.profilePic || "/assets/profile.png",
+          name:
+            outgoing?.recipientName ||
+            outgoing?.recipientEmail ||
+            adminMeta.name ||
+            "Admin",
+          email: outgoing?.recipientEmail || adminMeta.email || "No email",
+          contact: outgoing?.recipientPhone || adminMeta.contact || "No contact",
+          profilePic: outgoing?.profilePic || "/assets/profile.png",
         }
-      : outgoing
-        ? {
-            name: outgoing?.recipientName || outgoing?.recipientEmail || "Admin",
-            email: outgoing?.recipientEmail || "No email",
-            contact: outgoing?.recipientPhone || "No contact",
-            profilePic: outgoing?.profilePic || "/assets/profile.png",
-          }
-        : {
-            name: "Admin",
-            email: "No email",
-            contact: "No contact",
-            profilePic: "/assets/profile.png",
-          };
+      : {
+          name: adminMeta.name || "Admin",
+          email: adminMeta.email || "No email",
+          contact: adminMeta.contact || "No contact",
+          profilePic: "/assets/profile.png",
+        };
 
-    return {
-      id: adminUid,
-      participant,
-      messages: sorted,
-    };
-  }, [chatMessages, user?.uid]);
+  return {
+    id: resolvedAdminUid,
+    participant,
+    messages: sorted,
+  };
+}, [chatMessages, user?.uid, adminUid, adminMeta]);
+
+  // const adminConversation = useMemo(() => {
+  //   if (!user?.uid) return null;
+
+  //   const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+  //   const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
+
+  //   if (sorted.length === 0) return null;
+
+  //   const getOtherUid = (msg) => {
+  //     const senderUid = msg?.senderUid || "";
+  //     const recipientUid = msg?.recipientUid || "";
+  //     return senderUid === user.uid ? recipientUid : senderUid;
+  //   };
+
+  //   const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
+  //   const adminUid = firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "admin";
+
+  //   const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
+  //   const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
+
+  //   const participant = incoming
+  //     ? {
+  //         name: incoming?.name || incoming?.email || "Admin",
+  //         email: incoming?.email || "No email",
+  //         contact: incoming?.contact || "No contact",
+  //         profilePic: incoming?.profilePic || "/assets/profile.png",
+  //       }
+  //     : outgoing
+  //       ? {
+  //           name: outgoing?.recipientName || outgoing?.recipientEmail || "Admin",
+  //           email: outgoing?.recipientEmail || "No email",
+  //           contact: outgoing?.recipientPhone || "No contact",
+  //           profilePic: outgoing?.profilePic || "/assets/profile.png",
+  //         }
+  //       : {
+  //           name: "Admin",
+  //           email: "No email",
+  //           contact: "No contact",
+  //           profilePic: "/assets/profile.png",
+  //         };
+
+  //   return {
+  //     id: adminUid,
+  //     participant,
+  //     messages: sorted,
+  //   };
+  // }, [chatMessages, user?.uid]);
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -884,28 +967,68 @@ setShowProfileWarning(true);
     });
   }, [activeTab, adminConversation, markMessageAsRead]);
 
-  const sendConversationMessage = () => {
-    if (!chatInput.trim()) return;
-    if (!user || !user.uid || !adminConversation?.id) return;
+const sendConversationMessage = async () => {
+  if (!chatInput.trim()) return;
+  if (!user?.uid) return;
 
-    const contactInfo = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      message: chatInput.trim(),
-      recipientUid: adminConversation.id,
-      senderUid: user.uid,
-      isAdminSender: false,
-      recipientName: adminConversation.participant?.name,
-      recipientEmail: adminConversation.participant?.email,
-      recipientPhone: adminConversation.participant?.contact,
-    };
+  if (!adminConversation?.id) {
+    setProfileErrorMessage("Admin chat is not ready yet. Please try again.");
+    setShowProfileError(true);
+    return;
+  }
 
-    sendMessage(contactInfo);
-    setChatInput("");
-    setProfileSuccessMessage("Message sent successfully!");
-    setShowProfileSuccess(true);
+  const contactInfo = {
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    message: chatInput.trim(),
+    recipientUid: adminConversation.id,
+    senderUid: user.uid,
+    isAdminSender: false,
+    recipientName: adminConversation.participant?.name,
+    recipientEmail: adminConversation.participant?.email,
+    recipientPhone: adminConversation.participant?.contact,
   };
+
+  const result = await sendMessage(contactInfo);
+
+  if (!result?.success) {
+    setProfileErrorMessage(result?.error || "Failed to send message.");
+    setShowProfileError(true);
+    return;
+  }
+
+  setChatInput("");
+  showActionOverlay({
+    message: "Message sent successfully!",
+    type: "success",
+  });
+};
+
+
+
+  // const sendConversationMessage = () => {
+  //   if (!chatInput.trim()) return;
+  //   if (!user || !user.uid || !adminConversation?.id) return;
+
+  //   const contactInfo = {
+  //     name: user.name,
+  //     email: user.email,
+  //     phone: user.phone,
+  //     message: chatInput.trim(),
+  //     recipientUid: adminConversation.id,
+  //     senderUid: user.uid,
+  //     isAdminSender: false,
+  //     recipientName: adminConversation.participant?.name,
+  //     recipientEmail: adminConversation.participant?.email,
+  //     recipientPhone: adminConversation.participant?.contact,
+  //   };
+
+  //   sendMessage(contactInfo);
+  //   setChatInput("");
+  //   setProfileSuccessMessage("Message sent successfully!");
+  //   setShowProfileSuccess(true);
+  // };
 
   const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
@@ -2201,7 +2324,7 @@ const closeProfileSuccess = () => {
                         {adminConversation?.participant?.name || "Admin"}
                       </div>
                       <div className="profile-chat-email">
-                        {adminConversation?.participant?.email || "No email"}
+                        {adminConversation?.participant?.email || "No email"} | {adminConversation?.participant?.contact || "No contact"}
                       </div>
                     </div>
                   </div>
