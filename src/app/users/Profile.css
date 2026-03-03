@@ -17,7 +17,7 @@ body.modal-open {
   flex-wrap: wrap;
   flex-direction: row;
   background: white;
-  padding: 150px 50px 20px 50px;
+  padding: 120px 50px 20px 50px;
   gap: 20px;
   transition: all 0.5s ease;
 }
@@ -491,7 +491,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 0px;
-  height: 300px;
+  height: 400px;
   overflow-y: auto;
   padding-right: 5px;
   padding-top: 10px;
@@ -894,7 +894,7 @@ body.modal-open {
 /* Conversations (Profile) */
 .profile-conversation-layout {
   display: block;
-  height: 300px;
+  height: 400px;
 }
 
 .profile-conversation-layout.single-pane {

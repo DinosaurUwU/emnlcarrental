@@ -1,9 +1,8 @@
 "use client";
 //Messages.js
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../lib/UserContext";
 import "./Messages.css";
-import { MdCheckCircle } from "react-icons/md";
 
 const Messages = () => {
   const {
@@ -13,10 +12,12 @@ const Messages = () => {
     deleteMessage,
     markMessageAsRead,
     sendMessage,
+    actionOverlay,
+  showActionOverlay,
+  hideCancelAnimation,
+  setHideCancelAnimation,
+  setActionOverlay,
   } = useUser();
-
-  const [showMessageSuccess, setShowMessageSuccess] = useState(false);
-  const [messageSuccessMessage, setMessageSuccessMessage] = useState("");
 
   const [selectedNotification, setSelectedNotification] = useState(null);
 
@@ -38,6 +39,7 @@ const Messages = () => {
 
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [chatInput, setChatInput] = useState("");
+  const conversationChatBodyRef = useRef(null);
   const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
   useState(false);
 const [threadToDelete, setThreadToDelete] = useState(null);
@@ -251,61 +253,96 @@ if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
 };
 
 
+useEffect(() => {
+  if (activeTab !== "conversations") return;
+  if (!selectedThread) return;
+  if (!conversationChatBodyRef.current) return;
 
+  conversationChatBodyRef.current.scrollTop =
+    conversationChatBodyRef.current.scrollHeight;
+}, [activeTab, selectedThread?.id, selectedThread?.messages?.length]);
 
-  const sendConversationMessage = () => {
-    if (!chatInput.trim()) return;
-    if (!user?.uid || !selectedThread?.id) return;
+const sendConversationMessage = async () => {
+  if (!chatInput.trim()) return;
+  if (!user?.uid || !selectedThread?.id) return;
 
-    const contactInfo = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      message: chatInput.trim(),
-      recipientUid: selectedThread.id,
-      senderUid: user.uid,
-      isAdminSender: true,
-      recipientName: selectedThread.participant?.name,
-      recipientEmail: selectedThread.participant?.email,
-      recipientPhone: selectedThread.participant?.contact,
-    };
-
-    sendMessage(contactInfo);
-
-    setMessageSuccessMessage("Message sent!");
-    setShowMessageSuccess(true);
-    setChatInput("");
+  const contactInfo = {
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    message: chatInput.trim(),
+    recipientUid: selectedThread.id,
+    senderUid: user.uid,
+    isAdminSender: true,
+    recipientName: selectedThread.participant?.name,
+    recipientEmail: selectedThread.participant?.email,
+    recipientPhone: selectedThread.participant?.contact,
   };
 
-  const sendFleetDetailsLink = () => {
-    if (!user?.uid || !selectedThread?.id) return;
+  const result = await sendMessage(contactInfo);
 
-    const fleetUrl = `${window.location.origin}/fleet-details`;
-    const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
+  if (!result?.success) {
+    showActionOverlay({
+      message: result?.error || "Failed to send message.",
+      type: "warning",
+    });
+    return;
+  }
 
-    const contactInfo = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      message: quickMessage,
-      recipientUid: selectedThread.id,
-      senderUid: user.uid,
-      isAdminSender: true,
-      recipientName: selectedThread.participant?.name,
-      recipientEmail: selectedThread.participant?.email,
-      recipientPhone: selectedThread.participant?.contact,
-    };
+  showActionOverlay({
+    message: "Message sent!",
+    type: "success",
+  });
+  setChatInput("");
+  setTimeout(() => {
+  if (conversationChatBodyRef.current) {
+    conversationChatBodyRef.current.scrollTop =
+      conversationChatBodyRef.current.scrollHeight;
+  }
+}, 0);
+};
 
-    sendMessage(contactInfo);
+const sendFleetDetailsLink = async () => {
+  if (!user?.uid || !selectedThread?.id) return;
 
-    setMessageSuccessMessage("Fleet details link sent!");
-    setShowMessageSuccess(true);
+  const fleetUrl = `${window.location.origin}/fleet-details`;
+  const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
+
+  const contactInfo = {
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    message: quickMessage,
+    recipientUid: selectedThread.id,
+    senderUid: user.uid,
+    isAdminSender: true,
+    recipientName: selectedThread.participant?.name,
+    recipientEmail: selectedThread.participant?.email,
+    recipientPhone: selectedThread.participant?.contact,
   };
 
-  const closeMessageSuccess = () => {
-    setShowMessageSuccess(false);
-    setMessageSuccessMessage("");
-  };
+  const result = await sendMessage(contactInfo);
+
+  if (!result?.success) {
+    showActionOverlay({
+      message: result?.error || "Failed to send fleet link.",
+      type: "warning",
+    });
+    return;
+  }
+
+  showActionOverlay({
+    message: "Fleet details link sent!",
+    type: "success",
+  });
+
+  setTimeout(() => {
+  if (conversationChatBodyRef.current) {
+    conversationChatBodyRef.current.scrollTop =
+      conversationChatBodyRef.current.scrollHeight;
+  }
+}, 0);
+};
 
   const currentCount =
     activeTab === "notifications"
@@ -456,7 +493,11 @@ if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
             </div>
           )}
 
-        <h2>Messages & Notifications ({currentCount})</h2>
+       <h2>
+  {activeTab === "notifications"
+    ? `Notifications (${currentCount})`
+    : `Messages (${currentCount})`}
+</h2>
 
         <div className="tabs-container">
           <div className="tabs-left">
@@ -802,7 +843,7 @@ if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
                       </div>
                     </div>
 
-                    <div className="conversation-chat-body">
+                    <div className="conversation-chat-body" ref={conversationChatBodyRef}>
                       {selectedThread.messages.map((msg) => {
                         const isMine = msg.senderUid === user?.uid;
                         const htmlContent = msg.content || "";
@@ -959,20 +1000,40 @@ if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
           </div>
         )}
 
-        {showMessageSuccess && (
-          <div className="success-overlay" onClick={closeMessageSuccess}>
-            <div className="success-container" onClick={(e) => e.stopPropagation()}>
-              <div className="success-icon">
-                <MdCheckCircle size={32} />
-              </div>
-              <h3>Success!</h3>
-              <p>{messageSuccessMessage}</p>
-              <button className="success-btn" onClick={closeMessageSuccess}>
-                OK
-              </button>
-            </div>
-          </div>
-        )}
+{actionOverlay.isVisible && (
+  <div
+    className={`${
+      actionOverlay.type === "warning"
+        ? "date-warning-overlay"
+        : "sent-ongoing-overlay"
+    } ${hideCancelAnimation ? "hide" : ""}`}
+  >
+    <button
+      className={
+        actionOverlay.type === "warning"
+          ? "close-warning"
+          : "close-sent-ongoing"
+      }
+      onClick={() => {
+        setHideCancelAnimation(true);
+        setTimeout(
+          () => setActionOverlay({ ...actionOverlay, isVisible: false }),
+          400,
+        );
+      }}
+    >
+      ✖
+    </button>
+    <span className="warning-text">{actionOverlay.message}</span>
+    <div
+      className={
+        actionOverlay.type === "warning"
+          ? "progress-bar"
+          : "sent-ongoing-progress-bar"
+      }
+    ></div>
+  </div>
+)}
       </div>
     </div>
   );

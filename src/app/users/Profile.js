@@ -8,7 +8,6 @@ import { auth } from "../lib/firebase";
 import "./Profile.css";
 import { MdMoreVert, MdClose, MdWarning, MdCheckCircle } from "react-icons/md";
 
-
 const Profile = ({ openBooking }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -44,22 +43,20 @@ const Profile = ({ openBooking }) => {
     fetchImageFromFirestore,
     imageUpdateTrigger,
     adminUid,
-  fetchAdminUid,
+    fetchAdminUid,
+    actionOverlay,
+    setActionOverlay,
   } = useUser();
 
   const [showProfileError, setShowProfileError] = useState(false);
-const [profileErrorMessage, setProfileErrorMessage] = useState("");
+  const [profileErrorMessage, setProfileErrorMessage] = useState("");
 
-const [showProfileWarning, setShowProfileWarning] = useState(false);
-const [profileWarningMessage, setProfileWarningMessage] = useState("");
-
-const [showProfileSuccess, setShowProfileSuccess] = useState(false);
-const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
+  const [showProfileWarning, setShowProfileWarning] = useState(false);
+  const [profileWarningMessage, setProfileWarningMessage] = useState("");
 
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
-  const [replyMode, setReplyMode] = useState(false);
-  const [replyText, setReplyText] = useState("");
+
   const [showSettings, setShowSettings] = useState(false);
   const [showRevertConfirm, setShowRevertConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -133,36 +130,36 @@ const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const hasGoogle = providerIds.includes("google.com");
   const hasEmail = providerIds.includes("password");
 
-const [adminMeta, setAdminMeta] = useState({
-  uid: "",
-  name: "",
-  email: "",
-  contact: "",
-  profilePic: "/assets/profile.png",
-});
+  const [adminMeta, setAdminMeta] = useState({
+    uid: "",
+    name: "",
+    email: "",
+    contact: "",
+    profilePic: "/assets/profile.png",
+  });
 
-useEffect(() => {
-  let mounted = true;
+  useEffect(() => {
+    let mounted = true;
 
-  const loadAdminMeta = async () => {
-    const admin = await fetchAdminUid();
-    if (!mounted || !admin) return;
+    const loadAdminMeta = async () => {
+      const admin = await fetchAdminUid();
+      if (!mounted || !admin) return;
 
-setAdminMeta({
-  uid: admin.uid || "",
-  name: admin.name || "",
-  email: admin.email || "",
-  contact: admin.contact || "",
-  profilePic: admin.profilePic || "/assets/profile.png",
-});
-  };
+      setAdminMeta({
+        uid: admin.uid || "",
+        name: admin.name || "",
+        email: admin.email || "",
+        contact: admin.contact || "",
+        profilePic: admin.profilePic || "/assets/profile.png",
+      });
+    };
 
-  loadAdminMeta();
+    loadAdminMeta();
 
-  return () => {
-    mounted = false;
-  };
-}, [fetchAdminUid]);
+    return () => {
+      mounted = false;
+    };
+  }, [fetchAdminUid]);
 
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);
@@ -208,85 +205,89 @@ setAdminMeta({
   // }, [unitData, imageUpdateTrigger]);
 
   useEffect(() => {
-  if (
-    (!unitData || unitData.length === 0) &&
-    (!userActiveRentals || userActiveRentals.length === 0) &&
-    (!userBookingRequests || userBookingRequests.length === 0) &&
-    (!userRentalHistory || userRentalHistory.length === 0)
-  ) {
-    return;
-  }
+    if (
+      (!unitData || unitData.length === 0) &&
+      (!userActiveRentals || userActiveRentals.length === 0) &&
+      (!userBookingRequests || userBookingRequests.length === 0) &&
+      (!userRentalHistory || userRentalHistory.length === 0)
+    ) {
+      return;
+    }
 
-  const fetchProfileImages = async () => {
-    const imageIds = new Set();
+    const fetchProfileImages = async () => {
+      const imageIds = new Set();
 
-    unitData.forEach((unit) => {
-      if (unit?.imageId) imageIds.add(unit.imageId);
+      unitData.forEach((unit) => {
+        if (unit?.imageId) imageIds.add(unit.imageId);
 
-      const plate = String(unit?.plateNo || "").trim();
-      if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
-    });
+        const plate = String(unit?.plateNo || "").trim();
+        if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
+      });
 
-    const allRentals = [
-      ...(userActiveRentals || []),
-      ...(userBookingRequests || []),
-      ...(userRentalHistory || []),
-    ];
+      const allRentals = [
+        ...(userActiveRentals || []),
+        ...(userBookingRequests || []),
+        ...(userRentalHistory || []),
+      ];
 
-    allRentals.forEach((rental) => {
-      if (rental?.imageId) imageIds.add(rental.imageId);
+      allRentals.forEach((rental) => {
+        if (rental?.imageId) imageIds.add(rental.imageId);
 
-      const plate = String(rental?.plateNo || "").trim();
-      if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
+        const plate = String(rental?.plateNo || "").trim();
+        if (plate) imageIds.add(`${plate.toUpperCase()}_main`);
 
-      const unitByName = unitData.find(
-        (u) =>
-          String(u?.name || "").trim().toLowerCase() ===
-          String(rental?.carName || "").trim().toLowerCase(),
+        const unitByName = unitData.find(
+          (u) =>
+            String(u?.name || "")
+              .trim()
+              .toLowerCase() ===
+            String(rental?.carName || "")
+              .trim()
+              .toLowerCase(),
+        );
+        if (unitByName?.imageId) imageIds.add(unitByName.imageId);
+      });
+
+      if (imageIds.size === 0) return;
+
+      const results = await Promise.all(
+        [...imageIds].map(async (id) => {
+          try {
+            const image = await fetchImageFromFirestore(id);
+            return image
+              ? { [id]: image }
+              : {
+                  [id]: {
+                    base64: "/assets/images/default.png",
+                    updatedAt: Date.now(),
+                  },
+                };
+          } catch {
+            return {
+              [id]: {
+                base64: "/assets/images/default.png",
+                updatedAt: Date.now(),
+              },
+            };
+          }
+        }),
       );
-      if (unitByName?.imageId) imageIds.add(unitByName.imageId);
-    });
 
-    if (imageIds.size === 0) return;
+      setFetchedImages((prev) => ({
+        ...prev,
+        ...Object.assign({}, ...results.filter(Boolean)),
+      }));
+    };
 
-    const results = await Promise.all(
-      [...imageIds].map(async (id) => {
-        try {
-          const image = await fetchImageFromFirestore(id);
-          return image
-            ? { [id]: image }
-            : {
-                [id]: {
-                  base64: "/assets/images/default.png",
-                  updatedAt: Date.now(),
-                },
-              };
-        } catch {
-          return {
-            [id]: {
-              base64: "/assets/images/default.png",
-              updatedAt: Date.now(),
-            },
-          };
-        }
-      }),
-    );
-
-    setFetchedImages((prev) => ({
-      ...prev,
-      ...Object.assign({}, ...results.filter(Boolean)),
-    }));
-  };
-
-  fetchProfileImages();
-}, [
-  unitData,
-  userActiveRentals,
-  userBookingRequests,
-  userRentalHistory,
-  imageUpdateTrigger,
-  fetchImageFromFirestore,
-]);
+    fetchProfileImages();
+  }, [
+    unitData,
+    userActiveRentals,
+    userBookingRequests,
+    userRentalHistory,
+    imageUpdateTrigger,
+    fetchImageFromFirestore,
+  ]);
 
   useEffect(() => {
     if (user) {
@@ -761,14 +762,14 @@ setAdminMeta({
         setTempProfilePic(compressedBase64);
       } catch (error) {
         console.error("❌ Error compressing image:", error);
-setProfileErrorMessage("Failed to process image. Please try a different file.");
-setShowProfileError(true);
-
+        setProfileErrorMessage(
+          "Failed to process image. Please try a different file.",
+        );
+        setShowProfileError(true);
       }
     } else {
       setProfileWarningMessage("Please select a valid image file.");
-setShowProfileWarning(true);
-
+      setShowProfileWarning(true);
     }
 
     if (fileInputRef.current) {
@@ -843,61 +844,75 @@ setShowProfileWarning(true);
   }, [userMessages, sentMessages]);
 
   const adminConversation = useMemo(() => {
-  if (!user?.uid) return null;
+    if (!user?.uid) return null;
 
-  const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
-  const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
+    const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+    const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
 
-  const getOtherUid = (msg) => {
-    const senderUid = msg?.senderUid || "";
-    const recipientUid = msg?.recipientUid || "";
-    return senderUid === user.uid ? recipientUid : senderUid;
-  };
+    const getOtherUid = (msg) => {
+      const senderUid = msg?.senderUid || "";
+      const recipientUid = msg?.recipientUid || "";
+      return senderUid === user.uid ? recipientUid : senderUid;
+    };
 
-  const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
-  const resolvedAdminUid =
-    (firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "") ||
-    adminUid ||
-    adminMeta.uid ||
-    null;
+    const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
+    const resolvedAdminUid =
+      (firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "") ||
+      adminUid ||
+      adminMeta.uid ||
+      null;
 
-  const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
-  const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
+    const incoming = sorted.find(
+      (msg) => msg?.senderUid && msg.senderUid !== user.uid,
+    );
+    const outgoing = sorted.find(
+      (msg) => msg?.recipientUid && msg.recipientUid !== user.uid,
+    );
 
-const participant = incoming
-  ? {
-      name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
-      email: incoming?.email || adminMeta.email || "No email",
-      contact: incoming?.contact || adminMeta.contact || "No contact",
-      profilePic:
-        incoming?.profilePic ||
-        adminMeta.profilePic ||
-        "/assets/profile.png",
-    }
-  : outgoing
-    ? {
-        name:
-          outgoing?.recipientName ||
-          outgoing?.recipientEmail ||
-          adminMeta.name ||
-          "Admin",
-        email: outgoing?.recipientEmail || adminMeta.email || "No email",
-        contact: outgoing?.recipientContact || adminMeta.contact || "No contact",
-        profilePic: adminMeta.profilePic || "/assets/profile.png",
-      }
-    : {
-        name: adminMeta.name || "Admin",
-        email: adminMeta.email || "No email",
-        contact: adminMeta.contact || "No contact",
-        profilePic: adminMeta.profilePic || "/assets/profile.png",
-      };
+    const participant = incoming
+      ? {
+          name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
+          email: incoming?.email || adminMeta.email || "No email",
+          contact: incoming?.contact || adminMeta.contact || "No contact",
+          profilePic:
+            incoming?.profilePic ||
+            adminMeta.profilePic ||
+            "/assets/profile.png",
+        }
+      : outgoing
+        ? {
+            name:
+              outgoing?.recipientName ||
+              outgoing?.recipientEmail ||
+              adminMeta.name ||
+              "Admin",
+            email: outgoing?.recipientEmail || adminMeta.email || "No email",
+            contact:
+              outgoing?.recipientContact || adminMeta.contact || "No contact",
+            profilePic: adminMeta.profilePic || "/assets/profile.png",
+          }
+        : {
+            name: adminMeta.name || "Admin",
+            email: adminMeta.email || "No email",
+            contact: adminMeta.contact || "No contact",
+            profilePic: adminMeta.profilePic || "/assets/profile.png",
+          };
 
-  return {
-    id: resolvedAdminUid,
-    participant,
-    messages: sorted,
-  };
-}, [chatMessages, user?.uid, adminUid, adminMeta]);
+    return {
+      id: resolvedAdminUid,
+      participant,
+      messages: sorted,
+    };
+  }, [chatMessages, user?.uid, adminUid, adminMeta]);
+
+    const profileChatBodyRef = useRef(null);
+
+  useEffect(() => {
+  if (activeTab !== "conversations") return;
+  if (!profileChatBodyRef.current) return;
+
+  profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
+}, [adminConversation?.messages?.length, activeTab]);
 
   // const adminConversation = useMemo(() => {
   //   if (!user?.uid) return null;
@@ -962,7 +977,7 @@ const participant = incoming
     setIsClosing(false);
   };
 
-    useEffect(() => {
+  useEffect(() => {
     if (activeTab !== "conversations" || !adminConversation) return;
 
     adminConversation.messages.forEach((msg) => {
@@ -972,68 +987,52 @@ const participant = incoming
     });
   }, [activeTab, adminConversation, markMessageAsRead]);
 
-const sendConversationMessage = async () => {
-  if (!chatInput.trim()) return;
-  if (!user?.uid) return;
+  const sendConversationMessage = async () => {
+    if (!chatInput.trim()) return;
+    if (!user?.uid) return;
 
-  if (!adminConversation?.id) {
-    setProfileErrorMessage("Admin chat is not ready yet. Please try again.");
-    setShowProfileError(true);
-    return;
+    if (!adminConversation?.id) {
+      showActionOverlay({
+        message: "Admin chat is not ready yet. Please try again.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const contactInfo = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      message: chatInput.trim(),
+      recipientUid: adminConversation.id,
+      senderUid: user.uid,
+      isAdminSender: false,
+      recipientName: adminConversation.participant?.name,
+      recipientEmail: adminConversation.participant?.email,
+      recipientPhone: adminConversation.participant?.contact,
+    };
+
+    const result = await sendMessage(contactInfo);
+
+    if (!result?.success) {
+      showActionOverlay({
+        message: result?.error || "Failed to send message.",
+        type: "warning",
+      });
+      return;
+    }
+
+    setChatInput("");
+    setTimeout(() => {
+  if (profileChatBodyRef.current) {
+    profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
   }
-
-  const contactInfo = {
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    message: chatInput.trim(),
-    recipientUid: adminConversation.id,
-    senderUid: user.uid,
-    isAdminSender: false,
-    recipientName: adminConversation.participant?.name,
-    recipientEmail: adminConversation.participant?.email,
-    recipientPhone: adminConversation.participant?.contact,
+}, 0);
+    showActionOverlay({
+      message: "Message sent successfully!",
+      type: "success",
+    });
   };
-
-  const result = await sendMessage(contactInfo);
-
-  if (!result?.success) {
-    setProfileErrorMessage(result?.error || "Failed to send message.");
-    setShowProfileError(true);
-    return;
-  }
-
-  setChatInput("");
-  showActionOverlay({
-    message: "Message sent successfully!",
-    type: "success",
-  });
-};
-
-
-
-  // const sendConversationMessage = () => {
-  //   if (!chatInput.trim()) return;
-  //   if (!user || !user.uid || !adminConversation?.id) return;
-
-  //   const contactInfo = {
-  //     name: user.name,
-  //     email: user.email,
-  //     phone: user.phone,
-  //     message: chatInput.trim(),
-  //     recipientUid: adminConversation.id,
-  //     senderUid: user.uid,
-  //     isAdminSender: false,
-  //     recipientName: adminConversation.participant?.name,
-  //     recipientEmail: adminConversation.participant?.email,
-  //     recipientPhone: adminConversation.participant?.contact,
-  //   };
-
-  //   sendMessage(contactInfo);
-  //   setChatInput("");
-  //   setProfileSuccessMessage("Message sent successfully!");
-  //   setShowProfileSuccess(true);
-  // };
 
   const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
@@ -1075,39 +1074,15 @@ const sendConversationMessage = async () => {
     return message?.formattedDateTime || "No timestamp";
   };
 
-  const formatElapsed = (message) => {
-    const ts = message?.startTimestamp;
-    const nowMs = Date.now();
-
-    let msgMs = 0;
-    if (ts?.toDate) msgMs = ts.toDate().getTime();
-    else if (typeof ts?.seconds === "number") msgMs = ts.seconds * 1000;
-    else return "";
-
-    const diff = Math.max(0, nowMs - msgMs);
-    const minute = 60 * 1000;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-
-    if (diff < hour) return `${Math.max(1, Math.floor(diff / minute))}m`;
-    if (diff < day) return `${Math.floor(diff / hour)}h`;
-    return `${Math.floor(diff / day)}d`;
+  const closeProfileError = () => {
+    setShowProfileError(false);
+    setProfileErrorMessage("");
   };
 
-  const closeProfileError = () => {
-  setShowProfileError(false);
-  setProfileErrorMessage("");
-};
-
-const closeProfileWarning = () => {
-  setShowProfileWarning(false);
-  setProfileWarningMessage("");
-};
-
-const closeProfileSuccess = () => {
-  setShowProfileSuccess(false);
-  setProfileSuccessMessage("");
-};
+  const closeProfileWarning = () => {
+    setShowProfileWarning(false);
+    setProfileWarningMessage("");
+  };
 
   return (
     <div className="profile-main">
@@ -1137,25 +1112,31 @@ const closeProfileSuccess = () => {
               Detailed information about this rental.
             </p>
 
-<div className="profile-overlay-badge-row">
-  {selectedBooking?.reservation === true && (
-    <div className="profile-overlay-reserved-badge">Reserved Booking</div>
-  )}
+            <div className="profile-overlay-badge-row">
+              {selectedBooking?.reservation === true && (
+                <div className="profile-overlay-reserved-badge">
+                  Reserved Booking
+                </div>
+              )}
 
-  {typeof selectedBooking?.status === "string" && (
-    <div className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}>
-      {selectedBooking?.status}
-    </div>
-  )}
-</div>
-
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}
+                >
+                  {selectedBooking?.status}
+                </div>
+              )}
+            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
                   <div className="confirm-row">
                     <strong className="confirm-label">Rejection Reason:</strong>
-                    <span className="confirm-value" style={{color: "#dc3545"}}>
+                    <span
+                      className="confirm-value"
+                      style={{ color: "#dc3545" }}
+                    >
                       {selectedBooking.rejectionReason || "None"}
                     </span>
                   </div>
@@ -1353,7 +1334,9 @@ const closeProfileSuccess = () => {
 
                       <span className="summary-value">
                         (₱
-                        {(selectedBooking.discountedRate ?? 0).toLocaleString()}{" "}
+                        {(
+                          selectedBooking.discountedRate ?? 0
+                        ).toLocaleString()}{" "}
                         x {selectedBooking.billedDays} Day
                         {selectedBooking.billedDays > 1 ? "s" : ""}) ₱
                         {(
@@ -2078,7 +2061,7 @@ const closeProfileSuccess = () => {
           </div>
         </div>
 
-               {/* Messages Section */}
+        {/* Messages Section */}
         <div className="user-messages-container">
           <h3>Messages & Notifications</h3>
 
@@ -2110,7 +2093,9 @@ const closeProfileSuccess = () => {
                   {selectedMessageIds.length > 0 && (
                     <>
                       {notificationMessages
-                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .filter((message) =>
+                          selectedMessageIds.includes(message.id),
+                        )
                         .some((message) => !message.readStatus) && (
                         <img
                           src="/assets/open-envelope.png"
@@ -2120,7 +2105,9 @@ const closeProfileSuccess = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find((m) => m.id === id);
+                              const msg = notificationMessages.find(
+                                (m) => m.id === id,
+                              );
                               if (msg && !msg.readStatus) markMessageAsRead(id);
                             });
                           }}
@@ -2128,7 +2115,9 @@ const closeProfileSuccess = () => {
                       )}
 
                       {notificationMessages
-                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .filter((message) =>
+                          selectedMessageIds.includes(message.id),
+                        )
                         .some((message) => message.readStatus) && (
                         <img
                           src="/assets/close-envelope.png"
@@ -2138,7 +2127,9 @@ const closeProfileSuccess = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find((m) => m.id === id);
+                              const msg = notificationMessages.find(
+                                (m) => m.id === id,
+                              );
                               if (msg && msg.readStatus) markMessageAsRead(id);
                             });
                           }}
@@ -2152,8 +2143,8 @@ const closeProfileSuccess = () => {
                         title="Delete Selected"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const messagesToDelete = notificationMessages.filter((msg) =>
-                            selectedMessageIds.includes(msg.id),
+                          const messagesToDelete = notificationMessages.filter(
+                            (msg) => selectedMessageIds.includes(msg.id),
                           );
 
                           if (messagesToDelete.length > 0) {
@@ -2172,7 +2163,8 @@ const closeProfileSuccess = () => {
                     if (el) {
                       el.indeterminate =
                         selectedMessageIds.length > 0 &&
-                        selectedMessageIds.length < processedNotifications.length;
+                        selectedMessageIds.length <
+                          processedNotifications.length;
                     }
                   }}
                   className="message-tabs-checkbox"
@@ -2182,7 +2174,9 @@ const closeProfileSuccess = () => {
                   }
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedMessageIds(processedNotifications.map((msg) => msg.id));
+                      setSelectedMessageIds(
+                        processedNotifications.map((msg) => msg.id),
+                      );
                     } else {
                       setSelectedMessageIds([]);
                     }
@@ -2216,16 +2210,26 @@ const closeProfileSuccess = () => {
                   }}
                   title="More select options"
                 >
-                  <option value="none">&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;</option>
-                  <option value="all">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</option>
-                  <option value="unread">&nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;</option>
-                  <option value="read">&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;</option>
+                  <option value="none">
+                    &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="all">
+                    &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="unread">
+                    &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="read">
+                    &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
+                  </option>
                 </select>
               </div>
             )}
           </div>
 
-          <div className={`messages-list ${activeTab === "conversations" ? "conversations-mode" : ""}`}>
+          <div
+            className={`messages-list ${activeTab === "conversations" ? "conversations-mode" : ""}`}
+          >
             {activeTab === "notifications" && (
               <>
                 {processedNotifications.length > 0 ? (
@@ -2244,7 +2248,11 @@ const closeProfileSuccess = () => {
                               ? "/assets/open-envelope.png"
                               : "/assets/close-envelope.png"
                           }
-                          alt={message.readStatus ? "Mark as Unread" : "Mark as Read"}
+                          alt={
+                            message.readStatus
+                              ? "Mark as Unread"
+                              : "Mark as Read"
+                          }
                           className="mark-read-icon"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2264,7 +2272,10 @@ const closeProfileSuccess = () => {
                           onMouseLeave={() => setHoveredMessageId(null)}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setMessageToDelete({ ...message, _source: "inbox" });
+                            setMessageToDelete({
+                              ...message,
+                              _source: "inbox",
+                            });
                             setShowDeleteOverlay(true);
                           }}
                         />
@@ -2292,8 +2303,10 @@ const closeProfileSuccess = () => {
                         <div className="message-info">
                           <div className="message-name">{message.name}</div>
                           <div className="message-contact">
-                            <span className="message-email">{message.email}</span>
-                            <span className="message-phone">{" "}Notification</span>
+                            <span className="message-email">
+                              {message.email}
+                            </span>
+                            <span className="message-phone"> Notification</span>
                           </div>
                           <div className="message-date">
                             {formatMessageTimestamp(message)}
@@ -2302,15 +2315,15 @@ const closeProfileSuccess = () => {
                       </div>
 
                       <div className="message-text">
-  {message.content
-    ? message.content
-        .replace(/<br\s*\/?>/gi, " ")
-        .replace(/<\/p>/gi, " ")
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-    : ""}
-</div>
+                        {message.content
+                          ? message.content
+                              .replace(/<br\s*\/?>/gi, " ")
+                              .replace(/<\/p>/gi, " ")
+                              .replace(/<[^>]+>/g, "")
+                              .replace(/\s+/g, " ")
+                              .trim()
+                          : ""}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -2319,12 +2332,15 @@ const closeProfileSuccess = () => {
               </>
             )}
 
-{activeTab === "conversations" && (
+            {activeTab === "conversations" && (
               <div className="profile-conversation-layout single-pane">
                 <div className="profile-chat-panel">
                   <div className="profile-chat-header">
                     <img
-                      src={adminConversation?.participant?.profilePic || "/assets/profile.png"}
+                      src={
+                        adminConversation?.participant?.profilePic ||
+                        "/assets/profile.png"
+                      }
                       alt="Profile"
                       className="message-profile-pic"
                     />
@@ -2333,36 +2349,36 @@ const closeProfileSuccess = () => {
                         {adminConversation?.participant?.name || "Admin"}
                       </div>
                       <div className="profile-chat-email">
-                        {adminConversation?.participant?.email || "No email"} | {adminConversation?.participant?.contact || "No contact"}
+                        {adminConversation?.participant?.email || "No email"} |{" "}
+                        {adminConversation?.participant?.contact ||
+                          "No contact"}
                       </div>
                     </div>
                   </div>
 
-                  <div className="profile-chat-body">
-                    {!adminConversation || adminConversation.messages.length === 0 ? (
-                      <div className="profile-chat-empty">No conversation yet.</div>
-                    ) : (
-                      adminConversation.messages.map((msg) => {
-                        const isMine = msg.senderUid === user?.uid;
-                        return (
-                          <div
-                            key={`${msg._source}-${msg.id}`}
-                            className={`profile-chat-row ${isMine ? "mine" : "other"}`}
-                          >
-                            <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
-                              <div
-                                className="profile-chat-text"
-                                dangerouslySetInnerHTML={{ __html: msg.content || "" }}
-                              />
-                              <div className="profile-chat-time">
-                                {formatMessageTimestamp(msg)}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+<div className="profile-chat-body" ref={profileChatBodyRef}>
+  {!adminConversation || adminConversation.messages.length === 0 ? (
+    <div className="profile-chat-empty">No conversation yet.</div>
+  ) : (
+    adminConversation.messages.map((msg) => {
+      const isMine = msg.senderUid === user?.uid;
+      return (
+        <div
+          key={`${msg._source}-${msg.id}`}
+          className={`profile-chat-row ${isMine ? "mine" : "other"}`}
+        >
+          <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
+            <div
+              className="profile-chat-text"
+              dangerouslySetInnerHTML={{ __html: msg.content || "" }}
+            />
+            <div className="profile-chat-time">{formatMessageTimestamp(msg)}</div>
+          </div>
+        </div>
+      );
+    })
+  )}
+</div>
 
                   <div className="profile-chat-composer">
                     <textarea
@@ -2375,7 +2391,11 @@ const closeProfileSuccess = () => {
                       className="reply-btn"
                       onClick={sendConversationMessage}
                       disabled={!adminConversation?.id}
-                      title={!adminConversation?.id ? "No admin conversation found yet" : "Send"}
+                      title={
+                        !adminConversation?.id
+                          ? "No admin conversation found yet"
+                          : "Send"
+                      }
                     >
                       Send
                     </button>
@@ -2464,31 +2484,42 @@ const closeProfileSuccess = () => {
                         </div>
 
                         <div className="ongoing-unit-image-wrapper">
-{(() => {
-  const normalizedPlate = String(rental?.plateNo || "")
-    .trim()
-    .toUpperCase();
+                          {(() => {
+                            const normalizedPlate = String(
+                              rental?.plateNo || "",
+                            )
+                              .trim()
+                              .toUpperCase();
 
-  const unit =
-    unitData.find(
-      (u) =>
-        String(u?.plateNo || "").trim().toUpperCase() === normalizedPlate,
-    ) ||
-    unitData.find(
-      (u) =>
-        String(u?.name || "").trim().toLowerCase() ===
-        String(rental?.carName || "").trim().toLowerCase(),
-    );
+                            const unit =
+                              unitData.find(
+                                (u) =>
+                                  String(u?.plateNo || "")
+                                    .trim()
+                                    .toUpperCase() === normalizedPlate,
+                              ) ||
+                              unitData.find(
+                                (u) =>
+                                  String(u?.name || "")
+                                    .trim()
+                                    .toLowerCase() ===
+                                  String(rental?.carName || "")
+                                    .trim()
+                                    .toLowerCase(),
+                              );
 
-  const imageId =
-    rental.imageId ||
-    unit?.imageId ||
-    (normalizedPlate ? `${normalizedPlate}_main` : null);
+                            const imageId =
+                              rental.imageId ||
+                              unit?.imageId ||
+                              (normalizedPlate
+                                ? `${normalizedPlate}_main`
+                                : null);
 
-  const image = imageId ? fetchedImages[imageId] : null;
+                            const image = imageId
+                              ? fetchedImages[imageId]
+                              : null;
 
-
-                          /* {(() => {
+                            /* {(() => {
                             const unit = unitData.find(
                               (u) => u.plateNo === rental.plateNo,
                             );
@@ -2512,26 +2543,27 @@ const closeProfileSuccess = () => {
                           })()}
                         </div>
 
+                        <div className="profile-status-row">
+                          <span
+                            className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+                          >
+                            {rental.status}
+                          </span>
 
-<div className="profile-status-row">
-  <span
-    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-  >
-    {rental.status}
-  </span>
+                          {rental.reservation === true && (
+                            <span className="profile-reserved-booking-badge">
+                              Reserved Booking
+                            </span>
+                          )}
 
-  {rental.reservation === true && (
-    <span className="profile-reserved-booking-badge">Reserved Booking</span>
-  )}
-
-  {typeof rental.status === "string" && (
-    <span
-      className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}
-    >
-      {rental.status}
-    </span>
-  )}
-</div>
+                          {typeof rental.status === "string" && (
+                            <span
+                              className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}
+                            >
+                              {rental.status}
+                            </span>
+                          )}
+                        </div>
                         <button
                           className="ongoing-unit-details-button"
                           onClick={() => {
@@ -2870,32 +2902,41 @@ const closeProfileSuccess = () => {
                         </div>
 
                         <div className="ongoing-unit-image-wrapper">
-
-
-
                           {(() => {
-  const normalizedPlate = String(rental?.plateNo || "")
-    .trim()
-    .toUpperCase();
+                            const normalizedPlate = String(
+                              rental?.plateNo || "",
+                            )
+                              .trim()
+                              .toUpperCase();
 
-  const unit =
-    unitData.find(
-      (u) =>
-        String(u?.plateNo || "").trim().toUpperCase() === normalizedPlate,
-    ) ||
-    unitData.find(
-      (u) =>
-        String(u?.name || "").trim().toLowerCase() ===
-        String(rental?.carName || "").trim().toLowerCase(),
-    );
+                            const unit =
+                              unitData.find(
+                                (u) =>
+                                  String(u?.plateNo || "")
+                                    .trim()
+                                    .toUpperCase() === normalizedPlate,
+                              ) ||
+                              unitData.find(
+                                (u) =>
+                                  String(u?.name || "")
+                                    .trim()
+                                    .toLowerCase() ===
+                                  String(rental?.carName || "")
+                                    .trim()
+                                    .toLowerCase(),
+                              );
 
-  const imageId =
-    rental.imageId ||
-    unit?.imageId ||
-    (normalizedPlate ? `${normalizedPlate}_main` : null);
+                            const imageId =
+                              rental.imageId ||
+                              unit?.imageId ||
+                              (normalizedPlate
+                                ? `${normalizedPlate}_main`
+                                : null);
 
-  const image = imageId ? fetchedImages[imageId] : null;
-                          /* {(() => {
+                            const image = imageId
+                              ? fetchedImages[imageId]
+                              : null;
+                            /* {(() => {
                             const unit = unitData.find(
                               (u) => u.plateNo === rental.plateNo,
                             );
@@ -2919,19 +2960,19 @@ const closeProfileSuccess = () => {
                           })()}
                         </div>
 
-<div className="profile-status-row">
-  <span
-    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-  >
-    {rental.status}
-  </span>
+                        <div className="profile-status-row">
+                          <span
+                            className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+                          >
+                            {rental.status}
+                          </span>
 
-  {rental.reservation === true && (
-    <span className="profile-reserved-booking-badge">Reserved Booking</span>
-  )}
-</div>
-
-
+                          {rental.reservation === true && (
+                            <span className="profile-reserved-booking-badge">
+                              Reserved Booking
+                            </span>
+                          )}
+                        </div>
 
                         <button
                           className="ongoing-unit-details-button"
@@ -3135,20 +3176,21 @@ const closeProfileSuccess = () => {
                   Detailed information about this rental.
                 </p>
 
+                <div className="profile-overlay-badge-row">
+                  {selectedHistoryRental?.reservation === true && (
+                    <div className="profile-overlay-reserved-badge">
+                      Reserved Booking
+                    </div>
+                  )}
 
-<div className="profile-overlay-badge-row">
-  {selectedHistoryRental?.reservation === true && (
-    <div className="profile-overlay-reserved-badge">Reserved Booking</div>
-  )}
-
-  {typeof selectedHistoryRental?.status === "string" && (
-    <span
-      className={`profile-overlay-status-badge status-${selectedHistoryRental.status.toLowerCase()}`}
-    >
-      {selectedHistoryRental.status}
-    </span>
-  )}
-</div>
+                  {typeof selectedHistoryRental?.status === "string" && (
+                    <span
+                      className={`profile-overlay-status-badge status-${selectedHistoryRental.status.toLowerCase()}`}
+                    >
+                      {selectedHistoryRental.status}
+                    </span>
+                  )}
+                </div>
 
                 <div className="admin-confirm-details">
                   <div className="admin-confirm-scroll-container">
@@ -3677,7 +3719,9 @@ const closeProfileSuccess = () => {
 
       {/* Message Overlay - Notifications Only */}
       {selectedMessage && (
-        <div className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}>
+        <div
+          className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}
+        >
           <div className="message-overlay-content">
             <button className="close-btn" onClick={closeMessageOverlay}>
               ×
@@ -4031,13 +4075,13 @@ const closeProfileSuccess = () => {
         </div>
       )}
 
-            {/* ================= Profile Error Overlay ================= */}
+      {/* ================= Profile Error Overlay ================= */}
       {showProfileError && (
         <div className="error-overlay" onClick={closeProfileError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
             <div className="error-icon">
-      <MdClose size={32} />
-    </div>
+              <MdClose size={32} />
+            </div>
             <h3>Error!</h3>
             <p>{profileErrorMessage}</p>
             <button className="error-btn" onClick={closeProfileError}>
@@ -4050,10 +4094,13 @@ const closeProfileSuccess = () => {
       {/* ================= Profile Warning Overlay ================= */}
       {showProfileWarning && (
         <div className="warning-overlay" onClick={closeProfileWarning}>
-          <div className="warning-container" onClick={(e) => e.stopPropagation()}>
-           <div className="warning-icon">
-      <MdWarning size={32} />
-    </div>
+          <div
+            className="warning-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="warning-icon">
+              <MdWarning size={32} />
+            </div>
             <h3>Attention!</h3>
             <p>{profileWarningMessage}</p>
             <button className="warning-btn" onClick={closeProfileWarning}>
@@ -4064,22 +4111,41 @@ const closeProfileSuccess = () => {
       )}
 
       {/* ================= Profile Success Overlay ================= */}
-      {showProfileSuccess && (
-        <div className="success-overlay" onClick={closeProfileSuccess}>
-          <div className="success-container" onClick={(e) => e.stopPropagation()}>
-            <div className="success-icon">
-      <MdCheckCircle size={32} />
-    </div>
-            <h3>Success!</h3>
-            <p>{profileSuccessMessage}</p>
-            <button className="success-btn" onClick={closeProfileSuccess}>
-              OK
-            </button>
-          </div>
+
+      {actionOverlay.isVisible && (
+        <div
+          className={`${
+            actionOverlay.type === "warning"
+              ? "date-warning-overlay"
+              : "sent-ongoing-overlay"
+          } ${hideCancelAnimation ? "hide" : ""}`}
+        >
+          <button
+            className={
+              actionOverlay.type === "warning"
+                ? "close-warning"
+                : "close-sent-ongoing"
+            }
+            onClick={() => {
+              setHideCancelAnimation(true);
+              setTimeout(
+                () => setActionOverlay({ ...actionOverlay, isVisible: false }),
+                400,
+              );
+            }}
+          >
+            ✖
+          </button>
+          <span className="warning-text">{actionOverlay.message}</span>
+          <div
+            className={
+              actionOverlay.type === "warning"
+                ? "progress-bar"
+                : "sent-ongoing-progress-bar"
+            }
+          ></div>
         </div>
       )}
-
-
     </div>
   );
 };

@@ -496,8 +496,7 @@ body.modal-open {
   transition: padding-right 0.18s ease;
 }
 
-.conversation-thread-item:hover .thread-texts,
-.conversation-thread-item.active .thread-texts {
+.conversation-thread-item:hover .thread-texts {
   padding-right: 36px;
 }
 
@@ -596,8 +595,7 @@ body.modal-open {
   transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
 }
 
-.conversation-thread-item:hover .thread-delete-btn,
-.conversation-thread-item.active .thread-delete-btn {
+.conversation-thread-item:hover .thread-delete-btn {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
