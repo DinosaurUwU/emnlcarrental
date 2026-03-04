@@ -13,10 +13,10 @@ const Messages = () => {
     markMessageAsRead,
     sendMessage,
     actionOverlay,
-  showActionOverlay,
-  hideCancelAnimation,
-  setHideCancelAnimation,
-  setActionOverlay,
+    showActionOverlay,
+    hideCancelAnimation,
+    setHideCancelAnimation,
+    setActionOverlay,
   } = useUser();
 
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -41,8 +41,14 @@ const Messages = () => {
   const [chatInput, setChatInput] = useState("");
   const conversationChatBodyRef = useRef(null);
   const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
-  useState(false);
-const [threadToDelete, setThreadToDelete] = useState(null);
+    useState(false);
+  const [threadToDelete, setThreadToDelete] = useState(null);
+
+  const [processingConversationDelete, setProcessingConversationDelete] = useState({
+  isProcessing: false,
+  message: "",
+  textClass: "",
+});
 
   const notificationMessages = useMemo(() => {
     return [...(userMessages || [])]
@@ -75,7 +81,13 @@ const [threadToDelete, setThreadToDelete] = useState(null);
 
     const map = new Map();
 
-    const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+    const getMs = (msg) => {
+      const ts = msg?.startTimestamp;
+      if (ts?.toDate) return ts.toDate().getTime();
+      if (typeof ts?.seconds === "number") return ts.seconds * 1000;
+      if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
+      return 0;
+    };
 
     for (const msg of chatMessages) {
       const senderUid = msg?.senderUid || "";
@@ -84,105 +96,157 @@ const [threadToDelete, setThreadToDelete] = useState(null);
       const otherUid = senderUid === user.uid ? recipientUid : senderUid;
       if (!otherUid) continue;
 
-if (!map.has(otherUid)) {
-  map.set(otherUid, {
-    id: otherUid,
-    participant: {
-      name:
-        senderUid === user.uid
-          ? msg?.recipientName || msg?.recipientEmail || otherUid
-          : msg?.name || msg?.email || otherUid,
-      email:
-        senderUid === user.uid
-          ? msg?.recipientEmail || "No email"
-          : msg?.email || "No email",
-      contact:
-        senderUid === user.uid
-          ? msg?.recipientContact || msg?.recipientPhone || "No contact"
-          : msg?.contact || msg?.phone || "No contact",
-      profilePic: msg?.profilePic || "/assets/profile.png",
-    },
-    messages: [],
-    unreadCount: 0,
-    latest: null,
-  });
-}
+      if (!map.has(otherUid)) {
+        map.set(otherUid, {
+          id: otherUid,
+          participant: {
+            name:
+              senderUid === user.uid
+                ? msg?.recipientName || msg?.recipientEmail || otherUid
+                : msg?.name || msg?.email || otherUid,
+            email:
+              senderUid === user.uid
+                ? msg?.recipientEmail || "No email"
+                : msg?.email || "No email",
+            contact:
+              senderUid === user.uid
+                ? msg?.recipientContact || msg?.recipientPhone || "No contact"
+                : msg?.contact || msg?.phone || "No contact",
+            profilePic: msg?.profilePic || "/assets/profile.png",
+          },
+          messages: [],
+          unreadCount: 0,
+          latest: null,
+        });
+      }
 
-const thread = map.get(otherUid);
-thread.messages.push(msg);
+      const thread = map.get(otherUid);
+      thread.messages.push(msg);
 
-const isIncomingFromClient = senderUid !== user.uid;
+      const isIncomingFromClient = senderUid !== user.uid;
 
-const candidateName = isIncomingFromClient
-  ? msg?.name || msg?.email
-  : msg?.recipientName || msg?.recipientEmail;
+      const candidateName = isIncomingFromClient
+        ? msg?.name || msg?.email
+        : msg?.recipientName || msg?.recipientEmail;
 
-const candidateEmail = isIncomingFromClient
-  ? msg?.email
-  : msg?.recipientEmail;
+      const candidateEmail = isIncomingFromClient
+        ? msg?.email
+        : msg?.recipientEmail;
 
-const candidateContact = isIncomingFromClient
-  ? msg?.contact || msg?.phone
-  : msg?.recipientContact || msg?.recipientPhone;
+      const candidateContact = isIncomingFromClient
+        ? msg?.contact || msg?.phone
+        : msg?.recipientContact || msg?.recipientPhone;
 
-const candidateProfilePic = isIncomingFromClient
-  ? msg?.profilePic
-  : null;
+      const candidateProfilePic = isIncomingFromClient ? msg?.profilePic : null;
 
-// Upgrade fallback values when better data appears in newer/other messages
-if (
-  (!thread.participant?.name || thread.participant.name === otherUid) &&
-  candidateName
-) {
-  thread.participant.name = candidateName;
-}
+      // Upgrade fallback values when better data appears in newer/other messages
+      if (
+        (!thread.participant?.name || thread.participant.name === otherUid) &&
+        candidateName
+      ) {
+        thread.participant.name = candidateName;
+      }
 
-if (
-  (!thread.participant?.email || thread.participant.email === "No email") &&
-  candidateEmail
-) {
-  thread.participant.email = candidateEmail;
-}
+      if (
+        (!thread.participant?.email ||
+          thread.participant.email === "No email") &&
+        candidateEmail
+      ) {
+        thread.participant.email = candidateEmail;
+      }
 
-if (
-  (!thread.participant?.contact || thread.participant.contact === "No contact") &&
-  candidateContact
-) {
-  thread.participant.contact = candidateContact;
-}
+      if (
+        (!thread.participant?.contact ||
+          thread.participant.contact === "No contact") &&
+        candidateContact
+      ) {
+        thread.participant.contact = candidateContact;
+      }
 
-if (
-  (!thread.participant?.profilePic ||
-    thread.participant.profilePic === "/assets/profile.png") &&
-  candidateProfilePic
-) {
-  thread.participant.profilePic = candidateProfilePic;
-}
+      if (
+        (!thread.participant?.profilePic ||
+          thread.participant.profilePic === "/assets/profile.png") &&
+        candidateProfilePic
+      ) {
+        thread.participant.profilePic = candidateProfilePic;
+      }
 
-if (msg._source === "inbox" && !msg.readStatus) {
-  thread.unreadCount += 1;
-}
+      if (msg._source === "inbox" && !msg.readStatus) {
+        thread.unreadCount += 1;
+      }
 
-if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
-  thread.latest = msg;
-}
-
+      if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
+        thread.latest = msg;
+      }
     }
 
-    const threads = Array.from(map.values())
-      .map((thread) => ({
-        ...thread,
-        messages: [...thread.messages].sort((a, b) => getMs(a) - getMs(b)),
-      }))
-      .sort((a, b) => getMs(b.latest) - getMs(a.latest));
+    // const threads = Array.from(map.values())
+    //   .map((thread) => ({
+    //     ...thread,
+    //     messages: [...thread.messages].sort((a, b) => getMs(a) - getMs(b)),
+    //   }))
+    //   .sort((a, b) => getMs(b.latest) - getMs(a.latest));
 
-    return threads;
+    // return threads;
+
+    const threads = Array.from(map.values())
+  .map((thread) => {
+    const messages = [...thread.messages].sort((a, b) => getMs(a) - getMs(b));
+
+    // Always derive participant from the latest messages so profile updates reflect immediately
+    const latestIncoming = [...messages]
+      .reverse()
+      .find((m) => (m?.senderUid || "") !== user.uid);
+
+    const latestOutgoing = [...messages]
+      .reverse()
+      .find((m) => (m?.senderUid || "") === user.uid);
+
+    const participant = {
+      name:
+        latestIncoming?.name ||
+        latestOutgoing?.recipientName ||
+        thread.participant?.name ||
+        thread.id,
+      email:
+        latestIncoming?.email ||
+        latestOutgoing?.recipientEmail ||
+        thread.participant?.email ||
+        "No email",
+      contact:
+        latestIncoming?.contact ||
+        latestOutgoing?.recipientContact ||
+        latestOutgoing?.recipientPhone ||
+        thread.participant?.contact ||
+        "No contact",
+      profilePic:
+        latestIncoming?.profilePic ||
+        thread.participant?.profilePic ||
+        "/assets/profile.png",
+    };
+
+    const latest =
+      messages.length > 0
+        ? messages[messages.length - 1]
+        : thread.latest || null;
+
+    return {
+      ...thread,
+      participant,
+      messages,
+      latest,
+    };
+  })
+  .sort((a, b) => getMs(b.latest) - getMs(a.latest));
+
+return threads;
   }, [chatMessages, user?.uid]);
 
   const selectedThread = useMemo(() => {
     return (
-      conversationThreads.find((thread) => thread.id === selectedConversationId) ||
-      null
+      conversationThreads.find(
+        (thread) => thread.id === selectedConversationId,
+      ) || null
     );
   }, [conversationThreads, selectedConversationId]);
 
@@ -221,142 +285,164 @@ if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
     });
   };
 
-  const deleteConversationThread = async (thread) => {
+const deleteConversationThread = async (thread) => {
   if (!thread?.id) return;
 
-  const inboxIds = (thread.messages || [])
-    .filter((m) => m?._source === "inbox" && m?.id)
-    .map((m) => m.id);
-
-  const sentIds = (thread.messages || [])
-    .filter((m) => m?._source === "sentbox" && m?.id)
-    .map((m) => m.id);
-
-  if (inboxIds.length > 0) {
-    await deleteMessage(inboxIds, "inbox");
-  }
-
-  if (sentIds.length > 0) {
-    await deleteMessage(sentIds, "sentbox");
-  }
-
-  const deletedCount = inboxIds.length + sentIds.length;
-  handleMessagesDeleted(deletedCount > 0 ? deletedCount : 1);
-
-  if (selectedConversationId === thread.id) {
-    setSelectedConversationId(null);
-    setChatInput("");
-  }
-
-  setShowDeleteConversationOverlay(false);
-  setThreadToDelete(null);
-};
-
-
-useEffect(() => {
-  if (activeTab !== "conversations") return;
-  if (!selectedThread) return;
-  if (!conversationChatBodyRef.current) return;
-
-  conversationChatBodyRef.current.scrollTop =
-    conversationChatBodyRef.current.scrollHeight;
-}, [activeTab, selectedThread?.id, selectedThread?.messages?.length]);
-
-const sendConversationMessage = async () => {
-  if (!chatInput.trim()) return;
-  if (!user?.uid || !selectedThread?.id) return;
-
-  const contactInfo = {
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    message: chatInput.trim(),
-    recipientUid: selectedThread.id,
-    senderUid: user.uid,
-    isAdminSender: true,
-    recipientName: selectedThread.participant?.name,
-    recipientEmail: selectedThread.participant?.email,
-    recipientPhone: selectedThread.participant?.contact,
-  };
-
-  const result = await sendMessage(contactInfo);
-
-  if (!result?.success) {
-    showActionOverlay({
-      message: result?.error || "Failed to send message.",
-      type: "warning",
-    });
-    return;
-  }
-
-  showActionOverlay({
-    message: "Message sent!",
-    type: "success",
-  });
-  setChatInput("");
-  setTimeout(() => {
-  if (conversationChatBodyRef.current) {
-    conversationChatBodyRef.current.scrollTop =
-      conversationChatBodyRef.current.scrollHeight;
-  }
-}, 0);
-};
-
-const handleAdminChatKeyDown = (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendConversationMessage();
-  }
-};
-
-const sendFleetDetailsLink = async () => {
-  if (!user?.uid || !selectedThread?.id) return;
-
-  const fleetUrl = `${window.location.origin}/fleet-details`;
-  const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
-
-  const contactInfo = {
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    message: quickMessage,
-    recipientUid: selectedThread.id,
-    senderUid: user.uid,
-    isAdminSender: true,
-    recipientName: selectedThread.participant?.name,
-    recipientEmail: selectedThread.participant?.email,
-    recipientPhone: selectedThread.participant?.contact,
-  };
-
-  const result = await sendMessage(contactInfo);
-
-  if (!result?.success) {
-    showActionOverlay({
-      message: result?.error || "Failed to send fleet link.",
-      type: "warning",
-    });
-    return;
-  }
-
-  showActionOverlay({
-    message: "Fleet details link sent!",
-    type: "success",
+  setProcessingConversationDelete({
+    isProcessing: true,
+    message: "Deleting conversation...",
+    textClass: "status-submitting",
   });
 
-  setTimeout(() => {
-  if (conversationChatBodyRef.current) {
+  try {
+    const inboxIds = (thread.messages || [])
+      .filter((m) => m?._source === "inbox" && m?.id)
+      .map((m) => m.id);
+
+    const sentIds = (thread.messages || [])
+      .filter((m) => m?._source === "sentbox" && m?.id)
+      .map((m) => m.id);
+
+    if (inboxIds.length > 0) {
+      await deleteMessage(inboxIds, "inbox");
+    }
+
+    if (sentIds.length > 0) {
+      await deleteMessage(sentIds, "sentbox");
+    }
+
+    const deletedCount = inboxIds.length + sentIds.length;
+    handleMessagesDeleted(deletedCount > 0 ? deletedCount : 1);
+
+    if (selectedConversationId === thread.id) {
+      setSelectedConversationId(null);
+      setChatInput("");
+    }
+
+    setThreadToDelete(null);
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    showActionOverlay({
+      message: "Failed to delete conversation.",
+      type: "warning",
+    });
+  } finally {
+    setProcessingConversationDelete({
+      isProcessing: false,
+      message: "",
+      textClass: "",
+    });
+  }
+};
+
+  useEffect(() => {
+    if (activeTab !== "conversations") return;
+    if (!selectedThread) return;
+    if (!conversationChatBodyRef.current) return;
+
     conversationChatBodyRef.current.scrollTop =
       conversationChatBodyRef.current.scrollHeight;
-  }
-}, 0);
-};
+  }, [activeTab, selectedThread?.id, selectedThread?.messages?.length]);
+
+  const sendConversationMessage = async () => {
+    const text = chatInput.trim();
+    if (!text) return;
+    if (!user?.uid || !selectedThread?.id) return;
+
+    setChatInput(""); // clear immediately
+
+    const contactInfo = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      message: text,
+      recipientUid: selectedThread.id,
+      senderUid: user.uid,
+      isAdminSender: true,
+      recipientName: selectedThread.participant?.name,
+      recipientEmail: selectedThread.participant?.email,
+      recipientPhone: selectedThread.participant?.contact,
+    };
+
+    const result = await sendMessage(contactInfo);
+
+    if (!result?.success) {
+      setChatInput(text); // restore on failure
+      showActionOverlay({
+        message: result?.error || "Failed to send message.",
+        type: "warning",
+      });
+      return;
+    }
+
+    showActionOverlay({
+      message: "Message sent!",
+      type: "success",
+    });
+
+    setTimeout(() => {
+      if (conversationChatBodyRef.current) {
+        conversationChatBodyRef.current.scrollTop =
+          conversationChatBodyRef.current.scrollHeight;
+      }
+    }, 0);
+  };
+
+  const handleAdminChatKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendConversationMessage();
+    }
+  };
+
+  const sendFleetDetailsLink = async () => {
+    if (!user?.uid || !selectedThread?.id) return;
+
+    const fleetUrl = `${window.location.origin}/fleet-details`;
+    const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
+
+    const contactInfo = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      message: quickMessage,
+      recipientUid: selectedThread.id,
+      senderUid: user.uid,
+      isAdminSender: true,
+      recipientName: selectedThread.participant?.name,
+      recipientEmail: selectedThread.participant?.email,
+      recipientPhone: selectedThread.participant?.contact,
+    };
+
+    const result = await sendMessage(contactInfo);
+
+    if (!result?.success) {
+      showActionOverlay({
+        message: result?.error || "Failed to send fleet link.",
+        type: "warning",
+      });
+      return;
+    }
+
+    showActionOverlay({
+      message: "Fleet details link sent!",
+      type: "success",
+    });
+
+    setTimeout(() => {
+      if (conversationChatBodyRef.current) {
+        conversationChatBodyRef.current.scrollTop =
+          conversationChatBodyRef.current.scrollHeight;
+      }
+    }, 0);
+  };
 
   const currentCount =
     activeTab === "notifications"
       ? notificationMessages.length
       : conversationThreads.length;
 
-        const formatMessageTimestamp = (message) => {
+  const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
 
     if (ts?.toDate) {
@@ -392,12 +478,27 @@ const sendFleetDetailsLink = async () => {
       return `${datePart} | ${timePart}`;
     }
 
+    if (typeof message?.clientCreatedAt === "number") {
+      const d = new Date(message.clientCreatedAt);
+      const datePart = d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "Asia/Manila",
+      });
+      const timePart = d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      });
+      return `${datePart} | ${timePart}`;
+    }
+
     return message?.formattedDateTime || "No timestamp";
   };
 
-
-
-   const formatElapsed = (message) => {
+  const formatElapsed = (message) => {
     const ts = message?.startTimestamp;
     const now = Date.now();
 
@@ -500,11 +601,11 @@ const sendFleetDetailsLink = async () => {
             </div>
           )}
 
-       <h2>
-  {activeTab === "notifications"
-    ? `Notifications (${currentCount})`
-    : `Messages (${currentCount})`}
-</h2>
+        <h2>
+          {activeTab === "notifications"
+            ? `Notifications (${currentCount})`
+            : `Messages (${currentCount})`}
+        </h2>
 
         <div className="tabs-container">
           <div className="tabs-left">
@@ -530,7 +631,9 @@ const sendFleetDetailsLink = async () => {
 
           <div className="tabs-right">
             {activeTab === "notifications" && selectedMessageIds.length > 0 && (
-              <span className="selected-count">({selectedMessageIds.length})</span>
+              <span className="selected-count">
+                ({selectedMessageIds.length})
+              </span>
             )}
 
             {activeTab === "notifications" && (
@@ -539,7 +642,9 @@ const sendFleetDetailsLink = async () => {
                   {selectedMessageIds.length > 0 && (
                     <>
                       {notificationMessages
-                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .filter((message) =>
+                          selectedMessageIds.includes(message.id),
+                        )
                         .some((message) => !message.readStatus) && (
                         <img
                           src="/assets/open-envelope.png"
@@ -549,7 +654,9 @@ const sendFleetDetailsLink = async () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find((m) => m.id === id);
+                              const msg = notificationMessages.find(
+                                (m) => m.id === id,
+                              );
                               if (msg && !msg.readStatus) markMessageAsRead(id);
                             });
                           }}
@@ -557,7 +664,9 @@ const sendFleetDetailsLink = async () => {
                       )}
 
                       {notificationMessages
-                        .filter((message) => selectedMessageIds.includes(message.id))
+                        .filter((message) =>
+                          selectedMessageIds.includes(message.id),
+                        )
                         .some((message) => message.readStatus) && (
                         <img
                           src="/assets/close-envelope.png"
@@ -567,7 +676,9 @@ const sendFleetDetailsLink = async () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find((m) => m.id === id);
+                              const msg = notificationMessages.find(
+                                (m) => m.id === id,
+                              );
                               if (msg && msg.readStatus) markMessageAsRead(id);
                             });
                           }}
@@ -581,8 +692,8 @@ const sendFleetDetailsLink = async () => {
                         title="Delete Selected"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const messagesToDelete = notificationMessages.filter((msg) =>
-                            selectedMessageIds.includes(msg.id),
+                          const messagesToDelete = notificationMessages.filter(
+                            (msg) => selectedMessageIds.includes(msg.id),
                           );
 
                           if (messagesToDelete.length > 0) {
@@ -601,7 +712,8 @@ const sendFleetDetailsLink = async () => {
                     if (el) {
                       el.indeterminate =
                         selectedMessageIds.length > 0 &&
-                        selectedMessageIds.length < processedNotifications.length;
+                        selectedMessageIds.length <
+                          processedNotifications.length;
                     }
                   }}
                   className="message-tabs-checkbox"
@@ -611,7 +723,9 @@ const sendFleetDetailsLink = async () => {
                   }
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedMessageIds(processedNotifications.map((msg) => msg.id));
+                      setSelectedMessageIds(
+                        processedNotifications.map((msg) => msg.id),
+                      );
                     } else {
                       setSelectedMessageIds([]);
                     }
@@ -646,10 +760,18 @@ const sendFleetDetailsLink = async () => {
                   }}
                   title="More select options"
                 >
-                  <option value="none">&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;</option>
-                  <option value="all">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</option>
-                  <option value="unread">&nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;</option>
-                  <option value="read">&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;</option>
+                  <option value="none">
+                    &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="all">
+                    &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="unread">
+                    &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
+                  </option>
+                  <option value="read">
+                    &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
+                  </option>
                 </select>
               </div>
             )}
@@ -675,7 +797,9 @@ const sendFleetDetailsLink = async () => {
                             ? "/assets/open-envelope.png"
                             : "/assets/close-envelope.png"
                         }
-                        alt={message.readStatus ? "Mark as Unread" : "Mark as Read"}
+                        alt={
+                          message.readStatus ? "Mark as Unread" : "Mark as Read"
+                        }
                         className="action-icon envelope-icon"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -721,7 +845,9 @@ const sendFleetDetailsLink = async () => {
                         className="avatar"
                       />
                       <div>
-                        <strong className="admin-message-name">{message.name}</strong>
+                        <strong className="admin-message-name">
+                          {message.name}
+                        </strong>
                         <div className="message-meta">
                           <span className="email">{message.email}</span>
                           <span className="phone">Notification</span>
@@ -733,13 +859,13 @@ const sendFleetDetailsLink = async () => {
                     </div>
 
                     <p className="message-preview">
-  {(message.content || "")
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/p>/gi, " ")
-    .replace(/<[^>]+>/g, "")
-    .replace(/\s+/g, " ")
-    .trim()}
-</p>
+                      {(message.content || "")
+                        .replace(/<br\s*\/?>/gi, " ")
+                        .replace(/<\/p>/gi, " ")
+                        .replace(/<[^>]+>/g, "")
+                        .replace(/\s+/g, " ")
+                        .trim()}
+                    </p>
                   </div>
                 ))
               ) : (
@@ -771,7 +897,20 @@ const sendFleetDetailsLink = async () => {
                   </p>
                 ) : (
                   conversationThreads.map((thread) => {
-                    const lastText = (thread.latest?.content || "").replace(/<[^>]+>/g, "");
+                // const latestSourceTag =
+                //   thread.latest?.sourcePage === "contact" ? "[Contact] " : "";
+                // const lastText =
+                //   latestSourceTag +
+                //   (thread.latest?.content || "").replace(/<[^>]+>/g, "");
+
+                const sourceTag =
+  thread.latest?.sourcePage === "contact-guest"
+    ? "[Guest Contact] "
+    : thread.latest?.sourcePage === "contact"
+      ? "[Contact] "
+      : "";
+
+const lastText = sourceTag + (thread.latest?.content || "").replace(/<[^>]+>/g, "");
                     return (
                       <div
                         key={thread.id}
@@ -782,44 +921,60 @@ const sendFleetDetailsLink = async () => {
                       >
                         <div className="conversation-thread-row">
                           <img
-                            src={thread.participant.profilePic || "/assets/profile.png"}
+                            src={
+                              thread.participant.profilePic ||
+                              "/assets/profile.png"
+                            }
                             alt="Avatar"
                             className="avatar"
                           />
-<div className="thread-texts">
-  <div className="thread-top-row">
-    <div className="thread-name">{thread.participant.name}</div>
-    <div className="thread-time">{formatElapsed(thread.latest)}</div>
-  </div>
+                          <div className="thread-texts">
+                            <div className="thread-top-row">
+                              <div className="thread-name">
+                                {thread.participant.name}
+                              </div>
+                              <div className="thread-time">
+                                {formatElapsed(thread.latest)}
+                              </div>
+                            </div>
 
-  <div className="thread-bottom-row">
-    <div className="thread-preview">{lastText || "No message"}</div>
-    {thread.unreadCount > 0 && (
-      <span className="thread-unread-badge">{thread.unreadCount}</span>
-    )}
-  </div>
-</div>
+                            <div className="thread-bottom-row">
+                              <div className="thread-preview">
+                                {lastText || "No message"}
+                              </div>
+                              {thread.unreadCount > 0 && (
+                                <span className="thread-unread-badge">
+                                  {thread.unreadCount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
 
-<div className="thread-row-actions">
-  <button
-    type="button"
-    className="thread-delete-btn"
-    title="Delete conversation"
-    onClick={(e) => {
-      e.stopPropagation();
-      setThreadToDelete(thread);
-      setShowDeleteConversationOverlay(true);
-    }}
-  >
-    <img
-      src="/assets/delete.png"
-      alt="Delete conversation"
-      className="message-action-icon"
-      onMouseEnter={(e) => (e.currentTarget.src = "/assets/delete-hover.png")}
-      onMouseLeave={(e) => (e.currentTarget.src = "/assets/delete.png")}
-    />
-  </button>
-</div>
+                          <div className="thread-row-actions">
+                            <button
+                              type="button"
+                              className="thread-delete-btn"
+                              title="Delete conversation"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setThreadToDelete(thread);
+                                setShowDeleteConversationOverlay(true);
+                              }}
+                            >
+                              <img
+                                src="/assets/delete.png"
+                                alt="Delete conversation"
+                                className="message-action-icon"
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.src =
+                                    "/assets/delete-hover.png")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.src = "/assets/delete.png")
+                                }
+                              />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -836,21 +991,28 @@ const sendFleetDetailsLink = async () => {
                   <>
                     <div className="conversation-chat-header">
                       <img
-                        src={selectedThread.participant.profilePic || "/assets/profile.png"}
+                        src={
+                          selectedThread.participant.profilePic ||
+                          "/assets/profile.png"
+                        }
                         alt="Avatar"
                         className="avatar"
                       />
                       <div>
                         <div className="conversation-chat-title">
-                          {selectedThread.participant.name}
+                          {selectedThread.participant.name || "Unknown User"}
                         </div>
                         <div className="conversation-chat-email">
-                          {selectedThread.participant.email} | {selectedThread.participant.contact}
+                          {selectedThread.participant.email} |{" "}
+                          {selectedThread.participant.contact}
                         </div>
                       </div>
                     </div>
 
-                    <div className="conversation-chat-body" ref={conversationChatBodyRef}>
+                    <div
+                      className="conversation-chat-body"
+                      ref={conversationChatBodyRef}
+                    >
                       {selectedThread.messages.map((msg) => {
                         const isMine = msg.senderUid === user?.uid;
                         const htmlContent = msg.content || "";
@@ -861,14 +1023,15 @@ const sendFleetDetailsLink = async () => {
                             className={`conversation-chat-row ${isMine ? "mine" : "other"}`}
                           >
                             <div className={`conversation-bubble ${isMine ? "mine" : "other"}`}>
-                              <div
-  className="conversation-bubble-text"
-  dangerouslySetInnerHTML={{ __html: htmlContent }}
-/>
-                              <div className="conversation-bubble-time">
-                                {formatMessageTimestamp(msg)}
-                              </div>
-                            </div>
+  {msg.sourcePage === "contact" && (
+    <div className="message-source-chip">From Contact Page</div>
+  )}
+  <div
+    className="conversation-bubble-text"
+    dangerouslySetInnerHTML={{ __html: htmlContent }}
+  />
+  <div className="conversation-bubble-time">{formatMessageTimestamp(msg)}</div>
+</div>
                           </div>
                         );
                       })}
@@ -876,12 +1039,12 @@ const sendFleetDetailsLink = async () => {
 
                     <div className="conversation-chat-composer">
                       <textarea
-  value={chatInput}
-  onChange={(e) => setChatInput(e.target.value)}
-  onKeyDown={handleAdminChatKeyDown}
-  placeholder="Type your message..."
-  className="conversation-chat-input"
-/>
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={handleAdminChatKeyDown}
+                        placeholder="Type your message..."
+                        className="conversation-chat-input"
+                      />
                       <div className="conversation-chat-actions">
                         <button
                           className="fleet-link-btn"
@@ -889,7 +1052,10 @@ const sendFleetDetailsLink = async () => {
                         >
                           Send Fleet Link
                         </button>
-                        <button className="reply-btn" onClick={sendConversationMessage}>
+                        <button
+                          className="reply-btn"
+                          onClick={sendConversationMessage}
+                        >
                           Send
                         </button>
                       </div>
@@ -910,12 +1076,16 @@ const sendFleetDetailsLink = async () => {
 
               <div className="message-header">
                 <img
-                  src={selectedNotification?.profilePic || "/assets/profile.png"}
+                  src={
+                    selectedNotification?.profilePic || "/assets/profile.png"
+                  }
                   alt="Avatar"
                   className="avatar"
                 />
                 <div className="admin-message-info">
-                  <h3 className="admin-message-name">{selectedNotification?.name}</h3>
+                  <h3 className="admin-message-name">
+                    {selectedNotification?.name}
+                  </h3>
                   <p className="message-meta">
                     <span className="email">{selectedNotification?.email}</span>
                     <span className="phone">Notification</span>
@@ -928,7 +1098,9 @@ const sendFleetDetailsLink = async () => {
 
               <p
                 className="full-message"
-                dangerouslySetInnerHTML={{ __html: selectedNotification?.content }}
+                dangerouslySetInnerHTML={{
+                  __html: selectedNotification?.content,
+                }}
               ></p>
 
               <div className="message-actions">
@@ -939,7 +1111,10 @@ const sendFleetDetailsLink = async () => {
                     className="action-icon delete-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMessageToDelete({ ...selectedNotification, _source: "inbox" });
+                      setMessageToDelete({
+                        ...selectedNotification,
+                        _source: "inbox",
+                      });
                       setShowDeleteOverlay(true);
                     }}
                     onMouseEnter={(e) =>
@@ -956,33 +1131,53 @@ const sendFleetDetailsLink = async () => {
         )}
 
         {showDeleteConversationOverlay && threadToDelete && (
-  <div className="overlay-revert">
-    <div className="confirm-modal">
-      <h3>Delete Conversation</h3>
-      <p>
-        This will delete all messages in this conversation from your admin inbox
-        and sentbox. Continue?
-      </p>
-      <div className="confirm-buttons">
-        <button
-          className="confirm-btn revert"
-          onClick={() => deleteConversationThread(threadToDelete)}
-        >
-          Yes, Delete
-        </button>
-        <button
-          className="confirm-btn cancel"
-          onClick={() => {
-            setShowDeleteConversationOverlay(false);
-            setThreadToDelete(null);
-          }}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div className="overlay-revert">
+            <div className="confirm-modal">
+              <h3>Delete Conversation</h3>
+              <p>
+                This will delete all messages in this conversation from your
+                admin inbox and sentbox. Continue?
+              </p>
+              <div className="confirm-buttons">
+                <button
+                  className="confirm-btn revert"
+                 onClick={() => {
+  setShowDeleteConversationOverlay(false);
+  deleteConversationThread(threadToDelete);
+}}
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  className="confirm-btn cancel"
+                  onClick={() => {
+                    setShowDeleteConversationOverlay(false);
+                    setThreadToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {processingConversationDelete.isProcessing && (
+          <div className="submitting-overlay">
+            <div className="loading-container">
+              <div className="loading-bar-road">
+                <img
+                  src="/assets/images/submitting.gif"
+                  alt={processingConversationDelete.message}
+                  className="car-gif"
+                />
+              </div>
+              <p className={processingConversationDelete.textClass}>
+                {processingConversationDelete.message}
+              </p>
+            </div>
+          </div>
+        )}
 
         {showMessagesDeletedOverlay && (
           <div
@@ -1008,40 +1203,41 @@ const sendFleetDetailsLink = async () => {
           </div>
         )}
 
-{actionOverlay.isVisible && (
-  <div
-    className={`${
-      actionOverlay.type === "warning"
-        ? "date-warning-overlay"
-        : "sent-ongoing-overlay"
-    } ${hideCancelAnimation ? "hide" : ""}`}
-  >
-    <button
-      className={
-        actionOverlay.type === "warning"
-          ? "close-warning"
-          : "close-sent-ongoing"
-      }
-      onClick={() => {
-        setHideCancelAnimation(true);
-        setTimeout(
-          () => setActionOverlay({ ...actionOverlay, isVisible: false }),
-          400,
-        );
-      }}
-    >
-      ✖
-    </button>
-    <span className="warning-text">{actionOverlay.message}</span>
-    <div
-      className={
-        actionOverlay.type === "warning"
-          ? "progress-bar"
-          : "sent-ongoing-progress-bar"
-      }
-    ></div>
-  </div>
-)}
+        {actionOverlay.isVisible && (
+          <div
+            className={`${
+              actionOverlay.type === "warning"
+                ? "date-warning-overlay"
+                : "sent-ongoing-overlay"
+            } ${hideCancelAnimation ? "hide" : ""}`}
+          >
+            <button
+              className={
+                actionOverlay.type === "warning"
+                  ? "close-warning"
+                  : "close-sent-ongoing"
+              }
+              onClick={() => {
+                setHideCancelAnimation(true);
+                setTimeout(
+                  () =>
+                    setActionOverlay({ ...actionOverlay, isVisible: false }),
+                  400,
+                );
+              }}
+            >
+              ✖
+            </button>
+            <span className="warning-text">{actionOverlay.message}</span>
+            <div
+              className={
+                actionOverlay.type === "warning"
+                  ? "progress-bar"
+                  : "sent-ongoing-progress-bar"
+              }
+            ></div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1049,10 +1245,7 @@ const sendFleetDetailsLink = async () => {
 
 export default React.memo(Messages);
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 // "use client";
 // //Messages.js

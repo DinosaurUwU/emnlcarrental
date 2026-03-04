@@ -778,16 +778,20 @@ const Profile = ({ openBooking }) => {
   };
 
   const handleSaveProfileChanges = () => {
-    updateUser({
-      profilePic: tempProfilePic,
-      surname: editedProfile.surname,
-      firstName: editedProfile.firstName,
-      middleName: editedProfile.middleName,
-      occupation: editedProfile.occupation,
-      // email: editedProfile.email,
-      phone: editedProfile.contact,
-      address: editedProfile.address,
-    });
+const composedName = `${editedProfile.surname || ""} ${editedProfile.firstName || ""}`
+  .replace(/\s+/g, " ")
+  .trim();
+
+updateUser({
+  profilePic: tempProfilePic,
+  name: composedName || user?.name || "", // keep name in sync
+  surname: editedProfile.surname,
+  firstName: editedProfile.firstName,
+  middleName: editedProfile.middleName,
+  occupation: editedProfile.occupation,
+  phone: editedProfile.contact,
+  address: editedProfile.address,
+});
 
     setShowEditProfileOverlay(false);
 
@@ -846,7 +850,13 @@ const Profile = ({ openBooking }) => {
   const adminConversation = useMemo(() => {
     if (!user?.uid) return null;
 
-    const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
+    const getMs = (msg) => {
+  const ts = msg?.startTimestamp;
+  if (ts?.toDate) return ts.toDate().getTime();
+  if (typeof ts?.seconds === "number") return ts.seconds * 1000;
+  if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
+  return 0;
+};
     const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
 
     const getOtherUid = (msg) => {
@@ -909,53 +919,7 @@ const participant = {
   profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
 }, [adminConversation?.messages?.length, activeTab]);
 
-  // const adminConversation = useMemo(() => {
-  //   if (!user?.uid) return null;
-
-  //   const getMs = (msg) => msg?.startTimestamp?.toDate?.().getTime() || 0;
-  //   const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
-
-  //   if (sorted.length === 0) return null;
-
-  //   const getOtherUid = (msg) => {
-  //     const senderUid = msg?.senderUid || "";
-  //     const recipientUid = msg?.recipientUid || "";
-  //     return senderUid === user.uid ? recipientUid : senderUid;
-  //   };
-
-  //   const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
-  //   const adminUid = firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "admin";
-
-  //   const incoming = sorted.find((msg) => msg?.senderUid && msg.senderUid !== user.uid);
-  //   const outgoing = sorted.find((msg) => msg?.recipientUid && msg.recipientUid !== user.uid);
-
-  //   const participant = incoming
-  //     ? {
-  //         name: incoming?.name || incoming?.email || "Admin",
-  //         email: incoming?.email || "No email",
-  //         contact: incoming?.contact || "No contact",
-  //         profilePic: incoming?.profilePic || "/assets/profile.png",
-  //       }
-  //     : outgoing
-  //       ? {
-  //           name: outgoing?.recipientName || outgoing?.recipientEmail || "Admin",
-  //           email: outgoing?.recipientEmail || "No email",
-  //           contact: outgoing?.recipientPhone || "No contact",
-  //           profilePic: outgoing?.profilePic || "/assets/profile.png",
-  //         }
-  //       : {
-  //           name: "Admin",
-  //           email: "No email",
-  //           contact: "No contact",
-  //           profilePic: "/assets/profile.png",
-  //         };
-
-  //   return {
-  //     id: adminUid,
-  //     participant,
-  //     messages: sorted,
-  //   };
-  // }, [chatMessages, user?.uid]);
+ 
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -986,63 +950,63 @@ const sendConversationMessage = async () => {
   const text = chatInput.trim();
   if (!text || !user?.uid) return;
 
-  // Always resolve fresh admin meta before first message
-  const fetchedAdmin = await fetchAdminUid();
+  setChatInput(""); // clear immediately for better UX
 
-  const resolved = {
-    uid: fetchedAdmin?.uid || adminConversation?.id || adminUid || adminMeta.uid,
-    name:
-      fetchedAdmin?.name ||
-      adminMeta.name ||
-      adminConversation?.participant?.name ||
-      "Admin",
-    email:
-      fetchedAdmin?.email ||
-      adminMeta.email ||
-      adminConversation?.participant?.email ||
-      "No email",
+  let resolvedAdmin = {
+    uid: adminConversation?.id || adminUid || adminMeta.uid || "",
+    name: adminConversation?.participant?.name || adminMeta.name || "Admin",
+    email: adminConversation?.participant?.email || adminMeta.email || "No email",
     contact:
-      fetchedAdmin?.contact ||
-      adminMeta.contact ||
-      adminConversation?.participant?.contact ||
-      "No contact",
-    profilePic:
-      fetchedAdmin?.profilePic ||
-      adminMeta.profilePic ||
-      "/assets/profile.png",
+      adminConversation?.participant?.contact || adminMeta.contact || "No contact",
   };
 
-  if (!resolved.uid) {
+  if (!resolvedAdmin.uid) {
+    const fetchedAdmin = await fetchAdminUid();
+    if (fetchedAdmin?.uid) {
+      setAdminMeta({
+        uid: fetchedAdmin.uid || "",
+        name: fetchedAdmin.name || "",
+        email: fetchedAdmin.email || "",
+        contact: fetchedAdmin.contact || "",
+        profilePic: fetchedAdmin.profilePic || "/assets/profile.png",
+      });
+
+      resolvedAdmin = {
+        uid: fetchedAdmin.uid,
+        name: fetchedAdmin.name || "Admin",
+        email: fetchedAdmin.email || "No email",
+        contact: fetchedAdmin.contact || "No contact",
+      };
+    }
+  }
+
+  if (!resolvedAdmin.uid) {
+    setChatInput(text); // restore on failure
     showActionOverlay({
-      message:
-        "Admin UID is missing in config/appSettings. Please set adminUid first.",
+      message: "Admin chat is not ready yet. Please try again.",
       type: "warning",
     });
     return;
   }
 
-  setAdminMeta({
-    uid: resolved.uid,
-    name: resolved.name,
-    email: resolved.email,
-    contact: resolved.contact,
-    profilePic: resolved.profilePic,
-  });
-
   const result = await sendMessage({
-    name: user.name,
+    name:
+  `${user?.surname || ""} ${user?.firstName || ""}`.replace(/\s+/g, " ").trim() ||
+  user?.name ||
+  "User",
     email: user.email,
     phone: user.phone,
     message: text,
-    recipientUid: resolved.uid,
+    recipientUid: resolvedAdmin.uid,
     senderUid: user.uid,
     isAdminSender: false,
-    recipientName: resolved.name,
-    recipientEmail: resolved.email,
-    recipientPhone: resolved.contact,
+    recipientName: resolvedAdmin.name,
+    recipientEmail: resolvedAdmin.email,
+    recipientPhone: resolvedAdmin.contact,
   });
 
   if (!result?.success) {
+    setChatInput(text); // restore on failure
     showActionOverlay({
       message: result?.error || "Failed to send message.",
       type: "warning",
@@ -1050,7 +1014,6 @@ const sendConversationMessage = async () => {
     return;
   }
 
-  setChatInput("");
   setTimeout(() => {
     if (profileChatBodyRef.current) {
       profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
@@ -1107,6 +1070,23 @@ const handleProfileChatKeyDown = (e) => {
       });
       return `${datePart} | ${timePart}`;
     }
+
+    if (typeof message?.clientCreatedAt === "number") {
+  const d = new Date(message.clientCreatedAt);
+  const datePart = d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "Asia/Manila",
+  });
+  const timePart = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Manila",
+  });
+  return `${datePart} | ${timePart}`;
+}
 
     return message?.formattedDateTime || "No timestamp";
   };
@@ -2398,12 +2378,15 @@ const handleProfileChatKeyDown = (e) => {
           className={`profile-chat-row ${isMine ? "mine" : "other"}`}
         >
           <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
-            <div
-              className="profile-chat-text"
-              dangerouslySetInnerHTML={{ __html: msg.content || "" }}
-            />
-            <div className="profile-chat-time">{formatMessageTimestamp(msg)}</div>
-          </div>
+  {msg.sourcePage === "contact" && (
+    <div className="message-source-chip">From Contact Page</div>
+  )}
+  <div
+    className="profile-chat-text"
+    dangerouslySetInnerHTML={{ __html: msg.content || "" }}
+  />
+  <div className="profile-chat-time">{formatMessageTimestamp(msg)}</div>
+</div>
         </div>
       );
     })

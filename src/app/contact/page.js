@@ -8,8 +8,6 @@ import "./Contact.css";
 import "react-phone-input-2/lib/style.css";
 import { MdCheckCircle } from "react-icons/md";
 
-
-
 const countries = [
   { code: "af", name: "Afghanistan", dialCode: "+93" },
   { code: "al", name: "Albania", dialCode: "+355" },
@@ -217,12 +215,19 @@ const countries = [
 const defaultCountry = countries.find((c) => c.code === "ph") || countries[0];
 
 function Contact({ openBooking }) {
-  const { user, setUser, sendMessage, fetchAdminUid, fetchImageFromFirestore, imageCache,
-  imageUpdateTrigger } =
-    useUser();
+  const {
+    user,
+    setUser,
+    sendMessage,
+    sendEmail,
+    fetchAdminUid,
+    fetchImageFromFirestore,
+    imageCache,
+    imageUpdateTrigger,
+  } = useUser();
 
-    const [showContactSuccess, setShowContactSuccess] = useState(false);
-const [contactSuccessMessage, setContactSuccessMessage] = useState("");
+  const [showContactSuccess, setShowContactSuccess] = useState(false);
+  const [contactSuccessMessage, setContactSuccessMessage] = useState("");
 
   const fullName = user?.name || user?.displayName || "";
   const nameParts = fullName.trim().split(" ");
@@ -253,37 +258,36 @@ const [contactSuccessMessage, setContactSuccessMessage] = useState("");
   //   "/assets/images/contact.png",
   // );
 
-const contactFallback = "/assets/images/contact.png";
+  const contactFallback = "/assets/images/contact.png";
 
-const contactCachedSrc = useMemo(
-  () => imageCache["ContactPage_0"]?.base64 || contactFallback,
-  [imageCache],
-);
+  const contactCachedSrc = useMemo(
+    () => imageCache["ContactPage_0"]?.base64 || contactFallback,
+    [imageCache],
+  );
 
-const [contactImageSrc, setContactImageSrc] = useState(contactCachedSrc);
+  const [contactImageSrc, setContactImageSrc] = useState(contactCachedSrc);
 
-// instant from cache
-useEffect(() => {
-  setContactImageSrc(contactCachedSrc);
-}, [contactCachedSrc]);
+  // instant from cache
+  useEffect(() => {
+    setContactImageSrc(contactCachedSrc);
+  }, [contactCachedSrc]);
 
-// background revalidate (fresh from Firestore)
-useEffect(() => {
-  let cancelled = false;
+  // background revalidate (fresh from Firestore)
+  useEffect(() => {
+    let cancelled = false;
 
-  const fetchContactImage = async () => {
-    const result = await fetchImageFromFirestore("ContactPage_0", false);
-    if (!cancelled && result?.base64) {
-      setContactImageSrc(result.base64);
-    }
-  };
+    const fetchContactImage = async () => {
+      const result = await fetchImageFromFirestore("ContactPage_0", false);
+      if (!cancelled && result?.base64) {
+        setContactImageSrc(result.base64);
+      }
+    };
 
-  fetchContactImage();
-  return () => {
-    cancelled = true;
-  };
-}, [fetchImageFromFirestore, imageUpdateTrigger]);
-
+    fetchContactImage();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
   // useEffect(() => {
   //   const fetchContactImage = async () => {
@@ -358,45 +362,164 @@ useEffect(() => {
   }, []);
 
   //SUBMIT
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!adminUid) {
-      console.error("Admin UID not available");
-      return;
+  if (!adminUid) {
+    console.error("Admin UID not available");
+    return;
+  }
+
+  const fullName = `${firstName} ${middleName} ${lastName}`
+    .trim()
+    .replace(/\s+/g, " ");
+  const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
+
+  let senderUid = user?.uid || null;
+  let sourcePage = "contact";
+
+  try {
+    // Guest flow: anonymous auth so we can write to Firestore messages
+    if (!senderUid) {
+      const anonCred = await signInAnonymously(auth);
+      senderUid = anonCred?.user?.uid || null;
+      sourcePage = "contact-guest";
+    }
+
+    if (!senderUid) {
+      throw new Error("Unable to resolve sender UID.");
     }
 
     const contactInfo = {
-      name: `${firstName} ${middleName} ${lastName}`
-        .trim()
-        .replace(/\s+/g, " "),
+      name: fullName,
       email,
-      phone: `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`,
+      phone: fullPhone,
       message,
-      senderUid: user?.uid,
+      senderUid,
       recipientUid: adminUid,
       isAdminSender: false,
       recipientName: adminName,
       recipientEmail: adminEmail,
       recipientPhone: adminContact,
+      sourcePage,
+      sourceLabel: sourcePage === "contact-guest" ? "Guest Contact Page" : "Contact Page",
     };
 
-    sendMessage(contactInfo);
+    const result = await sendMessage(contactInfo);
+
+    if (!result?.success) {
+      throw new Error(result?.error || "Failed to send message.");
+    }
+
     setMessage("");
     setContactSuccessMessage("Message sent successfully!");
-setShowContactSuccess(true);
-  };
+    setShowContactSuccess(true);
+  } catch (err) {
+    console.error("Contact submit error:", err);
+  }
+};
+
+  
+// const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   if (!adminUid) {
+//     console.error("Admin UID not available");
+//     return;
+//   }
+
+//   const fullName = `${firstName} ${middleName} ${lastName}`
+//     .trim()
+//     .replace(/\s+/g, " ");
+
+//   const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
+
+//   // Authenticated user -> in-app message + conversation
+//   if (user?.uid) {
+//     const contactInfo = {
+//       name: fullName,
+//       email,
+//       phone: fullPhone,
+//       message,
+//       senderUid: user.uid,
+//       recipientUid: adminUid,
+//       isAdminSender: false,
+//       recipientName: adminName,
+//       recipientEmail: adminEmail,
+//       recipientPhone: adminContact,
+//       sourcePage: "contact",
+//       sourceLabel: "Contact Page",
+//     };
+
+//     const result = await sendMessage(contactInfo);
+
+//     if (!result?.success) {
+//       console.error(result?.error || "Failed to send message");
+//       return;
+//     }
+//   } else {
+//     // Guest user -> email fallback only (no senderUid, no in-app thread)
+//     await sendEmail({
+//       toName: adminName || "Admin",
+//       toEmail: adminEmail,
+//       subject: `Guest Contact Form - ${fullName || "Unknown"}`,
+//       message: `
+// Name: ${fullName}
+// Email: ${email}
+// Phone: ${fullPhone}
+
+// Message:
+// ${message}
+//       `.trim(),
+//     });
+//   }
+
+//   setMessage("");
+//   setContactSuccessMessage("Message sent successfully!");
+//   setShowContactSuccess(true);
+// };
 
 
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   if (!adminUid) {
+  //     console.error("Admin UID not available");
+  //     return;
+  //   }
+
+  //   const contactInfo = {
+  //     name: `${firstName} ${middleName} ${lastName}`
+  //       .trim()
+  //       .replace(/\s+/g, " "),
+  //     email,
+  //     phone: `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`,
+  //     message,
+  //     senderUid: user?.uid,
+  //     recipientUid: adminUid,
+  //     isAdminSender: false,
+  //     recipientName: adminName,
+  //     recipientEmail: adminEmail,
+  //     recipientPhone: adminContact,
+  //     sourcePage: "contact",
+  //     sourceLabel: "Contact Page",
+  //   };
+
+  //   sendMessage(contactInfo);
+  //   setMessage("");
+  //   setContactSuccessMessage("Message sent successfully!");
+  //   setShowContactSuccess(true);
+  // };
 
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()),
   );
 
   const closeContactSuccess = () => {
-  setShowContactSuccess(false);
-  setContactSuccessMessage("");
-};
+    setShowContactSuccess(false);
+    setContactSuccessMessage("");
+  };
 
   return (
     <div className="contactPage-container">
@@ -528,13 +651,16 @@ setShowContactSuccess(true);
         </div>
       </div>
 
-            {/* ================= Contact Success Overlay ================= */}
+      {/* ================= Contact Success Overlay ================= */}
       {showContactSuccess && (
         <div className="success-overlay" onClick={closeContactSuccess}>
-          <div className="success-container" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="success-container"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="success-icon">
-      <MdCheckCircle size={32} />
-    </div>
+              <MdCheckCircle size={32} />
+            </div>
             <h3>Success!</h3>
             <p>{contactSuccessMessage}</p>
             <button className="success-btn" onClick={closeContactSuccess}>
@@ -544,10 +670,8 @@ setShowContactSuccess(true);
         </div>
       )}
 
-
       <CompanyMap />
       <Footer />
-
     </div>
   );
 }
