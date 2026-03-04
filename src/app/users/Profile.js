@@ -2061,9 +2061,14 @@ const Profile = ({ openBooking }) => {
           </div>
         </div>
 
+
         {/* Messages Section */}
         <div className="user-messages-container">
-          <h3>Messages & Notifications</h3>
+          <h3>
+  {activeTab === "notifications"
+    ? `Notifications (${notificationMessages.length})`
+    : `Messages (${adminConversation?.messages?.length || 0})`}
+</h3>
 
           <div className="message-tabs-controls">
             <div className="message-tabs">
