@@ -7134,20 +7134,23 @@ useEffect(() => {
   };
 
   // UPDATE ADMIN PROFILE PICTURE
-  const updateAdminProfilePic = async (adminId, file) => {
-    try {
-      const compressedBase64 = await compressAndConvertFileToBase64(file);
-      const adminDocRef = doc(db, "users", adminId);
-      await updateDoc(adminDocRef, {
-        profilePic: compressedBase64,
-        updatedAt: serverTimestamp(),
-      });
-      console.log("✅ Admin profile picture updated in Firestore");
-    } catch (error) {
-      console.error("❌ Error updating admin profile picture:", error);
-      throw error;
-    }
-  };
+const updateAdminProfilePic = async (adminId, file) => {
+  try {
+    const compressedBase64 = await compressAndConvertFileToBase64(file);
+    const adminDocRef = doc(db, "users", adminId);
+
+    await updateDoc(adminDocRef, {
+      profilePic: compressedBase64,
+      updatedAt: serverTimestamp(),
+    });
+
+    console.log("✅ Admin profile picture updated in Firestore");
+    return { success: true, profilePic: compressedBase64 };
+  } catch (error) {
+    console.error("❌ Error updating admin profile picture:", error);
+    return { success: false, error: error.message };
+  }
+};
 
   // RESET ADMIN PROFILE PICTURE TO ORIGINAL
   const resetAdminProfilePic = async (adminId) => {

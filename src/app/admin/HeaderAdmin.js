@@ -29,7 +29,7 @@ const Header = ({
     useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [editedAdminName, setEditedAdminName] = useState("");
-const [editedAdminPhone, setEditedAdminPhone] = useState("");
+  const [editedAdminPhone, setEditedAdminPhone] = useState("");
 
   const [newAdminProfilePic, setNewAdminProfilePic] = useState(null);
   const [adminProfilePicFile, setAdminProfilePicFile] = useState(null);
@@ -213,19 +213,19 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
     showActionOverlay,
   } = useUser();
 
-const displayAdminName =
-  adminContactInfo?.name || selectedAdmin?.name || "Admin";
+  const displayAdminName =
+    adminContactInfo?.name || selectedAdmin?.name || "Admin";
 
-// per your requirement: email should come from current logged-in admin (users collection)
-const displayAdminEmail = selectedAdmin?.email || "No email";
+  // per your requirement: email should come from current logged-in admin (users collection)
+  const displayAdminEmail = selectedAdmin?.email || "No email";
 
-const displayAdminPhone =
-  adminContactInfo?.contact || selectedAdmin?.phone || "No contact";
+  const displayAdminPhone =
+    adminContactInfo?.contact || selectedAdmin?.phone || "No contact";
 
-const displayAdminProfilePic =
-  adminContactInfo?.profilePic ||
-  selectedAdmin?.profilePic ||
-  "/assets/profile.png";
+  const displayAdminProfilePic =
+    adminContactInfo?.profilePic ||
+    selectedAdmin?.profilePic ||
+    "/assets/profile.png";
 
   const importFileInputRef = useRef(null);
 
@@ -441,21 +441,19 @@ const displayAdminProfilePic =
     };
   }, [showProfileOverlay, showMessengerConfirm]);
 
-useEffect(() => {
-  if (!selectedAdmin || isEditingAdmin) return;
+  useEffect(() => {
+    if (!selectedAdmin || isEditingAdmin) return;
 
-  setEditedAdminName(
-    adminContactInfo?.name || selectedAdmin?.name || "",
-  );
-  setEditedAdminPhone(
-    adminContactInfo?.contact || selectedAdmin?.phone || "",
-  );
-}, [
-  selectedAdmin,
-  adminContactInfo?.name,
-  adminContactInfo?.contact,
-  isEditingAdmin,
-]);
+    setEditedAdminName(adminContactInfo?.name || selectedAdmin?.name || "");
+    setEditedAdminPhone(
+      adminContactInfo?.contact || selectedAdmin?.phone || "",
+    );
+  }, [
+    selectedAdmin,
+    adminContactInfo?.name,
+    adminContactInfo?.contact,
+    isEditingAdmin,
+  ]);
 
   useEffect(() => {
     if (selectedAdmin) {
@@ -853,48 +851,6 @@ useEffect(() => {
     }
   };
 
-  // const handleSaveAdminProfilePic = async () => {
-  //   if (selectedAdmin.profilePicFile) {
-  //     setIsSavingAdminProfile(true);
-  //     try {
-  //       await updateAdminProfilePic(
-  //         selectedAdmin.id,
-  //         selectedAdmin.profilePicFile,
-  //       );
-  //       setSelectedAdmin((prev) => ({
-  //         ...prev,
-  //         profilePic: prev.profilePic,
-  //         profilePicFile: null,
-  //       }));
-  //       setNewAdminProfilePic(null);
-  //       setIsEditingAdmin(false);
-  //       setIsSavingAdminProfile(false);
-
-  //       setShowAdminProfileSavedSuccess(true);
-  //       setHideAdminProfileSavedAnimation(false);
-
-  //       setTimeout(() => {
-  //         setHideAdminProfileSavedAnimation(true);
-  //         setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
-  //       }, 5000);
-
-  //       showActionOverlay({
-  //         message: "Admin profile picture updated successfully!",
-  //         type: "success",
-  //       });
-  //     } catch (error) {
-  //       console.error("Error saving admin profile picture:", error);
-  //       setIsSavingAdminProfile(false);
-  //       showActionOverlay({
-  //         message: "Failed to update admin profile picture",
-  //         type: "warning",
-  //       });
-  //     }
-  //   } else {
-  //     // No new file, just exit edit mode
-  //     setIsEditingAdmin(false);
-  //   }
-  // };
 const handleSaveAdminProfilePic = async () => {
   if (!selectedAdmin) return;
 
@@ -902,11 +858,10 @@ const handleSaveAdminProfilePic = async () => {
   const nextPhone = (editedAdminPhone || "").trim();
 
   const hasProfilePicChange = !!selectedAdmin.profilePicFile;
-const currentName = (displayAdminName || "").trim();
-const currentPhone = (displayAdminPhone || "").trim();
-
-const hasNameChange = nextName !== currentName;
-const hasPhoneChange = nextPhone !== currentPhone;
+  const currentName = (displayAdminName || "").trim();
+  const currentPhone = (displayAdminPhone || "").trim();
+  const hasNameChange = nextName !== currentName;
+  const hasPhoneChange = nextPhone !== currentPhone;
   const hasTextChange = hasNameChange || hasPhoneChange;
 
   if (!hasProfilePicChange && !hasTextChange) {
@@ -917,6 +872,22 @@ const hasPhoneChange = nextPhone !== currentPhone;
   setIsSavingAdminProfile(true);
 
   try {
+    let finalProfilePic =
+      displayAdminProfilePic || selectedAdmin.profilePic || "/assets/profile.png";
+
+    if (hasProfilePicChange) {
+      const picRes = await updateAdminProfilePic(
+        selectedAdmin.id,
+        selectedAdmin.profilePicFile,
+      );
+
+      if (!picRes?.success) {
+        throw new Error(picRes?.error || "Failed to update admin profile picture");
+      }
+
+      finalProfilePic = picRes.profilePic || finalProfilePic;
+    }
+
     if (hasTextChange) {
       await updateUser({
         name: nextName || selectedAdmin.name || "",
@@ -924,27 +895,19 @@ const hasPhoneChange = nextPhone !== currentPhone;
       });
     }
 
-    if (hasProfilePicChange) {
-      await updateAdminProfilePic(
-        selectedAdmin.id,
-        selectedAdmin.profilePicFile,
-      );
-    }
-
     await syncAdminInfoToAppSettings({
       adminUid: selectedAdmin.id,
       adminName: nextName || selectedAdmin.name || "",
       adminEmail: selectedAdmin.email || "",
       adminContact: nextPhone || "",
-      adminProfilePic: hasProfilePicChange
-  ? newAdminProfilePic || displayAdminProfilePic || "/assets/profile.png"
-  : displayAdminProfilePic || "/assets/profile.png",
+      adminProfilePic: finalProfilePic,
     });
 
     setSelectedAdmin((prev) => ({
       ...prev,
       name: nextName || prev.name,
       phone: nextPhone,
+      profilePic: finalProfilePic,
       profilePicFile: null,
     }));
 
@@ -974,72 +937,71 @@ const hasPhoneChange = nextPhone !== currentPhone;
   }
 };
 
-
-const handleCancelAdminEdit = () => {
-  setSelectedAdmin((prev) => ({
-    ...prev,
-    profilePicFile: null,
-  }));
-  setEditedAdminName(displayAdminName || "");
-  setEditedAdminPhone(displayAdminPhone || "");
-  setNewAdminProfilePic(null);
-  setIsEditingAdmin(false);
-  if (fileInputRef.current) {
-    fileInputRef.current.value = "";
-  }
-};
-
-const handleResetAdminProfilePic = async () => {
-  if (!selectedAdmin) return;
-
-  setIsResettingAdminProfile(true);
-  try {
-    const res = await resetAdminToAppSettingsOriginal();
-
-    if (!res?.success) {
-      throw new Error(res?.error || "Reset failed");
-    }
-
-    const payload = res.data || {};
-
+  const handleCancelAdminEdit = () => {
+    setSelectedAdmin((prev) => ({
+      ...prev,
+      profilePicFile: null,
+    }));
+    setEditedAdminName(displayAdminName || "");
+    setEditedAdminPhone(displayAdminPhone || "");
     setNewAdminProfilePic(null);
-setSelectedAdmin((prev) => ({
-  ...prev,
-  id: payload.adminUid || prev.id,
-  name: payload.adminName || prev.name,
-  phone: payload.adminContact || prev.phone,
-  profilePic: payload.adminProfilePic || prev.profilePic,
-  profilePicFile: null,
-  // keep current logged-in admin email as-is
-  email: prev.email,
-}));
-
-    setEditedAdminName(payload.adminName || "");
-    setEditedAdminPhone(payload.adminContact || "");
-
-    setShowAdminProfileResetSuccess(true);
-    setHideAdminProfileResetAnimation(false);
-
-    setTimeout(() => {
-      setHideAdminProfileResetAnimation(true);
-      setTimeout(() => setShowAdminProfileResetSuccess(false), 400);
-    }, 5000);
-
-    showActionOverlay({
-      message: "Admin reset to original app settings!",
-      type: "success",
-    });
-
     setIsEditingAdmin(false);
-  } catch (error) {
-    showActionOverlay({
-      message: "Failed to reset admin from app settings",
-      type: "warning",
-    });
-  } finally {
-    setIsResettingAdminProfile(false);
-  }
-};
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleResetAdminProfilePic = async () => {
+    if (!selectedAdmin) return;
+
+    setIsResettingAdminProfile(true);
+    try {
+      const res = await resetAdminToAppSettingsOriginal();
+
+      if (!res?.success) {
+        throw new Error(res?.error || "Reset failed");
+      }
+
+      const payload = res.data || {};
+
+      setNewAdminProfilePic(null);
+      setSelectedAdmin((prev) => ({
+        ...prev,
+        id: payload.adminUid || prev.id,
+        name: payload.adminName || prev.name,
+        phone: payload.adminContact || prev.phone,
+        profilePic: payload.adminProfilePic || prev.profilePic,
+        profilePicFile: null,
+        // keep current logged-in admin email as-is
+        email: prev.email,
+      }));
+
+      setEditedAdminName(payload.adminName || "");
+      setEditedAdminPhone(payload.adminContact || "");
+
+      setShowAdminProfileResetSuccess(true);
+      setHideAdminProfileResetAnimation(false);
+
+      setTimeout(() => {
+        setHideAdminProfileResetAnimation(true);
+        setTimeout(() => setShowAdminProfileResetSuccess(false), 400);
+      }, 5000);
+
+      showActionOverlay({
+        message: "Admin reset to original app settings!",
+        type: "success",
+      });
+
+      setIsEditingAdmin(false);
+    } catch (error) {
+      showActionOverlay({
+        message: "Failed to reset admin from app settings",
+        type: "warning",
+      });
+    } finally {
+      setIsResettingAdminProfile(false);
+    }
+  };
 
   const handleImportFilePick = async (event) => {
     const file = event.target.files?.[0];
@@ -1654,42 +1616,44 @@ setSelectedAdmin((prev) => ({
                     </div>
 
                     <div className="client-profile-right">
-<div className="admin-name-container">
-  {isEditingAdmin ? (
-    <input
-      type="text"
-      value={editedAdminName}
-      onChange={(e) => setEditedAdminName(e.target.value)}
-      className="admin-edit-input"
-      placeholder="Admin Name"
-    />
-  ) : (
-    <h3>{displayAdminName}</h3>
-  )}
+                      <div className="admin-name-container">
+                        {isEditingAdmin ? (
+                          <input
+                            type="text"
+                            value={editedAdminName}
+                            onChange={(e) => setEditedAdminName(e.target.value)}
+                            className="admin-edit-input"
+                            placeholder="Admin Name"
+                          />
+                        ) : (
+                          <h3>{displayAdminName}</h3>
+                        )}
 
-  {selectedAdmin.emailVerified ? (
-    <img
-      src="/assets/verified.png"
-      alt="Verified"
-      className="verification-icon"
-    />
-  ) : (
-    <img
-      src="/assets/unverified.png"
-      alt="Unverified"
-      className="verification-icon clickable"
-      onClick={() => {
-        sendVerificationEmail();
-        setShowVerifyOverlay(true);
-      }}
-    />
-  )}
-</div>
+                        {selectedAdmin.emailVerified ? (
+                          <img
+                            src="/assets/verified.png"
+                            alt="Verified"
+                            className="verification-icon"
+                          />
+                        ) : (
+                          <img
+                            src="/assets/unverified.png"
+                            alt="Unverified"
+                            className="verification-icon clickable"
+                            onClick={() => {
+                              sendVerificationEmail();
+                              setShowVerifyOverlay(true);
+                            }}
+                          />
+                        )}
+                      </div>
 
-<p>
-  <strong style={{ color: "var(--accent-color)" }}>Email:</strong>{" "}
-  {displayAdminEmail}
-</p>
+                      <p>
+                        <strong style={{ color: "var(--accent-color)" }}>
+                          Email:
+                        </strong>{" "}
+                        {displayAdminEmail}
+                      </p>
 
                       <p>
                         <strong style={{ color: "var(--accent-color)" }}>
@@ -1698,20 +1662,24 @@ setSelectedAdmin((prev) => ({
                         {selectedAdmin.role}
                       </p>
 
-<p className={isEditingAdmin ? "admin-inline-field" : ""}>
-  <strong style={{ color: "var(--accent-color)" }}>Phone:</strong>{" "}
-  {isEditingAdmin ? (
-    <input
-      type="text"
-      value={editedAdminPhone}
-      onChange={(e) => setEditedAdminPhone(e.target.value)}
-      className="admin-edit-input admin-edit-input-inline"
-      placeholder="Phone"
-    />
-  ) : (
-    displayAdminPhone
-  )}
-</p>
+                      <p className={isEditingAdmin ? "admin-inline-field" : ""}>
+                        <strong style={{ color: "var(--accent-color)" }}>
+                          Phone:
+                        </strong>{" "}
+                        {isEditingAdmin ? (
+                          <input
+                            type="text"
+                            value={editedAdminPhone}
+                            onChange={(e) =>
+                              setEditedAdminPhone(e.target.value)
+                            }
+                            className="admin-edit-input admin-edit-input-inline"
+                            placeholder="Phone"
+                          />
+                        ) : (
+                          displayAdminPhone
+                        )}
+                      </p>
 
                       <p>
                         <strong style={{ color: "var(--accent-color)" }}>
