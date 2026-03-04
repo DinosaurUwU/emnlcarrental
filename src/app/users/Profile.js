@@ -869,34 +869,29 @@ const Profile = ({ openBooking }) => {
       (msg) => msg?.recipientUid && msg.recipientUid !== user.uid,
     );
 
-    const participant = incoming
-      ? {
-          name: incoming?.name || incoming?.email || adminMeta.name || "Admin",
-          email: incoming?.email || adminMeta.email || "No email",
-          contact: incoming?.contact || adminMeta.contact || "No contact",
-          profilePic:
-            incoming?.profilePic ||
-            adminMeta.profilePic ||
-            "/assets/profile.png",
-        }
-      : outgoing
-        ? {
-            name:
-              outgoing?.recipientName ||
-              outgoing?.recipientEmail ||
-              adminMeta.name ||
-              "Admin",
-            email: outgoing?.recipientEmail || adminMeta.email || "No email",
-            contact:
-              outgoing?.recipientContact || adminMeta.contact || "No contact",
-            profilePic: adminMeta.profilePic || "/assets/profile.png",
-          }
-        : {
-            name: adminMeta.name || "Admin",
-            email: adminMeta.email || "No email",
-            contact: adminMeta.contact || "No contact",
-            profilePic: adminMeta.profilePic || "/assets/profile.png",
-          };
+const participant = {
+  name:
+    adminMeta.name ||
+    incoming?.name ||
+    outgoing?.recipientName ||
+    incoming?.email ||
+    outgoing?.recipientEmail ||
+    "Admin",
+  email:
+    adminMeta.email ||
+    incoming?.email ||
+    outgoing?.recipientEmail ||
+    "No email",
+  contact:
+    adminMeta.contact ||
+    incoming?.contact ||
+    outgoing?.recipientContact ||
+    "No contact",
+  profilePic:
+    adminMeta.profilePic ||
+    incoming?.profilePic ||
+    "/assets/profile.png",
+};
 
     return {
       id: resolvedAdminUid,
