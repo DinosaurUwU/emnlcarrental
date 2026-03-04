@@ -2056,18 +2056,36 @@ const syncAdminInfoToAppSettings = async ({
   adminProfilePic,
 }) => {
   try {
+    const nextUid = adminUid || "";
+    const nextName = adminName || "";
+    const nextEmail = adminEmail || "";
+    const nextContact = adminContact || "";
+
     await setDoc(
       doc(db, "config", "appSettings"),
       {
-        adminUid: adminUid || "",
-        adminName: adminName || "",
-        adminEmail: adminEmail || "",
-        adminContact: adminContact || "",
+        adminUid: nextUid,
+        adminName: nextName,
+        adminEmail: nextEmail,
+        adminContact: nextContact,
         ...(adminProfilePic ? { adminProfilePic } : {}),
         updatedAt: serverTimestamp(),
       },
       { merge: true },
     );
+
+    // instant UI sync (no manual reload needed)
+    setAdminUid(nextUid);
+    setAdminName(nextName);
+    setAdminEmail(nextEmail);
+    setAdminContact(nextContact);
+    setAdminContactInfo((prev) => ({
+      ...prev,
+      name: nextName,
+      email: nextEmail,
+      contact: nextContact,
+      profilePic: adminProfilePic || prev.profilePic || "/assets/profile.png",
+    }));
 
     return { success: true };
   } catch (error) {

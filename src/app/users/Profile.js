@@ -1063,52 +1063,13 @@ const sendConversationMessage = async () => {
   });
 };
 
-//   const sendConversationMessage = async () => {
-//     if (!chatInput.trim()) return;
-//     if (!user?.uid) return;
+const handleProfileChatKeyDown = (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendConversationMessage();
+  }
+};
 
-//     if (!adminConversation?.id) {
-//       showActionOverlay({
-//         message: "Admin chat is not ready yet. Please try again.",
-//         type: "warning",
-//       });
-//       return;
-//     }
-
-//     const contactInfo = {
-//       name: user.name,
-//       email: user.email,
-//       phone: user.phone,
-//       message: chatInput.trim(),
-//       recipientUid: adminConversation.id,
-//       senderUid: user.uid,
-//       isAdminSender: false,
-//       recipientName: adminConversation.participant?.name,
-//       recipientEmail: adminConversation.participant?.email,
-//       recipientPhone: adminConversation.participant?.contact,
-//     };
-
-//     const result = await sendMessage(contactInfo);
-
-//     if (!result?.success) {
-//       showActionOverlay({
-//         message: result?.error || "Failed to send message.",
-//         type: "warning",
-//       });
-//       return;
-//     }
-
-//     setChatInput("");
-//     setTimeout(() => {
-//   if (profileChatBodyRef.current) {
-//     profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
-//   }
-// }, 0);
-//     showActionOverlay({
-//       message: "Message sent successfully!",
-//       type: "success",
-//     });
-//   };
 
   const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
@@ -2450,12 +2411,13 @@ const sendConversationMessage = async () => {
 </div>
 
                   <div className="profile-chat-composer">
-                    <textarea
-                      className="profile-chat-input"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Type your message..."
-                    />
+<textarea
+  className="profile-chat-input"
+  value={chatInput}
+  onChange={(e) => setChatInput(e.target.value)}
+  onKeyDown={handleProfileChatKeyDown}
+  placeholder="Type your message..."
+/>
 <button
   className="reply-btn"
   onClick={sendConversationMessage}

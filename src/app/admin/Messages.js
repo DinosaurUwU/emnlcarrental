@@ -302,6 +302,13 @@ const sendConversationMessage = async () => {
 }, 0);
 };
 
+const handleAdminChatKeyDown = (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendConversationMessage();
+  }
+};
+
 const sendFleetDetailsLink = async () => {
   if (!user?.uid || !selectedThread?.id) return;
 
@@ -869,11 +876,12 @@ const sendFleetDetailsLink = async () => {
 
                     <div className="conversation-chat-composer">
                       <textarea
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        placeholder="Type your message..."
-                        className="conversation-chat-input"
-                      />
+  value={chatInput}
+  onChange={(e) => setChatInput(e.target.value)}
+  onKeyDown={handleAdminChatKeyDown}
+  placeholder="Type your message..."
+  className="conversation-chat-input"
+/>
                       <div className="conversation-chat-actions">
                         <button
                           className="fleet-link-btn"

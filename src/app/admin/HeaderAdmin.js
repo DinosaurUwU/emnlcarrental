@@ -851,91 +851,95 @@ const Header = ({
     }
   };
 
-const handleSaveAdminProfilePic = async () => {
-  if (!selectedAdmin) return;
+  const handleSaveAdminProfilePic = async () => {
+    if (!selectedAdmin) return;
 
-  const nextName = (editedAdminName || "").trim();
-  const nextPhone = (editedAdminPhone || "").trim();
+    const nextName = (editedAdminName || "").trim();
+    const nextPhone = (editedAdminPhone || "").trim();
 
-  const hasProfilePicChange = !!selectedAdmin.profilePicFile;
-  const currentName = (displayAdminName || "").trim();
-  const currentPhone = (displayAdminPhone || "").trim();
-  const hasNameChange = nextName !== currentName;
-  const hasPhoneChange = nextPhone !== currentPhone;
-  const hasTextChange = hasNameChange || hasPhoneChange;
+    const hasProfilePicChange = !!selectedAdmin.profilePicFile;
+    const currentName = (displayAdminName || "").trim();
+    const currentPhone = (displayAdminPhone || "").trim();
+    const hasNameChange = nextName !== currentName;
+    const hasPhoneChange = nextPhone !== currentPhone;
+    const hasTextChange = hasNameChange || hasPhoneChange;
 
-  if (!hasProfilePicChange && !hasTextChange) {
-    setIsEditingAdmin(false);
-    return;
-  }
+    if (!hasProfilePicChange && !hasTextChange) {
+      setIsEditingAdmin(false);
+      return;
+    }
 
-  setIsSavingAdminProfile(true);
+    setIsSavingAdminProfile(true);
 
-  try {
-    let finalProfilePic =
-      displayAdminProfilePic || selectedAdmin.profilePic || "/assets/profile.png";
+    try {
+      let finalProfilePic =
+        displayAdminProfilePic ||
+        selectedAdmin.profilePic ||
+        "/assets/profile.png";
 
-    if (hasProfilePicChange) {
-      const picRes = await updateAdminProfilePic(
-        selectedAdmin.id,
-        selectedAdmin.profilePicFile,
-      );
+      if (hasProfilePicChange) {
+        const picRes = await updateAdminProfilePic(
+          selectedAdmin.id,
+          selectedAdmin.profilePicFile,
+        );
 
-      if (!picRes?.success) {
-        throw new Error(picRes?.error || "Failed to update admin profile picture");
+        if (!picRes?.success) {
+          throw new Error(
+            picRes?.error || "Failed to update admin profile picture",
+          );
+        }
+
+        finalProfilePic = picRes.profilePic || finalProfilePic;
       }
 
-      finalProfilePic = picRes.profilePic || finalProfilePic;
-    }
+      if (hasTextChange) {
+        await updateUser({
+          name: nextName || selectedAdmin.name || "",
+          phone: nextPhone,
+        });
+      }
 
-    if (hasTextChange) {
-      await updateUser({
-        name: nextName || selectedAdmin.name || "",
-        phone: nextPhone,
+      await syncAdminInfoToAppSettings({
+        adminUid: selectedAdmin.id,
+        adminName: nextName || selectedAdmin.name || "",
+        adminEmail: selectedAdmin.email || "",
+        adminContact: nextPhone || "",
+        adminProfilePic: finalProfilePic,
       });
+
+      setSelectedAdmin((prev) => ({
+        ...prev,
+        name: nextName || prev.name,
+        phone: nextPhone,
+        profilePic: finalProfilePic,
+        profilePicFile: null,
+      }));
+
+      setNewAdminProfilePic(null);
+      setIsEditingAdmin(false);
+
+      setShowAdminProfileSavedSuccess(true);
+      setHideAdminProfileSavedAnimation(false);
+
+      setTimeout(() => {
+        setHideAdminProfileSavedAnimation(true);
+        setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
+      }, 5000);
+
+      showActionOverlay({
+        message: "Admin details updated successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Error saving admin details:", error);
+      showActionOverlay({
+        message: "Failed to update admin details",
+        type: "warning",
+      });
+    } finally {
+      setIsSavingAdminProfile(false);
     }
-
-    await syncAdminInfoToAppSettings({
-      adminUid: selectedAdmin.id,
-      adminName: nextName || selectedAdmin.name || "",
-      adminEmail: selectedAdmin.email || "",
-      adminContact: nextPhone || "",
-      adminProfilePic: finalProfilePic,
-    });
-
-    setSelectedAdmin((prev) => ({
-      ...prev,
-      name: nextName || prev.name,
-      phone: nextPhone,
-      profilePic: finalProfilePic,
-      profilePicFile: null,
-    }));
-
-    setNewAdminProfilePic(null);
-    setIsEditingAdmin(false);
-
-    setShowAdminProfileSavedSuccess(true);
-    setHideAdminProfileSavedAnimation(false);
-
-    setTimeout(() => {
-      setHideAdminProfileSavedAnimation(true);
-      setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
-    }, 5000);
-
-    showActionOverlay({
-      message: "Admin details updated successfully!",
-      type: "success",
-    });
-  } catch (error) {
-    console.error("Error saving admin details:", error);
-    showActionOverlay({
-      message: "Failed to update admin details",
-      type: "warning",
-    });
-  } finally {
-    setIsSavingAdminProfile(false);
-  }
-};
+  };
 
   const handleCancelAdminEdit = () => {
     setSelectedAdmin((prev) => ({
