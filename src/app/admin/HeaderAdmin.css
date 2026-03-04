@@ -1038,6 +1038,33 @@
   transform: translateX(-4px);
 }
 
+.admin-edit-input {
+  width: 100%;
+  max-width: 280px;
+  padding: 6px 10px;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-edit-input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.12);
+}
+
+.admin-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.admin-edit-input-inline {
+  width: 260px;
+  max-width: 100%;
+}
+
 /* .sidebar.collapsed .sidebar-nav-item {
   grid-template-columns: 24px 0 0;
   column-gap: 0;

@@ -28,6 +28,8 @@ const Header = ({
   const [showBookingDetailsOverlay, setShowBookingDetailsOverlay] =
     useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
+  const [editedAdminName, setEditedAdminName] = useState("");
+const [editedAdminPhone, setEditedAdminPhone] = useState("");
 
   const [newAdminProfilePic, setNewAdminProfilePic] = useState(null);
   const [adminProfilePicFile, setAdminProfilePicFile] = useState(null);
@@ -146,6 +148,7 @@ const Header = ({
   const router = useRouter();
   const {
     user,
+    updateUser,
     logout,
     theme,
     updateTheme,
@@ -420,6 +423,12 @@ const Header = ({
       document.body.style.top = "";
     };
   }, [showProfileOverlay, showMessengerConfirm]);
+
+  useEffect(() => {
+  if (!selectedAdmin) return;
+  setEditedAdminName(selectedAdmin.name || "");
+  setEditedAdminPhone(selectedAdmin.phone || "");
+}, [selectedAdmin]);
 
   useEffect(() => {
     if (selectedAdmin) {
@@ -817,48 +826,111 @@ const Header = ({
     }
   };
 
-  const handleSaveAdminProfilePic = async () => {
-    if (selectedAdmin.profilePicFile) {
-      setIsSavingAdminProfile(true);
-      try {
-        await updateAdminProfilePic(
-          selectedAdmin.id,
-          selectedAdmin.profilePicFile,
-        );
-        setSelectedAdmin((prev) => ({
-          ...prev,
-          profilePic: prev.profilePic,
-          profilePicFile: null,
-        }));
-        setNewAdminProfilePic(null);
-        setIsEditingAdmin(false);
-        setIsSavingAdminProfile(false);
+  // const handleSaveAdminProfilePic = async () => {
+  //   if (selectedAdmin.profilePicFile) {
+  //     setIsSavingAdminProfile(true);
+  //     try {
+  //       await updateAdminProfilePic(
+  //         selectedAdmin.id,
+  //         selectedAdmin.profilePicFile,
+  //       );
+  //       setSelectedAdmin((prev) => ({
+  //         ...prev,
+  //         profilePic: prev.profilePic,
+  //         profilePicFile: null,
+  //       }));
+  //       setNewAdminProfilePic(null);
+  //       setIsEditingAdmin(false);
+  //       setIsSavingAdminProfile(false);
 
-        setShowAdminProfileSavedSuccess(true);
-        setHideAdminProfileSavedAnimation(false);
+  //       setShowAdminProfileSavedSuccess(true);
+  //       setHideAdminProfileSavedAnimation(false);
 
-        setTimeout(() => {
-          setHideAdminProfileSavedAnimation(true);
-          setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
-        }, 5000);
+  //       setTimeout(() => {
+  //         setHideAdminProfileSavedAnimation(true);
+  //         setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
+  //       }, 5000);
 
-        showActionOverlay({
-          message: "Admin profile picture updated successfully!",
-          type: "success",
-        });
-      } catch (error) {
-        console.error("Error saving admin profile picture:", error);
-        setIsSavingAdminProfile(false);
-        showActionOverlay({
-          message: "Failed to update admin profile picture",
-          type: "warning",
-        });
-      }
-    } else {
-      // No new file, just exit edit mode
-      setIsEditingAdmin(false);
+  //       showActionOverlay({
+  //         message: "Admin profile picture updated successfully!",
+  //         type: "success",
+  //       });
+  //     } catch (error) {
+  //       console.error("Error saving admin profile picture:", error);
+  //       setIsSavingAdminProfile(false);
+  //       showActionOverlay({
+  //         message: "Failed to update admin profile picture",
+  //         type: "warning",
+  //       });
+  //     }
+  //   } else {
+  //     // No new file, just exit edit mode
+  //     setIsEditingAdmin(false);
+  //   }
+  // };
+const handleSaveAdminProfilePic = async () => {
+  if (!selectedAdmin) return;
+
+  const nextName = (editedAdminName || "").trim();
+  const nextPhone = (editedAdminPhone || "").trim();
+
+  const hasProfilePicChange = !!selectedAdmin.profilePicFile;
+  const hasNameChange = nextName !== (selectedAdmin.name || "");
+  const hasPhoneChange = nextPhone !== (selectedAdmin.phone || "");
+  const hasTextChange = hasNameChange || hasPhoneChange;
+
+  if (!hasProfilePicChange && !hasTextChange) {
+    setIsEditingAdmin(false);
+    return;
+  }
+
+  setIsSavingAdminProfile(true);
+
+  try {
+    if (hasTextChange) {
+      await updateUser({
+        name: nextName || selectedAdmin.name || "",
+        phone: nextPhone,
+      });
     }
-  };
+
+    if (hasProfilePicChange) {
+      await updateAdminProfilePic(selectedAdmin.id, selectedAdmin.profilePicFile);
+    }
+
+    setSelectedAdmin((prev) => ({
+      ...prev,
+      name: nextName || prev.name,
+      phone: nextPhone,
+      profilePicFile: null,
+    }));
+
+    setNewAdminProfilePic(null);
+    setIsEditingAdmin(false);
+    setIsSavingAdminProfile(false);
+
+    setShowAdminProfileSavedSuccess(true);
+    setHideAdminProfileSavedAnimation(false);
+
+    setTimeout(() => {
+      setHideAdminProfileSavedAnimation(true);
+      setTimeout(() => setShowAdminProfileSavedSuccess(false), 400);
+    }, 5000);
+
+    showActionOverlay({
+      message: "Admin details updated successfully!",
+      type: "success",
+    });
+  } catch (error) {
+    console.error("Error saving admin details:", error);
+    setIsSavingAdminProfile(false);
+    showActionOverlay({
+      message: "Failed to update admin details",
+      type: "warning",
+    });
+  }
+};
+
 
   const handleCancelAdminEdit = () => {
     setSelectedAdmin((prev) => ({
@@ -1525,26 +1597,37 @@ const Header = ({
                     </div>
 
                     <div className="client-profile-right">
-                      <div className="admin-name-container">
-                        <h3>{selectedAdmin.name}</h3>
-                        {selectedAdmin.emailVerified ? (
-                          <img
-                            src="/assets/verified.png"
-                            alt="Verified"
-                            className="verification-icon"
-                          />
-                        ) : (
-                          <img
-                            src="/assets/unverified.png"
-                            alt="Unverified"
-                            className="verification-icon clickable"
-                            onClick={() => {
-                              sendVerificationEmail();
-                              setShowVerifyOverlay(true);
-                            }}
-                          />
-                        )}
-                      </div>
+<div className="admin-name-container">
+  {isEditingAdmin ? (
+    <input
+      type="text"
+      value={editedAdminName}
+      onChange={(e) => setEditedAdminName(e.target.value)}
+      className="admin-edit-input"
+      placeholder="Admin Name"
+    />
+  ) : (
+    <h3>{selectedAdmin.name}</h3>
+  )}
+
+  {selectedAdmin.emailVerified ? (
+    <img
+      src="/assets/verified.png"
+      alt="Verified"
+      className="verification-icon"
+    />
+  ) : (
+    <img
+      src="/assets/unverified.png"
+      alt="Unverified"
+      className="verification-icon clickable"
+      onClick={() => {
+        sendVerificationEmail();
+        setShowVerifyOverlay(true);
+      }}
+    />
+  )}
+</div>
 
                       <p>
                         <strong style={{ color: "var(--accent-color)" }}>
@@ -1560,12 +1643,20 @@ const Header = ({
                         {selectedAdmin.role}
                       </p>
 
-                      <p>
-                        <strong style={{ color: "var(--accent-color)" }}>
-                          Phone:
-                        </strong>{" "}
-                        {selectedAdmin.phone}
-                      </p>
+<p className={isEditingAdmin ? "admin-inline-field" : ""}>
+  <strong style={{ color: "var(--accent-color)" }}>Phone:</strong>{" "}
+  {isEditingAdmin ? (
+    <input
+      type="text"
+      value={editedAdminPhone}
+      onChange={(e) => setEditedAdminPhone(e.target.value)}
+      className="admin-edit-input admin-edit-input-inline"
+      placeholder="Phone"
+    />
+  ) : (
+    selectedAdmin.phone
+  )}
+</p>
 
                       <p>
                         <strong style={{ color: "var(--accent-color)" }}>

@@ -2092,144 +2092,131 @@ const Profile = ({ openBooking }) => {
               </button>
             </div>
 
-            {activeTab === "notifications" && (
-              <div className="checkbox-dropdown-wrapper">
-                <div className="message-action-icons">
-                  {selectedMessageIds.length > 0 && (
-                    <>
-                      {notificationMessages
-                        .filter((message) =>
-                          selectedMessageIds.includes(message.id),
-                        )
-                        .some((message) => !message.readStatus) && (
-                        <img
-                          src="/assets/open-envelope.png"
-                          alt="Mark as Read"
-                          className="message-action-icon"
-                          title="Mark as Read"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find(
-                                (m) => m.id === id,
-                              );
-                              if (msg && !msg.readStatus) markMessageAsRead(id);
-                            });
-                          }}
-                        />
-                      )}
+{activeTab === "notifications" && (
+  <div className="tabs-right">
+    {selectedMessageIds.length > 0 && (
+      <span className="selected-count">({selectedMessageIds.length})</span>
+    )}
 
-                      {notificationMessages
-                        .filter((message) =>
-                          selectedMessageIds.includes(message.id),
-                        )
-                        .some((message) => message.readStatus) && (
-                        <img
-                          src="/assets/close-envelope.png"
-                          alt="Mark as Unread"
-                          className="message-action-icon"
-                          title="Mark as Unread"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            selectedMessageIds.forEach((id) => {
-                              const msg = notificationMessages.find(
-                                (m) => m.id === id,
-                              );
-                              if (msg && msg.readStatus) markMessageAsRead(id);
-                            });
-                          }}
-                        />
-                      )}
-
-                      <img
-                        src="/assets/delete.png"
-                        alt="Delete"
-                        className="message-action-icon"
-                        title="Delete Selected"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const messagesToDelete = notificationMessages.filter(
-                            (msg) => selectedMessageIds.includes(msg.id),
-                          );
-
-                          if (messagesToDelete.length > 0) {
-                            setMessageToDelete(messagesToDelete);
-                            setShowDeleteOverlay(true);
-                          }
-                        }}
-                      />
-                    </>
-                  )}
-                </div>
-
-                <input
-                  type="checkbox"
-                  ref={(el) => {
-                    if (el) {
-                      el.indeterminate =
-                        selectedMessageIds.length > 0 &&
-                        selectedMessageIds.length <
-                          processedNotifications.length;
-                    }
-                  }}
-                  className="message-tabs-checkbox"
-                  checked={
-                    processedNotifications.length > 0 &&
-                    selectedMessageIds.length === processedNotifications.length
-                  }
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedMessageIds(
-                        processedNotifications.map((msg) => msg.id),
-                      );
-                    } else {
-                      setSelectedMessageIds([]);
-                    }
-                  }}
-                  title="Select All"
-                />
-
-                <select
-                  className="message-tabs-select hide-text"
-                  onChange={(e) => {
-                    const option = e.target.value;
-                    setSelectedOption(option);
-
-                    let selected = [];
-                    if (option === "all") {
-                      selected = notificationMessages.map((msg) => msg.id);
-                    } else if (option === "unread") {
-                      selected = notificationMessages
-                        .filter((msg) => !msg.readStatus)
-                        .map((msg) => msg.id);
-                    } else if (option === "read") {
-                      selected = notificationMessages
-                        .filter((msg) => msg.readStatus)
-                        .map((msg) => msg.id);
-                    } else {
-                      selected = [];
-                    }
-
-                    setSelectedMessageIds(selected);
-                    e.target.selectedIndex = 0;
-                  }}
-                  title="More select options"
-                >
-                  <option value="none">
-                    &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
-                  </option>
-                  <option value="all">
-                    &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
-                  </option>
-                  <option value="unread">
-                    &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
-                  </option>
-                  <option value="read">
-                    &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
-                  </option>
-                </select>
-              </div>
+    <div className="checkbox-dropdown-wrapper">
+      <div className="message-action-icons">
+        {selectedMessageIds.length > 0 && (
+          <>
+            {notificationMessages
+              .filter((message) => selectedMessageIds.includes(message.id))
+              .some((message) => !message.readStatus) && (
+              <img
+                src="/assets/open-envelope.png"
+                alt="Mark as Read"
+                className="message-action-icon"
+                title="Mark as Read"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectedMessageIds.forEach((id) => {
+                    const msg = notificationMessages.find((m) => m.id === id);
+                    if (msg && !msg.readStatus) markMessageAsRead(id);
+                  });
+                }}
+              />
             )}
+
+            {notificationMessages
+              .filter((message) => selectedMessageIds.includes(message.id))
+              .some((message) => message.readStatus) && (
+              <img
+                src="/assets/close-envelope.png"
+                alt="Mark as Unread"
+                className="message-action-icon"
+                title="Mark as Unread"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectedMessageIds.forEach((id) => {
+                    const msg = notificationMessages.find((m) => m.id === id);
+                    if (msg && msg.readStatus) markMessageAsRead(id);
+                  });
+                }}
+              />
+            )}
+
+            <img
+              src="/assets/delete.png"
+              alt="Delete"
+              className="message-action-icon"
+              title="Delete Selected"
+              onClick={(e) => {
+                e.stopPropagation();
+                const messagesToDelete = notificationMessages.filter((msg) =>
+                  selectedMessageIds.includes(msg.id),
+                );
+
+                if (messagesToDelete.length > 0) {
+                  setMessageToDelete(messagesToDelete);
+                  setShowDeleteOverlay(true);
+                }
+              }}
+            />
+          </>
+        )}
+      </div>
+
+      <input
+        type="checkbox"
+        ref={(el) => {
+          if (el) {
+            el.indeterminate =
+              selectedMessageIds.length > 0 &&
+              selectedMessageIds.length < processedNotifications.length;
+          }
+        }}
+        className="message-tabs-checkbox"
+        checked={
+          processedNotifications.length > 0 &&
+          selectedMessageIds.length === processedNotifications.length
+        }
+        onChange={(e) => {
+          if (e.target.checked) {
+            setSelectedMessageIds(processedNotifications.map((msg) => msg.id));
+          } else {
+            setSelectedMessageIds([]);
+          }
+        }}
+        title="Select All"
+      />
+
+      <select
+        className="message-tabs-select hide-text"
+        onChange={(e) => {
+          const option = e.target.value;
+          setSelectedOption(option);
+
+          let selected = [];
+          if (option === "all") {
+            selected = notificationMessages.map((msg) => msg.id);
+          } else if (option === "unread") {
+            selected = notificationMessages
+              .filter((msg) => !msg.readStatus)
+              .map((msg) => msg.id);
+          } else if (option === "read") {
+            selected = notificationMessages
+              .filter((msg) => msg.readStatus)
+              .map((msg) => msg.id);
+          } else {
+            selected = [];
+          }
+
+          setSelectedMessageIds(selected);
+          e.target.selectedIndex = 0;
+        }}
+        title="More select options"
+      >
+        <option value="none">&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;</option>
+        <option value="all">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</option>
+        <option value="unread">&nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;</option>
+        <option value="read">&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;</option>
+      </select>
+    </div>
+  </div>
+)}
           </div>
 
           <div
