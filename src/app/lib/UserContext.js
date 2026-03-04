@@ -2076,6 +2076,76 @@ const syncAdminInfoToAppSettings = async ({
   }
 };
 
+const resetAdminToAppSettingsOriginal = async () => {
+  try {
+    const settingsRef = doc(db, "config", "appSettings");
+    const settingsSnap = await getDoc(settingsRef);
+
+    if (!settingsSnap.exists()) {
+      return { success: false, error: "appSettings not found" };
+    }
+
+    const data = settingsSnap.data() || {};
+
+    const originalUid = (data.originalAdminUid || data.adminUid || "").trim();
+    const originalName = (data.originalAdminName || data.adminName || "Admin").trim();
+    const originalEmail = (data.originalAdminEmail || data.adminEmail || "").trim();
+    const originalContact = (data.originalAdminContact || data.adminContact || "").trim();
+    const originalProfilePic =
+      data.originalAdminProfilePic || data.adminProfilePic || "/assets/profile.png";
+
+    if (!originalUid) {
+      return { success: false, error: "originalAdminUid/adminUid is missing" };
+    }
+
+    // Reset admin user document based on appSettings originals
+    await updateDoc(doc(db, "users", originalUid), {
+      name: originalName,
+      phone: originalContact,
+      profilePic: originalProfilePic,
+    });
+
+    // Also reset current appSettings public fields
+    await setDoc(
+      settingsRef,
+      {
+        adminUid: originalUid,
+        adminName: originalName,
+        adminEmail: originalEmail,
+        adminContact: originalContact,
+        adminProfilePic: originalProfilePic,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    setAdminUid(originalUid);
+    setAdminName(originalName);
+    setAdminEmail(originalEmail);
+    setAdminContact(originalContact);
+    setAdminContactInfo({
+      name: originalName,
+      email: originalEmail,
+      contact: originalContact,
+      profilePic: originalProfilePic,
+    });
+
+    return {
+      success: true,
+      data: {
+        adminUid: originalUid,
+        adminName: originalName,
+        adminEmail: originalEmail,
+        adminContact: originalContact,
+        adminProfilePic: originalProfilePic,
+      },
+    };
+  } catch (error) {
+    console.error("❌ resetAdminToAppSettingsOriginal failed:", error);
+    return { success: false, error: error.message || "Reset failed" };
+  }
+};
+
 //   const fetchAdminUid = async () => {
 //   try {
 //     const settingsRef = doc(db, "config", "appSettings");
@@ -8344,6 +8414,7 @@ await throttledSetDoc(
         adminUid,
         fetchAdminUid,
         syncAdminInfoToAppSettings,
+        resetAdminToAppSettingsOriginal,
         updateUnitData,
 
         theme,

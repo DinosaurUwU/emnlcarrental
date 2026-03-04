@@ -176,6 +176,7 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
     updateAdminProfilePic,
     resetAdminProfilePic,
     syncAdminInfoToAppSettings,
+    resetAdminToAppSettingsOriginal,
     adminContactInfo,
 
     createBackup,
@@ -212,12 +213,19 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
     showActionOverlay,
   } = useUser();
 
-  const displayAdminName =
+const displayAdminName =
   adminContactInfo?.name || selectedAdmin?.name || "Admin";
-const displayAdminEmail =
-  adminContactInfo?.email || selectedAdmin?.email || "No email";
+
+// per your requirement: email should come from current logged-in admin (users collection)
+const displayAdminEmail = selectedAdmin?.email || "No email";
+
 const displayAdminPhone =
   adminContactInfo?.contact || selectedAdmin?.phone || "No contact";
+
+const displayAdminProfilePic =
+  adminContactInfo?.profilePic ||
+  selectedAdmin?.profilePic ||
+  "/assets/profile.png";
 
   const importFileInputRef = useRef(null);
 
@@ -986,22 +994,28 @@ const handleResetAdminProfilePic = async () => {
 
   setIsResettingAdminProfile(true);
   try {
-    await resetAdminProfilePic(selectedAdmin.id);
+    const res = await resetAdminToAppSettingsOriginal();
+
+    if (!res?.success) {
+      throw new Error(res?.error || "Reset failed");
+    }
+
+    const payload = res.data || {};
 
     setNewAdminProfilePic(null);
-    setSelectedAdmin((prev) => ({
-      ...prev,
-      profilePic: prev.originalProfilePic || "/assets/profile.png",
-      profilePicFile: null,
-    }));
+setSelectedAdmin((prev) => ({
+  ...prev,
+  id: payload.adminUid || prev.id,
+  name: payload.adminName || prev.name,
+  phone: payload.adminContact || prev.phone,
+  profilePic: payload.adminProfilePic || prev.profilePic,
+  profilePicFile: null,
+  // keep current logged-in admin email as-is
+  email: prev.email,
+}));
 
-    await syncAdminInfoToAppSettings({
-      adminUid: selectedAdmin.id,
-      adminName: selectedAdmin.name || "",
-      adminEmail: selectedAdmin.email || "",
-      adminContact: selectedAdmin.phone || "",
-      adminProfilePic: selectedAdmin.originalProfilePic || displayAdminProfilePic || "/assets/profile.png",
-    });
+    setEditedAdminName(payload.adminName || "");
+    setEditedAdminPhone(payload.adminContact || "");
 
     setShowAdminProfileResetSuccess(true);
     setHideAdminProfileResetAnimation(false);
@@ -1012,14 +1026,14 @@ const handleResetAdminProfilePic = async () => {
     }, 5000);
 
     showActionOverlay({
-      message: "Profile picture reset to original!",
+      message: "Admin reset to original app settings!",
       type: "success",
     });
 
     setIsEditingAdmin(false);
   } catch (error) {
     showActionOverlay({
-      message: "Failed to reset profile picture",
+      message: "Failed to reset admin from app settings",
       type: "warning",
     });
   } finally {
@@ -1587,11 +1601,7 @@ const handleResetAdminProfilePic = async () => {
                   <div className="client-profile-column">
                     <div className="client-profile-left">
                       <img
-                        src={
-                          newAdminProfilePic ||
-                          selectedAdmin.profilePic ||
-                          "/assets/profile.png"
-                        }
+                        src={newAdminProfilePic || displayAdminProfilePic}
                         alt={selectedAdmin.name}
                         className="client-profile-pic"
                       />
