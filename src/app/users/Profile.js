@@ -2092,6 +2092,7 @@ const Profile = ({ openBooking }) => {
               </button>
             </div>
 
+
 {activeTab === "notifications" && (
   <div className="tabs-right">
     {selectedMessageIds.length > 0 && (
