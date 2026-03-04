@@ -94,11 +94,12 @@ export const UserProvider = ({ children }) => {
 
   const [showBlockedUserOverlay, setShowBlockedUserOverlay] = useState(false);
   const [blockedUserReason, setBlockedUserReason] = useState("");
-  const [adminContactInfo, setAdminContactInfo] = useState({
-    email: "",
-    contact: "",
-    name: "",
-  });
+const [adminContactInfo, setAdminContactInfo] = useState({
+  email: "",
+  contact: "",
+  name: "",
+  profilePic: "",
+});
 
   const [authLoading, setAuthLoading] = useState(true);
   const [originalUser, setOriginalUser] = useState(null);
@@ -1933,10 +1934,11 @@ Call them now to check if they want to extend. If no response, call them when re
             if (settingsSnap.exists()) {
               const data = settingsSnap.data();
               setAdminContactInfo({
-                email: data.adminEmail || "rentalinquiries.emnl@gmail.com",
-                contact: data.adminContact || "+63 975 477 8178",
-                name: data.adminName || "EMNL Admin",
-              });
+  email: data.adminEmail || "rentalinquiries.emnl@gmail.com",
+  contact: data.adminContact || "+63 975 477 8178",
+  name: data.adminName || "EMNL Admin",
+  profilePic: data.adminProfilePic || "/assets/profile.png",
+});
             }
           } catch (error) {
             console.error("Error fetching admin contact:", error);
@@ -1994,38 +1996,85 @@ const fetchAdminUid = async () => {
     const settingsSnap = await getDoc(settingsRef);
 
     if (!settingsSnap.exists()) {
-      console.warn("⚠️ appSettings document does not exist.");
+      console.warn("⚠️ appSettings does not exist.");
       return null;
     }
 
-    const settingsData = settingsSnap.data();
-    const uid = settingsData.adminUid;
+    const settingsData = settingsSnap.data() || {};
+    const uid = (settingsData.adminUid || "").trim();
 
     if (!uid) {
-      console.warn("⚠️ adminUid field is missing in appSettings.");
+      console.warn("⚠️ appSettings.adminUid is missing.");
       return null;
     }
 
-    const adminUserSnap = await getDoc(doc(db, "users", uid));
-    const adminUserData = adminUserSnap.exists() ? adminUserSnap.data() : {};
+    // Use appSettings first (publicly readable path for all users)
+    let name = (settingsData.adminName || "").trim() || "Admin";
+    let email = (settingsData.adminEmail || "").trim() || "No email";
+    let contact = (settingsData.adminContact || "").trim() || "No contact";
+    let profilePic = settingsData.adminProfilePic || "/assets/profile.png";
 
-    const name = adminUserData?.name || settingsData.adminName || "Admin";
-    const email = adminUserData?.email || settingsData.adminEmail || "";
-    const contact = adminUserData?.phone || settingsData.adminContact || "";
-    const profilePic = adminUserData?.profilePic || "/assets/profile.png";
+    // Try enriching from users/{adminUid}; non-admin may not have permission (ignore if denied)
+    try {
+      const adminUserSnap = await getDoc(doc(db, "users", uid));
+      if (adminUserSnap.exists()) {
+        const d = adminUserSnap.data() || {};
+        name = (d.name || "").trim() || name;
+        email = (d.email || "").trim() || email;
+        contact = (d.phone || "").trim() || contact;
+        profilePic = d.profilePic || profilePic;
+      }
+    } catch (err) {
+      console.warn("⚠️ users/{adminUid} not readable for this user, using appSettings only.");
+    }
 
     setAdminUid(uid);
     setAdminName(name);
     setAdminEmail(email);
     setAdminContact(contact);
 
+setAdminContactInfo({
+  name,
+  email,
+  contact,
+  profilePic,
+});
+
     return { uid, name, email, contact, profilePic };
   } catch (err) {
-    console.error("🔥 Error fetching admin UID from appSettings:", err);
+    console.error("🔥 fetchAdminUid failed:", err);
     return null;
   }
 };
 
+// (ADMIN) SYNC ADMIN INFO TO appSettings (called from AdminSettings.js after admin updates their profile)
+const syncAdminInfoToAppSettings = async ({
+  adminUid,
+  adminName,
+  adminEmail,
+  adminContact,
+  adminProfilePic,
+}) => {
+  try {
+    await setDoc(
+      doc(db, "config", "appSettings"),
+      {
+        adminUid: adminUid || "",
+        adminName: adminName || "",
+        adminEmail: adminEmail || "",
+        adminContact: adminContact || "",
+        ...(adminProfilePic ? { adminProfilePic } : {}),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Failed to sync admin info to appSettings:", error);
+    return { success: false, error: error.message };
+  }
+};
 
 //   const fetchAdminUid = async () => {
 //   try {
@@ -8294,6 +8343,7 @@ await throttledSetDoc(
         isAdmin: user?.role === "admin",
         adminUid,
         fetchAdminUid,
+        syncAdminInfoToAppSettings,
         updateUnitData,
 
         theme,

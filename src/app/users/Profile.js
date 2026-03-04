@@ -982,52 +982,133 @@ const participant = {
     });
   }, [activeTab, adminConversation, markMessageAsRead]);
 
-  const sendConversationMessage = async () => {
-    if (!chatInput.trim()) return;
-    if (!user?.uid) return;
+const sendConversationMessage = async () => {
+  const text = chatInput.trim();
+  if (!text || !user?.uid) return;
 
-    if (!adminConversation?.id) {
-      showActionOverlay({
-        message: "Admin chat is not ready yet. Please try again.",
-        type: "warning",
-      });
-      return;
-    }
+  // Always resolve fresh admin meta before first message
+  const fetchedAdmin = await fetchAdminUid();
 
-    const contactInfo = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      message: chatInput.trim(),
-      recipientUid: adminConversation.id,
-      senderUid: user.uid,
-      isAdminSender: false,
-      recipientName: adminConversation.participant?.name,
-      recipientEmail: adminConversation.participant?.email,
-      recipientPhone: adminConversation.participant?.contact,
-    };
-
-    const result = await sendMessage(contactInfo);
-
-    if (!result?.success) {
-      showActionOverlay({
-        message: result?.error || "Failed to send message.",
-        type: "warning",
-      });
-      return;
-    }
-
-    setChatInput("");
-    setTimeout(() => {
-  if (profileChatBodyRef.current) {
-    profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
-  }
-}, 0);
-    showActionOverlay({
-      message: "Message sent successfully!",
-      type: "success",
-    });
+  const resolved = {
+    uid: fetchedAdmin?.uid || adminConversation?.id || adminUid || adminMeta.uid,
+    name:
+      fetchedAdmin?.name ||
+      adminMeta.name ||
+      adminConversation?.participant?.name ||
+      "Admin",
+    email:
+      fetchedAdmin?.email ||
+      adminMeta.email ||
+      adminConversation?.participant?.email ||
+      "No email",
+    contact:
+      fetchedAdmin?.contact ||
+      adminMeta.contact ||
+      adminConversation?.participant?.contact ||
+      "No contact",
+    profilePic:
+      fetchedAdmin?.profilePic ||
+      adminMeta.profilePic ||
+      "/assets/profile.png",
   };
+
+  if (!resolved.uid) {
+    showActionOverlay({
+      message:
+        "Admin UID is missing in config/appSettings. Please set adminUid first.",
+      type: "warning",
+    });
+    return;
+  }
+
+  setAdminMeta({
+    uid: resolved.uid,
+    name: resolved.name,
+    email: resolved.email,
+    contact: resolved.contact,
+    profilePic: resolved.profilePic,
+  });
+
+  const result = await sendMessage({
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    message: text,
+    recipientUid: resolved.uid,
+    senderUid: user.uid,
+    isAdminSender: false,
+    recipientName: resolved.name,
+    recipientEmail: resolved.email,
+    recipientPhone: resolved.contact,
+  });
+
+  if (!result?.success) {
+    showActionOverlay({
+      message: result?.error || "Failed to send message.",
+      type: "warning",
+    });
+    return;
+  }
+
+  setChatInput("");
+  setTimeout(() => {
+    if (profileChatBodyRef.current) {
+      profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
+    }
+  }, 0);
+
+  showActionOverlay({
+    message: "Message sent successfully!",
+    type: "success",
+  });
+};
+
+//   const sendConversationMessage = async () => {
+//     if (!chatInput.trim()) return;
+//     if (!user?.uid) return;
+
+//     if (!adminConversation?.id) {
+//       showActionOverlay({
+//         message: "Admin chat is not ready yet. Please try again.",
+//         type: "warning",
+//       });
+//       return;
+//     }
+
+//     const contactInfo = {
+//       name: user.name,
+//       email: user.email,
+//       phone: user.phone,
+//       message: chatInput.trim(),
+//       recipientUid: adminConversation.id,
+//       senderUid: user.uid,
+//       isAdminSender: false,
+//       recipientName: adminConversation.participant?.name,
+//       recipientEmail: adminConversation.participant?.email,
+//       recipientPhone: adminConversation.participant?.contact,
+//     };
+
+//     const result = await sendMessage(contactInfo);
+
+//     if (!result?.success) {
+//       showActionOverlay({
+//         message: result?.error || "Failed to send message.",
+//         type: "warning",
+//       });
+//       return;
+//     }
+
+//     setChatInput("");
+//     setTimeout(() => {
+//   if (profileChatBodyRef.current) {
+//     profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
+//   }
+// }, 0);
+//     showActionOverlay({
+//       message: "Message sent successfully!",
+//       type: "success",
+//     });
+//   };
 
   const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
@@ -2375,18 +2456,14 @@ const participant = {
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Type your message..."
                     />
-                    <button
-                      className="reply-btn"
-                      onClick={sendConversationMessage}
-                      disabled={!adminConversation?.id}
-                      title={
-                        !adminConversation?.id
-                          ? "No admin conversation found yet"
-                          : "Send"
-                      }
-                    >
-                      Send
-                    </button>
+<button
+  className="reply-btn"
+  onClick={sendConversationMessage}
+  disabled={!chatInput.trim()}
+  title="Send"
+>
+  Send
+</button>
                   </div>
                 </div>
               </div>

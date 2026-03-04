@@ -175,6 +175,8 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
     fetchImageFromFirestore,
     updateAdminProfilePic,
     resetAdminProfilePic,
+    syncAdminInfoToAppSettings,
+    adminContactInfo,
 
     createBackup,
     isBackingUp,
@@ -209,6 +211,13 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
 
     showActionOverlay,
   } = useUser();
+
+  const displayAdminName =
+  adminContactInfo?.name || selectedAdmin?.name || "Admin";
+const displayAdminEmail =
+  adminContactInfo?.email || selectedAdmin?.email || "No email";
+const displayAdminPhone =
+  adminContactInfo?.contact || selectedAdmin?.phone || "No contact";
 
   const importFileInputRef = useRef(null);
 
@@ -424,11 +433,21 @@ const [editedAdminPhone, setEditedAdminPhone] = useState("");
     };
   }, [showProfileOverlay, showMessengerConfirm]);
 
-  useEffect(() => {
-  if (!selectedAdmin) return;
-  setEditedAdminName(selectedAdmin.name || "");
-  setEditedAdminPhone(selectedAdmin.phone || "");
-}, [selectedAdmin]);
+useEffect(() => {
+  if (!selectedAdmin || isEditingAdmin) return;
+
+  setEditedAdminName(
+    adminContactInfo?.name || selectedAdmin?.name || "",
+  );
+  setEditedAdminPhone(
+    adminContactInfo?.contact || selectedAdmin?.phone || "",
+  );
+}, [
+  selectedAdmin,
+  adminContactInfo?.name,
+  adminContactInfo?.contact,
+  isEditingAdmin,
+]);
 
   useEffect(() => {
     if (selectedAdmin) {
@@ -875,8 +894,11 @@ const handleSaveAdminProfilePic = async () => {
   const nextPhone = (editedAdminPhone || "").trim();
 
   const hasProfilePicChange = !!selectedAdmin.profilePicFile;
-  const hasNameChange = nextName !== (selectedAdmin.name || "");
-  const hasPhoneChange = nextPhone !== (selectedAdmin.phone || "");
+const currentName = (displayAdminName || "").trim();
+const currentPhone = (displayAdminPhone || "").trim();
+
+const hasNameChange = nextName !== currentName;
+const hasPhoneChange = nextPhone !== currentPhone;
   const hasTextChange = hasNameChange || hasPhoneChange;
 
   if (!hasProfilePicChange && !hasTextChange) {
@@ -895,8 +917,21 @@ const handleSaveAdminProfilePic = async () => {
     }
 
     if (hasProfilePicChange) {
-      await updateAdminProfilePic(selectedAdmin.id, selectedAdmin.profilePicFile);
+      await updateAdminProfilePic(
+        selectedAdmin.id,
+        selectedAdmin.profilePicFile,
+      );
     }
+
+    await syncAdminInfoToAppSettings({
+      adminUid: selectedAdmin.id,
+      adminName: nextName || selectedAdmin.name || "",
+      adminEmail: selectedAdmin.email || "",
+      adminContact: nextPhone || "",
+      adminProfilePic: hasProfilePicChange
+  ? newAdminProfilePic || displayAdminProfilePic || "/assets/profile.png"
+  : displayAdminProfilePic || "/assets/profile.png",
+    });
 
     setSelectedAdmin((prev) => ({
       ...prev,
@@ -907,7 +942,6 @@ const handleSaveAdminProfilePic = async () => {
 
     setNewAdminProfilePic(null);
     setIsEditingAdmin(false);
-    setIsSavingAdminProfile(false);
 
     setShowAdminProfileSavedSuccess(true);
     setHideAdminProfileSavedAnimation(false);
@@ -923,62 +957,75 @@ const handleSaveAdminProfilePic = async () => {
     });
   } catch (error) {
     console.error("Error saving admin details:", error);
-    setIsSavingAdminProfile(false);
     showActionOverlay({
       message: "Failed to update admin details",
       type: "warning",
     });
+  } finally {
+    setIsSavingAdminProfile(false);
   }
 };
 
 
-  const handleCancelAdminEdit = () => {
+const handleCancelAdminEdit = () => {
+  setSelectedAdmin((prev) => ({
+    ...prev,
+    profilePicFile: null,
+  }));
+  setEditedAdminName(displayAdminName || "");
+  setEditedAdminPhone(displayAdminPhone || "");
+  setNewAdminProfilePic(null);
+  setIsEditingAdmin(false);
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+  }
+};
+
+const handleResetAdminProfilePic = async () => {
+  if (!selectedAdmin) return;
+
+  setIsResettingAdminProfile(true);
+  try {
+    await resetAdminProfilePic(selectedAdmin.id);
+
+    setNewAdminProfilePic(null);
     setSelectedAdmin((prev) => ({
       ...prev,
+      profilePic: prev.originalProfilePic || "/assets/profile.png",
       profilePicFile: null,
     }));
-    setNewAdminProfilePic(null);
+
+    await syncAdminInfoToAppSettings({
+      adminUid: selectedAdmin.id,
+      adminName: selectedAdmin.name || "",
+      adminEmail: selectedAdmin.email || "",
+      adminContact: selectedAdmin.phone || "",
+      adminProfilePic: selectedAdmin.originalProfilePic || displayAdminProfilePic || "/assets/profile.png",
+    });
+
+    setShowAdminProfileResetSuccess(true);
+    setHideAdminProfileResetAnimation(false);
+
+    setTimeout(() => {
+      setHideAdminProfileResetAnimation(true);
+      setTimeout(() => setShowAdminProfileResetSuccess(false), 400);
+    }, 5000);
+
+    showActionOverlay({
+      message: "Profile picture reset to original!",
+      type: "success",
+    });
+
     setIsEditingAdmin(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleResetAdminProfilePic = async () => {
-    setIsResettingAdminProfile(true);
-    try {
-      await resetAdminProfilePic(selectedAdmin.id);
-      setIsResettingAdminProfile(false);
-
-      setNewAdminProfilePic(null);
-      setSelectedAdmin((prev) => ({
-        ...prev,
-        profilePic: prev.originalProfilePic || "/assets/profile.png",
-        profilePicFile: null,
-      }));
-
-      setShowAdminProfileResetSuccess(true);
-      setHideAdminProfileResetAnimation(false);
-
-      setTimeout(() => {
-        setHideAdminProfileResetAnimation(true);
-        setTimeout(() => setShowAdminProfileResetSuccess(false), 400);
-      }, 5000);
-
-      showActionOverlay({
-        message: "Profile picture reset to original!",
-        type: "success",
-      });
-
-      setIsEditingAdmin(false);
-    } catch (error) {
-      setIsResettingAdminProfile(false);
-      showActionOverlay({
-        message: "Failed to reset profile picture",
-        type: "warning",
-      });
-    }
-  };
+  } catch (error) {
+    showActionOverlay({
+      message: "Failed to reset profile picture",
+      type: "warning",
+    });
+  } finally {
+    setIsResettingAdminProfile(false);
+  }
+};
 
   const handleImportFilePick = async (event) => {
     const file = event.target.files?.[0];
@@ -1607,7 +1654,7 @@ const handleSaveAdminProfilePic = async () => {
       placeholder="Admin Name"
     />
   ) : (
-    <h3>{selectedAdmin.name}</h3>
+    <h3>{displayAdminName}</h3>
   )}
 
   {selectedAdmin.emailVerified ? (
@@ -1629,12 +1676,10 @@ const handleSaveAdminProfilePic = async () => {
   )}
 </div>
 
-                      <p>
-                        <strong style={{ color: "var(--accent-color)" }}>
-                          Email:
-                        </strong>{" "}
-                        {selectedAdmin.email}
-                      </p>
+<p>
+  <strong style={{ color: "var(--accent-color)" }}>Email:</strong>{" "}
+  {displayAdminEmail}
+</p>
 
                       <p>
                         <strong style={{ color: "var(--accent-color)" }}>
@@ -1654,7 +1699,7 @@ const handleSaveAdminProfilePic = async () => {
       placeholder="Phone"
     />
   ) : (
-    selectedAdmin.phone
+    displayAdminPhone
   )}
 </p>
 
