@@ -219,7 +219,8 @@ function Contact({ openBooking }) {
     user,
     setUser,
     sendMessage,
-    sendEmail,
+    sendGuestContactMessage,
+    showActionOverlay,
     fetchAdminUid,
     fetchImageFromFirestore,
     imageCache,
@@ -375,49 +376,52 @@ const handleSubmit = async (e) => {
     .replace(/\s+/g, " ");
   const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
 
-  let senderUid = user?.uid || null;
-  let sourcePage = "contact";
+  let result = null;
 
-  try {
-    // Guest flow: anonymous auth so we can write to Firestore messages
-    if (!senderUid) {
-      const anonCred = await signInAnonymously(auth);
-      senderUid = anonCred?.user?.uid || null;
-      sourcePage = "contact-guest";
-    }
-
-    if (!senderUid) {
-      throw new Error("Unable to resolve sender UID.");
-    }
-
-    const contactInfo = {
+  if (user?.uid) {
+    result = await sendMessage({
       name: fullName,
       email,
       phone: fullPhone,
       message,
-      senderUid,
+      senderUid: user.uid,
       recipientUid: adminUid,
       isAdminSender: false,
       recipientName: adminName,
       recipientEmail: adminEmail,
       recipientPhone: adminContact,
-      sourcePage,
-      sourceLabel: sourcePage === "contact-guest" ? "Guest Contact Page" : "Contact Page",
-    };
-
-    const result = await sendMessage(contactInfo);
-
-    if (!result?.success) {
-      throw new Error(result?.error || "Failed to send message.");
-    }
-
-    setMessage("");
-    setContactSuccessMessage("Message sent successfully!");
-    setShowContactSuccess(true);
-  } catch (err) {
-    console.error("Contact submit error:", err);
+      sourcePage: "contact",
+      sourceLabel: "Contact Page",
+    });
+  } else {
+    result = await sendGuestContactMessage({
+      name: fullName,
+      email,
+      phone: fullPhone,
+      message,
+      recipientUid: adminUid,
+      recipientName: adminName,
+      recipientEmail: adminEmail,
+      recipientPhone: adminContact,
+    });
   }
+
+  if (!result?.success) {
+    console.error(result?.error || "Failed to send message.");
+    return;
+  }
+
+setMessage("");
+setContactSuccessMessage("Message sent successfully!");
+setShowContactSuccess(true);
+
+showActionOverlay({
+  message: "Message sent successfully!",
+  type: "success",
+});
 };
+
+
 
   
 // const handleSubmit = async (e) => {

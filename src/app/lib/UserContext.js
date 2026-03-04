@@ -28,6 +28,7 @@ import {
   getAuth,
   updateEmail,
   verifyBeforeUpdateEmail,
+  signInAnonymously,
 } from "firebase/auth";
 
 import {
@@ -3991,42 +3992,174 @@ const sendMessage = async ({
   }
 };
 
-// const sendMessage = async ({
+// (GUEST) BUILD STABLE SENDER UID BASED ON GUEST DETAILS OR LOCAL STORAGE
+const buildStableGuestSenderUid = ({ name, email, phone }) => {
+  const normalize = (v) =>
+    (v || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+
+  const slug = (v) =>
+    normalize(v)
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 32);
+
+  const emailKey = slug(email);
+  const phoneKey = slug((phone || "").replace(/[^\d+]/g, ""));
+  const nameKey = slug(name);
+
+  // Deterministic ID for same guest details (prevents new conversation per message)
+  const deterministic = [emailKey, phoneKey, nameKey].filter(Boolean).join("_");
+
+  if (deterministic) {
+    return `guest_${deterministic}`.slice(0, 120);
+  }
+
+  // Fallback: persistent browser-level guest ID
+  const storageKey = "guest_contact_sender_uid";
+  const existing =
+    typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+  if (existing) return existing;
+
+  const generated = `guest_local_${Math.random().toString(36).slice(2, 12)}`;
+  if (typeof window !== "undefined") localStorage.setItem(storageKey, generated);
+  return generated;
+};
+
+
+
+
+// (GUEST) SEND CONTACT MESSAGE TO ADMIN
+const sendGuestContactMessage = async ({
+  name,
+  email,
+  phone,
+  message,
+  recipientUid,
+  recipientName,
+  recipientEmail,
+  recipientPhone,
+}) => {
+  try {
+    if (!recipientUid) {
+      return { success: false, error: "Missing recipientUid." };
+    }
+
+    const safeName = (name || "Guest").trim() || "Guest";
+    const safeEmail = (email || "No email").trim() || "No email";
+    const safePhone = (phone || "No contact").trim() || "No contact";
+    const safeMessage = (message || "").trim();
+
+    if (!safeMessage) {
+      return { success: false, error: "Message is required." };
+    }
+
+    const guestSenderUid = buildStableGuestSenderUid({
+      name: safeName,
+      email: safeEmail,
+      phone: safePhone,
+    });
+
+    const guestMessage = {
+      senderUid: guestSenderUid,
+      recipientUid,
+      name: safeName,
+      email: safeEmail,
+      contact: safePhone,
+      content: safeMessage,
+      recipientName: recipientName || "Admin",
+      recipientEmail: recipientEmail || "",
+      recipientContact: recipientPhone || "",
+      sourcePage: "contact-guest",
+      sourceLabel: "Guest Contact Page",
+      isGuest: true,
+      date: new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      startTimestamp: serverTimestamp(),
+      clientCreatedAt: Date.now(),
+      formattedDateTime: new Date().toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      }),
+      profilePic: "/assets/profile.png",
+      readStatus: false,
+    };
+
+    await setDoc(
+      doc(collection(db, "users", recipientUid, "receivedMessages")),
+      guestMessage,
+    );
+
+    return { success: true, viaInApp: true, guest: true };
+  } catch (error) {
+    console.error("❌ sendGuestContactMessage failed:", error);
+    return { success: false, error: error.message || "Guest send failed." };
+  }
+};
+
+
+
+// const sendGuestContactMessage = async ({
 //   name,
 //   email,
 //   phone,
 //   message,
 //   recipientUid,
-//   senderUid,
-//   isAdminSender,
 //   recipientName,
 //   recipientEmail,
 //   recipientPhone,
 // }) => {
-//   if (!senderUid || !recipientUid) {
-//     console.error("❌ Missing senderUid or recipientUid.");
-//     return { success: false, error: "Missing senderUid or recipientUid." };
-//   }
-
 //   try {
-//     const senderSentRef = collection(db, "users", senderUid, "sentMessages");
-//     const recipientInboxRef = collection(
-//       db,
-//       "users",
-//       recipientUid,
-//       "receivedMessages",
-//     );
+//     if (!recipientUid) {
+//       return { success: false, error: "Missing recipientUid." };
+//     }
 
-//     const newMessage = {
-//       senderUid,
+//     const safeName = (name || "Guest").trim() || "Guest";
+//     const safeEmail = (email || "No email").trim() || "No email";
+//     const safePhone = (phone || "No contact").trim() || "No contact";
+//     const safeMessage = (message || "").trim();
+
+//     if (!safeMessage) {
+//       return { success: false, error: "Message is required." };
+//     }
+
+//     const guestKey = `${safeEmail}_${safePhone}_${Date.now()}`
+//       .toLowerCase()
+//       .replace(/[^a-z0-9]+/g, "_")
+//       .replace(/^_+|_+$/g, "")
+//       .slice(0, 64);
+
+//     const guestSenderUid = `guest_${guestKey}`;
+
+//     const guestMessage = {
+//       senderUid: guestSenderUid,
 //       recipientUid,
-//       name,
-//       email,
-//       contact: phone,
-//       content: message,
-//       recipientName,
-//       recipientEmail,
-//       recipientContact: recipientPhone,
+//       name: safeName,
+//       email: safeEmail,
+//       contact: safePhone,
+//       content: safeMessage,
+//       recipientName: recipientName || "Admin",
+//       recipientEmail: recipientEmail || "",
+//       recipientContact: recipientPhone || "",
+//       sourcePage: "contact-guest",
+//       sourceLabel: "Guest Contact Page",
+//       isGuest: true,
 //       date: new Date().toLocaleDateString("en-US", {
 //         weekday: "long",
 //         year: "numeric",
@@ -4038,8 +4171,6 @@ const sendMessage = async ({
 //         minute: "2-digit",
 //       }),
 //       startTimestamp: serverTimestamp(),
-//       profilePic: user.profilePic || null,
-//       readStatus: false,
 //       clientCreatedAt: Date.now(),
 //       formattedDateTime: new Date().toLocaleString("en-US", {
 //         year: "numeric",
@@ -4050,21 +4181,22 @@ const sendMessage = async ({
 //         hour12: true,
 //         timeZone: "Asia/Manila",
 //       }),
+//       profilePic: "/assets/profile.png",
+//       readStatus: false,
 //     };
 
-//     await setDoc(doc(senderSentRef), newMessage);
-//     await setDoc(doc(recipientInboxRef), newMessage);
+//     await setDoc(
+//       doc(collection(db, "users", recipientUid, "receivedMessages")),
+//       guestMessage,
+//     );
 
-//     console.log("✅ Message sent between users:", newMessage);
-
-//     // IMPORTANT: do not push to local sent state here.
-//     // onSnapshot(sentMessages) will add exactly one real message with resolved timestamp.
-//     return { success: true };
-//   } catch (err) {
-//     console.error("🔥 Error sending message:", err);
-//     return { success: false, error: err?.message || "Failed to send message." };
+//     return { success: true, viaInApp: true, guest: true };
+//   } catch (error) {
+//     console.error("❌ sendGuestContactMessage failed:", error);
+//     return { success: false, error: error.message || "Guest send failed." };
 //   }
 // };
+
 
   // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
   useEffect(() => {
@@ -8312,6 +8444,7 @@ await throttledSetDoc(
         deleteMessage,
         sentMessages,
         userMessages,
+        sendGuestContactMessage,
 
         saveBookingToFirestore,
         unitData,
