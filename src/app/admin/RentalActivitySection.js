@@ -4879,6 +4879,7 @@ try {
               <div className="personal-info-section">
                 <h4>Personal Information</h4>
                 <div className="personal-info-fields">
+                   <div className="input-with-icon personal-info-field">
                   <input
                     type="text"
                     name="firstName"
@@ -4888,6 +4889,12 @@ try {
                     onChange={handleEditRequestInputChange}
                     required
                   />
+                                <label className="personal-info-inner-label">
+                                  First Name
+                                </label>
+                                </div>
+
+                   <div className="personal-info-field">
                   <input
                     type="text"
                     name="middleName"
@@ -4897,6 +4904,12 @@ try {
                     onChange={handleEditRequestInputChange}
                     required
                   />
+                                <label className="personal-info-inner-label">
+                                  Middle Name (N/A if none)
+                                </label>
+                              </div>
+
+                  <div className="personal-info-field">
                   <input
                     type="text"
                     name="surname"
@@ -4906,7 +4919,12 @@ try {
                     onChange={handleEditRequestInputChange}
                     required
                   />
+                                <label className="personal-info-inner-label">
+                                  Surname
+                                </label>
+                              </div>
 
+ <div className="personal-info-field">
                   <input
                     type="text"
                     name="address"
@@ -4916,30 +4934,12 @@ try {
                     onChange={handleEditRequestInputChange}
                     required
                   />
-                </div>
-              </div>
+                                <label className="personal-info-inner-label">
+                                  Current Address
+                                </label>
+                              </div>
 
-              <div className="contact-occupation-section">
-                <h4>Contact & Occupation</h4>
-                <div className="contact-occupation-fields">
-                  <input
-                    type="tel"
-                    name="contact"
-                    placeholder="Contact No."
-                    className="personal-info-input"
-                    value={editRequestFormData?.contact || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="personal-info-input"
-                    value={editRequestFormData?.email || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
+<div className="personal-info-field">
                   <input
                     type="text"
                     name="occupation"
@@ -4949,6 +4949,45 @@ try {
                     onChange={handleEditRequestInputChange}
                     required
                   />
+                                                 <label className="personal-info-inner-label">
+                                  Occupation
+                                </label>
+                              </div>
+                </div>
+              </div>
+
+              <div className="contact-occupation-section">
+                <h4>Contacts</h4>
+                <div className="contact-occupation-fields">
+                  <div className="contact-occupation-field">
+                  <input
+                    type="tel"
+                    name="contact"
+                    placeholder="Contact No."
+                    className="personal-info-input"
+                    value={editRequestFormData?.contact || ""}
+                    onChange={handleEditRequestInputChange}
+                    required
+                  />
+<label className="personal-info-inner-label">
+                                  Contact No.
+                                </label>
+                              </div>
+
+                   <div className="contact-occupation-field">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="personal-info-input"
+                    value={editRequestFormData?.email || ""}
+                    onChange={handleEditRequestInputChange}
+                    required
+                  />
+                  <label className="personal-info-inner-label">
+                                  Email Address
+                                </label>
+                              </div>
                 </div>
               </div>
 
@@ -6147,6 +6186,7 @@ try {
               <div className="personal-info-section">
                 <h4>Personal Information</h4>
                 <div className="personal-info-fields">
+                  <div className="input-with-icon personal-info-field">
                   <input
                     type="text"
                     name="firstName"
@@ -6156,6 +6196,12 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
+                  <label className="personal-info-inner-label">
+                                  First Name
+                                </label>
+                                </div>
+
+                         <div className="personal-info-field">       
                   <input
                     type="text"
                     name="middleName"
@@ -6165,6 +6211,14 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
+
+                                                  <label className="personal-info-inner-label">
+                                  Middle Name (N/A if none)
+                                </label>
+                              </div>
+
+                  <div className="personal-info-field">
+                    
                   <input
                     type="text"
                     name="surname"
@@ -6174,7 +6228,12 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
+                                <label className="personal-info-inner-label">
+                                  Surname
+                                </label>
+                              </div>
 
+<div className="personal-info-field">
                   <input
                     type="text"
                     name="address"
@@ -6184,12 +6243,34 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
+                                <label className="personal-info-inner-label">
+                                  Current Address
+                                </label>
+                              </div>
+
+<div className="personal-info-field">
+                                    <input
+                    type="text"
+                    name="occupation"
+                    placeholder="Occupation"
+                    className="personal-info-input"
+                    value={editFormData?.occupation || ""}
+                    onChange={handleEditInputChange}
+                    required
+                  />
+<label className="personal-info-inner-label">
+                                  Occupation
+                                </label>
+                 
+
+                </div>
                 </div>
               </div>
 
               <div className="contact-occupation-section">
-                <h4>Contact & Occupation</h4>
+                <h4>Contacts</h4>
                 <div className="contact-occupation-fields">
+                  <div className="contact-occupation-field">
                   <input
                     type="tel"
                     name="contact"
@@ -6199,6 +6280,11 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
+<label className="personal-info-inner-label">
+                                  Contact No.
+                                </label>
+                              </div>
+<div className="contact-occupation-field">
                   <input
                     type="email"
                     name="email"
@@ -6208,15 +6294,10 @@ try {
                     onChange={handleEditInputChange}
                     required
                   />
-                  <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Occupation"
-                    className="personal-info-input"
-                    value={editFormData?.occupation || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
+<label className="personal-info-inner-label">
+                                  Email Address
+                                </label>
+                              </div>
                 </div>
               </div>
 
