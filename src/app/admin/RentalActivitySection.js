@@ -7416,7 +7416,7 @@ try {
                   marginBottom: "20px",
                 }}
               >
-                {selectedCustomerName}
+                {selectedCustomerName || "None"}
               </div>
             )}
 
@@ -8890,11 +8890,23 @@ onClick={() => {
                                 }
                                 required
                               />
+
+                              <input
+                                type="text"
+                                name="occupation"
+                                placeholder="Occupation"
+                                className="personal-info-input"
+                                value={unitForm.occupation || ""}
+                                onChange={(e) =>
+                                  handleInputChange(selectedUnitId, e)
+                                }
+                                required
+                              />
                             </div>
                           </div>
 
                           <div className="contact-occupation-section">
-                            <h4>Contact & Occupation</h4>
+                            <h4>Contacts</h4>
                             <div className="contact-occupation-fields">
                               <input
                                 type="tel"
@@ -8910,7 +8922,7 @@ onClick={() => {
                               <input
                                 type="email"
                                 name="email"
-                                placeholder="Email"
+                                placeholder="Email Address"
                                 className="personal-info-input"
                                 value={unitForm.email || ""}
                                 onChange={(e) =>
@@ -8918,17 +8930,7 @@ onClick={() => {
                                 }
                                 required
                               />
-                              <input
-                                type="text"
-                                name="occupation"
-                                placeholder="Occupation"
-                                className="personal-info-input"
-                                value={unitForm.occupation || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
+
                             </div>
                           </div>
 

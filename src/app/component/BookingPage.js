@@ -2616,6 +2616,124 @@ if (!user) {
                   : "Upload Driver's License"}
               </label>
 
+
+
+
+
+
+
+<label className="form-label">Personal Information</label>
+<div className="form-row">
+  <div className="first-name-field">
+    <label className="first-name-inner-label">First Name</label>
+    <input
+      type="text"
+      name="firstName"
+      placeholder="First Name"
+      value={formData.firstName}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Middle Name (N/A if none)</label>
+    <input
+      type="text"
+      name="middleName"
+      placeholder="Middle Name (N/A if none)"
+      value={formData.middleName}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Surname</label>
+    <input
+      type="text"
+      name="surname"
+      placeholder="Surname"
+      value={formData.surname}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Occupation</label>
+    <input
+      type="text"
+      name="occupation"
+      placeholder="Occupation"
+      value={formData.occupation}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Current Address</label>
+    <input
+      type="text"
+      name="address"
+      placeholder="Current Address"
+      value={formData.address}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+</div>
+
+<label className="form-label">Contacts</label>
+<div className="form-row">
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Contact No.</label>
+    <input
+      type="text"
+      name="contactNo"
+      placeholder="Contact No."
+      value={formData.contactNo}
+      onChange={(e) => {
+        const formattedNumber = e.target.value.replace(/[^0-9-]/g, "");
+        setFormData((prev) => ({
+          ...prev,
+          contactNo: formattedNumber,
+        }));
+        setHasChanges(true);
+      }}
+      className="first-name-input"
+      required
+    />
+  </div>
+
+  <div className="first-name-field">
+    <label className="first-name-inner-label">Email Address</label>
+    <input
+      type="email"
+      name="email"
+      placeholder="Email Address"
+      value={formData.email}
+      onChange={handleInputChange}
+      className="first-name-input"
+      required
+    />
+  </div>
+</div>
+
+
+
+
+
+
+
+
+{/* 
               <label className="form-label">Personal Information</label>
               <div className="form-row">
                 <input
@@ -2691,7 +2809,7 @@ if (!user) {
                   onChange={handleInputChange}
                   required
                 />
-              </div>
+              </div> */}
 
               <div className="message-section">
                 <h4 className="message-label">Referral Source (Optional)</h4>
