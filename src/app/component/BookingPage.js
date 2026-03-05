@@ -2610,41 +2610,6 @@ if (!user) {
 )}
 
 
-              {/* {uploadedID && (
-                <div className="image-preview">
-                  {(() => {
-                    if (typeof uploadedID === "string") {
-                      return (
-                        <img
-                          src={uploadedID}
-                          alt="Uploaded ID"
-                          onClick={handleImageClick}
-                          className="preview-thumbnail"
-                        />
-                      );
-                    } else if (
-                      uploadedID instanceof File ||
-                      uploadedID instanceof Blob
-                    ) {
-                      return (
-                        <img
-                          src={URL.createObjectURL(uploadedID)}
-                          alt="Uploaded ID"
-                          onClick={handleImageClick}
-                          className="preview-thumbnail"
-                        />
-                      );
-                    } else {
-                      console.warn(
-                        "⚠️ Unsupported uploadedID type:",
-                        uploadedID,
-                      );
-                      return null;
-                    }
-                  })()}
-                </div>
-              )} */}
-
               <label htmlFor="uploadID" className="file-label">
                 {uploadedID
                   ? "Change Driver's License"
