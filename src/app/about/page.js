@@ -7,65 +7,40 @@ import "./About.css";
 
 function About({ openBooking }) {
   const { fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
-  // const [aboutBackground, setAboutBackground] = useState("");
-const [isLoading, setIsLoading] = useState(true);
+
   const aboutSectionRef = useRef(null);
   const contentRef = useRef(null);
 
-  // useEffect(() => {
-  //   const fetchAboutBackground = async () => {
-  //     const result = await fetchImageFromFirestore("AboutPage_0");
-  //     if (result) {
-  //       setAboutBackground(result.base64);
-  //     }
-  //   };
-  //   fetchAboutBackground();
-  // }, [fetchImageFromFirestore]);
-
-  //  useEffect(() => {
-  //   const fetchAboutBackground = async () => {
-  //     const result = await fetchImageFromFirestore("AboutPage_0");
-  //     if (result) {
-  //       setAboutBackground(result.base64);
-  //     }
-  //     setIsLoading(false); // Always stop loading
-  //   };
-  //   fetchAboutBackground();
-  // }, [fetchImageFromFirestore]);
-
-
-
   const aboutFallback = "/assets/images/about.png";
 
-const aboutCachedSrc = useMemo(
-  () => imageCache["AboutPage_0"]?.base64 || aboutFallback,
-  [imageCache],
-);
+  const aboutCachedSrc = useMemo(
+    () => imageCache["AboutPage_0"]?.base64 || aboutFallback,
+    [imageCache],
+  );
 
-const [aboutBackground, setAboutBackground] = useState(aboutCachedSrc);
+  const [aboutBackground, setAboutBackground] = useState(aboutCachedSrc);
 
-// instant from cache
-useEffect(() => {
-  setAboutBackground(aboutCachedSrc);
-}, [aboutCachedSrc]);
+  // instant from cache
+  useEffect(() => {
+    setAboutBackground(aboutCachedSrc);
+  }, [aboutCachedSrc]);
 
-// background revalidate (fresh from Firestore)
-useEffect(() => {
-  let cancelled = false;
+  // background revalidate (fresh from Firestore)
+  useEffect(() => {
+    let cancelled = false;
 
-  const fetchAboutBackground = async () => {
-    const result = await fetchImageFromFirestore("AboutPage_0", false);
-    if (!cancelled && result?.base64) {
-      setAboutBackground(result.base64);
-    }
-  };
+    const fetchAboutBackground = async () => {
+      const result = await fetchImageFromFirestore("AboutPage_0", false);
+      if (!cancelled && result?.base64) {
+        setAboutBackground(result.base64);
+      }
+    };
 
-  fetchAboutBackground();
-  return () => {
-    cancelled = true;
-  };
-}, [fetchImageFromFirestore, imageUpdateTrigger]);
-
+    fetchAboutBackground();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,10 +73,10 @@ useEffect(() => {
         className="about-section"
         ref={aboutSectionRef}
         style={{
-  backgroundImage: aboutBackground
-    ? `url(${aboutBackground})`
-    : 'url(/assets/images/about.png)',
-}}
+          backgroundImage: aboutBackground
+            ? `url(${aboutBackground})`
+            : "url(/assets/images/about.png)",
+        }}
       >
         <div className="gradient-overlay"></div>
         <div className="content" ref={contentRef}>

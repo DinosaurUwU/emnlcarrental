@@ -271,11 +271,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           const image = await fetchImageFromFirestore(id);
           if (image) return { [id]: image };
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         } catch {
           return {
-            [id]: { base64: "/assets/images/default.png", updatedAt: Date.now() },
+            [id]: {
+              base64: "/assets/images/default.png",
+              updatedAt: Date.now(),
+            },
           };
         }
       });
@@ -3144,8 +3150,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                               setShowUnitDetailsOverlay(true);
                             }}
                           >
-
-
                             <td className="table-cell image-cell">
                               {(() => {
                                 if (!car) return null;
@@ -3164,12 +3168,16 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                                 return (
                                   <img
-                                    src={image?.base64 || "/assets/images/default.png"}
+                                    src={
+                                      image?.base64 ||
+                                      "/assets/images/default.png"
+                                    }
                                     alt={car.carName || car.model}
                                     className="unit-table-image"
                                     key={image?.updatedAt}
                                     onError={(e) =>
-                                      (e.target.src = "/assets/images/default.png")
+                                      (e.target.src =
+                                        "/assets/images/default.png")
                                     }
                                   />
                                 );
@@ -3867,7 +3875,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                             return (
                               <img
-                                src={image?.base64 || "/assets/images/default.png"}
+                                src={
+                                  image?.base64 || "/assets/images/default.png"
+                                }
                                 alt={booking.carName}
                                 className="unit-table-image"
                                 key={image?.updatedAt}

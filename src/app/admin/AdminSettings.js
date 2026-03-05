@@ -37,12 +37,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
     clearImageCache,
     updateImageCache,
     loadFinancialReport,
-setRevenueGrid,
-setExpenseGrid,
-
+    setRevenueGrid,
+    setExpenseGrid,
   } = useUser();
-const [entriesLoading, setEntriesLoading] = useState(false);
-const entriesHydratedRef = useRef(false);
+  const [entriesLoading, setEntriesLoading] = useState(false);
+  const entriesHydratedRef = useRef(false);
 
   const [showAdminError, setShowAdminError] = useState(false);
   const [adminErrorMessage, setAdminErrorMessage] = useState("");
@@ -206,7 +205,6 @@ const entriesHydratedRef = useRef(false);
     contact: ["/assets/images/default.png"],
   });
 
-
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
@@ -358,72 +356,73 @@ const entriesHydratedRef = useRef(false);
     event.target.value = "";
   };
 
+  useEffect(() => {
+    if (!(subSection === "entries" || subSection === "overview")) return;
+    if (entriesHydratedRef.current) return;
 
-useEffect(() => {
-  if (!(subSection === "entries" || subSection === "overview")) return;
-  if (entriesHydratedRef.current) return;
+    let cancelled = false;
 
-  let cancelled = false;
+    const hasAnyValue = (grid) => {
+      if (!grid || typeof grid !== "object") return false;
+      return Object.values(grid).some((monthRows) =>
+        Object.values(monthRows || {}).some(
+          (row) =>
+            Array.isArray(row) &&
+            row.some((cell) => String(cell || "").trim() !== ""),
+        ),
+      );
+    };
 
-  const hasAnyValue = (grid) => {
-    if (!grid || typeof grid !== "object") return false;
-    return Object.values(grid).some((monthRows) =>
-      Object.values(monthRows || {}).some(
-        (row) => Array.isArray(row) && row.some((cell) => String(cell || "").trim() !== ""),
-      ),
-    );
-  };
+    const hydrateEntries = async () => {
+      setEntriesLoading(true);
+      try {
+        const currentYear = new Date().getFullYear();
+        const yearsToLoad = Array.from(
+          { length: 11 },
+          (_, i) => currentYear - 5 + i,
+        );
 
-  const hydrateEntries = async () => {
-    setEntriesLoading(true);
-    try {
-      const currentYear = new Date().getFullYear();
-      const yearsToLoad = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+        const revenueByYear = {};
+        const expenseByYear = {};
 
-      const revenueByYear = {};
-      const expenseByYear = {};
+        for (const year of yearsToLoad) {
+          const [revRes, expRes] = await Promise.all([
+            loadFinancialReport("revenue", year),
+            loadFinancialReport("expense", year),
+          ]);
 
-      for (const year of yearsToLoad) {
-        const [revRes, expRes] = await Promise.all([
-          loadFinancialReport("revenue", year),
-          loadFinancialReport("expense", year),
-        ]);
+          if (cancelled) return;
+
+          const revGrid = revRes?.gridData || {};
+          const expGrid = expRes?.gridData || {};
+
+          if (hasAnyValue(revGrid)) revenueByYear[year] = revGrid;
+          if (hasAnyValue(expGrid)) expenseByYear[year] = expGrid;
+        }
 
         if (cancelled) return;
 
-        const revGrid = revRes?.gridData || {};
-        const expGrid = expRes?.gridData || {};
+        if (Object.keys(revenueByYear).length > 0) {
+          setRevenueGrid((prev) => ({ ...prev, ...revenueByYear }));
+        }
+        if (Object.keys(expenseByYear).length > 0) {
+          setExpenseGrid((prev) => ({ ...prev, ...expenseByYear }));
+        }
 
-        if (hasAnyValue(revGrid)) revenueByYear[year] = revGrid;
-        if (hasAnyValue(expGrid)) expenseByYear[year] = expGrid;
+        entriesHydratedRef.current = true;
+      } catch (err) {
+        console.error("Failed to hydrate Entries data:", err);
+      } finally {
+        if (!cancelled) setEntriesLoading(false);
       }
+    };
 
-      if (cancelled) return;
+    hydrateEntries();
 
-      if (Object.keys(revenueByYear).length > 0) {
-        setRevenueGrid((prev) => ({ ...prev, ...revenueByYear }));
-      }
-      if (Object.keys(expenseByYear).length > 0) {
-        setExpenseGrid((prev) => ({ ...prev, ...expenseByYear }));
-      }
-
-      entriesHydratedRef.current = true;
-    } catch (err) {
-      console.error("Failed to hydrate Entries data:", err);
-    } finally {
-      if (!cancelled) setEntriesLoading(false);
-    }
-  };
-
-  hydrateEntries();
-
-  return () => {
-    cancelled = true;
-  };
-}, [subSection, loadFinancialReport, setRevenueGrid, setExpenseGrid]);
-
-
-
+    return () => {
+      cancelled = true;
+    };
+  }, [subSection, loadFinancialReport, setRevenueGrid, setExpenseGrid]);
 
   // Load reviews from Firestore on mount
   useEffect(() => {
@@ -906,14 +905,17 @@ useEffect(() => {
 
           // Filter out empty items from Features array
           Features: Array.isArray(editedUnit.details?.specifications?.Features)
-            ? editedUnit.details.specifications.Features.filter(f => f && f.trim())
+            ? editedUnit.details.specifications.Features.filter(
+                (f) => f && f.trim(),
+              )
             : editedUnit.details?.specifications?.Features,
-          
+
           // Filter out empty items from Trunk array
           Trunk: Array.isArray(editedUnit.details?.specifications?.Trunk)
-            ? editedUnit.details.specifications.Trunk.filter(t => t && t.trim())
+            ? editedUnit.details.specifications.Trunk.filter(
+                (t) => t && t.trim(),
+              )
             : editedUnit.details?.specifications?.Trunk,
-
         },
       },
     };
@@ -921,44 +923,43 @@ useEffect(() => {
     const result = await updateUnitData(selectedUnitId, normalizedUnit);
 
     if (result.success) {
-    //   // Upload main image if changed
-    //   if (editedMainImageFile) {
-    //     const uploadResult = await updateUnitImage(
-    //       selectedUnitId,
-    //       "main",
-    //       editedMainImageFile,
-    //     );
-    //     if (uploadResult.success) {
-    //       setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
-    //     } else {
-    //       setAdminErrorMessage(
-    //         "Failed to upload main image: " + uploadResult.error,
-    //       );
-    //       setShowAdminError(true);
-    //     }
-    //   } else {
-    //     setMainImage(editedMainImage || mainImage); // Already object
-    //   }
+      //   // Upload main image if changed
+      //   if (editedMainImageFile) {
+      //     const uploadResult = await updateUnitImage(
+      //       selectedUnitId,
+      //       "main",
+      //       editedMainImageFile,
+      //     );
+      //     if (uploadResult.success) {
+      //       setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
+      //     } else {
+      //       setAdminErrorMessage(
+      //         "Failed to upload main image: " + uploadResult.error,
+      //       );
+      //       setShowAdminError(true);
+      //     }
+      //   } else {
+      //     setMainImage(editedMainImage || mainImage); // Already object
+      //   }
 
-    //   // Update gallery images
-    //   const galleryResult = await updateUnitGalleryImages(
-    //     selectedUnitId,
-    //     editedGalleryImages,
-    //     editedGalleryImageFiles,
-    //     galleryImages,
-    //     currentUnit.galleryIds,
-    //   );
-    //   if (galleryResult.success) {
-    //     setGalleryImages(galleryResult.newGalleryImages); // Now objects
-    //   } else {
-    //     setAdminErrorMessage(
-    //       "Failed to update gallery: " + galleryResult.error,
-    //     );
-    //     setShowAdminError(true);
-    //   }
+      //   // Update gallery images
+      //   const galleryResult = await updateUnitGalleryImages(
+      //     selectedUnitId,
+      //     editedGalleryImages,
+      //     editedGalleryImageFiles,
+      //     galleryImages,
+      //     currentUnit.galleryIds,
+      //   );
+      //   if (galleryResult.success) {
+      //     setGalleryImages(galleryResult.newGalleryImages); // Now objects
+      //   } else {
+      //     setAdminErrorMessage(
+      //       "Failed to update gallery: " + galleryResult.error,
+      //     );
+      //     setShowAdminError(true);
+      //   }
 
-
-          // Upload main image if changed
+      // Upload main image if changed
       if (editedMainImageFile) {
         const uploadResult = await updateUnitImage(
           selectedUnitId,
@@ -966,7 +967,10 @@ useEffect(() => {
           editedMainImageFile,
         );
         if (uploadResult.success) {
-          const imageData = { base64: uploadResult.base64, updatedAt: Date.now() };
+          const imageData = {
+            base64: uploadResult.base64,
+            updatedAt: Date.now(),
+          };
           setMainImage(imageData);
           // Update cache with new image
           await updateImageCache(`${selectedUnitId}_main`, imageData);
@@ -980,7 +984,7 @@ useEffect(() => {
         setMainImage(editedMainImage || mainImage); // Already object
       }
 
-            // Update gallery images
+      // Update gallery images
       const galleryResult = await updateUnitGalleryImages(
         selectedUnitId,
         editedGalleryImages,
@@ -1003,7 +1007,6 @@ useEffect(() => {
         );
         setShowAdminError(true);
       }
-
 
       setShowSavedSuccess(true);
       setIsEditing(false);
@@ -1069,9 +1072,7 @@ useEffect(() => {
         currentGalleryIndex,
       );
 
-
-
-            // if (result.success) {
+      // if (result.success) {
       //   const base64 = result.base64;
 
       //   if (currentImageType === "main") {
@@ -1089,7 +1090,7 @@ useEffect(() => {
       //   }
       // }
 
-            if (result.success) {
+      if (result.success) {
         const base64 = result.base64;
 
         if (currentImageType === "main") {
@@ -1107,11 +1108,12 @@ useEffect(() => {
           };
           setGalleryImages(updatedGallery);
           // Clear cache for this image
-          await clearImageCache(`${selectedUnitId}_gallery_${currentGalleryIndex}`);
+          await clearImageCache(
+            `${selectedUnitId}_gallery_${currentGalleryIndex}`,
+          );
         }
       }
     }
-
 
     // Reset file input to allow re-uploading the same file
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -1362,69 +1364,70 @@ useEffect(() => {
 
   // Fetch gallery images when unit is selected
 
-useEffect(() => {
-  let cancelled = false;
+  useEffect(() => {
+    let cancelled = false;
 
-  const loadGallery = async () => {
-    // Always stop spinner when editing or no selected unit
-    if (isEditing || !selectedUnitId) {
-      setGalleryImagesLoading(false);
-      if (!isEditing) setGalleryImages([]);
-      return;
-    }
-
-    // Normalize imported gallery IDs (defensive)
-    const rawIds = Array.isArray(currentUnit?.galleryIds) ? currentUnit.galleryIds : [];
-    const validIds = rawIds
-      .map((id) => (typeof id === "string" ? id.trim() : ""))
-      .filter(Boolean);
-
-    if (validIds.length === 0) {
-      setGalleryImages([]);
-      setGalleryImagesLoading(false);
-      return;
-    }
-
-    setGalleryImagesLoading(true);
-
-    try {
-      // use cache-first path to avoid long validation stalls in AdminSettings
-      const settled = await Promise.allSettled(
-        validIds.map((id) => fetchImageFromFirestore(id, true))
-      );
-
-      if (cancelled) return;
-
-      const loaded = settled
-        .map((r) => (r.status === "fulfilled" ? r.value : null))
-        .filter((img) => img && img.base64);
-
-      setGalleryImages(loaded);
-    } catch (error) {
-      if (!cancelled) {
-        setGalleryImages([]);
-      }
-    } finally {
-      if (!cancelled) {
+    const loadGallery = async () => {
+      // Always stop spinner when editing or no selected unit
+      if (isEditing || !selectedUnitId) {
         setGalleryImagesLoading(false);
+        if (!isEditing) setGalleryImages([]);
+        return;
       }
-    }
-  };
 
-  loadGallery();
+      // Normalize imported gallery IDs (defensive)
+      const rawIds = Array.isArray(currentUnit?.galleryIds)
+        ? currentUnit.galleryIds
+        : [];
+      const validIds = rawIds
+        .map((id) => (typeof id === "string" ? id.trim() : ""))
+        .filter(Boolean);
 
-  return () => {
-    cancelled = true;
-  };
-}, [
-  selectedUnitId,
-  isEditing,
-  imageUpdateTrigger,
-  currentUnit?.plateNo,
-  JSON.stringify(currentUnit?.galleryIds || []),
-  fetchImageFromFirestore,
-]);
+      if (validIds.length === 0) {
+        setGalleryImages([]);
+        setGalleryImagesLoading(false);
+        return;
+      }
 
+      setGalleryImagesLoading(true);
+
+      try {
+        // use cache-first path to avoid long validation stalls in AdminSettings
+        const settled = await Promise.allSettled(
+          validIds.map((id) => fetchImageFromFirestore(id, true)),
+        );
+
+        if (cancelled) return;
+
+        const loaded = settled
+          .map((r) => (r.status === "fulfilled" ? r.value : null))
+          .filter((img) => img && img.base64);
+
+        setGalleryImages(loaded);
+      } catch (error) {
+        if (!cancelled) {
+          setGalleryImages([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setGalleryImagesLoading(false);
+        }
+      }
+    };
+
+    loadGallery();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    selectedUnitId,
+    isEditing,
+    imageUpdateTrigger,
+    currentUnit?.plateNo,
+    JSON.stringify(currentUnit?.galleryIds || []),
+    fetchImageFromFirestore,
+  ]);
 
   // useEffect(() => {
   //   if (selectedUnitId && currentUnit?.galleryIds?.length > 0 && !isEditing) {
@@ -2170,37 +2173,34 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-
-
                   <tbody>
-
-  {entriesLoading ? (
-    <tr>
-      <td colSpan="3" style={{ padding: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            minHeight: "220px",
-          }}
-        >
-          <div
-            className="spinner"
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "4px solid #ccc",
-              borderTop: "4px solid #28a745",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
-      </td>
-    </tr>
-  ) : mopTypes.length > 0 ? (
+                    {entriesLoading ? (
+                      <tr>
+                        <td colSpan="3" style={{ padding: 0 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                              minHeight: "220px",
+                            }}
+                          >
+                            <div
+                              className="spinner"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                border: "4px solid #ccc",
+                                borderTop: "4px solid #28a745",
+                                borderRadius: "50%",
+                                animation: "spin 1s linear infinite",
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : mopTypes.length > 0 ? (
                       mopTypes.map((type) => (
                         <tr
                           key={type}
@@ -2229,13 +2229,7 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
-
-
-
                   </tbody>
-
-
-
                 </table>
               )}
 
@@ -2249,37 +2243,34 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-
-
                   <tbody>
-
-  {entriesLoading ? (
-    <tr>
-      <td colSpan="3" style={{ padding: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            minHeight: "220px",
-          }}
-        >
-          <div
-            className="spinner"
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "4px solid #ccc",
-              borderTop: "4px solid #28a745",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
-      </td>
-    </tr>
-  ) : popTypesRevenue.length > 0 ? (
+                    {entriesLoading ? (
+                      <tr>
+                        <td colSpan="3" style={{ padding: 0 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                              minHeight: "220px",
+                            }}
+                          >
+                            <div
+                              className="spinner"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                border: "4px solid #ccc",
+                                borderTop: "4px solid #28a745",
+                                borderRadius: "50%",
+                                animation: "spin 1s linear infinite",
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : popTypesRevenue.length > 0 ? (
                       popTypesRevenue.map((type) => (
                         <tr
                           key={type}
@@ -2308,12 +2299,7 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
-
-
                   </tbody>
-
-
-
                 </table>
               )}
 
@@ -2327,37 +2313,34 @@ useEffect(() => {
                     </tr>
                   </thead>
 
-
-
                   <tbody>
-
-  {entriesLoading ? (
-    <tr>
-      <td colSpan="3" style={{ padding: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            minHeight: "220px",
-          }}
-        >
-          <div
-            className="spinner"
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "4px solid #ccc",
-              borderTop: "4px solid #28a745",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
-      </td>
-    </tr>
-  ) : popTypesExpense.length > 0 ? (
+                    {entriesLoading ? (
+                      <tr>
+                        <td colSpan="3" style={{ padding: 0 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                              minHeight: "220px",
+                            }}
+                          >
+                            <div
+                              className="spinner"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                border: "4px solid #ccc",
+                                borderTop: "4px solid #28a745",
+                                borderRadius: "50%",
+                                animation: "spin 1s linear infinite",
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : popTypesExpense.length > 0 ? (
                       popTypesExpense.map((type) => (
                         <tr
                           key={type}
@@ -2386,13 +2369,7 @@ useEffect(() => {
                         </td>
                       </tr>
                     )}
-
-
-
                   </tbody>
-
-
-
                 </table>
               )}
 
@@ -2530,8 +2507,10 @@ useEffect(() => {
             <div className="content-page">
               <div className="content-page-header">
                 <div className="content-title-wrapper">
-                <h3>Reviews</h3>
-                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                  <h3>Reviews</h3>
+                  <span className="dimension-notice">
+                    Recommended Dimensions: 2873 x 1690
+                  </span>
                 </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
@@ -2685,8 +2664,10 @@ useEffect(() => {
             <div className="content-page">
               <div className="content-page-header">
                 <div className="content-title-wrapper">
-                <h3>Landing Page</h3>
-                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                  <h3>Landing Page</h3>
+                  <span className="dimension-notice">
+                    Recommended Dimensions: 2873 x 1690
+                  </span>
                 </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
@@ -2816,8 +2797,10 @@ useEffect(() => {
             <div className="content-page">
               <div className="content-page-header">
                 <div className="content-title-wrapper">
-                <h3>Fleet Page</h3>
-                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                  <h3>Fleet Page</h3>
+                  <span className="dimension-notice">
+                    Recommended Dimensions: 2873 x 1690
+                  </span>
                 </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
@@ -2919,8 +2902,10 @@ useEffect(() => {
             <div className="content-page">
               <div className="content-page-header">
                 <div className="content-title-wrapper">
-                <h3>About & Contact Pages</h3>
-                <span className="dimension-notice">Recommended Dimensions: 2873 x 1690</span>
+                  <h3>About & Contact Pages</h3>
+                  <span className="dimension-notice">
+                    Recommended Dimensions: 2873 x 1690
+                  </span>
                 </div>
                 {isEditingContent ? (
                   <div className="edit-buttons">
@@ -3117,7 +3102,7 @@ useEffect(() => {
 
                   <div className="unit-info-column">
                     <div className="unit-gallery-row">
-                                           {galleryImagesLoading ? (
+                      {galleryImagesLoading ? (
                         <div
                           style={{
                             display: "flex",
@@ -3146,122 +3131,129 @@ useEffect(() => {
                         </div>
                       ) : (
                         (() => {
-                        const currentGallery = isEditing
-                          ? editedGalleryImages
-                          : galleryImages;
-                        const displayGallery = [...currentGallery];
+                          const currentGallery = isEditing
+                            ? editedGalleryImages
+                            : galleryImages;
+                          const displayGallery = [...currentGallery];
 
-                        // Always add one placeholder at the end for new uploads
-                        displayGallery.push(null);
+                          // Always add one placeholder at the end for new uploads
+                          displayGallery.push(null);
 
-                        return displayGallery.map((img, index) => {
-                          if (img) {
-                            // Existing image: Show with replace/delete buttons (only in edit mode) and overlay for broken images
-                            return (
-                              <div key={index} className="gallery-item">
-                                <img
-                                  src={img.base64}
-                                  alt={`Gallery ${index}`}
-                                  className="unit-gallery-image"
-                                  key={img.updatedAt}
-                                  onError={(e) => {
-                                    // Hide the broken image and show the overlay with plus sign
-                                    e.target.style.display = "none";
-                                    const overlay = e.target.nextElementSibling;
-                                    if (overlay) overlay.style.display = "flex";
-                                  }}
-                                />
-                                {/* Always-present overlay for broken images */}
-                                <div
-                                  className="broken-image-overlay"
-                                  style={{
-                                    display: "none",
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    background: "rgba(0,0,0,0.5)",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    zIndex: 1,
-                                  }}
-                                >
-                                  <span
-                                    className="plus-sign"
-                                    style={{ color: "white", fontSize: "2rem" }}
+                          return displayGallery.map((img, index) => {
+                            if (img) {
+                              // Existing image: Show with replace/delete buttons (only in edit mode) and overlay for broken images
+                              return (
+                                <div key={index} className="gallery-item">
+                                  <img
+                                    src={img.base64}
+                                    alt={`Gallery ${index}`}
+                                    className="unit-gallery-image"
+                                    key={img.updatedAt}
+                                    onError={(e) => {
+                                      // Hide the broken image and show the overlay with plus sign
+                                      e.target.style.display = "none";
+                                      const overlay =
+                                        e.target.nextElementSibling;
+                                      if (overlay)
+                                        overlay.style.display = "flex";
+                                    }}
+                                  />
+                                  {/* Always-present overlay for broken images */}
+                                  <div
+                                    className="broken-image-overlay"
+                                    style={{
+                                      display: "none",
+                                      position: "absolute",
+                                      top: 0,
+                                      left: 0,
+                                      width: "100%",
+                                      height: "100%",
+                                      background: "rgba(0,0,0,0.5)",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      zIndex: 1,
+                                    }}
                                   >
-                                    +
-                                  </span>
-                                  <span className="recommended-dimensions">
-                                    Recommended Dimensions:{" "}
-                                    <strong>2873 x 1690</strong>
-                                  </span>
-                                </div>
-                                {isEditing && (
-                                  <div className="gallery-buttons">
-                                    <button
-                                      className="replace-btn"
-                                      onClick={() => {
-                                        setCurrentImageType("gallery");
-                                        setCurrentGalleryIndex(index);
-                                        fileInputRef.current.click();
+                                    <span
+                                      className="plus-sign"
+                                      style={{
+                                        color: "white",
+                                        fontSize: "2rem",
                                       }}
-                                      title="Replace Image"
                                     >
-                                      <MdEdit size={18} />
-                                    </button>
-                                    <button
-                                      className="delete-btn"
-                                      onClick={() => {
-                                        const updatedGallery = [
-                                          ...editedGalleryImages,
-                                        ];
-                                        updatedGallery.splice(index, 1);
-                                        setEditedGalleryImages(updatedGallery);
-                                        const updatedFiles = [
-                                          ...editedGalleryImageFiles,
-                                        ];
-                                        updatedFiles.splice(index, 1);
-                                        setEditedGalleryImageFiles(
-                                          updatedFiles,
-                                        );
-                                      }}
-                                      title="Delete Image"
-                                    >
-                                      <MdDelete size={18} />
-                                    </button>
+                                      +
+                                    </span>
+                                    <span className="recommended-dimensions">
+                                      Recommended Dimensions:{" "}
+                                      <strong>2873 x 1690</strong>
+                                    </span>
                                   </div>
-                                )}
-                              </div>
-                            );
-                          } else {
-                            // Placeholder for uploading new images
-                            return (
-                              <div key={index} className="image-item">
-                                <div
-                                  className="unit-gallery-placeholder"
-                                  onClick={() => {
-                                    if (!isEditing) {
-                                      setShowEditConfirmDialog(true);
-                                    } else {
-                                      setCurrentImageType("gallery");
-                                      setCurrentGalleryIndex(index); // Index for adding new (will be >= current length)
-                                      fileInputRef.current.click();
-                                    }
-                                  }}
-                                >
-                                  <span className="plus-sign">+</span>
-
-                                  <span className="recommended-dimensions">
-                                    Recommended Dimensions:{" "}
-                                    <strong>2873 x 1690</strong>
-                                  </span>
+                                  {isEditing && (
+                                    <div className="gallery-buttons">
+                                      <button
+                                        className="replace-btn"
+                                        onClick={() => {
+                                          setCurrentImageType("gallery");
+                                          setCurrentGalleryIndex(index);
+                                          fileInputRef.current.click();
+                                        }}
+                                        title="Replace Image"
+                                      >
+                                        <MdEdit size={18} />
+                                      </button>
+                                      <button
+                                        className="delete-btn"
+                                        onClick={() => {
+                                          const updatedGallery = [
+                                            ...editedGalleryImages,
+                                          ];
+                                          updatedGallery.splice(index, 1);
+                                          setEditedGalleryImages(
+                                            updatedGallery,
+                                          );
+                                          const updatedFiles = [
+                                            ...editedGalleryImageFiles,
+                                          ];
+                                          updatedFiles.splice(index, 1);
+                                          setEditedGalleryImageFiles(
+                                            updatedFiles,
+                                          );
+                                        }}
+                                        title="Delete Image"
+                                      >
+                                        <MdDelete size={18} />
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            );
-                          }
-                        });
+                              );
+                            } else {
+                              // Placeholder for uploading new images
+                              return (
+                                <div key={index} className="image-item">
+                                  <div
+                                    className="unit-gallery-placeholder"
+                                    onClick={() => {
+                                      if (!isEditing) {
+                                        setShowEditConfirmDialog(true);
+                                      } else {
+                                        setCurrentImageType("gallery");
+                                        setCurrentGalleryIndex(index); // Index for adding new (will be >= current length)
+                                        fileInputRef.current.click();
+                                      }
+                                    }}
+                                  >
+                                    <span className="plus-sign">+</span>
+
+                                    <span className="recommended-dimensions">
+                                      Recommended Dimensions:{" "}
+                                      <strong>2873 x 1690</strong>
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          });
                         })()
                       )}
                     </div>
@@ -3355,93 +3347,99 @@ useEffect(() => {
                   <div className="specs-grid">
                     <div className="spec-item">
                       <label>Transmission</label>
-{isEditing ? (
-  <select
-    value={currentUnit.details?.specifications?.Transmission || ""}
-    onChange={(e) =>
-      setEditedUnit({
-        ...editedUnit,
-        details: {
-          ...editedUnit.details,
-          specifications: {
-            ...editedUnit.details.specifications,
-            Transmission: e.target.value,
-          },
-        },
-      })
-    }
-    className="spec-input"
-  >
-    <option value="Automatic">Automatic</option>
-    <option value="Manual">Manual</option>
-  </select>
-) : (
-  <span>{currentUnit.details?.specifications?.Transmission}</span>
-)}
-
+                      {isEditing ? (
+                        <select
+                          value={
+                            currentUnit.details?.specifications?.Transmission ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            setEditedUnit({
+                              ...editedUnit,
+                              details: {
+                                ...editedUnit.details,
+                                specifications: {
+                                  ...editedUnit.details.specifications,
+                                  Transmission: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="spec-input"
+                        >
+                          <option value="Automatic">Automatic</option>
+                          <option value="Manual">Manual</option>
+                        </select>
+                      ) : (
+                        <span>
+                          {currentUnit.details?.specifications?.Transmission}
+                        </span>
+                      )}
                     </div>
 
                     <div className="spec-item">
                       <label>Fuel</label>
-{isEditing ? (
-  <select
-    value={currentUnit.details?.specifications?.Fuel || ""}
-    onChange={(e) =>
-      setEditedUnit({
-        ...editedUnit,
-        details: {
-          ...editedUnit.details,
-          specifications: {
-            ...editedUnit.details.specifications,
-            Fuel: e.target.value,
-          },
-        },
-      })
-    }
-    className="spec-input"
-  >
-    <option value="Unleaded Gasoline">Unleaded Gasoline</option>
-    <option value="Diesel">Diesel</option>
-    <option value="Electricity">Electricity</option>
-    <option value="Hybrid">Hybrid</option>
-  </select>
-) : (
-  <span>{currentUnit.details?.specifications?.Fuel}</span>
-)}
-
+                      {isEditing ? (
+                        <select
+                          value={
+                            currentUnit.details?.specifications?.Fuel || ""
+                          }
+                          onChange={(e) =>
+                            setEditedUnit({
+                              ...editedUnit,
+                              details: {
+                                ...editedUnit.details,
+                                specifications: {
+                                  ...editedUnit.details.specifications,
+                                  Fuel: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="spec-input"
+                        >
+                          <option value="Unleaded Gasoline">
+                            Unleaded Gasoline
+                          </option>
+                          <option value="Diesel">Diesel</option>
+                          <option value="Electricity">Electricity</option>
+                          <option value="Hybrid">Hybrid</option>
+                        </select>
+                      ) : (
+                        <span>{currentUnit.details?.specifications?.Fuel}</span>
+                      )}
                     </div>
 
                     <div className="spec-item">
                       <label>Car Type</label>
-{isEditing ? (
-  <select
-    value={currentUnit.carType || ""}
-    onChange={(e) => {
-      const value = e.target.value;
-      setEditedUnit({
-        ...editedUnit,
-        carType: value,
-        details: {
-          ...editedUnit.details,
-          specifications: {
-            ...editedUnit.details?.specifications,
-            Type: value, // Sync to details.specifications.Type
-          },
-        },
-      });
-    }}
-    className="spec-input"
-  >
-    <option value="SEDAN">SEDAN</option>
-    <option value="SUV">SUV</option>
-    <option value="MPV">MPV</option>
-    <option value="VAN">VAN</option>
-    <option value="PICKUP">PICKUP</option>
-  </select>
-) : (
-  <span>{currentUnit.carType}</span>
-)}
-
+                      {isEditing ? (
+                        <select
+                          value={currentUnit.carType || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setEditedUnit({
+                              ...editedUnit,
+                              carType: value,
+                              details: {
+                                ...editedUnit.details,
+                                specifications: {
+                                  ...editedUnit.details?.specifications,
+                                  Type: value, // Sync to details.specifications.Type
+                                },
+                              },
+                            });
+                          }}
+                          className="spec-input"
+                        >
+                          <option value="SEDAN">SEDAN</option>
+                          <option value="SUV">SUV</option>
+                          <option value="MPV">MPV</option>
+                          <option value="VAN">VAN</option>
+                          <option value="PICKUP">PICKUP</option>
+                        </select>
+                      ) : (
+                        <span>{currentUnit.carType}</span>
+                      )}
                     </div>
 
                     <div className="spec-item">
@@ -3636,15 +3634,21 @@ useEffect(() => {
                     </div>
                   </div>
 
-
-                                    <div className="features-row">
+                  <div className="features-row">
                     <div className="description-row">
                       <label>Features</label>
                       {isEditing ? (
                         <div className="bullet-input-container">
-                          {(Array.isArray(currentUnit.details?.specifications?.Features) 
-                            ? currentUnit.details.specifications.Features 
-                            : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim())
+                          {(Array.isArray(
+                            currentUnit.details?.specifications?.Features,
+                          )
+                            ? currentUnit.details.specifications.Features
+                            : (
+                                currentUnit.details?.specifications?.Features ||
+                                ""
+                              )
+                                .split("\n")
+                                .filter((f) => f.trim())
                           ).map((feature, index, arr) => (
                             <div key={index} className="bullet-input-row">
                               <span className="bullet-dot">•</span>
@@ -3652,9 +3656,20 @@ useEffect(() => {
                                 type="text"
                                 value={feature}
                                 onChange={(e) => {
-                                  const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
-                                    ? [...currentUnit.details.specifications.Features]
-                                    : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim());
+                                  const newFeatures = Array.isArray(
+                                    currentUnit.details?.specifications
+                                      ?.Features,
+                                  )
+                                    ? [
+                                        ...currentUnit.details.specifications
+                                          .Features,
+                                      ]
+                                    : (
+                                        currentUnit.details?.specifications
+                                          ?.Features || ""
+                                      )
+                                        .split("\n")
+                                        .filter((f) => f.trim());
                                   newFeatures[index] = e.target.value;
                                   setEditedUnit({
                                     ...editedUnit,
@@ -3675,9 +3690,20 @@ useEffect(() => {
                                   type="button"
                                   className="remove-bullet-btn"
                                   onClick={() => {
-                                    const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
-                                      ? [...currentUnit.details.specifications.Features]
-                                      : (currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim());
+                                    const newFeatures = Array.isArray(
+                                      currentUnit.details?.specifications
+                                        ?.Features,
+                                    )
+                                      ? [
+                                          ...currentUnit.details.specifications
+                                            .Features,
+                                        ]
+                                      : (
+                                          currentUnit.details?.specifications
+                                            ?.Features || ""
+                                        )
+                                          .split("\n")
+                                          .filter((f) => f.trim());
                                     newFeatures.splice(index, 1);
                                     setEditedUnit({
                                       ...editedUnit,
@@ -3700,9 +3726,23 @@ useEffect(() => {
                             type="button"
                             className="add-bullet-btn"
                             onClick={() => {
-                              const newFeatures = Array.isArray(currentUnit.details?.specifications?.Features)
-                                ? [...currentUnit.details.specifications.Features, ""]
-                                : [...(currentUnit.details?.specifications?.Features || "").split("\n").filter(f => f.trim()), ""];
+                              const newFeatures = Array.isArray(
+                                currentUnit.details?.specifications?.Features,
+                              )
+                                ? [
+                                    ...currentUnit.details.specifications
+                                      .Features,
+                                    "",
+                                  ]
+                                : [
+                                    ...(
+                                      currentUnit.details?.specifications
+                                        ?.Features || ""
+                                    )
+                                      .split("\n")
+                                      .filter((f) => f.trim()),
+                                    "",
+                                  ];
                               setEditedUnit({
                                 ...editedUnit,
                                 details: {
@@ -3718,28 +3758,43 @@ useEffect(() => {
                             + Add Feature
                           </button>
                         </div>
-                                            ) : (
+                      ) : (
                         <div className="description-text bullet-display">
-                          {Array.isArray(currentUnit.details?.specifications?.Features) 
-                            ? currentUnit.details.specifications.Features.map((f, i) => (
-                                <div key={i} className="bullet-item">• {f}</div>
-                              ))
-                            : (currentUnit.details?.specifications?.Features || "").split(",").map((f, i) => (
-                                <div key={i} className="bullet-item">• {f.trim()}</div>
-                              ))
-                          }
+                          {Array.isArray(
+                            currentUnit.details?.specifications?.Features,
+                          )
+                            ? currentUnit.details.specifications.Features.map(
+                                (f, i) => (
+                                  <div key={i} className="bullet-item">
+                                    • {f}
+                                  </div>
+                                ),
+                              )
+                            : (
+                                currentUnit.details?.specifications?.Features ||
+                                ""
+                              )
+                                .split(",")
+                                .map((f, i) => (
+                                  <div key={i} className="bullet-item">
+                                    • {f.trim()}
+                                  </div>
+                                ))}
                         </div>
                       )}
-
                     </div>
 
                     <div className="description-row">
                       <label>Trunk</label>
                       {isEditing ? (
                         <div className="bullet-input-container">
-                          {(Array.isArray(currentUnit.details?.specifications?.Trunk) 
-                            ? currentUnit.details.specifications.Trunk 
-                            : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim())
+                          {(Array.isArray(
+                            currentUnit.details?.specifications?.Trunk,
+                          )
+                            ? currentUnit.details.specifications.Trunk
+                            : (currentUnit.details?.specifications?.Trunk || "")
+                                .split("\n")
+                                .filter((t) => t.trim())
                           ).map((item, index, arr) => (
                             <div key={index} className="bullet-input-row">
                               <span className="bullet-dot">•</span>
@@ -3747,9 +3802,19 @@ useEffect(() => {
                                 type="text"
                                 value={item}
                                 onChange={(e) => {
-                                  const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
-                                    ? [...currentUnit.details.specifications.Trunk]
-                                    : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim());
+                                  const newTrunk = Array.isArray(
+                                    currentUnit.details?.specifications?.Trunk,
+                                  )
+                                    ? [
+                                        ...currentUnit.details.specifications
+                                          .Trunk,
+                                      ]
+                                    : (
+                                        currentUnit.details?.specifications
+                                          ?.Trunk || ""
+                                      )
+                                        .split("\n")
+                                        .filter((t) => t.trim());
                                   newTrunk[index] = e.target.value;
                                   setEditedUnit({
                                     ...editedUnit,
@@ -3770,9 +3835,20 @@ useEffect(() => {
                                   type="button"
                                   className="remove-bullet-btn"
                                   onClick={() => {
-                                    const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
-                                      ? [...currentUnit.details.specifications.Trunk]
-                                      : (currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim());
+                                    const newTrunk = Array.isArray(
+                                      currentUnit.details?.specifications
+                                        ?.Trunk,
+                                    )
+                                      ? [
+                                          ...currentUnit.details.specifications
+                                            .Trunk,
+                                        ]
+                                      : (
+                                          currentUnit.details?.specifications
+                                            ?.Trunk || ""
+                                        )
+                                          .split("\n")
+                                          .filter((t) => t.trim());
                                     newTrunk.splice(index, 1);
                                     setEditedUnit({
                                       ...editedUnit,
@@ -3795,9 +3871,22 @@ useEffect(() => {
                             type="button"
                             className="add-bullet-btn"
                             onClick={() => {
-                              const newTrunk = Array.isArray(currentUnit.details?.specifications?.Trunk)
-                                ? [...currentUnit.details.specifications.Trunk, ""]
-                                : [...(currentUnit.details?.specifications?.Trunk || "").split("\n").filter(t => t.trim()), ""];
+                              const newTrunk = Array.isArray(
+                                currentUnit.details?.specifications?.Trunk,
+                              )
+                                ? [
+                                    ...currentUnit.details.specifications.Trunk,
+                                    "",
+                                  ]
+                                : [
+                                    ...(
+                                      currentUnit.details?.specifications
+                                        ?.Trunk || ""
+                                    )
+                                      .split("\n")
+                                      .filter((t) => t.trim()),
+                                    "",
+                                  ];
                               setEditedUnit({
                                 ...editedUnit,
                                 details: {
@@ -3813,22 +3902,29 @@ useEffect(() => {
                             + Add Trunk Item
                           </button>
                         </div>
-                                            ) : (
+                      ) : (
                         <div className="description-text bullet-display">
-                          {Array.isArray(currentUnit.details?.specifications?.Trunk) 
-                            ? currentUnit.details.specifications.Trunk.map((t, i) => (
-                                <div key={i} className="bullet-item">• {t}</div>
-                              ))
-                            : (currentUnit.details?.specifications?.Trunk || "").split(",").map((t, i) => (
-                                <div key={i} className="bullet-item">• {t.trim()}</div>
-                              ))
-                          }
+                          {Array.isArray(
+                            currentUnit.details?.specifications?.Trunk,
+                          )
+                            ? currentUnit.details.specifications.Trunk.map(
+                                (t, i) => (
+                                  <div key={i} className="bullet-item">
+                                    • {t}
+                                  </div>
+                                ),
+                              )
+                            : (currentUnit.details?.specifications?.Trunk || "")
+                                .split(",")
+                                .map((t, i) => (
+                                  <div key={i} className="bullet-item">
+                                    • {t.trim()}
+                                  </div>
+                                ))}
                         </div>
                       )}
-
                     </div>
                   </div>
-
 
                   {/* <div className="features-row">
                     <div className="description-row">
