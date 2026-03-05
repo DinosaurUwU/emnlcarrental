@@ -205,6 +205,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     contact: ["/assets/images/default.png"],
   });
 
+  
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
