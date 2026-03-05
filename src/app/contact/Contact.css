@@ -176,6 +176,15 @@
   margin: 0;
 }
 
+.country-dropdown::-webkit-scrollbar {
+  width: 5px;
+}
+
+.country-dropdown::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
 .country-dropdown li {
   padding: 6px 8px;
   cursor: pointer;
@@ -186,6 +195,49 @@
 .country-dropdown li:hover {
   background-color: #f0f0f0;
   color: var(--accent-color);
+}
+
+.contact-or-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 14px 0 10px;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.contact-or-separator::before,
+.contact-or-separator::after {
+  content: "";
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: #cfd8dc;
+}
+
+.call-us-btn {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid #198754;
+  background: #ffffff;
+  color: #198754;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.5s ease;
+}
+
+.call-us-btn:hover {
+  background: #198754;
+  box-shadow: 0 0 10px #198754;
+  color: #ffffff;
 }
 
 @media (max-width: 780px) {

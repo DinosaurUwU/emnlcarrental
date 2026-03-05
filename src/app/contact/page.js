@@ -268,6 +268,34 @@ function Contact({ openBooking }) {
 
   const [contactImageSrc, setContactImageSrc] = useState(contactCachedSrc);
 
+  const [contactActionOverlay, setContactActionOverlay] = useState({
+    isVisible: false,
+    type: "success", // "success" | "warning"
+    message: "",
+  });
+  const [hideContactActionAnimation, setHideContactActionAnimation] =
+    useState(false);
+
+  const showContactAction = ({
+    message,
+    type = "success",
+    duration = 5000,
+  }) => {
+    setHideContactActionAnimation(false);
+    setContactActionOverlay({
+      isVisible: true,
+      type,
+      message,
+    });
+
+    setTimeout(() => {
+      setHideContactActionAnimation(true);
+      setTimeout(() => {
+        setContactActionOverlay((prev) => ({ ...prev, isVisible: false }));
+      }, 400);
+    }, duration);
+  };
+
   // instant from cache
   useEffect(() => {
     setContactImageSrc(contactCachedSrc);
@@ -363,158 +391,62 @@ function Contact({ openBooking }) {
   }, []);
 
   //SUBMIT
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!adminUid) {
-    console.error("Admin UID not available");
-    return;
-  }
+    if (!adminUid) {
+      console.error("Admin UID not available");
+      return;
+    }
 
-  const fullName = `${firstName} ${middleName} ${lastName}`
-    .trim()
-    .replace(/\s+/g, " ");
-  const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
+    const fullName = `${firstName} ${middleName} ${lastName}`
+      .trim()
+      .replace(/\s+/g, " ");
+    const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
 
-  let result = null;
+    let result = null;
 
-  if (user?.uid) {
-    result = await sendMessage({
-      name: fullName,
-      email,
-      phone: fullPhone,
-      message,
-      senderUid: user.uid,
-      recipientUid: adminUid,
-      isAdminSender: false,
-      recipientName: adminName,
-      recipientEmail: adminEmail,
-      recipientPhone: adminContact,
-      sourcePage: "contact",
-      sourceLabel: "Contact Page",
+    if (user?.uid) {
+      result = await sendMessage({
+        name: fullName,
+        email,
+        phone: fullPhone,
+        message,
+        senderUid: user.uid,
+        recipientUid: adminUid,
+        isAdminSender: false,
+        recipientName: adminName,
+        recipientEmail: adminEmail,
+        recipientPhone: adminContact,
+        sourcePage: "contact",
+        sourceLabel: "Contact Page",
+      });
+    } else {
+      result = await sendGuestContactMessage({
+        name: fullName,
+        email,
+        phone: fullPhone,
+        message,
+        recipientUid: adminUid,
+        recipientName: adminName,
+        recipientEmail: adminEmail,
+        recipientPhone: adminContact,
+      });
+    }
+
+    showContactAction({
+      message: result?.error || "Failed to send message.",
+      type: "warning",
     });
-  } else {
-    result = await sendGuestContactMessage({
-      name: fullName,
-      email,
-      phone: fullPhone,
-      message,
-      recipientUid: adminUid,
-      recipientName: adminName,
-      recipientEmail: adminEmail,
-      recipientPhone: adminContact,
+
+    setMessage("");
+    setContactSuccessMessage("Message sent successfully!");
+    setShowContactSuccess(true);
+    showContactAction({
+      message: "Message sent successfully!",
+      type: "success",
     });
-  }
-
-  if (!result?.success) {
-    console.error(result?.error || "Failed to send message.");
-    return;
-  }
-
-setMessage("");
-setContactSuccessMessage("Message sent successfully!");
-setShowContactSuccess(true);
-
-showActionOverlay({
-  message: "Message sent successfully!",
-  type: "success",
-});
-};
-
-
-
-  
-// const handleSubmit = async (e) => {
-//   e.preventDefault();
-
-//   if (!adminUid) {
-//     console.error("Admin UID not available");
-//     return;
-//   }
-
-//   const fullName = `${firstName} ${middleName} ${lastName}`
-//     .trim()
-//     .replace(/\s+/g, " ");
-
-//   const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
-
-//   // Authenticated user -> in-app message + conversation
-//   if (user?.uid) {
-//     const contactInfo = {
-//       name: fullName,
-//       email,
-//       phone: fullPhone,
-//       message,
-//       senderUid: user.uid,
-//       recipientUid: adminUid,
-//       isAdminSender: false,
-//       recipientName: adminName,
-//       recipientEmail: adminEmail,
-//       recipientPhone: adminContact,
-//       sourcePage: "contact",
-//       sourceLabel: "Contact Page",
-//     };
-
-//     const result = await sendMessage(contactInfo);
-
-//     if (!result?.success) {
-//       console.error(result?.error || "Failed to send message");
-//       return;
-//     }
-//   } else {
-//     // Guest user -> email fallback only (no senderUid, no in-app thread)
-//     await sendEmail({
-//       toName: adminName || "Admin",
-//       toEmail: adminEmail,
-//       subject: `Guest Contact Form - ${fullName || "Unknown"}`,
-//       message: `
-// Name: ${fullName}
-// Email: ${email}
-// Phone: ${fullPhone}
-
-// Message:
-// ${message}
-//       `.trim(),
-//     });
-//   }
-
-//   setMessage("");
-//   setContactSuccessMessage("Message sent successfully!");
-//   setShowContactSuccess(true);
-// };
-
-
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   if (!adminUid) {
-  //     console.error("Admin UID not available");
-  //     return;
-  //   }
-
-  //   const contactInfo = {
-  //     name: `${firstName} ${middleName} ${lastName}`
-  //       .trim()
-  //       .replace(/\s+/g, " "),
-  //     email,
-  //     phone: `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`,
-  //     message,
-  //     senderUid: user?.uid,
-  //     recipientUid: adminUid,
-  //     isAdminSender: false,
-  //     recipientName: adminName,
-  //     recipientEmail: adminEmail,
-  //     recipientPhone: adminContact,
-  //     sourcePage: "contact",
-  //     sourceLabel: "Contact Page",
-  //   };
-
-  //   sendMessage(contactInfo);
-  //   setMessage("");
-  //   setContactSuccessMessage("Message sent successfully!");
-  //   setShowContactSuccess(true);
-  // };
+  };
 
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()),
@@ -552,7 +484,7 @@ showActionOverlay({
         <div className="form-section">
           <h2 className="title">Fill Up Form</h2>
           <form className="contact-form" onSubmit={handleSubmit}>
-            <label htmlFor="surname">Surname:</label>
+            <label htmlFor="surname">Surname</label>
             <input
               type="text"
               id="surname"
@@ -562,7 +494,7 @@ showActionOverlay({
               required
             />
 
-            <label htmlFor="first_name">First Name:</label>
+            <label htmlFor="first_name">First Name</label>
             <input
               type="text"
               id="first_name"
@@ -572,7 +504,7 @@ showActionOverlay({
               required
             />
 
-            <label htmlFor="middle_name">Middle Name:</label>
+            <label htmlFor="middle_name">Middle Name</label>
             <input
               type="text"
               id="middle_name"
@@ -581,7 +513,7 @@ showActionOverlay({
               onChange={(e) => setMiddleName(e.target.value)}
             />
 
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
@@ -591,7 +523,7 @@ showActionOverlay({
               required
             />
 
-            <label htmlFor="phone">Phone Number:</label>
+            <label htmlFor="phone">Phone Number</label>
             <div className="phone-number-container">
               <div className="flag-dropdown">
                 <img
@@ -604,26 +536,32 @@ showActionOverlay({
                   <input
                     type="text"
                     placeholder="Search country"
-                    value={countrySearch}
-                    onFocus={() => setShowDropdown(true)}
+                    value={
+                      countrySearch ||
+                      `${selectedCountry?.name || ""} ${selectedCountry?.dialCode || ""}`.trim()
+                    }
+                    onFocus={() => {
+                      setShowDropdown(true);
+                      setCountrySearch("");
+                    }}
                     onChange={(e) => setCountrySearch(e.target.value)}
                     className="country-search-input"
                   />
 
                   {showDropdown && (
                     <ul className="country-dropdown">
-                      {filteredCountries.map((country) => (
+                      {filteredCountries.map((country, index) => (
                         <li
-                          key={country.code}
+                          key={`${country.code || "xx"}-${country.dialCode || "000"}-${country.name || "country"}-${index}`}
                           onClick={() => {
                             setSelectedCountry(country);
-                            setCountrySearch(
-                              `${country.name} ${country.dialCode}`,
-                            );
                             setShowDropdown(false);
+                            setCountrySearch("");
                           }}
                         >
-                          {country.name} ({country.dialCode})
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                          <span>{country.dialCode}</span>
                         </li>
                       ))}
                     </ul>
@@ -640,7 +578,7 @@ showActionOverlay({
               />
             </div>
 
-            <label htmlFor="message">Message:</label>
+            <label htmlFor="message">Message</label>
             <textarea
               id="message"
               placeholder="Enter Message..."
@@ -651,6 +589,16 @@ showActionOverlay({
             ></textarea>
 
             <button type="submit">Send Message</button>
+            <div className="contact-or-separator">
+              <span>or</span>
+            </div>
+
+            <a
+              href={`tel:${(adminContact || "").replace(/\s+/g, "") || "+639754778178"}`}
+              className="call-us-btn"
+            >
+              Call Us
+            </a>
           </form>
         </div>
       </div>
@@ -671,6 +619,45 @@ showActionOverlay({
               OK
             </button>
           </div>
+        </div>
+      )}
+
+      {contactActionOverlay.isVisible && (
+        <div
+          className={`${
+            contactActionOverlay.type === "warning"
+              ? "date-warning-overlay"
+              : "sent-ongoing-overlay"
+          } ${hideContactActionAnimation ? "hide" : ""}`}
+        >
+          <button
+            className={
+              contactActionOverlay.type === "warning"
+                ? "close-warning"
+                : "close-sent-ongoing"
+            }
+            onClick={() => {
+              setHideContactActionAnimation(true);
+              setTimeout(
+                () =>
+                  setContactActionOverlay((prev) => ({
+                    ...prev,
+                    isVisible: false,
+                  })),
+                400,
+              );
+            }}
+          >
+            ✖
+          </button>
+          <span className="warning-text">{contactActionOverlay.message}</span>
+          <div
+            className={
+              contactActionOverlay.type === "warning"
+                ? "progress-bar"
+                : "sent-ongoing-progress-bar"
+            }
+          ></div>
         </div>
       )}
 
