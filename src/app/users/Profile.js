@@ -50,7 +50,6 @@ const Profile = ({ openBooking }) => {
     setActionOverlay,
   } = useUser();
 
-  
   const [showProfileError, setShowProfileError] = useState(false);
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
 
@@ -1216,15 +1215,20 @@ const Profile = ({ openBooking }) => {
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
-                  <div className="confirm-row">
-                    <strong className="confirm-label">Rejection Reason:</strong>
-                    <span
-                      className="confirm-value"
-                      style={{ color: "#dc3545" }}
-                    >
-                      {selectedBooking.rejectionReason || "None"}
-                    </span>
-                  </div>
+{String(selectedBooking?.status || "").toLowerCase() ===
+                    "rejected" && (
+                    <div className="confirm-row">
+                      <strong className="confirm-label">
+                        Rejection Reason:
+                      </strong>
+                      <span
+                        className="confirm-value"
+                        style={{ color: "#dc3545" }}
+                      >
+                        {selectedBooking.rejectionReason || "None"}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="confirm-row">
                     <strong className="confirm-label">Car Selected:</strong>
@@ -2706,13 +2710,7 @@ const Profile = ({ openBooking }) => {
                             </span>
                           )}
 
-                          {typeof rental.status === "string" && (
-                            <span
-                              className={`profile-reserved-booking-badge status-${rental.status.toLowerCase()}`}
-                            >
-                              {rental.status}
-                            </span>
-                          )}
+
                         </div>
                         <button
                           className="ongoing-unit-details-button"
