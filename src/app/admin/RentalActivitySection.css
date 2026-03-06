@@ -1934,6 +1934,7 @@
   padding-right: 0.6rem;
   padding-bottom: 0.6rem;
   padding-left: 0.6rem;
+    font-weight: 700;
 }
 
 .personal-info-input:focus {
@@ -1947,7 +1948,7 @@
   top: 6px;
   left: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   color: #6c757d;
   line-height: 1;
   margin: 0;

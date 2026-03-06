@@ -525,13 +525,13 @@ select option {
   top: 6px;
   left: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   color: #6c757d;
   line-height: 1;
   margin: 0;
   padding: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
   opacity: 0;
   transform: translateY(-2px);
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -545,10 +545,11 @@ select option {
 
 .form-row .first-name-input {
   width: 100%;
+  font-weight: 700;
   box-sizing: border-box;
   height: 46px;                 /* lock outer box size */
   min-height: 46px;
-  padding: 10px !important;     /* centered when empty */
+  padding: 10px !important;   /* centered when empty */
   line-height: 1.2;
   transition: padding 0.2s ease;
 }

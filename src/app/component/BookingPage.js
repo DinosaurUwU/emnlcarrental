@@ -601,7 +601,7 @@ const handleDiscardSavedData = async () => {
 // PREFILL
 useEffect(() => {
   if (prefillData) {
-    console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
+    // console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
 
     // Check if this is guest session data - show dialog instead of auto-restoring
     if (prefillData.isFromGuestSession) {
@@ -2817,7 +2817,7 @@ if (!user) {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || ""}
+                  value={formData.referralSource || "Not Specified"}
                   onChange={handleInputChange}
                 >
                   {referralSources.map((source) => (

@@ -1832,6 +1832,8 @@ const handleProfileChatKeyDown = (e) => {
                   <label className="profile-section-label">
                     Personal Information
                   </label>
+
+<div className="profile-input-field">
                   <input
                     className="profile-section-label-input"
                     type="text"
@@ -1844,6 +1846,10 @@ const handleProfileChatKeyDown = (e) => {
                       })
                     }
                   />
+                                      <label className="profile-inner-label">Surname</label>
+                  </div>
+
+<div className="profile-input-field">
                   <input
                     className="profile-section-label-input"
                     type="text"
@@ -1856,6 +1862,10 @@ const handleProfileChatKeyDown = (e) => {
                       })
                     }
                   />
+                    <label className="profile-inner-label">First Name</label>
+                  </div>
+
+                  <div className="profile-input-field">
                   <input
                     className="profile-section-label-input"
                     type="text"
@@ -1868,43 +1878,12 @@ const handleProfileChatKeyDown = (e) => {
                       })
                     }
                   />
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Occupation"
-                    value={editedProfile.occupation}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        occupation: e.target.value,
-                      })
-                    }
-                  />
+                    <label className="profile-inner-label">
+                      Middle Name (N/A if none)
+                    </label>
+                  </div>
 
-                  <label className="profile-section-label">Contacts</label>
-                  <input
-                    className="profile-section-label-input"
-                    type="email"
-                    placeholder="Email Address"
-                    value={editedProfile.email}
-                    readOnly // ✅ Prevent user from editing
-                    style={{
-                      backgroundColor: "#f5f5f5",
-                      cursor: "not-allowed",
-                    }}
-                  />
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Contact No."
-                    value={editedProfile.contact}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        contact: e.target.value,
-                      })
-                    }
-                  />
+                                 <div className="profile-input-field">
                   <input
                     className="profile-section-label-input"
                     type="text"
@@ -1917,6 +1896,61 @@ const handleProfileChatKeyDown = (e) => {
                       })
                     }
                   />
+                                      <label className="profile-inner-label">Current Address</label>
+                  </div>
+
+                  <div className="profile-input-field">
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Occupation"
+                    value={editedProfile.occupation}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        occupation: e.target.value,
+                      })
+                    }
+                  />
+                    <label className="profile-inner-label">Occupation</label>
+                  </div>
+
+
+                  <label className="profile-section-label">Contacts</label>
+
+                                    <div className="profile-input-field">
+                  <input
+                    className="profile-section-label-input"
+                    type="email"
+                    placeholder="Email Address"
+                    value={editedProfile.email}
+                    readOnly // ✅ Prevent user from editing
+                    style={{
+                      backgroundColor: "#f5f5f5",
+                      cursor: "not-allowed",
+                    }}
+                  />
+                    <label className="profile-inner-label">Email Address</label>
+                  </div>
+
+
+<div className="profile-input-field">
+                  <input
+                    className="profile-section-label-input"
+                    type="text"
+                    placeholder="Contact No."
+                    value={editedProfile.contact}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        contact: e.target.value,
+                      })
+                    }
+                  />
+                    <label className="profile-inner-label">Contact No.</label>
+                  </div>
+
+
 
                   <div className="confirm-button-group">
                     <button

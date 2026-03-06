@@ -127,7 +127,7 @@ body.modal-open {
   color: #dc3545;
 }
 
-.profile-section-label-input {
+/* .profile-section-label-input {
   margin: 0;
   padding: 10px;
   border: 2px solid var(--accent-color);
@@ -137,12 +137,55 @@ body.modal-open {
   box-sizing: border-box;
   width: 100%;
   transition: 0.3s;
+} */
+
+.profile-input-field {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.profile-inner-label {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6c757d;
+  line-height: 1;
+  margin: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profile-section-label-input {
+  margin: 0;
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  transition:
+    all 0.5s ease,
+    padding 0.2s ease;
 }
 
 .profile-section-label-input:focus {
   border-color: var(--supporting-color);
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
+
+
+
+
+
 
 .password-toggle {
   position: absolute;
@@ -453,7 +496,7 @@ body.modal-open {
   box-shadow: 0 0 10px #28a745;
 }
 
-.profile-section-label-input[type="text"],
+/* .profile-section-label-input[type="text"],
 .profile-section-label-input[type="email"],
 .profile-section-label-input[type="password"] {
   padding: 10px;
@@ -474,6 +517,51 @@ body.modal-open {
 .profile-section-label-input[type="email"]:focus {
   border-color: var(--supporting-color) !important;
   box-shadow: 0 0 10px var(--accent-color);
+} */
+
+.profile-section-label-input[type="text"],
+.profile-section-label-input[type="email"],
+.profile-section-label-input[type="password"] {
+  height: 46px;
+  min-height: 46px;
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  background: #fffafa;
+  outline: none;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  box-sizing: border-box;
+  resize: vertical;
+  width: 100%;
+  margin-bottom: 0;
+  transition:
+    all 0.5s ease,
+    padding 0.2s ease;
+}
+
+.profile-section-label-input[type="text"]:focus,
+.profile-section-label-input[type="email"]:focus {
+  border-color: var(--supporting-color) !important;
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+.profile-section-label-input[type="text"]:not(:placeholder-shown),
+.profile-section-label-input[type="email"]:not(:placeholder-shown),
+.profile-section-label-input[type="password"]:not(:placeholder-shown) {
+  padding-top: 18px;
+  padding-bottom: 6px;
+}
+
+.profile-section-label-input[type="text"]:not(:placeholder-shown)
+  + .profile-inner-label,
+.profile-section-label-input[type="email"]:not(:placeholder-shown)
+  + .profile-inner-label,
+.profile-section-label-input[type="password"]:not(:placeholder-shown)
+  + .profile-inner-label {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .user-messages-container {

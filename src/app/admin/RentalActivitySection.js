@@ -4997,7 +4997,7 @@ try {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || ""}
+                  value={formData.referralSource || "Not Specified"}
                   onChange={handleEditRequestInputChange}
                 >
                   {referralSources.map((source) => (
@@ -6307,7 +6307,7 @@ try {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || ""}
+                  value={formData.referralSource || "Not Specified"}
                   onChange={handleEditInputChange}
                 >
                   {referralSources.map((source) => (
@@ -9163,7 +9163,7 @@ onClick={() => {
                             <select
                               name="referralSource"
                               className="referral-info"
-                              value={unitForm.referralSource || ""}
+                              value={unitForm.referralSource || "Not Specified"}
                               onChange={(e) =>
                                 handleInputChange(selectedUnitId, e)
                               }
