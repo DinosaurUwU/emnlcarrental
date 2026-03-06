@@ -1891,7 +1891,7 @@ const handleProfileChatKeyDown = (e) => {
                     style={{
                       backgroundColor: "#f5f5f5",
                       cursor: "not-allowed",
-                    }} // Optional: visual cue
+                    }}
                   />
                   <input
                     className="profile-section-label-input"
