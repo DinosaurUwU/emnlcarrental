@@ -547,11 +547,12 @@ select option {
   width: 100%;
   font-weight: 700;
   box-sizing: border-box;
-  height: 46px;                 /* lock outer box size */
+  height: 46px;                 
   min-height: 46px;
-  padding: 10px !important;   /* centered when empty */
+  padding: 10px !important;   
   line-height: 1.2;
   transition: padding 0.2s ease;
+  text-align: left;
 }
 
 /* Move typed text down without changing box height */

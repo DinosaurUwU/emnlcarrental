@@ -62,15 +62,15 @@ const BookingPage = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedID, setUploadedID] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-    const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
+  // const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
   const [previewImage, setPreviewImage] = useState("/assets/images/image1.png");
   const [imageAnimation, setImageAnimation] = useState("");
   const [fileError, setFileError] = useState(false);
 
   const [hasChanges, setHasChanges] = useState(false);
   const [showConfirmOverlay, setShowConfirmOverlay] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  // const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const [bookingPreviewData, setBookingPreviewData] = useState(null);
 
@@ -98,108 +98,103 @@ const BookingPage = ({
   // Save booking data to localStorage
   const saveBookingDataToStorage = () => {
     // Extract just the preview base64 for localStorage
-  const savedUploadedID = uploadedID?.preview || uploadedID || null;
+    const savedUploadedID = uploadedID?.preview || uploadedID || null;
 
-  const bookingData = {
-    selectedCarId,
-    selectedCarType,
-    driveType,
-    dropOffType,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    formData,
-    uploadedID: savedUploadedID, // Save base64 string
-    totalPrice,
-  };
+    const bookingData = {
+      selectedCarId,
+      selectedCarType,
+      driveType,
+      dropOffType,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      formData,
+      uploadedID: savedUploadedID, // Save base64 string
+      totalPrice,
+    };
     localStorage.setItem("pendingBookingData", JSON.stringify(bookingData));
   };
 
- // Check for pending booking data on mount
-useEffect(() => {
-  if (user?.uid) {
-    const pendingData = localStorage.getItem(
-      `pendingBookingData_${user.uid}`,
-    );
+  // Check for pending booking data on mount
+  useEffect(() => {
+    if (user?.uid) {
+      const pendingData = localStorage.getItem(
+        `pendingBookingData_${user.uid}`,
+      );
 
-    if (pendingData) {
-      try {
-        const data = JSON.parse(pendingData);
+      if (pendingData) {
+        try {
+          const data = JSON.parse(pendingData);
 
-        // Restore all the fields
-        if (data.selectedCarId) setSelectedCarId(data.selectedCarId);
-        if (data.selectedCarType) setSelectedCarType(data.selectedCarType);
-        if (data.driveType) setDriveType(data.driveType);
-        if (data.dropOffType) setDropOffType(data.dropOffType);
-        if (data.startDate) setStartDate(data.startDate);
-        if (data.endDate) setEndDate(data.endDate);
-        if (data.startTime) setStartTime(data.startTime);
-        if (data.endTime) setEndTime(data.endTime);
-        if (data.formData) setFormData(data.formData);
-        if (data.uploadedID) setUploadedID(data.uploadedID);
-        if (data.totalPrice) setTotalPrice(data.totalPrice);
+          // Restore all the fields
+          if (data.selectedCarId) setSelectedCarId(data.selectedCarId);
+          if (data.selectedCarType) setSelectedCarType(data.selectedCarType);
+          if (data.driveType) setDriveType(data.driveType);
+          if (data.dropOffType) setDropOffType(data.dropOffType);
+          if (data.startDate) setStartDate(data.startDate);
+          if (data.endDate) setEndDate(data.endDate);
+          if (data.startTime) setStartTime(data.startTime);
+          if (data.endTime) setEndTime(data.endTime);
+          if (data.formData) setFormData(data.formData);
+          if (data.uploadedID) setUploadedID(data.uploadedID);
+          if (data.totalPrice) setTotalPrice(data.totalPrice);
 
-        // Clear the stored data
-        localStorage.removeItem(`pendingBookingData_${user.uid}`);
+          // Clear the stored data
+          localStorage.removeItem(`pendingBookingData_${user.uid}`);
 
-        console.log("✅ Booking data restored!");
-      } catch (error) {
-        console.error("Error restoring booking data:", error);
+          console.log("✅ Booking data restored!");
+        } catch (error) {
+          console.error("Error restoring booking data:", error);
+        }
       }
     }
-  }
-}, [user]);
+  }, [user]);
 
-useEffect(() => {
-  // Check for URL search params (from guest session redirect)
-  const searchParams = new URLSearchParams(window.location.search);
-  const hasPrefill = searchParams.get('prefill') === 'true';
-  
-  if (hasPrefill) {
-    const urlPrefillData = {
-      carType: searchParams.get('carType') || undefined,
-      carName: searchParams.get('carName') || undefined,
-      drivingOption: searchParams.get('drivingOption') || undefined,
-      pickupOption: searchParams.get('pickupOption') || undefined,
-      startDate: searchParams.get('startDate') || undefined,
-      startTime: searchParams.get('startTime') || undefined,
-      endDate: searchParams.get('endDate') || undefined,
-      endTime: searchParams.get('endTime') || undefined,
-      firstName: searchParams.get('firstName') || undefined,
-      middleName: searchParams.get('middleName') || undefined,
-      surname: searchParams.get('surname') || undefined,
-      occupation: searchParams.get('occupation') || undefined,
-      address: searchParams.get('address') || undefined,
-      contact: searchParams.get('contact') || undefined,
-      email: searchParams.get('email') || undefined,
-      location: searchParams.get('location') || undefined,
-      dropoffLocation: searchParams.get('dropoffLocation') || undefined,
-      purpose: searchParams.get('purpose') || undefined,
-      additionalMessage: searchParams.get('additionalMessage') || undefined,
-      referralSource: searchParams.get('referralSource') || undefined,
-      driverLicense: searchParams.get('driverLicense') || undefined,
-    };
-    
-    // Clean URL without reloading
-    window.history.replaceState({}, document.title, window.location.pathname);
-    
-    // Merge with existing prefillData
-    setPrefillData(urlPrefillData);
-  }
-}, []);
+  useEffect(() => {
+    // Check for URL search params (from guest session redirect)
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasPrefill = searchParams.get("prefill") === "true";
 
+    if (hasPrefill) {
+      const urlPrefillData = {
+        carType: searchParams.get("carType") || undefined,
+        carName: searchParams.get("carName") || undefined,
+        drivingOption: searchParams.get("drivingOption") || undefined,
+        pickupOption: searchParams.get("pickupOption") || undefined,
+        startDate: searchParams.get("startDate") || undefined,
+        startTime: searchParams.get("startTime") || undefined,
+        endDate: searchParams.get("endDate") || undefined,
+        endTime: searchParams.get("endTime") || undefined,
+        firstName: searchParams.get("firstName") || undefined,
+        middleName: searchParams.get("middleName") || undefined,
+        surname: searchParams.get("surname") || undefined,
+        occupation: searchParams.get("occupation") || undefined,
+        address: searchParams.get("address") || undefined,
+        contact: searchParams.get("contact") || undefined,
+        email: searchParams.get("email") || undefined,
+        location: searchParams.get("location") || undefined,
+        dropoffLocation: searchParams.get("dropoffLocation") || undefined,
+        purpose: searchParams.get("purpose") || undefined,
+        additionalMessage: searchParams.get("additionalMessage") || undefined,
+        referralSource: searchParams.get("referralSource") || undefined,
+        driverLicense: searchParams.get("driverLicense") || undefined,
+      };
 
+      // Clean URL without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
 
-
-
-
-
+      // Merge with existing prefillData
+      setPrefillData(urlPrefillData);
+    }
+  }, []);
 
   const [filteredUnits, setFilteredUnits] = useState(allUnitData || []);
   const selectedUnit = allUnitData.find((unit) => unit.id === selectedCarId);
   const lockedReservedRequest = Boolean(prefillData?.isReservedRequest);
-const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedRequest);
+  const isReservedUnitSelected = Boolean(
+    selectedUnit?.hidden || lockedReservedRequest,
+  );
 
   useEffect(() => {
     if (!allUnitData || allUnitData.length === 0) {
@@ -284,13 +279,27 @@ const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedReq
     } else {
       setPreviewImage("/assets/images/image1.png");
     }
-  // }, [selectedCarId, allUnitData, fetchImageFromFirestore]);
-    }, [selectedCarId, allUnitData]);
-
+    // }, [selectedCarId, allUnitData, fetchImageFromFirestore]);
+  }, [selectedCarId, allUnitData]);
 
   const galleryRef = useRef(null);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const lightbox = new PhotoSwipeLightbox({
+  //     gallery: galleryRef.current,
+  //     children: "a",
+  //     pswpModule: () => import("photoswipe"),
+  //     showHideAnimationType: "fade",
+  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+  //     maxWidth: window.innerWidth * 0.8,
+  //     maxHeight: window.innerHeight * 0.8,
+  //   });
+
+  //   lightbox.init();
+  //   return () => lightbox.destroy();
+  // }, []);
+
+useEffect(() => {
     const lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
@@ -299,11 +308,41 @@ const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedReq
       paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
       maxWidth: window.innerWidth * 0.8,
       maxHeight: window.innerHeight * 0.8,
+      preloaderDelay: 0,
     });
 
     lightbox.init();
     return () => lightbox.destroy();
   }, []);
+
+    const uploadedPreviewSrc = useMemo(() => {
+    return (
+      uploadedID?.preview ||
+      (typeof uploadedID === "string" ? uploadedID : null) ||
+      (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null) ||
+      (uploadedID instanceof File || uploadedID instanceof Blob
+        ? URL.createObjectURL(uploadedID)
+        : null)
+    );
+  }, [uploadedID]);
+
+  const [uploadedPreviewSize, setUploadedPreviewSize] = useState({
+    width: 1200,
+    height: 800,
+  });
+
+  useEffect(() => {
+    if (!uploadedPreviewSrc) return;
+
+    const img = new Image();
+    img.onload = () => {
+      setUploadedPreviewSize({
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+    };
+    img.src = uploadedPreviewSrc;
+  }, [uploadedPreviewSrc]);
 
   // CHECK AND LOAD SAVED DATA FROM GUEST USER
   useEffect(() => {
@@ -347,221 +386,153 @@ const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedReq
   }, [isOpen, editingBookingData]);
 
   // LOAD SAVED DATA
-const handleLoadSavedData = async () => {
-  try {
-    setLoadSavedData(true); // 🟢 Show loading overlay
+  const handleLoadSavedData = async () => {
+    try {
+      setLoadSavedData(true); // 🟢 Show loading overlay
 
-    // Optional delay for animation feel
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+      // Optional delay for animation feel
+      await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    if (savedFormData) {
-      // Load the saved form data
-      setFormData({
-        firstName: savedFormData.firstName || "",
-        middleName: savedFormData.middleName || "",
-        surname: savedFormData.surname || "",
-        occupation: savedFormData.occupation || "",
-        address: savedFormData.address || "",
-        contactNo: savedFormData.contactNo || "",
-        email: savedFormData.email || "",
-        location: savedFormData.location || "",
-        dropoffLocation: savedFormData.dropoffLocation || "",
-        purpose: savedFormData.purpose || "",
-        additionalMessage: savedFormData.additionalMessage || "",
-        referralSource: savedFormData.referralSource || "",
-      });
+      if (savedFormData) {
+        // Load the saved form data
+        setFormData({
+          firstName: savedFormData.firstName || "",
+          middleName: savedFormData.middleName || "",
+          surname: savedFormData.surname || "",
+          occupation: savedFormData.occupation || "",
+          address: savedFormData.address || "",
+          contactNo: savedFormData.contactNo || "",
+          email: savedFormData.email || "",
+          location: savedFormData.location || "",
+          dropoffLocation: savedFormData.dropoffLocation || "",
+          purpose: savedFormData.purpose || "",
+          additionalMessage: savedFormData.additionalMessage || "",
+          referralSource: savedFormData.referralSource || "",
+        });
 
-      // Handle car selection - check both car ID and car name
-      if (savedFormData.selectedCar) {
-        // First try to find by ID (for guest session data)
-        const savedUnitById = unitData.find((u) => u.id === savedFormData.selectedCar);
-        if (savedUnitById) {
-          setSelectedCarId(savedUnitById.id);
-        } else {
-          // Fallback to name lookup
-          const savedUnit = unitData.find(
+        // Handle car selection - check both car ID and car name
+        if (savedFormData.selectedCar) {
+          // First try to find by ID (for guest session data)
+          const savedUnitById = unitData.find(
+            (u) => u.id === savedFormData.selectedCar,
+          );
+          if (savedUnitById) {
+            setSelectedCarId(savedUnitById.id);
+          } else {
+            // Fallback to name lookup
+            const savedUnit = unitData.find(
+              (u) => u.name === savedFormData.selectedCar,
+            );
+            setSelectedCarId(savedUnit?.id || "");
+          }
+        }
+
+        setSelectedCarType(savedFormData.selectedCarType || "ALL");
+        setDriveType(savedFormData.driveType || "Self-Drive");
+        setDropOffType(savedFormData.dropOffType || "Pickup");
+        setStartDate(savedFormData.startDate || "");
+        setStartTime(savedFormData.startTime || "");
+        setEndDate(savedFormData.endDate || "");
+        setEndTime(savedFormData.endTime || "");
+
+        // Handle driver's license
+        if (savedFormData.driverLicense) {
+          setUploadedID({
+            preview: savedFormData.driverLicense,
+          });
+        }
+
+        // Handle car image
+        if (savedFormData.selectedCar) {
+          const savedUnitById = unitData.find(
+            (u) => u.id === savedFormData.selectedCar,
+          );
+          const savedUnitByName = unitData.find(
             (u) => u.name === savedFormData.selectedCar,
           );
-          setSelectedCarId(savedUnit?.id || "");
+          const selectedUnit = savedUnitById || savedUnitByName;
+
+          if (selectedUnit?.imageId) {
+            const { base64 } = await fetchImageFromFirestore(
+              selectedUnit.imageId,
+            );
+            setPreviewImage(base64 || "/assets/images/image1.png");
+          } else {
+            setPreviewImage("/assets/images/image1.png");
+          }
         }
+
+        setHasChanges(true);
       }
 
-      setSelectedCarType(savedFormData.selectedCarType || "ALL");
-      setDriveType(savedFormData.driveType || "Self-Drive");
-      setDropOffType(savedFormData.dropOffType || "Pickup");
-      setStartDate(savedFormData.startDate || "");
-      setStartTime(savedFormData.startTime || "");
-      setEndDate(savedFormData.endDate || "");
-      setEndTime(savedFormData.endTime || "");
+      setLoadSavedData(false);
 
-      // Handle driver's license
-      if (savedFormData.driverLicense) {
-        setUploadedID({
-          preview: savedFormData.driverLicense,
-        });
-      }
+      setShowLoadSavedData(true);
 
-      // Handle car image
-      if (savedFormData.selectedCar) {
-        const savedUnitById = unitData.find((u) => u.id === savedFormData.selectedCar);
-        const savedUnitByName = unitData.find(
-          (u) => u.name === savedFormData.selectedCar,
-        );
-        const selectedUnit = savedUnitById || savedUnitByName;
-
-        if (selectedUnit?.imageId) {
-          const { base64 } = await fetchImageFromFirestore(
-            selectedUnit.imageId,
-          );
-          setPreviewImage(base64 || "/assets/images/image1.png");
-        } else {
-          setPreviewImage("/assets/images/image1.png");
-        }
-      }
-
-      setHasChanges(true);
+      setTimeout(() => setShowLoadSavedData(false), 4000);
+    } catch (error) {
+      console.error("❌ Error loading saved data:", error);
+      setLoadSavedData(false);
+    } finally {
+      setShowLoadSavedDialog(false);
     }
-
-    setLoadSavedData(false);
-
-    setShowLoadSavedData(true);
-
-    setTimeout(() => setShowLoadSavedData(false), 4000);
-  } catch (error) {
-    console.error("❌ Error loading saved data:", error);
-    setLoadSavedData(false);
-  } finally {
-    setShowLoadSavedDialog(false);
-  }
-};
-
-
-
-  // const handleLoadSavedData = async () => {
-  //   try {
-  //     setLoadSavedData(true); // 🟢 Show loading overlay
-
-  //     // Optional delay for animation feel
-  //     await new Promise((resolve) => setTimeout(resolve, 1200));
-
-  //     if (savedFormData) {
-  //       // Load the saved form data
-  //       setFormData({
-  //         firstName: savedFormData.firstName || "",
-  //         middleName: savedFormData.middleName || "",
-  //         surname: savedFormData.surname || "",
-  //         occupation: savedFormData.occupation || "",
-  //         address: savedFormData.address || "",
-  //         contactNo: savedFormData.contactNo || "",
-  //         email: savedFormData.email || "",
-  //         location: savedFormData.location || "",
-  //         dropoffLocation: savedFormData.dropoffLocation || "",
-  //         purpose: savedFormData.purpose || "",
-  //         additionalMessage: savedFormData.additionalMessage || "",
-  //         referralSource: savedFormData.referralSource || "",
-  //       });
-
-  //       // Load other fields
-  //       // setSelectedCar(savedFormData.selectedCar || "");
-  //       const savedUnit = unitData.find(
-  //         (u) => u.name === savedFormData.selectedCar,
-  //       );
-  //       setSelectedCarId(savedUnit?.id || "");
-
-  //       setSelectedCarType(savedFormData.selectedCarType || "ALL");
-  //       setDriveType(savedFormData.driveType || "Self-Drive");
-  //       setDropOffType(savedFormData.dropOffType || "Pickup");
-  //       setStartDate(savedFormData.startDate || "");
-  //       setStartTime(savedFormData.startTime || "");
-  //       setEndDate(savedFormData.endDate || "");
-  //       setEndTime(savedFormData.endTime || "");
-  //       setUploadedID(savedFormData.driverLicense || null);
-
-  //       const selectedUnit = unitData.find(
-  //         (u) => u.name === savedFormData.selectedCar,
-  //       );
-  //       // setPreviewImage(selectedUnit?.image || pickacar);
-  //       if (selectedUnit?.imageId) {
-  //         const { base64 } = await fetchImageFromFirestore(
-  //           selectedUnit.imageId,
-  //         );
-  //         setPreviewImage(base64 || "/assets/images/image1.png");
-  //       } else {
-  //         setPreviewImage("/assets/images/image1.png");
-  //       }
-
-  //       setHasChanges(true);
-  //     }
-
-  //     setLoadSavedData(false);
-
-  //     setShowLoadSavedData(true);
-
-  //     setTimeout(() => setShowLoadSavedData(false), 4000);
-  //   } catch (error) {
-  //     console.error("❌ Error loading saved data:", error);
-  //     setLoadSavedData(false);
-  //   } finally {
-  //     setShowLoadSavedDialog(false);
-  //   }
-  // };
+  };
 
   // DISCARD SAVED DATA
-const handleDiscardSavedData = async () => {
-  try {
-    setDiscardSavedData(true);
+  const handleDiscardSavedData = async () => {
+    try {
+      setDiscardSavedData(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    // Clear localStorage guest data
-    if (user?.uid) {
-      localStorage.removeItem(`pendingBookingData_${user.uid}`);
-    } else {
-      localStorage.removeItem("pendingBookingData");
+      // Clear localStorage guest data
+      if (user?.uid) {
+        localStorage.removeItem(`pendingBookingData_${user.uid}`);
+      } else {
+        localStorage.removeItem("pendingBookingData");
+      }
+
+      // Clear Firestore saved data (if any)
+      await clearSavedBookingFormData();
+
+      // Reset all form fields
+      setFormData({
+        firstName: "",
+        middleName: "",
+        surname: "",
+        occupation: "",
+        address: "",
+        contactNo: "",
+        email: "",
+        location: "",
+        dropoffLocation: "",
+        purpose: "",
+        additionalMessage: "",
+      });
+      setSelectedCarId("");
+      setSelectedCarType("ALL");
+      setDriveType("Self-Drive");
+      setDropOffType("Pickup");
+      setStartDate("");
+      setEndDate("");
+      setStartTime("");
+      setEndTime("");
+      setUploadedID(null);
+      setPreviewImage("/assets/images/image1.png");
+
+      setDiscardSavedData(false);
+
+      setShowDiscardSavedData(true);
+
+      setTimeout(() => setShowDiscardSavedData(false), 4000);
+    } catch (error) {
+      console.error("❌ Error discarding saved data:", error);
+      setDiscardSavedData(false);
+    } finally {
+      setShowLoadSavedDialog(false);
     }
+  };
 
-    // Clear Firestore saved data (if any)
-    await clearSavedBookingFormData();
-
-    // Reset all form fields
-    setFormData({
-      firstName: "",
-      middleName: "",
-      surname: "",
-      occupation: "",
-      address: "",
-      contactNo: "",
-      email: "",
-      location: "",
-      dropoffLocation: "",
-      purpose: "",
-      additionalMessage: "",
-    });
-    setSelectedCarId("");
-    setSelectedCarType("ALL");
-    setDriveType("Self-Drive");
-    setDropOffType("Pickup");
-    setStartDate("");
-    setEndDate("");
-    setStartTime("");
-    setEndTime("");
-    setUploadedID(null);
-    setPreviewImage("/assets/images/image1.png");
-
-    setDiscardSavedData(false);
-
-    setShowDiscardSavedData(true);
-
-    setTimeout(() => setShowDiscardSavedData(false), 4000);
-  } catch (error) {
-    console.error("❌ Error discarding saved data:", error);
-    setDiscardSavedData(false);
-  } finally {
-    setShowLoadSavedDialog(false);
-  }
-};
-
-  
   // const handleDiscardSavedData = async () => {
   //   try {
   //     setDiscardSavedData(true);
@@ -598,336 +569,180 @@ const handleDiscardSavedData = async () => {
     additionalMessage: "",
   });
 
+  // PREFILL
+  useEffect(() => {
+    if (prefillData) {
+      // console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
 
+      // Check if this is guest session data - show dialog instead of auto-restoring
+      if (prefillData.isFromGuestSession) {
+        console.log("📝 Guest session data detected, showing load dialog...");
 
-
-// PREFILL
-useEffect(() => {
-  if (prefillData) {
-    // console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
-
-    // Check if this is guest session data - show dialog instead of auto-restoring
-    if (prefillData.isFromGuestSession) {
-      console.log("📝 Guest session data detected, showing load dialog...");
-
-      // Set savedFormData with the guest data
-      setSavedFormData({
-        firstName: prefillData.firstName || "",
-        middleName: prefillData.middleName || "",
-        surname: prefillData.surname || "",
-        occupation: prefillData.occupation || "",
-        address: prefillData.address || "",
-        contactNo: prefillData.contact || "",
-        email: prefillData.email || "",
-        location: prefillData.location || "",
-        dropoffLocation: prefillData.dropoffLocation || "",
-        purpose: prefillData.purpose || "",
-        additionalMessage: prefillData.additionalMessage || "",
-        referralSource: prefillData.referralSource || "",
-        selectedCar: prefillData.carId || "", // carId will be resolved by handleLoadSavedData
-        selectedCarType: prefillData.carType || "ALL",
-        driveType: prefillData.drivingOption || "Self-Drive",
-        dropOffType: prefillData.pickupOption || "Pickup",
-        startDate: prefillData.startDate || "",
-        startTime: prefillData.startTime || "",
-        endDate: prefillData.endDate || "",
-        endTime: prefillData.endTime || "",
-        driverLicense: prefillData.driverLicense || null,
-      });
-
-      // Show the load saved dialog
-      setShowLoadSavedDialog(true);
-
-      // Don't auto-restore - let user choose
-      return;
-    }
-
-    // Car selection
-    setSelectedCarType(prefillData.carType || "ALL");
-
-    // if (prefillData.carId) {
-    //   const unitById = unitData.find((u) => u.id === prefillData.carId);
-    //   if (unitById) {
-    //     setSelectedCarId(unitById.id);
-    //   } else {
-    //     setSelectedCarId(prefillData.carId);
-    //   }
-    // }
-
-    // // Fallback: also look for carName if provided
-    // if (prefillData.carName) {
-    //   const unitByName = unitData.find((u) => u.name === prefillData.carName);
-    //   if (unitByName) {
-    //     setSelectedCarId(unitByName.id);
-    //   }
-    // }
-
-    if (prefillData.carId) {
-  const unitById =
-    allUnitData.find((u) => u.id === prefillData.carId) ||
-    unitData.find((u) => u.id === prefillData.carId);
-
-  if (unitById) {
-    setSelectedCarId(unitById.id);
-  } else {
-    setSelectedCarId(prefillData.carId);
-  }
-} else if (prefillData.carName) {
-  const unitByName =
-    allUnitData.find((u) => u.name === prefillData.carName) ||
-    unitData.find((u) => u.name === prefillData.carName);
-
-  if (unitByName) {
-    setSelectedCarId(unitByName.id);
-  }
-}
-
-    // Drive/Drop options
-    setDriveType(prefillData.drivingOption || "Self-Drive");
-    setDropOffType(prefillData.pickupOption || "Pickup");
-
-    // Dates and times
-    setStartDate(prefillData.startDate || "");
-    setStartTime(prefillData.startTime || "");
-    setEndDate(prefillData.endDate || "");
-    setEndTime(prefillData.endTime || "");
-
-    // Form data fields
-    setFormData((prev) => ({
-      ...prev,
-      firstName: prefillData.firstName || prev.firstName,
-      middleName: prefillData.middleName || prev.middleName,
-      surname: prefillData.surname || prev.surname,
-      occupation: prefillData.occupation || prev.occupation,
-      address: prefillData.address || prev.address,
-      contactNo: prefillData.contact || prev.contactNo,
-      email: prefillData.email || prev.email,
-      location: prefillData.location || prev.location,
-      dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
-      purpose: prefillData.purpose || prev.purpose,
-      additionalMessage: prefillData.additionalMessage || prev.additionalMessage,
-      referralSource: prefillData.referralSource || prev.referralSource,
-    }));
-
-    // Driver's License
-    if (prefillData.driverLicense) {
-      setUploadedID({
-        preview: prefillData.driverLicense,
-      });
-    }
-
-    // Image handling
-    // const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
-    //                      unitData.find((u) => u.name === prefillData.carName);
-    const selectedUnit =
-  allUnitData.find((u) => u.id === prefillData.carId) ||
-  allUnitData.find((u) => u.name === prefillData.carName) ||
-  unitData.find((u) => u.id === prefillData.carId) ||
-  unitData.find((u) => u.name === prefillData.carName);
-    if (selectedUnit?.imageId) {
-      fetchImageFromFirestore(selectedUnit.imageId)
-        .then(({ base64 }) => {
-          setPreviewImage(base64 || "/assets/images/image1.png");
-        })
-        .catch(() => {
-          setPreviewImage("/assets/images/image1.png");
+        // Set savedFormData with the guest data
+        setSavedFormData({
+          firstName: prefillData.firstName || "",
+          middleName: prefillData.middleName || "",
+          surname: prefillData.surname || "",
+          occupation: prefillData.occupation || "",
+          address: prefillData.address || "",
+          contactNo: prefillData.contact || "",
+          email: prefillData.email || "",
+          location: prefillData.location || "",
+          dropoffLocation: prefillData.dropoffLocation || "",
+          purpose: prefillData.purpose || "",
+          additionalMessage: prefillData.additionalMessage || "",
+          referralSource: prefillData.referralSource || "",
+          selectedCar: prefillData.carId || "", // carId will be resolved by handleLoadSavedData
+          selectedCarType: prefillData.carType || "ALL",
+          driveType: prefillData.drivingOption || "Self-Drive",
+          dropOffType: prefillData.pickupOption || "Pickup",
+          startDate: prefillData.startDate || "",
+          startTime: prefillData.startTime || "",
+          endDate: prefillData.endDate || "",
+          endTime: prefillData.endTime || "",
+          driverLicense: prefillData.driverLicense || null,
         });
-    } else {
-      setPreviewImage("/assets/images/image1.png");
-    }
-  }
-// }, [prefillData, unitData, fetchImageFromFirestore]);
-}, [prefillData, unitData, allUnitData]);
 
+        // Show the load saved dialog
+        setShowLoadSavedDialog(true);
 
+        // Don't auto-restore - let user choose
+        return;
+      }
 
-// useEffect(() => {
-//   if (prefillData) {
-//     // Car selection
-//     setSelectedCarType(prefillData.carType || "ALL");
+      // Car selection
+      setSelectedCarType(prefillData.carType || "ALL");
 
-//     if (prefillData.carId) {
-//       const unitById = unitData.find((u) => u.id === prefillData.carId);
-//       if (unitById) {
-//         setSelectedCarId(unitById.id);
-//       } else {
-//         setSelectedCarId(prefillData.carId);
-//       }
-//     }
+      // if (prefillData.carId) {
+      //   const unitById = unitData.find((u) => u.id === prefillData.carId);
+      //   if (unitById) {
+      //     setSelectedCarId(unitById.id);
+      //   } else {
+      //     setSelectedCarId(prefillData.carId);
+      //   }
+      // }
 
-//     // Fallback: also look for carName if provided
-//     if (prefillData.carName) {
-//       const unitByName = unitData.find((u) => u.name === prefillData.carName);
-//       if (unitByName) {
-//         setSelectedCarId(unitByName.id);
-//       }
-//     }
+      // // Fallback: also look for carName if provided
+      // if (prefillData.carName) {
+      //   const unitByName = unitData.find((u) => u.name === prefillData.carName);
+      //   if (unitByName) {
+      //     setSelectedCarId(unitByName.id);
+      //   }
+      // }
 
-//     // Drive/Drop options
-//     setDriveType(prefillData.drivingOption || "Self-Drive");
-//     setDropOffType(prefillData.pickupOption || "Pickup");
+      if (prefillData.carId) {
+        const unitById =
+          allUnitData.find((u) => u.id === prefillData.carId) ||
+          unitData.find((u) => u.id === prefillData.carId);
 
-//     // Dates and times
-//     setStartDate(prefillData.startDate || "");
-//     setStartTime(prefillData.startTime || "");
-//     setEndDate(prefillData.endDate || "");
-//     setEndTime(prefillData.endTime || "");
+        if (unitById) {
+          setSelectedCarId(unitById.id);
+        } else {
+          setSelectedCarId(prefillData.carId);
+        }
+      } else if (prefillData.carName) {
+        const unitByName =
+          allUnitData.find((u) => u.name === prefillData.carName) ||
+          unitData.find((u) => u.name === prefillData.carName);
 
-//     // Form data fields
-//     setFormData((prev) => ({
-//       ...prev,
-//       firstName: prefillData.firstName || prev.firstName,
-//       middleName: prefillData.middleName || prev.middleName,
-//       surname: prefillData.surname || prev.surname,
-//       occupation: prefillData.occupation || prev.occupation,
-//       address: prefillData.address || prev.address,
-//       contactNo: prefillData.contact || prev.contactNo,
-//       email: prefillData.email || prev.email,
-//       location: prefillData.location || prev.location,
-//       dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
-//       purpose: prefillData.purpose || prev.purpose,
-//       additionalMessage: prefillData.additionalMessage || prev.additionalMessage,
-//       referralSource: prefillData.referralSource || prev.referralSource,
-//     }));
+        if (unitByName) {
+          setSelectedCarId(unitByName.id);
+        }
+      }
 
-//     // Driver's License
-// if (prefillData.driverLicense) {
-//   setUploadedID({
-//     preview: prefillData.driverLicense,
-//   });
-// }
+      // Drive/Drop options
+      setDriveType(prefillData.drivingOption || "Self-Drive");
+      setDropOffType(prefillData.pickupOption || "Pickup");
 
+      // Dates and times
+      setStartDate(prefillData.startDate || "");
+      setStartTime(prefillData.startTime || "");
+      setEndDate(prefillData.endDate || "");
+      setEndTime(prefillData.endTime || "");
 
-//     // Image handling
-//     const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
-//                          unitData.find((u) => u.name === prefillData.carName);
-//     if (selectedUnit?.imageId) {
-//       fetchImageFromFirestore(selectedUnit.imageId)
-//         .then(({ base64 }) => {
-//           setPreviewImage(base64 || "/assets/images/image1.png");
-//         })
-//         .catch(() => {
-//           setPreviewImage("/assets/images/image1.png");
-//         });
-//     } else {
-//       setPreviewImage("/assets/images/image1.png");
-//     }
-//   }
-// }, [prefillData, unitData, fetchImageFromFirestore]);
+      // Form data fields
+      setFormData((prev) => ({
+        ...prev,
+        firstName: prefillData.firstName || prev.firstName,
+        middleName: prefillData.middleName || prev.middleName,
+        surname: prefillData.surname || prev.surname,
+        occupation: prefillData.occupation || prev.occupation,
+        address: prefillData.address || prev.address,
+        contactNo: prefillData.contact || prev.contactNo,
+        email: prefillData.email || prev.email,
+        location: prefillData.location || prev.location,
+        dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
+        purpose: prefillData.purpose || prev.purpose,
+        additionalMessage:
+          prefillData.additionalMessage || prev.additionalMessage,
+        referralSource: prefillData.referralSource || prev.referralSource,
+      }));
 
+      // Driver's License
+      if (prefillData.driverLicense) {
+        setUploadedID({
+          preview: prefillData.driverLicense,
+        });
+      }
 
-
-
-// useEffect(() => {
-//   if (prefillData?.carId && unitData.length > 0 && selectedCarId !== prefillData.carId) {
-//     const unitById = unitData.find((u) => u.id === prefillData.carId);
-//     if (unitById) {
-//       setSelectedCarId(unitById.id);
-      
-//       // Also update image
-//       if (unitById.imageId) {
-//         fetchImageFromFirestore(unitById.imageId)
-//           .then(({ base64 }) => {
-//             setPreviewImage(base64 || "/assets/images/image1.png");
-//           })
-//           .catch(() => {
-//             setPreviewImage("/assets/images/image1.png");
-//           });
-//       }
-//     }
-//   }
-// }, [unitData, prefillData]);
-
-useEffect(() => {
-  if (!prefillData || allUnitData.length === 0) return;
-
-  if (prefillData.carId && selectedCarId !== prefillData.carId) {
-    const unitById =
-      allUnitData.find((u) => u.id === prefillData.carId) ||
-      unitData.find((u) => u.id === prefillData.carId);
-
-    if (unitById) {
-      setSelectedCarId(unitById.id);
-
-      if (unitById.imageId) {
-        fetchImageFromFirestore(unitById.imageId)
+      // Image handling
+      // const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
+      //                      unitData.find((u) => u.name === prefillData.carName);
+      const selectedUnit =
+        allUnitData.find((u) => u.id === prefillData.carId) ||
+        allUnitData.find((u) => u.name === prefillData.carName) ||
+        unitData.find((u) => u.id === prefillData.carId) ||
+        unitData.find((u) => u.name === prefillData.carName);
+      if (selectedUnit?.imageId) {
+        fetchImageFromFirestore(selectedUnit.imageId)
           .then(({ base64 }) => {
             setPreviewImage(base64 || "/assets/images/image1.png");
           })
           .catch(() => {
             setPreviewImage("/assets/images/image1.png");
           });
+      } else {
+        setPreviewImage("/assets/images/image1.png");
       }
     }
-    return;
-  }
+    // }, [prefillData, unitData, fetchImageFromFirestore]);
+  }, [prefillData, unitData, allUnitData]);
 
-  if (!prefillData.carId && prefillData.carName && !selectedCarId) {
-    const unitByName =
-      allUnitData.find((u) => u.name === prefillData.carName) ||
-      unitData.find((u) => u.name === prefillData.carName);
+  useEffect(() => {
+    if (!prefillData || allUnitData.length === 0) return;
 
-    if (unitByName) {
-      setSelectedCarId(unitByName.id);
+    if (prefillData.carId && selectedCarId !== prefillData.carId) {
+      const unitById =
+        allUnitData.find((u) => u.id === prefillData.carId) ||
+        unitData.find((u) => u.id === prefillData.carId);
+
+      if (unitById) {
+        setSelectedCarId(unitById.id);
+
+        if (unitById.imageId) {
+          fetchImageFromFirestore(unitById.imageId)
+            .then(({ base64 }) => {
+              setPreviewImage(base64 || "/assets/images/image1.png");
+            })
+            .catch(() => {
+              setPreviewImage("/assets/images/image1.png");
+            });
+        }
+      }
+      return;
     }
-  }
-// }, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
-}, [allUnitData, unitData, prefillData, selectedCarId]);
 
+    if (!prefillData.carId && prefillData.carName && !selectedCarId) {
+      const unitByName =
+        allUnitData.find((u) => u.name === prefillData.carName) ||
+        unitData.find((u) => u.name === prefillData.carName);
 
-
-  // useEffect(() => {
-  //   if (prefillData) {
-  //     setSelectedCarType(prefillData.carType || "ALL");
-  //     // setSelectedCar(prefillData.carName || "");
-  //     const prefillUnit = unitData.find((u) => u.name === prefillData.carName);
-  //     setSelectedCarId(prefillUnit?.id || "");
-
-  //     setDriveType(prefillData.drivingOption || "Self-Drive");
-  //     setDropOffType(prefillData.pickupOption || "Pickup");
-
-  //     setStartDate(prefillData.startDate || "");
-  //     setStartTime(prefillData.startTime || "");
-  //     setEndDate(prefillData.endDate || "");
-  //     setEndTime(prefillData.endTime || "");
-
-  //     // Image
-  //     const selectedUnit = unitData.find((u) => u.name === prefillData.carName);
-  //     // setPreviewImage(selectedUnit?.image || pickacar);
-  //     if (selectedUnit?.imageId) {
-  //       fetchImageFromFirestore(selectedUnit.imageId)
-  //         .then(({ base64 }) => {
-  //           setPreviewImage(base64 || "/assets/images/image1.png");
-  //         })
-  //         .catch(() => {
-  //           setPreviewImage("/assets/images/image1.png");
-  //         });
-  //     } else {
-  //       setPreviewImage("/assets/images/image1.png");
-  //     }
-
-  //     // Form data
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       firstName: prefillData.firstName || prev.firstName,
-  //       middleName: prefillData.middleName || prev.middleName,
-  //       surname: prefillData.surname || prev.surname,
-  //       occupation: prefillData.occupation || prev.occupation,
-  //       address: prefillData.address || prev.address,
-  //       contactNo: prefillData.contact || prev.contactNo,
-  //       email: prefillData.email || prev.email,
-  //       location: prefillData.location || prev.location,
-  //       dropoffLocation: prefillData.dropoffLocation || prev.dropoffLocation,
-  //       purpose: prefillData.purpose || prev.purpose,
-  //       additionalMessage:
-  //         prefillData.additionalMessage || prev.additionalMessage,
-  //     }));
-
-  //     if (prefillData.driverLicense) {
-  //       setUploadedID(prefillData.driverLicense);
-  //     }
-  //   }
-  // }, [prefillData, unitData, fetchImageFromFirestore]);
+      if (unitByName) {
+        setSelectedCarId(unitByName.id);
+      }
+    }
+    // }, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
+  }, [allUnitData, unitData, prefillData, selectedCarId]);
 
   useEffect(() => {
     if (!startDate || !endDate || !startTime || !endTime) {
@@ -943,8 +758,12 @@ useEffect(() => {
     setIsDurationInvalid(diffHours < 1);
   }, [startDate, endDate, startTime, endTime]);
 
+  // const handleImageClick = () => {
+  //   setIsImageModalOpen(true);
+  // };
+
   const handleImageClick = () => {
-    setIsImageModalOpen(true);
+    document.querySelector(`[data-pswp-index="1"]`)?.click();
   };
 
   const handleCloseImageModal = () => {
@@ -981,10 +800,201 @@ useEffect(() => {
     return value ? "green-label" : "red-label";
   };
 
-  const QuotationSummary = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+  // const QuotationSummary = () => {
+  //   const [isCollapsed, setIsCollapsed] = useState(false);
 
-     useEffect(() => {
+  //    useEffect(() => {
+  //   const handleResize = () => {
+  //     if (window.innerWidth < 900) {
+  //       setIsSummaryCollapsed(false);
+  //     } else {
+  //       setIsSummaryCollapsed(true);
+  //     }
+  //   };
+
+  //   handleResize();
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
+
+  // const renderQuotationSummary = () => {
+  //   return (
+  //     <div className="quotation-summary">
+  //       <h3
+  //         className="collapsible-header"
+  //         onClick={() => setIsSummaryCollapsed(!isSummaryCollapsed)}
+  //       >
+  //         QUOTATION SUMMARY
+  //         <img
+  //           src="/assets/nxt-btn.png"
+  //           alt="Hide icon"
+  //           className={`toggle-icon ${isSummaryCollapsed ? "hidden" : ""}`}
+  //         />
+  //         <img
+  //           src="/assets/prv-btn.png"
+  //           alt="Show icon"
+  //           className={`toggle-icon ${!isSummaryCollapsed ? "hidden" : ""}`}
+  //         />
+  //       </h3>
+
+  //       <div className="checkout-total">
+  //         <strong>Total Price:</strong>
+  //         <span className="total-price">₱{totalPrice.toLocaleString()}</span>
+  //       </div>
+
+  //       <div className={`sticky-details ${isSummaryCollapsed ? "open" : ""}`}>
+  //         <div className="checkout-item">
+  //           <span className={`label ${getColorForSelectedOption(selectedCarId)}`}>
+  //             <label>Car:</label> <br />
+  //             {selectedUnit?.name || "Pick a Car"}
+  //           </span>
+  //           <span className="price">{getCarRate()}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span className={`label ${getColorForSelectedOption(driveType)}`}>
+  //             <label>Driving Option:</label> <br />
+  //             {driveType}
+  //           </span>
+  //           <span className="price">{getDrivingPrice(selectedUnit)}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span className={`label ${getColorForSelectedOption(dropOffType)}`}>
+  //             <label>Pickup / Drop-off:</label> <br />
+  //             {dropOffType}
+  //           </span>
+  //           <span className="price">{getDropOffPrice(selectedUnit)}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span
+  //             className={`label ${
+  //               startDate && startTime && endDate && endTime
+  //                 ? "green-label"
+  //                 : "red-label"
+  //             }`}
+  //           >
+  //             <label>Rental Period:</label> <br />
+  //             <span
+  //               dangerouslySetInnerHTML={{ __html: getRentalPeriodText() }}
+  //             />
+  //           </span>
+  //           <span className="price">{getRentalDuration()}</span>
+  //           {errorMessage && (
+  //             <div className="date-error-message">{errorMessage}</div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  //   // useEffect(() => {
+  //   //   const handleResize = () => {
+  //   //     if (window.innerWidth < 900) {
+  //   //       setIsCollapsed(false);
+  //   //     } else {
+  //   //       setIsCollapsed(true);
+  //   //     }
+  //   //   };
+
+  //   //   // Set default state when component mounts
+  //   //   handleResize();
+
+  //   //   // Add event listener to handle resizing
+  //   //   window.addEventListener("resize", handleResize);
+
+  //   //   // Cleanup the event listener on unmount
+  //   //   return () => window.removeEventListener("resize", handleResize);
+  //   // }, []);
+
+  //   // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
+  //   // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+  //   const selectedUnit =
+  // allUnitData.find((unit) => unit.id === selectedCarId) ||
+  // unitData.find((unit) => unit.id === selectedCarId);
+
+  //   return (
+  //     <div className="quotation-summary">
+  //       <h3
+  //         className="collapsible-header"
+  //         onClick={() => setIsCollapsed(!isCollapsed)}
+  //       >
+  //         QUOTATION SUMMARY
+  //         <img
+  //           src="/assets/nxt-btn.png"
+  //           alt="Hide icon"
+  //           className={`toggle-icon ${isCollapsed ? "hidden" : ""}`}
+  //         />
+  //         <img
+  //           src="/assets/prv-btn.png"
+  //           alt="Show icon"
+  //           className={`toggle-icon ${!isCollapsed ? "hidden" : ""}`}
+  //         />
+  //       </h3>
+
+  //       {/* Total Price section placed directly under the header */}
+  //       <div className="checkout-total">
+  //         <strong>Total Price:</strong>
+  //         <span className="total-price">₱{totalPrice.toLocaleString()}</span>
+  //       </div>
+
+  //       {/* The rest of the summary details with animation */}
+  //       <div className={`sticky-details ${isCollapsed ? "open" : ""}`}>
+  //         <div className="checkout-item">
+  //           {/* <span className={`label ${getColorForSelectedOption(selectedCar)}`}> */}
+  //           <span
+  //             className={`label ${getColorForSelectedOption(selectedCarId)}`}
+  //           >
+  //             <label>Car:</label> <br />
+  //             {/* {selectedCar || "Pick a Car"} */}
+  //             {selectedUnit?.name || "Pick a Car"}
+  //           </span>
+  //           <span className="price">{getCarRate()}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span className={`label ${getColorForSelectedOption(driveType)}`}>
+  //             <label>Driving Option:</label> <br />
+  //             {driveType}
+  //           </span>
+  //           <span className="price">{getDrivingPrice(selectedUnit)}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span className={`label ${getColorForSelectedOption(dropOffType)}`}>
+  //             <label>Pickup / Drop-off:</label> <br />
+  //             {dropOffType}
+  //           </span>
+  //           <span className="price">{getDropOffPrice(selectedUnit)}</span>
+  //         </div>
+
+  //         <div className="checkout-item">
+  //           <span
+  //             className={`label ${
+  //               startDate && startTime && endDate && endTime
+  //                 ? "green-label"
+  //                 : "red-label"
+  //             }`}
+  //           >
+  //             <label>Rental Period:</label> <br />
+  //             <span
+  //               dangerouslySetInnerHTML={{ __html: getRentalPeriodText() }}
+  //             />
+  //           </span>
+  //           <span className="price">{getRentalDuration()}</span>
+  //           {/* Display error message below Rental Period */}
+  //           {errorMessage && (
+  //             <div className="date-error-message">{errorMessage}</div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 900) {
         setIsSummaryCollapsed(false);
@@ -1025,111 +1035,10 @@ useEffect(() => {
 
         <div className={`sticky-details ${isSummaryCollapsed ? "open" : ""}`}>
           <div className="checkout-item">
-            <span className={`label ${getColorForSelectedOption(selectedCarId)}`}>
-              <label>Car:</label> <br />
-              {selectedUnit?.name || "Pick a Car"}
-            </span>
-            <span className="price">{getCarRate()}</span>
-          </div>
-
-          <div className="checkout-item">
-            <span className={`label ${getColorForSelectedOption(driveType)}`}>
-              <label>Driving Option:</label> <br />
-              {driveType}
-            </span>
-            <span className="price">{getDrivingPrice(selectedUnit)}</span>
-          </div>
-
-          <div className="checkout-item">
-            <span className={`label ${getColorForSelectedOption(dropOffType)}`}>
-              <label>Pickup / Drop-off:</label> <br />
-              {dropOffType}
-            </span>
-            <span className="price">{getDropOffPrice(selectedUnit)}</span>
-          </div>
-
-          <div className="checkout-item">
-            <span
-              className={`label ${
-                startDate && startTime && endDate && endTime
-                  ? "green-label"
-                  : "red-label"
-              }`}
-            >
-              <label>Rental Period:</label> <br />
-              <span
-                dangerouslySetInnerHTML={{ __html: getRentalPeriodText() }}
-              />
-            </span>
-            <span className="price">{getRentalDuration()}</span>
-            {errorMessage && (
-              <div className="date-error-message">{errorMessage}</div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-    // useEffect(() => {
-    //   const handleResize = () => {
-    //     if (window.innerWidth < 900) {
-    //       setIsCollapsed(false);
-    //     } else {
-    //       setIsCollapsed(true);
-    //     }
-    //   };
-
-    //   // Set default state when component mounts
-    //   handleResize();
-
-    //   // Add event listener to handle resizing
-    //   window.addEventListener("resize", handleResize);
-
-    //   // Cleanup the event listener on unmount
-    //   return () => window.removeEventListener("resize", handleResize);
-    // }, []);
-
-    // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
-    const selectedUnit =
-  allUnitData.find((unit) => unit.id === selectedCarId) ||
-  unitData.find((unit) => unit.id === selectedCarId);
-
-    return (
-      <div className="quotation-summary">
-        <h3
-          className="collapsible-header"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          QUOTATION SUMMARY
-          <img
-            src="/assets/nxt-btn.png"
-            alt="Hide icon"
-            className={`toggle-icon ${isCollapsed ? "hidden" : ""}`}
-          />
-          <img
-            src="/assets/prv-btn.png"
-            alt="Show icon"
-            className={`toggle-icon ${!isCollapsed ? "hidden" : ""}`}
-          />
-        </h3>
-
-        {/* Total Price section placed directly under the header */}
-        <div className="checkout-total">
-          <strong>Total Price:</strong>
-          <span className="total-price">₱{totalPrice.toLocaleString()}</span>
-        </div>
-
-        {/* The rest of the summary details with animation */}
-        <div className={`sticky-details ${isCollapsed ? "open" : ""}`}>
-          <div className="checkout-item">
-            {/* <span className={`label ${getColorForSelectedOption(selectedCar)}`}> */}
             <span
               className={`label ${getColorForSelectedOption(selectedCarId)}`}
             >
               <label>Car:</label> <br />
-              {/* {selectedCar || "Pick a Car"} */}
               {selectedUnit?.name || "Pick a Car"}
             </span>
             <span className="price">{getCarRate()}</span>
@@ -1165,7 +1074,6 @@ useEffect(() => {
               />
             </span>
             <span className="price">{getRentalDuration()}</span>
-            {/* Display error message below Rental Period */}
             {errorMessage && (
               <div className="date-error-message">{errorMessage}</div>
             )}
@@ -1201,8 +1109,8 @@ useEffect(() => {
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
     // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
     const selectedUnit =
-  allUnitData.find((unit) => unit.id === selectedCarId) ||
-  unitData.find((unit) => unit.id === selectedCarId);
+      allUnitData.find((unit) => unit.id === selectedCarId) ||
+      unitData.find((unit) => unit.id === selectedCarId);
 
     let diffDays = 1;
     let extraHours = 0;
@@ -1293,8 +1201,8 @@ useEffect(() => {
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
     // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
     const selectedUnit =
-  allUnitData.find((unit) => unit.id === selectedCarId) ||
-  unitData.find((unit) => unit.id === selectedCarId);
+      allUnitData.find((unit) => unit.id === selectedCarId) ||
+      unitData.find((unit) => unit.id === selectedCarId);
 
     if (!selectedUnit) return "";
 
@@ -1359,8 +1267,8 @@ useEffect(() => {
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
     // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
     const selectedUnit =
-  allUnitData.find((unit) => unit.id === selectedCarId) ||
-  unitData.find((unit) => unit.id === selectedCarId);
+      allUnitData.find((unit) => unit.id === selectedCarId) ||
+      unitData.find((unit) => unit.id === selectedCarId);
 
     const extraHourCharge =
       extraHours > 0 ? extraHours * (selectedUnit?.extension || 0) : 0;
@@ -1408,8 +1316,8 @@ useEffect(() => {
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
     // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
     const selectedUnit =
-  allUnitData.find((unit) => unit.id === selectedCarId) ||
-  unitData.find((unit) => unit.id === selectedCarId);
+      allUnitData.find((unit) => unit.id === selectedCarId) ||
+      unitData.find((unit) => unit.id === selectedCarId);
 
     if (!selectedUnit) return;
 
@@ -1598,45 +1506,44 @@ useEffect(() => {
   // };
 
   const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    // Convert file to base64 for localStorage preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // Save base64 string to localStorage along with the file
-      setUploadedID({
-        file: file,
-        preview: reader.result,  // base64 data URL
-        name: file.name,
-        type: file.type,
-      });
-    };
-    reader.readAsDataURL(file);
-    
-    setFileError(false);
-    setHasChanges(true);
-  }
-};
+    const file = event.target.files[0];
+    if (file) {
+      // Convert file to base64 for localStorage preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Save base64 string to localStorage along with the file
+        setUploadedID({
+          file: file,
+          preview: reader.result, // base64 data URL
+          name: file.name,
+          type: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
 
+      setFileError(false);
+      setHasChanges(true);
+    }
+  };
 
   const handleConfirmBooking = async () => {
-if (!user) {
-    saveBookingDataToStorage();
-    
-    // Add user ID to the saved data for later retrieval
-    const bookingData = localStorage.getItem("pendingBookingData");
-    if (bookingData) {
-      const data = JSON.parse(bookingData);
-      data.tempUserEmail = formData.email; // Store email to identify user
-      localStorage.setItem("pendingBookingData", JSON.stringify(data));
+    if (!user) {
+      saveBookingDataToStorage();
+
+      // Add user ID to the saved data for later retrieval
+      const bookingData = localStorage.getItem("pendingBookingData");
+      if (bookingData) {
+        const data = JSON.parse(bookingData);
+        data.tempUserEmail = formData.email; // Store email to identify user
+        localStorage.setItem("pendingBookingData", JSON.stringify(data));
+      }
+
+      setShowBookingConfirmOverlay(false);
+      setShowConfirmOverlay(false);
+      closeOverlay();
+      router.push("/auth/login");
+      return;
     }
-    
-    setShowBookingConfirmOverlay(false);
-    setShowConfirmOverlay(false);
-    closeOverlay();
-    router.push("/auth/login");
-    return;
-  }
 
     if (!user?.emailVerified) {
       setShowVerifyOverlay(true); // Opens the global verification overlay
@@ -1967,7 +1874,7 @@ if (!user) {
         </div>
       )}
 
-      {isImageModalOpen && uploadedID && (
+      {/* {isImageModalOpen && uploadedID && (
         <div
           className={`image-modal-overlay ${isImageModalOpen ? "active" : ""}`}
           onClick={handleCloseImageModal}
@@ -1981,18 +1888,21 @@ if (!user) {
               // }
 
               src={
-  uploadedID?.preview || 
-  (typeof uploadedID === "string" ? uploadedID : null) ||
-  (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null) ||
-  (uploadedID instanceof File || uploadedID instanceof Blob ? URL.createObjectURL(uploadedID) : "/assets/images/image1.png")
-}
-
+                uploadedID?.preview ||
+                (typeof uploadedID === "string" ? uploadedID : null) ||
+                (uploadedID?.file
+                  ? URL.createObjectURL(uploadedID.file)
+                  : null) ||
+                (uploadedID instanceof File || uploadedID instanceof Blob
+                  ? URL.createObjectURL(uploadedID)
+                  : "/assets/images/image1.png")
+              }
               alt="Driver's License"
               className="image-fullview"
             />
           </div>
         </div>
-      )}
+      )} */}
 
       {showClearFormOverlay && (
         <div className="overlay-delete">
@@ -2172,8 +2082,8 @@ if (!user) {
             </p>
 
             {bookingPreviewData?.reservation === true && (
-  <div className="confirm-reserved-badge">Reserved Booking</div>
-)}
+              <div className="confirm-reserved-badge">Reserved Booking</div>
+            )}
 
             <div className="confirm-details">
               <div className="confirm-scroll-container">
@@ -2302,11 +2212,12 @@ if (!user) {
                   <img
                     // src={URL.createObjectURL(uploadedID)}
                     src={
-  uploadedID?.preview || 
-  (typeof uploadedID === "string" ? uploadedID : null) ||
-  (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null)
-}
-
+                      uploadedID?.preview ||
+                      (typeof uploadedID === "string" ? uploadedID : null) ||
+                      (uploadedID?.file
+                        ? URL.createObjectURL(uploadedID.file)
+                        : null)
+                    }
                     alt="Driver's License"
                     className="confirm-id-preview"
                     onClick={handleImageClick}
@@ -2476,10 +2387,14 @@ if (!user) {
                 </div>
 
                 <div>
-                  <label className="pickacar">Pick a Car:                   {isReservedUnitSelected && (
-  <span className="reserved-unit-inline-badge">Reservation</span>
-)}</label>
-
+                  <label className="pickacar">
+                    Pick a Car:{" "}
+                    {isReservedUnitSelected && (
+                      <span className="reserved-unit-inline-badge">
+                        Reservation
+                      </span>
+                    )}
+                  </label>
 
                   <select
                     value={selectedCarId}
@@ -2664,45 +2579,54 @@ if (!user) {
                 </div>
               )}
 
-              {uploadedID && (
-  <div className="image-preview">
-    {(() => {
-      if (typeof uploadedID === "string") {
-        return (
-          <img
-            src={uploadedID}
-            alt="Uploaded ID"
-            onClick={handleImageClick}
-            className="preview-thumbnail"
-          />
-        );
-      } else if (uploadedID?.preview) {
-        return (
-          <img
-            src={uploadedID.preview}
-            alt="Uploaded ID"
-            onClick={handleImageClick}
-            className="preview-thumbnail"
-          />
-        );
-      } else if (
-        uploadedID instanceof File ||
-        uploadedID instanceof Blob
-      ) {
-        return (
-          <img
-            src={URL.createObjectURL(uploadedID)}
-            alt="Uploaded ID"
-            onClick={handleImageClick}
-            className="preview-thumbnail"
-          />
-        );
-      }
-      return null;
-    })()}
-  </div>
-)}
-
+              {/* {uploadedID && (
+                <div className="image-preview">
+                  {(() => {
+                    if (typeof uploadedID === "string") {
+                      return (
+                        <img
+                          src={uploadedID}
+                          alt="Uploaded ID"
+                          onClick={handleImageClick}
+                          className="preview-thumbnail"
+                        />
+                      );
+                    } else if (uploadedID?.preview) {
+                      return (
+                        <img
+                          src={uploadedID.preview}
+                          alt="Uploaded ID"
+                          onClick={handleImageClick}
+                          className="preview-thumbnail"
+                        />
+                      );
+                    } else if (
+                      uploadedID instanceof File ||
+                      uploadedID instanceof Blob
+                    ) {
+                      return (
+                        <img
+                          src={URL.createObjectURL(uploadedID)}
+                          alt="Uploaded ID"
+                          onClick={handleImageClick}
+                          className="preview-thumbnail"
+                        />
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+              )} */}
+                            {uploadedPreviewSrc && (
+                <div className="image-preview">
+                  <img
+                    src={uploadedPreviewSrc}
+                    alt="Uploaded ID"
+                    onClick={handleImageClick}
+                    className="preview-thumbnail"
+                  />
+                </div>
+              )}
 
               <label htmlFor="uploadID" className="file-label">
                 {uploadedID
@@ -2710,200 +2634,118 @@ if (!user) {
                   : "Upload Driver's License"}
               </label>
 
-
-
-
-
-
-
-<label className="form-label">Personal Information</label>
-<div className="form-row">
-  <div className="first-name-field">
-    <label className="first-name-inner-label">First Name</label>
-    <input
-      type="text"
-      name="firstName"
-      placeholder="First Name"
-      value={formData.firstName}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Middle Name (N/A if none)</label>
-    <input
-      type="text"
-      name="middleName"
-      placeholder="Middle Name (N/A if none)"
-      value={formData.middleName}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Surname</label>
-    <input
-      type="text"
-      name="surname"
-      placeholder="Surname"
-      value={formData.surname}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Occupation</label>
-    <input
-      type="text"
-      name="occupation"
-      placeholder="Occupation"
-      value={formData.occupation}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Current Address</label>
-    <input
-      type="text"
-      name="address"
-      placeholder="Current Address"
-      value={formData.address}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-</div>
-
-<label className="form-label">Contacts</label>
-<div className="form-row">
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Contact No.</label>
-    <input
-      type="text"
-      name="contactNo"
-      placeholder="Contact No."
-      value={formData.contactNo}
-      onChange={(e) => {
-        const formattedNumber = e.target.value.replace(/[^0-9-]/g, "");
-        setFormData((prev) => ({
-          ...prev,
-          contactNo: formattedNumber,
-        }));
-        setHasChanges(true);
-      }}
-      className="first-name-input"
-      required
-    />
-  </div>
-
-  <div className="first-name-field">
-    <label className="first-name-inner-label">Email Address</label>
-    <input
-      type="email"
-      name="email"
-      placeholder="Email Address"
-      value={formData.email}
-      onChange={handleInputChange}
-      className="first-name-input"
-      required
-    />
-  </div>
-</div>
-
-
-
-
-
-
-
-
-{/* 
               <label className="form-label">Personal Information</label>
               <div className="form-row">
-                <input
-                  type="text"
-                  name="firstName"
-                  placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">First Name</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
 
-                <input
-                  type="text"
-                  name="middleName"
-                  placeholder="Middle Name (N/A if none)"
-                  value={formData.middleName}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  type="text"
-                  name="surname"
-                  placeholder="Surname"
-                  value={formData.surname}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">
+                    Middle Name (N/A if none)
+                  </label>
+                  <input
+                    type="text"
+                    name="middleName"
+                    placeholder="Middle Name (N/A if none)"
+                    value={formData.middleName}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
 
-                <input
-                  type="text"
-                  name="occupation"
-                  placeholder="Occupation"
-                  value={formData.occupation}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">Surname</label>
+                  <input
+                    type="text"
+                    name="surname"
+                    placeholder="Surname"
+                    value={formData.surname}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
 
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Current Address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">Occupation</label>
+                  <input
+                    type="text"
+                    name="occupation"
+                    placeholder="Occupation"
+                    value={formData.occupation}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
+
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">
+                    Current Address
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Current Address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
               </div>
 
               <label className="form-label">Contacts</label>
               <div className="form-row">
-                <input
-                  type="text"
-                  name="contactNo"
-                  placeholder="Contact No."
-                  value={formData.contactNo}
-                  onChange={(e) => {
-                    const formattedNumber = e.target.value.replace(
-                      /[^0-9-]/g,
-                      "",
-                    );
-                    setFormData((prev) => ({
-                      ...prev,
-                      contactNo: formattedNumber,
-                    }));
-                    setHasChanges(true);
-                  }}
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div> */}
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">Contact No.</label>
+                  <input
+                    type="text"
+                    name="contactNo"
+                    placeholder="Contact No."
+                    value={formData.contactNo}
+                    onChange={(e) => {
+                      const formattedNumber = e.target.value.replace(
+                        /[^0-9-]/g,
+                        "",
+                      );
+                      setFormData((prev) => ({
+                        ...prev,
+                        contactNo: formattedNumber,
+                      }));
+                      setHasChanges(true);
+                    }}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
+
+                <div className="first-name-field">
+                  <label className="first-name-inner-label">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="first-name-input"
+                    required
+                  />
+                </div>
+              </div>
 
               <div className="message-section">
                 <h4 className="message-label">Referral Source (Optional)</h4>
@@ -2937,8 +2779,7 @@ if (!user) {
 
           <div className="booking-column">
             {/* <QuotationSummary /> */}
-                        {renderQuotationSummary()}
-
+            {renderQuotationSummary()}
           </div>
         </div>
 
@@ -2955,7 +2796,7 @@ if (!user) {
         </button>
       </form>
 
-      <div ref={galleryRef} style={{ display: "none" }}>
+      {/* <div ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
           data-pswp-width={2873} // Recommended width
@@ -2964,7 +2805,53 @@ if (!user) {
         >
           <img src={previewImage} alt="" />
         </a>
+      </div> */}
+
+            <div ref={galleryRef} style={{ display: "none" }}>
+        <a
+          href={previewImage}
+          data-pswp-width={2873}
+          data-pswp-height={1690}
+          data-pswp-index={0}
+        >
+          <img src={previewImage} alt="" />
+        </a>
+
+        {/* {(() => {
+          const uploadedPreviewSrc =
+            uploadedID?.preview ||
+            (typeof uploadedID === "string" ? uploadedID : null) ||
+            (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null) ||
+            (uploadedID instanceof File || uploadedID instanceof Blob
+              ? URL.createObjectURL(uploadedID)
+              : null);
+
+          if (!uploadedPreviewSrc) return null;
+
+          return (
+            <a
+              href={uploadedPreviewSrc}
+          data-pswp-width={2873}
+          data-pswp-height={1690}
+          data-pswp-index={1}
+            >
+              <img src={uploadedPreviewSrc} alt="" />
+            </a>
+          );
+        })()} */}
+                {uploadedPreviewSrc && (
+          <a
+            href={uploadedPreviewSrc}
+            data-pswp-width={uploadedPreviewSize.width}
+            data-pswp-height={uploadedPreviewSize.height}
+            data-pswp-index={1}
+          >
+            <img src={uploadedPreviewSrc} alt="" />
+          </a>
+        )}
+
       </div>
+
     </div>
   );
 };

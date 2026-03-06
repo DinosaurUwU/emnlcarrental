@@ -6942,7 +6942,7 @@ useEffect(() => {
   const fetchImageFromFirestore = async (imageId, skipValidation = false) => {
     // Check React state cache first
     if (imageCache[imageId]) {
-      console.log(`✅ Image ${imageId} loaded from React cache`);
+      // console.log(`✅ Image ${imageId} loaded from React cache`);
       return imageCache[imageId];
     }
 
