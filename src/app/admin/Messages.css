@@ -460,6 +460,15 @@ body.modal-open {
   background: #fff;
 }
 
+.conversation-thread-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.conversation-thread-list::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
 .conversation-empty {
   padding: 16px;
 }

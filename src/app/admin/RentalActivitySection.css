@@ -1651,6 +1651,10 @@
   background-color: #dc3545;
 }
 
+.confirm-status-flag.status-completed {
+  background-color: #28a745;
+}
+
 .admin-confirm-scroll-container {
   max-height: 130px;
   overflow-y: auto;

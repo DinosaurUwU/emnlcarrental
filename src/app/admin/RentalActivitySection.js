@@ -2938,6 +2938,18 @@ const RentalActivitySection = ({ subSection }) => {
                   {selectedBooking.status}
                 </div>
               )}
+
+                                    <span
+                        className={`ongoing-unit-status-badge ${
+                          selectedBooking.balanceDue === 0 ? "paid" : "unpaid"
+                        }`}
+                      >
+                        {selectedBooking.status === "Completed"
+                          ? selectedBooking.balanceDue === 0
+                            ? "Pending for ( Mark as Paid )"
+                            : "Unpaid"
+                          : selectedBooking.status}
+                      </span>
             </div>
 
             <div className="admin-confirm-details">

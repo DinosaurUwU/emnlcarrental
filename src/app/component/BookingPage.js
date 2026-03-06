@@ -326,6 +326,24 @@ useEffect(() => {
     );
   }, [uploadedID]);
 
+   const [previewImageSize, setPreviewImageSize] = useState({
+    width: 1200,
+    height: 800,
+  });
+
+  useEffect(() => {
+    if (!previewImage) return;
+
+    const img = new Image();
+    img.onload = () => {
+      setPreviewImageSize({
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+    };
+    img.src = previewImage;
+  }, [previewImage]);
+
   const [uploadedPreviewSize, setUploadedPreviewSize] = useState({
     width: 1200,
     height: 800,
@@ -2810,8 +2828,10 @@ useEffect(() => {
             <div ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
-          data-pswp-width={2873}
-          data-pswp-height={1690}
+          // data-pswp-width={2873}
+          // data-pswp-height={1690}
+          data-pswp-width={previewImageSize.width}
+          data-pswp-height={previewImageSize.height}
           data-pswp-index={0}
         >
           <img src={previewImage} alt="" />

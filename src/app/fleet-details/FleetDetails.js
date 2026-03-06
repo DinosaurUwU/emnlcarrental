@@ -223,6 +223,86 @@ const buildUnitImageMap = (units, cache) => {
   const images = overlayGalleryImages;
   const extendedImages = [...images, ...images, ...images];
 
+   const [overlayImageSizes, setOverlayImageSizes] = useState({});
+  const [fleetCarouselImageSizes, setFleetCarouselImageSizes] = useState({});
+
+  useEffect(() => {
+    if (!images.length) return;
+    let cancelled = false;
+
+    Promise.all(
+      images.map(
+        (image) =>
+          new Promise((resolve) => {
+            const src = image?.base64 || "";
+            const img = new Image();
+            img.onload = () =>
+              resolve({
+                src,
+                width: img.naturalWidth || 1200,
+                height: img.naturalHeight || 800,
+              });
+            img.onerror = () =>
+              resolve({
+                src,
+                width: 1200,
+                height: 800,
+              });
+            img.src = src;
+          }),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      const next = {};
+      results.forEach(({ src, width, height }) => {
+        if (src) next[src] = { width, height };
+      });
+      setOverlayImageSizes(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [images]);
+
+  useEffect(() => {
+    if (!carouselImages.length) return;
+    let cancelled = false;
+
+    Promise.all(
+      carouselImages.map(
+        (src) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () =>
+              resolve({
+                src,
+                width: img.naturalWidth || 1200,
+                height: img.naturalHeight || 800,
+              });
+            img.onerror = () =>
+              resolve({
+                src,
+                width: 1200,
+                height: 800,
+              });
+            img.src = src;
+          }),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      const next = {};
+      results.forEach(({ src, width, height }) => {
+        next[src] = { width, height };
+      });
+      setFleetCarouselImageSizes(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [carouselImages]);
+
   const total = images.length;
   const imgWidth = 180; // width + gap
 
@@ -477,7 +557,16 @@ useEffect(() => {
 
     if (!mounted || !galleryRef.current) return;
 
-    lightbox = new PhotoSwipeLightbox({
+    // lightbox = new PhotoSwipeLightbox({
+    //   gallery: galleryRef.current,
+    //   children: "a",
+    //   pswpModule: () => import("photoswipe"),
+    //   showHideAnimationType: "fade",
+    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+    //   maxWidth: window.innerWidth * 0.8,
+    //   maxHeight: window.innerHeight * 0.8,
+    // });
+        lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -485,6 +574,7 @@ useEffect(() => {
       paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
       maxWidth: window.innerWidth * 0.8,
       maxHeight: window.innerHeight * 0.8,
+      preloaderDelay: 0,
     });
 
     lightbox.init();
@@ -524,7 +614,17 @@ useEffect(() => {
 
     if (!mounted || !carouselGalleryRef.current) return;
 
-    carouselLightbox = new PhotoSwipeLightbox({
+    // carouselLightbox = new PhotoSwipeLightbox({
+    //   gallery: carouselGalleryRef.current,
+    //   children: "a",
+    //   pswpModule: () => import("photoswipe"),
+    //   showHideAnimationType: "fade",
+    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+    //   maxWidth: window.innerWidth * 0.8,
+    //   maxHeight: window.innerHeight * 0.8,
+    // });
+
+        carouselLightbox = new PhotoSwipeLightbox({
       gallery: carouselGalleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -532,6 +632,7 @@ useEffect(() => {
       paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
       maxWidth: window.innerWidth * 0.8,
       maxHeight: window.innerHeight * 0.8,
+      preloaderDelay: 0,
     });
 
     carouselLightbox.init();
@@ -1634,8 +1735,10 @@ const isUnitBooked = (car) => {
           <a
             key={index}
             href={image.base64} // Use base64
-            data-pswp-width={2873}
-            data-pswp-height={1690}
+            // data-pswp-width={2873}
+            // data-pswp-height={1690}
+            data-pswp-width={overlayImageSizes[image.base64]?.width || 1200}
+            data-pswp-height={overlayImageSizes[image.base64]?.height || 800}
             data-pswp-index={index}
           >
             {/* <img src={image.base64} alt="" /> */}
@@ -1649,8 +1752,10 @@ const isUnitBooked = (car) => {
           <a
             key={index}
             href={src}
-            data-pswp-width={2873} // Recommended image WIDTH
-            data-pswp-height={1690} // Recommended image HEIGHT
+            // data-pswp-width={2873} // Recommended image WIDTH
+            // data-pswp-height={1690} // Recommended image HEIGHT
+             data-pswp-width={fleetCarouselImageSizes[src]?.width || 1200}
+            data-pswp-height={fleetCarouselImageSizes[src]?.height || 800}
             data-pswp-index={`carousel-${index}`}
           >
             <img src={src} alt="" />

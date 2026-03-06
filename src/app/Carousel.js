@@ -104,6 +104,46 @@ function Carousel() {
         : ["/assets/images/default.png"];
   }, [imageCache]);
 
+   const [carouselImageSizes, setCarouselImageSizes] = useState({});
+
+  useEffect(() => {
+    if (!carouselImages.length) return;
+    let cancelled = false;
+
+    Promise.all(
+      carouselImages.map(
+        (src) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () =>
+              resolve({
+                src,
+                width: img.naturalWidth || 1200,
+                height: img.naturalHeight || 800,
+              });
+            img.onerror = () =>
+              resolve({
+                src,
+                width: 1200,
+                height: 800,
+              });
+            img.src = src;
+          }),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      const next = {};
+      results.forEach(({ src, width, height }) => {
+        next[src] = { width, height };
+      });
+      setCarouselImageSizes(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [carouselImages]);
+
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(null);
@@ -213,7 +253,16 @@ useEffect(() => {
 
     if (!mounted || !carouselGalleryRef.current) return;
 
-    lightbox = new PhotoSwipeLightbox({
+    // lightbox = new PhotoSwipeLightbox({
+    //   gallery: carouselGalleryRef.current,
+    //   children: "a",
+    //   pswpModule: () => import("photoswipe"),
+    //   showHideAnimationType: "fade",
+    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+    //   maxWidth: window.innerWidth * 0.8,
+    //   maxHeight: window.innerHeight * 0.8,
+    // });
+        lightbox = new PhotoSwipeLightbox({
       gallery: carouselGalleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -221,7 +270,9 @@ useEffect(() => {
       paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
       maxWidth: window.innerWidth * 0.8,
       maxHeight: window.innerHeight * 0.8,
+      preloaderDelay: 0,
     });
+
 
     lightbox.init();
   };
@@ -402,8 +453,10 @@ useEffect(() => {
           <a
             key={index}
             href={src}
-            data-pswp-width={2873} // Recommended image WIDTH
-            data-pswp-height={1690} // Recommended image HEIGHT
+            // data-pswp-width={2873} // Recommended image WIDTH
+            // data-pswp-height={1690} // Recommended image HEIGHT
+            data-pswp-width={carouselImageSizes[src]?.width || 1200}
+            data-pswp-height={carouselImageSizes[src]?.height || 800}
             data-pswp-index={index}
           >
             {/* <img src={src} alt="" /> */}
