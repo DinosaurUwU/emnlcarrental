@@ -710,47 +710,50 @@ const RentalActivitySection = ({ subSection }) => {
   //   const unitForm = formData[confirmUnitId] || {};
 
   const handleConfirmBooking = async () => {
-  const unitForm = formData[confirmUnitId] || {};
-  const currentUnit =
-    allUnitData.find((u) => u.id === confirmUnitId) ||
-    unitData.find((u) => u.id === confirmUnitId) ||
-    null;
+    const unitForm = formData[confirmUnitId] || {};
+    const currentUnit =
+      allUnitData.find((u) => u.id === confirmUnitId) ||
+      unitData.find((u) => u.id === confirmUnitId) ||
+      null;
 
-  if (!currentUnit) {
-    setHideAnimation(false);
-    setRentalErrorMessage("Selected unit not found. Please re-select the car.");
-    setShowRentalError(true);
-    setTimeout(() => {
-      setHideAnimation(true);
-      setTimeout(() => setShowRentalError(false), 400);
-    }, 3000);
-    return;
-  }
+    if (!currentUnit) {
+      setHideAnimation(false);
+      setRentalErrorMessage(
+        "Selected unit not found. Please re-select the car.",
+      );
+      setShowRentalError(true);
+      setTimeout(() => {
+        setHideAnimation(true);
+        setTimeout(() => setShowRentalError(false), 400);
+      }, 3000);
+      return;
+    }
 
-const sourceReservedBooking = (activeBookings || []).find((booking) => {
-  const samePlate =
-    String(booking?.plateNo || "").toUpperCase() ===
-    String(currentUnit?.plateNo || "").toUpperCase();
+    const sourceReservedBooking = (activeBookings || []).find((booking) => {
+      const samePlate =
+        String(booking?.plateNo || "").toUpperCase() ===
+        String(currentUnit?.plateNo || "").toUpperCase();
 
-  const openStatus = ["active", "pending"].includes(
-    String(booking?.status || "").toLowerCase(),
-  );
+      const openStatus = ["active", "pending"].includes(
+        String(booking?.status || "").toLowerCase(),
+      );
 
-  return samePlate && openStatus && booking?.reservation === true;
-});
+      return samePlate && openStatus && booking?.reservation === true;
+    });
 
-const sourceReservedBookingId = sourceReservedBooking
-  ? String(sourceReservedBooking.id)
-  : unitForm.reservation === true && reserveUnitId
-    ? String(reserveUnitId)
-    : null;
+    const sourceReservedBookingId = sourceReservedBooking
+      ? String(sourceReservedBooking.id)
+      : unitForm.reservation === true && reserveUnitId
+        ? String(reserveUnitId)
+        : null;
 
-const isReservedFlow = !!sourceReservedBookingId || unitForm.reservation === true;
+    const isReservedFlow =
+      !!sourceReservedBookingId || unitForm.reservation === true;
 
-  // const sourceReservedBookingId =
-  //   unitForm.reservation === true && reserveUnitId
-  //     ? String(reserveUnitId)
-  //     : null;
+    // const sourceReservedBookingId =
+    //   unitForm.reservation === true && reserveUnitId
+    //     ? String(reserveUnitId)
+    //     : null;
 
     // // Check for unit conflict BEFORE processing
     // const isUnitInUse = activeBookings.some(
@@ -768,66 +771,71 @@ const isReservedFlow = !!sourceReservedBookingId || unitForm.reservation === tru
     // }
 
     // Check for unit conflict BEFORE processing (time-window aware)
-const requestedStart = new Date(`${unitForm.startDate}T${unitForm.startTime}:00`);
-const requestedEnd = new Date(`${unitForm.endDate}T${unitForm.endTime}:00`);
+    const requestedStart = new Date(
+      `${unitForm.startDate}T${unitForm.startTime}:00`,
+    );
+    const requestedEnd = new Date(`${unitForm.endDate}T${unitForm.endTime}:00`);
 
-const requestedStartMs = requestedStart.getTime();
-const requestedEndMs = requestedEnd.getTime();
+    const requestedStartMs = requestedStart.getTime();
+    const requestedEndMs = requestedEnd.getTime();
 
-const toMs = (bookingDate, bookingTime, bookingTs, fallbackMs) => {
-  if (bookingTs?.toDate) return bookingTs.toDate().getTime();
-  if (bookingDate && bookingTime) return new Date(`${bookingDate}T${bookingTime}:00`).getTime();
-  return fallbackMs;
-};
+    const toMs = (bookingDate, bookingTime, bookingTs, fallbackMs) => {
+      if (bookingTs?.toDate) return bookingTs.toDate().getTime();
+      if (bookingDate && bookingTime)
+        return new Date(`${bookingDate}T${bookingTime}:00`).getTime();
+      return fallbackMs;
+    };
 
-const sameUnitOpenBookings = (activeBookings || []).filter((booking) => {
-  const samePlate =
-    String(booking?.plateNo || "").toUpperCase() ===
-    String(currentUnit?.plateNo || "").toUpperCase();
+    const sameUnitOpenBookings = (activeBookings || []).filter((booking) => {
+      const samePlate =
+        String(booking?.plateNo || "").toUpperCase() ===
+        String(currentUnit?.plateNo || "").toUpperCase();
 
-  const openStatus = ["active", "pending"].includes(
-    String(booking?.status || "").toLowerCase(),
-  );
+      const openStatus = ["active", "pending"].includes(
+        String(booking?.status || "").toLowerCase(),
+      );
 
-  return samePlate && openStatus;
-});
+      return samePlate && openStatus;
+    });
 
-const hasConflict = sameUnitOpenBookings.some((booking) => {
-  const existingStartMs = toMs(
-    booking.startDate,
-    booking.startTime,
-    booking.startTimestamp,
-    0,
-  );
+    const hasConflict = sameUnitOpenBookings.some((booking) => {
+      const existingStartMs = toMs(
+        booking.startDate,
+        booking.startTime,
+        booking.startTimestamp,
+        0,
+      );
 
-  const existingEndMs = toMs(
-    booking.endDate,
-    booking.endTime,
-    booking.endTimestamp,
-    Number.MAX_SAFE_INTEGER,
-  );
+      const existingEndMs = toMs(
+        booking.endDate,
+        booking.endTime,
+        booking.endTimestamp,
+        Number.MAX_SAFE_INTEGER,
+      );
 
-  // Reserved-flow source booking: allow only if new booking starts at/after source end.
-  if (
-    sourceReservedBookingId &&
-    String(booking.id) === String(sourceReservedBookingId)
-  ) {
-    return requestedStartMs < existingEndMs;
-  }
+      // Reserved-flow source booking: allow only if new booking starts at/after source end.
+      if (
+        sourceReservedBookingId &&
+        String(booking.id) === String(sourceReservedBookingId)
+      ) {
+        return requestedStartMs < existingEndMs;
+      }
 
-  // Normal overlap rule.
-  return requestedStartMs < existingEndMs && requestedEndMs > existingStartMs;
-});
+      // Normal overlap rule.
+      return (
+        requestedStartMs < existingEndMs && requestedEndMs > existingStartMs
+      );
+    });
 
-if (hasConflict) {
-  setHideAnimation(false);
-  setShowUnitConflict(true);
-  setTimeout(() => {
-    setHideAnimation(true);
-    setTimeout(() => setShowUnitConflict(false), 400);
-  }, 5000);
-  return;
-}
+    if (hasConflict) {
+      setHideAnimation(false);
+      setShowUnitConflict(true);
+      setTimeout(() => {
+        setHideAnimation(true);
+        setTimeout(() => setShowUnitConflict(false), 400);
+      }, 5000);
+      return;
+    }
 
     const duration = getRentalDuration(unitForm);
 
@@ -973,153 +981,157 @@ if (hasConflict) {
       bookingUid,
     };
 
-//     // Save to Firestore
-//     // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-//     await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-//         if (sourceReservedBookingId) {
-//       await updateActiveBooking(sourceReservedBookingId, {
-//         reservation: false,
-//       });
-//       setReserveUnitId(null);
-//     }
+    //     // Save to Firestore
+    //     // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+    //     await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
+    //         if (sourceReservedBookingId) {
+    //       await updateActiveBooking(sourceReservedBookingId, {
+    //         reservation: false,
+    //       });
+    //       setReserveUnitId(null);
+    //     }
 
-//     setFormData((prev) => ({
-//   ...prev,
-//   [confirmUnitId]: {
-//     ...(prev[confirmUnitId] || {}),
-//     reservation: false,
-//   },
-// }));
+    //     setFormData((prev) => ({
+    //   ...prev,
+    //   [confirmUnitId]: {
+    //     ...(prev[confirmUnitId] || {}),
+    //     reservation: false,
+    //   },
+    // }));
 
-//     // 🟢 Merge new booking into existing paymentEntries first
-//     triggerAutoFill((prevPaymentEntries) => ({
-//       ...prevPaymentEntries,
-//       [bookingUid]: (localPaymentEntries || []).map((entry) => ({
-//         ...entry,
-//         carName: currentUnit.name,
-//         bookingId: bookingUid,
-//       })),
-//     }));
+    //     // 🟢 Merge new booking into existing paymentEntries first
+    //     triggerAutoFill((prevPaymentEntries) => ({
+    //       ...prevPaymentEntries,
+    //       [bookingUid]: (localPaymentEntries || []).map((entry) => ({
+    //         ...entry,
+    //         carName: currentUnit.name,
+    //         bookingId: bookingUid,
+    //       })),
+    //     }));
 
-//     // UI cleanup
-//     setShowBookingConfirmOverlay(false);
-//     console.log("Clearing form for unit ID:", clearUnitId); // Debug
-//     console.log("Confirming booking for unit ID:", confirmUnitId); // Debug
-//     console.log("CURRENT UNIT:", currentUnit); // Debug
-//     console.log("BOOKING DATA:", bookingData); // Debug
-//     console.log("PRICING:", discountedRate); // Debug
+    //     // UI cleanup
+    //     setShowBookingConfirmOverlay(false);
+    //     console.log("Clearing form for unit ID:", clearUnitId); // Debug
+    //     console.log("Confirming booking for unit ID:", confirmUnitId); // Debug
+    //     console.log("CURRENT UNIT:", currentUnit); // Debug
+    //     console.log("BOOKING DATA:", bookingData); // Debug
+    //     console.log("PRICING:", discountedRate); // Debug
 
-//     handleClearForm(confirmUnitId);
+    //     handleClearForm(confirmUnitId);
 
-//     setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
-//     setShowSuccessBooking(true);
+    //     setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
+    //     setShowSuccessBooking(true);
 
-//     setSelectedUnitId(null);
+    //     setSelectedUnitId(null);
 
-//     setTimeout(() => {
-//       setHideAnimation(true);
+    //     setTimeout(() => {
+    //       setHideAnimation(true);
 
-//       setTimeout(() => {
-//         setShowSuccessBooking(false);
-//         setHideAnimation(false);
-//       }, 400);
-//     }, 5000);
-//   };
+    //       setTimeout(() => {
+    //         setShowSuccessBooking(false);
+    //         setHideAnimation(false);
+    //       }, 400);
+    //     }, 5000);
+    //   };
 
-// Save to Firestore with processing -> result overlay flow
-setProcessingBooking({
-  isProcessing: true,
-  message: "Creating Booking...",
-  textClass: "submitting-text",
-});
-
-try {
-  await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-
-  if (sourceReservedBookingId) {
-    await updateActiveBooking(sourceReservedBookingId, {
-      reservation: false,
+    // Save to Firestore with processing -> result overlay flow
+    setProcessingBooking({
+      isProcessing: true,
+      message: "Creating Booking...",
+      textClass: "submitting-text",
     });
-    setReserveUnitId(null);
-  }
 
-  setFormData((prev) => ({
-    ...prev,
-    [confirmUnitId]: {
-      ...(prev[confirmUnitId] || {}),
-      reservation: false,
-    },
-  }));
+    try {
+      await saveBookingToFirestore(
+        String(confirmUnitId),
+        bookingData,
+        bookingUid,
+      );
 
-  triggerAutoFill((prevPaymentEntries) => ({
-    ...prevPaymentEntries,
-    [bookingUid]: (localPaymentEntries || []).map((entry) => ({
-      ...entry,
-      carName: currentUnit.name,
-      bookingId: bookingUid,
-    })),
-  }));
+      if (sourceReservedBookingId) {
+        await updateActiveBooking(sourceReservedBookingId, {
+          reservation: false,
+        });
+        setReserveUnitId(null);
+      }
 
-  setShowBookingConfirmOverlay(false);
-  handleClearForm(confirmUnitId);
-
-  setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
-  setShowSuccessBooking(true);
-  setSelectedUnitId(null);
-
-  setHideCancelAnimation(false);
-  setActionOverlay({
-    isVisible: true,
-    message: "Booking created successfully!",
-    type: "success",
-  });
-
-  setTimeout(() => {
-    setHideCancelAnimation(true);
-    setTimeout(() => {
-      setActionOverlay((prev) => ({
+      setFormData((prev) => ({
         ...prev,
-        isVisible: false,
+        [confirmUnitId]: {
+          ...(prev[confirmUnitId] || {}),
+          reservation: false,
+        },
       }));
-      setHideCancelAnimation(false);
-    }, 400);
-  }, 5000);
 
-  setTimeout(() => {
-    setHideAnimation(true);
-    setTimeout(() => {
-      setShowSuccessBooking(false);
-      setHideAnimation(false);
-    }, 400);
-  }, 5000);
-} catch (error) {
-  console.error("❌ Failed to confirm booking:", error);
-
-  setHideCancelAnimation(false);
-  setActionOverlay({
-    isVisible: true,
-    message: "Failed to create booking. Please try again.",
-    type: "warning",
-  });
-
-  setTimeout(() => {
-    setHideCancelAnimation(true);
-    setTimeout(() => {
-      setActionOverlay((prev) => ({
-        ...prev,
-        isVisible: false,
+      triggerAutoFill((prevPaymentEntries) => ({
+        ...prevPaymentEntries,
+        [bookingUid]: (localPaymentEntries || []).map((entry) => ({
+          ...entry,
+          carName: currentUnit.name,
+          bookingId: bookingUid,
+        })),
       }));
+
+      setShowBookingConfirmOverlay(false);
+      handleClearForm(confirmUnitId);
+
+      setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
+      setShowSuccessBooking(true);
+      setSelectedUnitId(null);
+
       setHideCancelAnimation(false);
-    }, 400);
-  }, 5000);
-} finally {
-  setProcessingBooking({
-    isProcessing: false,
-    message: "",
-    textClass: "submitting-text",
-  });
-}
-};
+      setActionOverlay({
+        isVisible: true,
+        message: "Booking created successfully!",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        setHideCancelAnimation(true);
+        setTimeout(() => {
+          setActionOverlay((prev) => ({
+            ...prev,
+            isVisible: false,
+          }));
+          setHideCancelAnimation(false);
+        }, 400);
+      }, 5000);
+
+      setTimeout(() => {
+        setHideAnimation(true);
+        setTimeout(() => {
+          setShowSuccessBooking(false);
+          setHideAnimation(false);
+        }, 400);
+      }, 5000);
+    } catch (error) {
+      console.error("❌ Failed to confirm booking:", error);
+
+      setHideCancelAnimation(false);
+      setActionOverlay({
+        isVisible: true,
+        message: "Failed to create booking. Please try again.",
+        type: "warning",
+      });
+
+      setTimeout(() => {
+        setHideCancelAnimation(true);
+        setTimeout(() => {
+          setActionOverlay((prev) => ({
+            ...prev,
+            isVisible: false,
+          }));
+          setHideCancelAnimation(false);
+        }, 400);
+      }, 5000);
+    } finally {
+      setProcessingBooking({
+        isProcessing: false,
+        message: "",
+        textClass: "submitting-text",
+      });
+    }
+  };
 
   const toggleExpand = (unitId) => {
     setExpandedUnits((prev) => ({
@@ -1782,7 +1794,6 @@ try {
 
       {/* BOOKING FORM RENTAL DETAILS */}
       {showBookingConfirmOverlay && confirmUnitId && (
-        
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
             <button
@@ -1806,34 +1817,36 @@ try {
             <p className="confirm-text">
               Please review your booking details before proceeding.
             </p>
-{(() => {
-  const confirmUnit =
-    allUnitData.find((u) => u.id === confirmUnitId) ||
-    unitData.find((u) => u.id === confirmUnitId) ||
-    null;
+            {(() => {
+              const confirmUnit =
+                allUnitData.find((u) => u.id === confirmUnitId) ||
+                unitData.find((u) => u.id === confirmUnitId) ||
+                null;
 
-  const confirmPlate = String(confirmUnit?.plateNo || "")
-    .trim()
-    .toUpperCase();
+              const confirmPlate = String(confirmUnit?.plateNo || "")
+                .trim()
+                .toUpperCase();
 
-  const hasReservedSource =
-    !!confirmPlate &&
-    (activeBookings || []).some(
-      (booking) =>
-        String(booking?.plateNo || "").trim().toUpperCase() === confirmPlate &&
-        booking?.reservation === true &&
-        ["active", "pending"].includes(
-          String(booking?.status || "").toLowerCase(),
-        ),
-    );
+              const hasReservedSource =
+                !!confirmPlate &&
+                (activeBookings || []).some(
+                  (booking) =>
+                    String(booking?.plateNo || "")
+                      .trim()
+                      .toUpperCase() === confirmPlate &&
+                    booking?.reservation === true &&
+                    ["active", "pending"].includes(
+                      String(booking?.status || "").toLowerCase(),
+                    ),
+                );
 
-  const isReservedDraft = formData[confirmUnitId]?.reservation === true;
+              const isReservedDraft =
+                formData[confirmUnitId]?.reservation === true;
 
-  return isReservedDraft || hasReservedSource ? (
-    <div className="confirm-reserved-flag">Reserved Unit</div>
-  ) : null;
-})()}
-
+              return isReservedDraft || hasReservedSource ? (
+                <div className="confirm-reserved-flag">Reserved Unit</div>
+              ) : null;
+            })()}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -1848,7 +1861,6 @@ try {
                       allUnitData.find((u) => u.id === confirmUnitId) ||
                       unitData.find((u) => u.id === confirmUnitId) ||
                       null;
-
 
                     const unitForm = formData[confirmUnitId] || {};
 
@@ -1993,9 +2005,9 @@ try {
                   //   (u) => u.id === confirmUnitId,
                   // );
                   const currentUnit =
-                  allUnitData.find((u) => u.id === confirmUnitId) ||
-                  unitData.find((u) => u.id === confirmUnitId) ||
-                  null;
+                    allUnitData.find((u) => u.id === confirmUnitId) ||
+                    unitData.find((u) => u.id === confirmUnitId) ||
+                    null;
 
                   const unitForm = formData[confirmUnitId] || {};
 
@@ -2406,17 +2418,19 @@ try {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
-<div className="confirm-flag-row">
-  {selectedBooking?.reservation === true && (
-    <div className="confirm-reserved-flag">Reserved Booking</div>
-  )}
+            <div className="confirm-flag-row">
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
 
-  {typeof selectedBooking?.status === "string" && (
-    <div className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}>
-      {selectedBooking.status}
-    </div>
-  )}
-</div>
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
+                >
+                  {selectedBooking.status}
+                </div>
+              )}
+            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -2912,17 +2926,19 @@ try {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
-<div className="confirm-flag-row">
-  {selectedBooking?.reservation === true && (
-    <div className="confirm-reserved-flag">Reserved Booking</div>
-  )}
+            <div className="confirm-flag-row">
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
 
-  {typeof selectedBooking?.status === "string" && (
-    <div className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}>
-      {selectedBooking.status}
-    </div>
-  )}
-</div>
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
+                >
+                  {selectedBooking.status}
+                </div>
+              )}
+            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -3742,7 +3758,10 @@ try {
         <div className="overlay-delete">
           <div className="confirm-modal">
             <h3>Reserve this unit for the next renter?</h3>
-<p>This will flag the current booking as reserved and open this unit in Bookings for the next booking draft.</p>
+            <p>
+              This will flag the current booking as reserved and open this unit
+              in Bookings for the next booking draft.
+            </p>
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
@@ -3812,121 +3831,133 @@ try {
                 //   }
                 // }}
                 onClick={async () => {
-  setShowReserveConfirm(false);
+                  setShowReserveConfirm(false);
 
-  setProcessingBooking({
-    isProcessing: true,
-    message: "Preparing Reservation...",
-    textClass: "submitting-text",
-  });
+                  setProcessingBooking({
+                    isProcessing: true,
+                    message: "Preparing Reservation...",
+                    textClass: "submitting-text",
+                  });
 
-  try {
-    await reserveUnit(reserveUnitId);
+                  try {
+                    await reserveUnit(reserveUnitId);
 
-    const sourceBooking = (activeBookings || []).find(
-      (b) => String(b.id) === String(reserveUnitId),
-    );
+                    const sourceBooking = (activeBookings || []).find(
+                      (b) => String(b.id) === String(reserveUnitId),
+                    );
 
-    if (sourceBooking) {
-      const unitId = String(sourceBooking.plateNo || "");
-      const nextStartDate = sourceBooking.endDate || "";
-      const nextStartTime = sourceBooking.endTime || "";
+                    if (sourceBooking) {
+                      const unitId = String(sourceBooking.plateNo || "");
+                      const nextStartDate = sourceBooking.endDate || "";
+                      const nextStartTime = sourceBooking.endTime || "";
 
-      if (sourceBooking.carType) {
-        setFilterType(String(sourceBooking.carType).toUpperCase());
-      }
+                      if (sourceBooking.carType) {
+                        setFilterType(
+                          String(sourceBooking.carType).toUpperCase(),
+                        );
+                      }
 
-      setSelectedUnitId(unitId);
+                      setSelectedUnitId(unitId);
 
-      setFormData((prev) => ({
-        ...prev,
-        [unitId]: {
-          drivingOption: prev[unitId]?.drivingOption || "Self-Drive",
-          pickupOption: prev[unitId]?.pickupOption || "Pickup",
-          startDate: nextStartDate,
-          startTime: nextStartTime,
-          endDate: prev[unitId]?.endDate || "",
-          endTime: prev[unitId]?.endTime || "",
-          assignedDriver: prev[unitId]?.assignedDriver || "",
-          dropoffLocation: prev[unitId]?.dropoffLocation || "",
-          location: prev[unitId]?.location || "",
-          purpose: prev[unitId]?.purpose || "",
-          driverLicense: prev[unitId]?.driverLicense || null,
-          firstName: prev[unitId]?.firstName || "",
-          middleName: prev[unitId]?.middleName || "",
-          surname: prev[unitId]?.surname || "",
-          contact: prev[unitId]?.contact || "",
-          email: prev[unitId]?.email || "",
-          occupation: prev[unitId]?.occupation || "",
-          address: prev[unitId]?.address || "",
-          referralSource: prev[unitId]?.referralSource || "",
-          additionalMessage: prev[unitId]?.additionalMessage || "",
-          discountType: prev[unitId]?.discountType || "peso",
-          discountValue: Number(prev[unitId]?.discountValue || 0),
-          reservation: true,
-        },
-      }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        [unitId]: {
+                          drivingOption:
+                            prev[unitId]?.drivingOption || "Self-Drive",
+                          pickupOption: prev[unitId]?.pickupOption || "Pickup",
+                          startDate: nextStartDate,
+                          startTime: nextStartTime,
+                          endDate: prev[unitId]?.endDate || "",
+                          endTime: prev[unitId]?.endTime || "",
+                          assignedDriver: prev[unitId]?.assignedDriver || "",
+                          dropoffLocation: prev[unitId]?.dropoffLocation || "",
+                          location: prev[unitId]?.location || "",
+                          purpose: prev[unitId]?.purpose || "",
+                          driverLicense: prev[unitId]?.driverLicense || null,
+                          firstName: prev[unitId]?.firstName || "",
+                          middleName: prev[unitId]?.middleName || "",
+                          surname: prev[unitId]?.surname || "",
+                          contact: prev[unitId]?.contact || "",
+                          email: prev[unitId]?.email || "",
+                          occupation: prev[unitId]?.occupation || "",
+                          address: prev[unitId]?.address || "",
+                          referralSource: prev[unitId]?.referralSource || "",
+                          additionalMessage:
+                            prev[unitId]?.additionalMessage || "",
+                          discountType: prev[unitId]?.discountType || "peso",
+                          discountValue: Number(
+                            prev[unitId]?.discountValue || 0,
+                          ),
+                          reservation: true,
+                        },
+                      }));
 
-      setTimeout(() => {
-        document
-          .querySelector(".available-units-column .select-container")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    }
+                      setTimeout(() => {
+                        document
+                          .querySelector(
+                            ".available-units-column .select-container",
+                          )
+                          ?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                      }, 100);
+                    }
 
-    setProcessingBooking({
-      isProcessing: false,
-      message: "",
-      textClass: "submitting-text",
-    });
+                    setProcessingBooking({
+                      isProcessing: false,
+                      message: "",
+                      textClass: "submitting-text",
+                    });
 
-    setHideCancelAnimation(false);
-    setActionOverlay({
-      isVisible: true,
-      message: "Reserved flag set. Continue in Bookings to create the next rental.",
-      type: "success",
-    });
+                    setHideCancelAnimation(false);
+                    setActionOverlay({
+                      isVisible: true,
+                      message:
+                        "Reserved flag set. Continue in Bookings to create the next rental.",
+                      type: "success",
+                    });
 
-    setTimeout(() => {
-      setHideCancelAnimation(true);
-      setTimeout(
-        () =>
-          setActionOverlay({
-            ...actionOverlay,
-            isVisible: false,
-          }),
-        400,
-      );
-    }, 5000);
-  } catch (err) {
-    console.error("❌ Failed to reserve unit:", err);
+                    setTimeout(() => {
+                      setHideCancelAnimation(true);
+                      setTimeout(
+                        () =>
+                          setActionOverlay({
+                            ...actionOverlay,
+                            isVisible: false,
+                          }),
+                        400,
+                      );
+                    }, 5000);
+                  } catch (err) {
+                    console.error("❌ Failed to reserve unit:", err);
 
-    setProcessingBooking({
-      isProcessing: false,
-      message: "",
-      textClass: "submitting-text",
-    });
+                    setProcessingBooking({
+                      isProcessing: false,
+                      message: "",
+                      textClass: "submitting-text",
+                    });
 
-    setHideCancelAnimation(false);
-    setActionOverlay({
-      isVisible: true,
-      message: "Failed to prepare reservation draft!",
-      type: "warning",
-    });
+                    setHideCancelAnimation(false);
+                    setActionOverlay({
+                      isVisible: true,
+                      message: "Failed to prepare reservation draft!",
+                      type: "warning",
+                    });
 
-    setTimeout(() => {
-      setHideCancelAnimation(true);
-      setTimeout(
-        () =>
-          setActionOverlay({
-            ...actionOverlay,
-            isVisible: false,
-          }),
-        400,
-      );
-    }, 5000);
-  }
-}}
+                    setTimeout(() => {
+                      setHideCancelAnimation(true);
+                      setTimeout(
+                        () =>
+                          setActionOverlay({
+                            ...actionOverlay,
+                            isVisible: false,
+                          }),
+                        400,
+                      );
+                    }, 5000);
+                  }
+                }}
               >
                 Yes, Reserve
               </button>
@@ -4879,80 +4910,78 @@ try {
               <div className="personal-info-section">
                 <h4>Personal Information</h4>
                 <div className="personal-info-fields">
-                   <div className="input-with-icon personal-info-field">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="First Name"
-                    className="personal-info-input"
-                    value={editRequestFormData?.firstName || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  First Name
-                                </label>
-                                </div>
-
-                   <div className="personal-info-field">
-                  <input
-                    type="text"
-                    name="middleName"
-                    placeholder="Middle Name (N/A if none)"
-                    className="personal-info-input"
-                    value={editRequestFormData?.middleName || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  Middle Name (N/A if none)
-                                </label>
-                              </div>
+                  <div className="input-with-icon personal-info-field">
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder="First Name"
+                      className="personal-info-input"
+                      value={editRequestFormData?.firstName || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      First Name
+                    </label>
+                  </div>
 
                   <div className="personal-info-field">
-                  <input
-                    type="text"
-                    name="surname"
-                    placeholder="Surname"
-                    className="personal-info-input"
-                    value={editRequestFormData?.surname || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  Surname
-                                </label>
-                              </div>
+                    <input
+                      type="text"
+                      name="middleName"
+                      placeholder="Middle Name (N/A if none)"
+                      className="personal-info-input"
+                      value={editRequestFormData?.middleName || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Middle Name (N/A if none)
+                    </label>
+                  </div>
 
- <div className="personal-info-field">
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Current Address"
-                    className="personal-info-input"
-                    value={editRequestFormData?.address || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  Current Address
-                                </label>
-                              </div>
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="surname"
+                      placeholder="Surname"
+                      className="personal-info-input"
+                      value={editRequestFormData?.surname || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">Surname</label>
+                  </div>
 
-<div className="personal-info-field">
-                  <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Occupation"
-                    className="personal-info-input"
-                    value={editRequestFormData?.occupation || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                                                 <label className="personal-info-inner-label">
-                                  Occupation
-                                </label>
-                              </div>
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Current Address"
+                      className="personal-info-input"
+                      value={editRequestFormData?.address || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Current Address
+                    </label>
+                  </div>
+
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="occupation"
+                      placeholder="Occupation"
+                      className="personal-info-input"
+                      value={editRequestFormData?.occupation || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Occupation
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -4960,34 +4989,34 @@ try {
                 <h4>Contacts</h4>
                 <div className="contact-occupation-fields">
                   <div className="contact-occupation-field">
-                  <input
-                    type="tel"
-                    name="contact"
-                    placeholder="Contact No."
-                    className="personal-info-input"
-                    value={editRequestFormData?.contact || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-<label className="personal-info-inner-label">
-                                  Contact No.
-                                </label>
-                              </div>
+                    <input
+                      type="tel"
+                      name="contact"
+                      placeholder="Contact No."
+                      className="personal-info-input"
+                      value={editRequestFormData?.contact || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Contact No.
+                    </label>
+                  </div>
 
-                   <div className="contact-occupation-field">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="personal-info-input"
-                    value={editRequestFormData?.email || ""}
-                    onChange={handleEditRequestInputChange}
-                    required
-                  />
-                  <label className="personal-info-inner-label">
-                                  Email Address
-                                </label>
-                              </div>
+                  <div className="contact-occupation-field">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      className="personal-info-input"
+                      value={editRequestFormData?.email || ""}
+                      onChange={handleEditRequestInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Email Address
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -6187,83 +6216,78 @@ try {
                 <h4>Personal Information</h4>
                 <div className="personal-info-fields">
                   <div className="input-with-icon personal-info-field">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="First Name"
-                    className="personal-info-input"
-                    value={editFormData?.firstName || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-                  <label className="personal-info-inner-label">
-                                  First Name
-                                </label>
-                                </div>
-
-                         <div className="personal-info-field">       
-                  <input
-                    type="text"
-                    name="middleName"
-                    placeholder="Middle Name (N/A if none)"
-                    className="personal-info-input"
-                    value={editFormData?.middleName || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-
-                                                  <label className="personal-info-inner-label">
-                                  Middle Name (N/A if none)
-                                </label>
-                              </div>
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder="First Name"
+                      className="personal-info-input"
+                      value={editFormData?.firstName || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      First Name
+                    </label>
+                  </div>
 
                   <div className="personal-info-field">
-                    
-                  <input
-                    type="text"
-                    name="surname"
-                    placeholder="Surname"
-                    className="personal-info-input"
-                    value={editFormData?.surname || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  Surname
-                                </label>
-                              </div>
+                    <input
+                      type="text"
+                      name="middleName"
+                      placeholder="Middle Name (N/A if none)"
+                      className="personal-info-input"
+                      value={editFormData?.middleName || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
 
-<div className="personal-info-field">
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Current Address"
-                    className="personal-info-input"
-                    value={editFormData?.address || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-                                <label className="personal-info-inner-label">
-                                  Current Address
-                                </label>
-                              </div>
+                    <label className="personal-info-inner-label">
+                      Middle Name (N/A if none)
+                    </label>
+                  </div>
 
-<div className="personal-info-field">
-                                    <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Occupation"
-                    className="personal-info-input"
-                    value={editFormData?.occupation || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-<label className="personal-info-inner-label">
-                                  Occupation
-                                </label>
-                 
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="surname"
+                      placeholder="Surname"
+                      className="personal-info-input"
+                      value={editFormData?.surname || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">Surname</label>
+                  </div>
 
-                </div>
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Current Address"
+                      className="personal-info-input"
+                      value={editFormData?.address || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Current Address
+                    </label>
+                  </div>
+
+                  <div className="personal-info-field">
+                    <input
+                      type="text"
+                      name="occupation"
+                      placeholder="Occupation"
+                      className="personal-info-input"
+                      value={editFormData?.occupation || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Occupation
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -6271,33 +6295,33 @@ try {
                 <h4>Contacts</h4>
                 <div className="contact-occupation-fields">
                   <div className="contact-occupation-field">
-                  <input
-                    type="tel"
-                    name="contact"
-                    placeholder="Contact No."
-                    className="personal-info-input"
-                    value={editFormData?.contact || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-<label className="personal-info-inner-label">
-                                  Contact No.
-                                </label>
-                              </div>
-<div className="contact-occupation-field">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="personal-info-input"
-                    value={editFormData?.email || ""}
-                    onChange={handleEditInputChange}
-                    required
-                  />
-<label className="personal-info-inner-label">
-                                  Email Address
-                                </label>
-                              </div>
+                    <input
+                      type="tel"
+                      name="contact"
+                      placeholder="Contact No."
+                      className="personal-info-input"
+                      value={editFormData?.contact || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Contact No.
+                    </label>
+                  </div>
+                  <div className="contact-occupation-field">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      className="personal-info-input"
+                      value={editFormData?.email || ""}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                    <label className="personal-info-inner-label">
+                      Email Address
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -7835,10 +7859,10 @@ try {
                           </button>
 
                           {rental.reservation === true && (
-  <span className="edit-unit-status-badge request-reserved-badge">
-    Reserved Booking
-  </span>
-)}
+                            <span className="edit-unit-status-badge request-reserved-badge">
+                              Reserved Booking
+                            </span>
+                          )}
 
                           <button
                             className="ongoing-unit-details-button"
@@ -7988,25 +8012,25 @@ try {
                           })()}
                         </div>
 
-<div className="ongoing-unit-status-row">
-  <span
-    className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-  >
-    {rental.status}
-  </span>
+                        <div className="ongoing-unit-status-row">
+                          <span
+                            className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
+                          >
+                            {rental.status}
+                          </span>
 
-  {rental.reservation === true && (
-    <span className="ongoing-unit-status-badge reserved-booking">
-      Reserved Booking
-    </span>
-  )}
+                          {rental.reservation === true && (
+                            <span className="ongoing-unit-status-badge reserved-booking">
+                              Reserved Booking
+                            </span>
+                          )}
 
-  {rental.reservationConflict === true && (
-    <span className="ongoing-unit-status-badge reservation-conflict">
-      Conflict
-    </span>
-  )}
-</div>
+                          {rental.reservationConflict === true && (
+                            <span className="ongoing-unit-status-badge reservation-conflict">
+                              Conflict
+                            </span>
+                          )}
+                        </div>
 
                         <button
                           className="ongoing-unit-details-button"
@@ -8097,9 +8121,6 @@ try {
                               Cancel
                             </button>
 
-
-
-
                             {/* <button
                               className="action-button finish"
                               onClick={() => {
@@ -8109,17 +8130,18 @@ try {
                             >
                               Finish
                             </button> */}
-                            {String(rental.status || "").toLowerCase() !== "pending" && (
-  <button
-    className="action-button finish"
-    onClick={() => {
-      setFinishRentalId(rental.id);
-      setShowFinishConfirm(true);
-    }}
-  >
-    Finish
-  </button>
-)}
+                            {String(rental.status || "").toLowerCase() !==
+                              "pending" && (
+                              <button
+                                className="action-button finish"
+                                onClick={() => {
+                                  setFinishRentalId(rental.id);
+                                  setShowFinishConfirm(true);
+                                }}
+                              >
+                                Finish
+                              </button>
+                            )}
 
                             {/* More button with dropdown */}
                             <div className="action-more">
@@ -8148,19 +8170,19 @@ onClick={() => {
                                   >
                                     Reserve
                                   </button> */}
-                                  {String(rental.status || "").toLowerCase() !== "pending" && (
-  <button
-    className="action-button reserve"
-    onClick={() => {
-      setReserveUnitId(rental.id);
-      setShowReserveConfirm(true);
-      setShowMoreFor(null);
-    }}
-  >
-    Reserve
-  </button>
-)}
-
+                                  {String(rental.status || "").toLowerCase() !==
+                                    "pending" && (
+                                    <button
+                                      className="action-button reserve"
+                                      onClick={() => {
+                                        setReserveUnitId(rental.id);
+                                        setShowReserveConfirm(true);
+                                        setShowMoreFor(null);
+                                      }}
+                                    >
+                                      Reserve
+                                    </button>
+                                  )}
 
                                   <button
                                     className="action-button extend"
@@ -8317,19 +8339,20 @@ onClick={() => {
 
                       const unitForm = formData[selectedUnitId] || {};
                       const reservedActiveBooking = (activeBookings || []).find(
-  (booking) =>
-    String(booking?.plateNo || "").toUpperCase() ===
-      String(selectedUnit?.plateNo || "").toUpperCase() &&
-    booking?.reservation === true &&
-    String(booking?.status || "").toLowerCase() === "active",
-);
-//                       const reservedActiveBooking = (activeBookings || []).find(
-//   (booking) =>
-//     String(booking?.plateNo || "").toUpperCase() ===
-//       String(selectedUnit?.plateNo || "").toUpperCase() &&
-//     booking?.reservation === true &&
-//     ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
-// );
+                        (booking) =>
+                          String(booking?.plateNo || "").toUpperCase() ===
+                            String(selectedUnit?.plateNo || "").toUpperCase() &&
+                          booking?.reservation === true &&
+                          String(booking?.status || "").toLowerCase() ===
+                            "active",
+                      );
+                      //                       const reservedActiveBooking = (activeBookings || []).find(
+                      //   (booking) =>
+                      //     String(booking?.plateNo || "").toUpperCase() ===
+                      //       String(selectedUnit?.plateNo || "").toUpperCase() &&
+                      //     booking?.reservation === true &&
+                      //     ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
+                      // );
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
@@ -8390,8 +8413,10 @@ onClick={() => {
                           <div className="sticky-banner-group">
                             <div className="selected-unit-image">
                               {reservedActiveBooking && (
-  <span className="selected-unit-reserved-badge">Reserved Booking</span>
-)}
+                                <span className="selected-unit-reserved-badge">
+                                  Reserved Booking
+                                </span>
+                              )}
                               {(() => {
                                 if (!selectedUnit) {
                                   return (
@@ -9015,7 +9040,7 @@ onClick={() => {
                             </div>
                           </div> */}
 
-                                                    <div className="personal-info-section">
+                          <div className="personal-info-section">
                             <h4>Personal Information</h4>
                             <div className="personal-info-fields">
                               <div className="input-with-icon personal-info-field">
@@ -9661,32 +9686,31 @@ onClick={() => {
                       })()}
                     </div>
 
-<div className="ongoing-unit-status-row">
-  <span
-    className={`ongoing-unit-status-badge ${
-      booking.balanceDue === 0 ? "paid" : "unpaid"
-    }`}
-  >
-    {booking.status === "Completed"
-      ? booking.balanceDue === 0
-        ? "Pending for ( Mark as Paid )"
-        : "Unpaid"
-      : booking.status}
-  </span>
+                    <div className="ongoing-unit-status-row">
+                      <span
+                        className={`ongoing-unit-status-badge ${
+                          booking.balanceDue === 0 ? "paid" : "unpaid"
+                        }`}
+                      >
+                        {booking.status === "Completed"
+                          ? booking.balanceDue === 0
+                            ? "Pending for ( Mark as Paid )"
+                            : "Unpaid"
+                          : booking.status}
+                      </span>
 
-  {booking?.reservation === true && (
-    <span className="ongoing-unit-status-badge reserved-booking">
-      Reserved Booking
-    </span>
-  )}
+                      {booking?.reservation === true && (
+                        <span className="ongoing-unit-status-badge reserved-booking">
+                          Reserved Booking
+                        </span>
+                      )}
 
-  {booking?.reservationConflict === true && (
-    <span className="ongoing-unit-status-badge reservation-conflict">
-      Conflict
-    </span>
-  )}
-</div>
-
+                      {booking?.reservationConflict === true && (
+                        <span className="ongoing-unit-status-badge reservation-conflict">
+                          Conflict
+                        </span>
+                      )}
+                    </div>
 
                     <button
                       className="ongoing-unit-details-button"
