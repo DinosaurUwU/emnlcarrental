@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import { auth } from "../lib/firebase";
 
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import "./Profile.css";
 import { MdMoreVert, MdClose, MdWarning, MdCheckCircle } from "react-icons/md";
 
@@ -92,8 +94,70 @@ const Profile = ({ openBooking }) => {
     useState(false);
   const [selectedHistoryRental, setSelectedHistoryRental] = useState(null);
   const [now, setNow] = useState(new Date());
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
+  const licenseGalleryRef = useRef(null);
+  const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
+  const previewKeyRef = useRef(0);
+  const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+
+    useEffect(() => {
+    if (!licenseGalleryRef.current) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: licenseGalleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
+
+    lightbox.init();
+    return () => lightbox.destroy();
+  }, []);
+
+  const openPhotoSwipePreview = (src) => {
+    if (!src) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.onerror = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: 1200,
+        height: 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.src = src;
+  };
+
+  useEffect(() => {
+    if (!pendingPreviewKey || !photoSwipePreviewItem) return;
+
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-pswp-index="profile-preview-${pendingPreviewKey}"]`)
+        ?.click();
+      setPendingPreviewKey(null);
+    });
+  }, [pendingPreviewKey, photoSwipePreviewItem]);
   const [showCancelBookingConfirm, setShowCancelBookingConfirm] =
     useState(false);
   const [showEditBookingConfirm, setShowEditBookingConfirm] = useState(false);
@@ -1330,9 +1394,16 @@ const Profile = ({ openBooking }) => {
                       }
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
+                                            onClick={() => {
+                        const licenseSrc =
+                          typeof selectedBooking.driverLicense === "string"
+                            ? selectedBooking.driverLicense
+                            : URL.createObjectURL(selectedBooking.driverLicense);
+                        openPhotoSwipePreview(licenseSrc);
                       }}
                     />
                   ) : (
@@ -1634,19 +1705,18 @@ const Profile = ({ openBooking }) => {
         </div>
       )}
 
-      {isImageModalOpen && modalImage && (
-        <div className="admin-image-modal-overlay" onClick={closeModal}>
-          <img
-            src={
-              typeof modalImage === "string"
-                ? modalImage
-                : URL.createObjectURL(modalImage)
-            }
-            alt="Full License"
-            className="admin-full-image-view"
-          />
-        </div>
-      )}
+      <div ref={licenseGalleryRef} style={{ display: "none" }}>
+        {photoSwipePreviewItem && (
+          <a
+            href={photoSwipePreviewItem.src}
+            data-pswp-width={photoSwipePreviewItem.width}
+            data-pswp-height={photoSwipePreviewItem.height}
+            data-pswp-index={`profile-preview-${photoSwipePreviewItem.key}`}
+          >
+            <span aria-hidden="true" />
+          </a>
+        )}
+      </div>
 
       {showRevertConfirm && (
         <div className="overlay-revert">
@@ -3466,9 +3536,19 @@ const Profile = ({ openBooking }) => {
                           }
                           alt="Driver's License"
                           className="admin-confirm-id-preview"
-                          onClick={() => {
-                            setModalImage(selectedHistoryRental.driverLicense);
-                            setIsImageModalOpen(true);
+                          // onClick={() => {
+                          //   setModalImage(selectedHistoryRental.driverLicense);
+                          //   setIsImageModalOpen(true);
+                          // }}
+                                                    onClick={() => {
+                            const licenseSrc =
+                              typeof selectedHistoryRental.driverLicense ===
+                              "string"
+                                ? selectedHistoryRental.driverLicense
+                                : URL.createObjectURL(
+                                    selectedHistoryRental.driverLicense,
+                                  );
+                            openPhotoSwipePreview(licenseSrc);
                           }}
                         />
                       ) : (
