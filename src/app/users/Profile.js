@@ -778,20 +778,21 @@ const Profile = ({ openBooking }) => {
   };
 
   const handleSaveProfileChanges = () => {
-const composedName = `${editedProfile.surname || ""} ${editedProfile.firstName || ""}`
-  .replace(/\s+/g, " ")
-  .trim();
+    const composedName =
+      `${editedProfile.surname || ""} ${editedProfile.firstName || ""}`
+        .replace(/\s+/g, " ")
+        .trim();
 
-updateUser({
-  profilePic: tempProfilePic,
-  name: composedName || user?.name || "", // keep name in sync
-  surname: editedProfile.surname,
-  firstName: editedProfile.firstName,
-  middleName: editedProfile.middleName,
-  occupation: editedProfile.occupation,
-  phone: editedProfile.contact,
-  address: editedProfile.address,
-});
+    updateUser({
+      profilePic: tempProfilePic,
+      name: composedName || user?.name || "", // keep name in sync
+      surname: editedProfile.surname,
+      firstName: editedProfile.firstName,
+      middleName: editedProfile.middleName,
+      occupation: editedProfile.occupation,
+      phone: editedProfile.contact,
+      address: editedProfile.address,
+    });
 
     setShowEditProfileOverlay(false);
 
@@ -851,12 +852,12 @@ updateUser({
     if (!user?.uid) return null;
 
     const getMs = (msg) => {
-  const ts = msg?.startTimestamp;
-  if (ts?.toDate) return ts.toDate().getTime();
-  if (typeof ts?.seconds === "number") return ts.seconds * 1000;
-  if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
-  return 0;
-};
+      const ts = msg?.startTimestamp;
+      if (ts?.toDate) return ts.toDate().getTime();
+      if (typeof ts?.seconds === "number") return ts.seconds * 1000;
+      if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
+      return 0;
+    };
     const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
 
     const getOtherUid = (msg) => {
@@ -879,29 +880,27 @@ updateUser({
       (msg) => msg?.recipientUid && msg.recipientUid !== user.uid,
     );
 
-const participant = {
-  name:
-    adminMeta.name ||
-    incoming?.name ||
-    outgoing?.recipientName ||
-    incoming?.email ||
-    outgoing?.recipientEmail ||
-    "Admin",
-  email:
-    adminMeta.email ||
-    incoming?.email ||
-    outgoing?.recipientEmail ||
-    "No email",
-  contact:
-    adminMeta.contact ||
-    incoming?.contact ||
-    outgoing?.recipientContact ||
-    "No contact",
-  profilePic:
-    adminMeta.profilePic ||
-    incoming?.profilePic ||
-    "/assets/profile.png",
-};
+    const participant = {
+      name:
+        adminMeta.name ||
+        incoming?.name ||
+        outgoing?.recipientName ||
+        incoming?.email ||
+        outgoing?.recipientEmail ||
+        "Admin",
+      email:
+        adminMeta.email ||
+        incoming?.email ||
+        outgoing?.recipientEmail ||
+        "No email",
+      contact:
+        adminMeta.contact ||
+        incoming?.contact ||
+        outgoing?.recipientContact ||
+        "No contact",
+      profilePic:
+        adminMeta.profilePic || incoming?.profilePic || "/assets/profile.png",
+    };
 
     return {
       id: resolvedAdminUid,
@@ -910,16 +909,15 @@ const participant = {
     };
   }, [chatMessages, user?.uid, adminUid, adminMeta]);
 
-    const profileChatBodyRef = useRef(null);
+  const profileChatBodyRef = useRef(null);
 
   useEffect(() => {
-  if (activeTab !== "conversations") return;
-  if (!profileChatBodyRef.current) return;
+    if (activeTab !== "conversations") return;
+    if (!profileChatBodyRef.current) return;
 
-  profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
-}, [adminConversation?.messages?.length, activeTab]);
-
- 
+    profileChatBodyRef.current.scrollTop =
+      profileChatBodyRef.current.scrollHeight;
+  }, [adminConversation?.messages?.length, activeTab]);
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -946,93 +944,98 @@ const participant = {
     });
   }, [activeTab, adminConversation, markMessageAsRead]);
 
-const sendConversationMessage = async () => {
-  const text = chatInput.trim();
-  if (!text || !user?.uid) return;
+  const sendConversationMessage = async () => {
+    const text = chatInput.trim();
+    if (!text || !user?.uid) return;
 
-  setChatInput(""); // clear immediately for better UX
+    setChatInput(""); // clear immediately for better UX
 
-  let resolvedAdmin = {
-    uid: adminConversation?.id || adminUid || adminMeta.uid || "",
-    name: adminConversation?.participant?.name || adminMeta.name || "Admin",
-    email: adminConversation?.participant?.email || adminMeta.email || "No email",
-    contact:
-      adminConversation?.participant?.contact || adminMeta.contact || "No contact",
+    let resolvedAdmin = {
+      uid: adminConversation?.id || adminUid || adminMeta.uid || "",
+      name: adminConversation?.participant?.name || adminMeta.name || "Admin",
+      email:
+        adminConversation?.participant?.email || adminMeta.email || "No email",
+      contact:
+        adminConversation?.participant?.contact ||
+        adminMeta.contact ||
+        "No contact",
+    };
+
+    if (!resolvedAdmin.uid) {
+      const fetchedAdmin = await fetchAdminUid();
+      if (fetchedAdmin?.uid) {
+        setAdminMeta({
+          uid: fetchedAdmin.uid || "",
+          name: fetchedAdmin.name || "",
+          email: fetchedAdmin.email || "",
+          contact: fetchedAdmin.contact || "",
+          profilePic: fetchedAdmin.profilePic || "/assets/profile.png",
+        });
+
+        resolvedAdmin = {
+          uid: fetchedAdmin.uid,
+          name: fetchedAdmin.name || "Admin",
+          email: fetchedAdmin.email || "No email",
+          contact: fetchedAdmin.contact || "No contact",
+        };
+      }
+    }
+
+    if (!resolvedAdmin.uid) {
+      setChatInput(text); // restore on failure
+      showActionOverlay({
+        message: "Admin chat is not ready yet. Please try again.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const result = await sendMessage({
+      name:
+        `${user?.surname || ""} ${user?.firstName || ""}`
+          .replace(/\s+/g, " ")
+          .trim() ||
+        user?.name ||
+        "User",
+      email: user.email,
+      phone: user.phone,
+      message: text,
+      recipientUid: resolvedAdmin.uid,
+      senderUid: user.uid,
+      isAdminSender: false,
+      recipientName: resolvedAdmin.name,
+      recipientEmail: resolvedAdmin.email,
+      recipientPhone: resolvedAdmin.contact,
+    });
+
+    if (!result?.success) {
+      setChatInput(text); // restore on failure
+      showActionOverlay({
+        message: result?.error || "Failed to send message.",
+        type: "warning",
+      });
+      return;
+    }
+
+    setTimeout(() => {
+      if (profileChatBodyRef.current) {
+        profileChatBodyRef.current.scrollTop =
+          profileChatBodyRef.current.scrollHeight;
+      }
+    }, 0);
+
+    showActionOverlay({
+      message: "Message sent successfully!",
+      type: "success",
+    });
   };
 
-  if (!resolvedAdmin.uid) {
-    const fetchedAdmin = await fetchAdminUid();
-    if (fetchedAdmin?.uid) {
-      setAdminMeta({
-        uid: fetchedAdmin.uid || "",
-        name: fetchedAdmin.name || "",
-        email: fetchedAdmin.email || "",
-        contact: fetchedAdmin.contact || "",
-        profilePic: fetchedAdmin.profilePic || "/assets/profile.png",
-      });
-
-      resolvedAdmin = {
-        uid: fetchedAdmin.uid,
-        name: fetchedAdmin.name || "Admin",
-        email: fetchedAdmin.email || "No email",
-        contact: fetchedAdmin.contact || "No contact",
-      };
+  const handleProfileChatKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendConversationMessage();
     }
-  }
-
-  if (!resolvedAdmin.uid) {
-    setChatInput(text); // restore on failure
-    showActionOverlay({
-      message: "Admin chat is not ready yet. Please try again.",
-      type: "warning",
-    });
-    return;
-  }
-
-  const result = await sendMessage({
-    name:
-  `${user?.surname || ""} ${user?.firstName || ""}`.replace(/\s+/g, " ").trim() ||
-  user?.name ||
-  "User",
-    email: user.email,
-    phone: user.phone,
-    message: text,
-    recipientUid: resolvedAdmin.uid,
-    senderUid: user.uid,
-    isAdminSender: false,
-    recipientName: resolvedAdmin.name,
-    recipientEmail: resolvedAdmin.email,
-    recipientPhone: resolvedAdmin.contact,
-  });
-
-  if (!result?.success) {
-    setChatInput(text); // restore on failure
-    showActionOverlay({
-      message: result?.error || "Failed to send message.",
-      type: "warning",
-    });
-    return;
-  }
-
-  setTimeout(() => {
-    if (profileChatBodyRef.current) {
-      profileChatBodyRef.current.scrollTop = profileChatBodyRef.current.scrollHeight;
-    }
-  }, 0);
-
-  showActionOverlay({
-    message: "Message sent successfully!",
-    type: "success",
-  });
-};
-
-const handleProfileChatKeyDown = (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendConversationMessage();
-  }
-};
-
+  };
 
   const formatMessageTimestamp = (message) => {
     const ts = message?.startTimestamp;
@@ -1072,21 +1075,21 @@ const handleProfileChatKeyDown = (e) => {
     }
 
     if (typeof message?.clientCreatedAt === "number") {
-  const d = new Date(message.clientCreatedAt);
-  const datePart = d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "Asia/Manila",
-  });
-  const timePart = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Manila",
-  });
-  return `${datePart} | ${timePart}`;
-}
+      const d = new Date(message.clientCreatedAt);
+      const datePart = d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "Asia/Manila",
+      });
+      const timePart = d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      });
+      return `${datePart} | ${timePart}`;
+    }
 
     return message?.formattedDateTime || "No timestamp";
   };
@@ -1833,124 +1836,122 @@ const handleProfileChatKeyDown = (e) => {
                     Personal Information
                   </label>
 
-<div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Surname"
-                    value={editedProfile.surname}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        surname: e.target.value,
-                      })
-                    }
-                  />
-                                      <label className="profile-inner-label">Surname</label>
+                  <div className="profile-input-field">
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="Surname"
+                      value={editedProfile.surname}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          surname: e.target.value,
+                        })
+                      }
+                    />
+                    <label className="profile-inner-label">Surname</label>
                   </div>
 
-<div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="First Name"
-                    value={editedProfile.firstName}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        firstName: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="profile-input-field">
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="First Name"
+                      value={editedProfile.firstName}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          firstName: e.target.value,
+                        })
+                      }
+                    />
                     <label className="profile-inner-label">First Name</label>
                   </div>
 
                   <div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Middle Name (N/A if none)"
-                    value={editedProfile.middleName}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        middleName: e.target.value,
-                      })
-                    }
-                  />
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="Middle Name (N/A if none)"
+                      value={editedProfile.middleName}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          middleName: e.target.value,
+                        })
+                      }
+                    />
                     <label className="profile-inner-label">
                       Middle Name (N/A if none)
                     </label>
                   </div>
 
-                                 <div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Current Address"
-                    value={editedProfile.address}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        address: e.target.value,
-                      })
-                    }
-                  />
-                                      <label className="profile-inner-label">Current Address</label>
+                  <div className="profile-input-field">
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="Current Address"
+                      value={editedProfile.address}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                    <label className="profile-inner-label">
+                      Current Address
+                    </label>
                   </div>
 
                   <div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Occupation"
-                    value={editedProfile.occupation}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        occupation: e.target.value,
-                      })
-                    }
-                  />
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="Occupation"
+                      value={editedProfile.occupation}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          occupation: e.target.value,
+                        })
+                      }
+                    />
                     <label className="profile-inner-label">Occupation</label>
                   </div>
 
-
                   <label className="profile-section-label">Contacts</label>
 
-                                    <div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="email"
-                    placeholder="Email Address"
-                    value={editedProfile.email}
-                    readOnly // ✅ Prevent user from editing
-                    style={{
-                      backgroundColor: "#f5f5f5",
-                      cursor: "not-allowed",
-                    }}
-                  />
+                  <div className="profile-input-field">
+                    <input
+                      className="profile-section-label-input"
+                      type="email"
+                      placeholder="Email Address"
+                      value={editedProfile.email}
+                      readOnly // ✅ Prevent user from editing
+                      style={{
+                        backgroundColor: "#f5f5f5",
+                        cursor: "not-allowed",
+                      }}
+                    />
                     <label className="profile-inner-label">Email Address</label>
                   </div>
 
-
-<div className="profile-input-field">
-                  <input
-                    className="profile-section-label-input"
-                    type="text"
-                    placeholder="Contact No."
-                    value={editedProfile.contact}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        contact: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="profile-input-field">
+                    <input
+                      className="profile-section-label-input"
+                      type="text"
+                      placeholder="Contact No."
+                      value={editedProfile.contact}
+                      onChange={(e) =>
+                        setEditedProfile({
+                          ...editedProfile,
+                          contact: e.target.value,
+                        })
+                      }
+                    />
                     <label className="profile-inner-label">Contact No.</label>
                   </div>
-
-
 
                   <div className="confirm-button-group">
                     <button
@@ -2005,12 +2006,12 @@ const handleProfileChatKeyDown = (e) => {
                         : "Verify Account"}
                     </p>
 
-                    <p
+                    {/* <p
                       className="settings-item"
                       onClick={() => setShowLinkAccountOverlay(true)}
                     >
                       Link Account
-                    </p>
+                    </p> */}
                     <p
                       className="settings-item"
                       onClick={() => setShowRevertConfirm(true)}
@@ -2112,14 +2113,13 @@ const handleProfileChatKeyDown = (e) => {
           </div>
         </div>
 
-
         {/* Messages Section */}
         <div className="user-messages-container">
           <h3>
-  {activeTab === "notifications"
-    ? `Notifications (${notificationMessages.length})`
-    : `Messages (${adminConversation?.messages?.length || 0})`}
-</h3>
+            {activeTab === "notifications"
+              ? `Notifications (${notificationMessages.length})`
+              : `Messages (${adminConversation?.messages?.length || 0})`}
+          </h3>
 
           <div className="message-tabs-controls">
             <div className="message-tabs">
@@ -2143,132 +2143,156 @@ const handleProfileChatKeyDown = (e) => {
               </button>
             </div>
 
+            {activeTab === "notifications" && (
+              <div className="tabs-right">
+                {selectedMessageIds.length > 0 && (
+                  <span className="selected-count">
+                    ({selectedMessageIds.length})
+                  </span>
+                )}
 
-{activeTab === "notifications" && (
-  <div className="tabs-right">
-    {selectedMessageIds.length > 0 && (
-      <span className="selected-count">({selectedMessageIds.length})</span>
-    )}
+                <div className="checkbox-dropdown-wrapper">
+                  <div className="message-action-icons">
+                    {selectedMessageIds.length > 0 && (
+                      <>
+                        {notificationMessages
+                          .filter((message) =>
+                            selectedMessageIds.includes(message.id),
+                          )
+                          .some((message) => !message.readStatus) && (
+                          <img
+                            src="/assets/open-envelope.png"
+                            alt="Mark as Read"
+                            className="message-action-icon"
+                            title="Mark as Read"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              selectedMessageIds.forEach((id) => {
+                                const msg = notificationMessages.find(
+                                  (m) => m.id === id,
+                                );
+                                if (msg && !msg.readStatus)
+                                  markMessageAsRead(id);
+                              });
+                            }}
+                          />
+                        )}
 
-    <div className="checkbox-dropdown-wrapper">
-      <div className="message-action-icons">
-        {selectedMessageIds.length > 0 && (
-          <>
-            {notificationMessages
-              .filter((message) => selectedMessageIds.includes(message.id))
-              .some((message) => !message.readStatus) && (
-              <img
-                src="/assets/open-envelope.png"
-                alt="Mark as Read"
-                className="message-action-icon"
-                title="Mark as Read"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectedMessageIds.forEach((id) => {
-                    const msg = notificationMessages.find((m) => m.id === id);
-                    if (msg && !msg.readStatus) markMessageAsRead(id);
-                  });
-                }}
-              />
+                        {notificationMessages
+                          .filter((message) =>
+                            selectedMessageIds.includes(message.id),
+                          )
+                          .some((message) => message.readStatus) && (
+                          <img
+                            src="/assets/close-envelope.png"
+                            alt="Mark as Unread"
+                            className="message-action-icon"
+                            title="Mark as Unread"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              selectedMessageIds.forEach((id) => {
+                                const msg = notificationMessages.find(
+                                  (m) => m.id === id,
+                                );
+                                if (msg && msg.readStatus)
+                                  markMessageAsRead(id);
+                              });
+                            }}
+                          />
+                        )}
+
+                        <img
+                          src="/assets/delete.png"
+                          alt="Delete"
+                          className="message-action-icon"
+                          title="Delete Selected"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const messagesToDelete =
+                              notificationMessages.filter((msg) =>
+                                selectedMessageIds.includes(msg.id),
+                              );
+
+                            if (messagesToDelete.length > 0) {
+                              setMessageToDelete(messagesToDelete);
+                              setShowDeleteOverlay(true);
+                            }
+                          }}
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  <input
+                    type="checkbox"
+                    ref={(el) => {
+                      if (el) {
+                        el.indeterminate =
+                          selectedMessageIds.length > 0 &&
+                          selectedMessageIds.length <
+                            processedNotifications.length;
+                      }
+                    }}
+                    className="message-tabs-checkbox"
+                    checked={
+                      processedNotifications.length > 0 &&
+                      selectedMessageIds.length ===
+                        processedNotifications.length
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedMessageIds(
+                          processedNotifications.map((msg) => msg.id),
+                        );
+                      } else {
+                        setSelectedMessageIds([]);
+                      }
+                    }}
+                    title="Select All"
+                  />
+
+                  <select
+                    className="message-tabs-select hide-text"
+                    onChange={(e) => {
+                      const option = e.target.value;
+                      setSelectedOption(option);
+
+                      let selected = [];
+                      if (option === "all") {
+                        selected = notificationMessages.map((msg) => msg.id);
+                      } else if (option === "unread") {
+                        selected = notificationMessages
+                          .filter((msg) => !msg.readStatus)
+                          .map((msg) => msg.id);
+                      } else if (option === "read") {
+                        selected = notificationMessages
+                          .filter((msg) => msg.readStatus)
+                          .map((msg) => msg.id);
+                      } else {
+                        selected = [];
+                      }
+
+                      setSelectedMessageIds(selected);
+                      e.target.selectedIndex = 0;
+                    }}
+                    title="More select options"
+                  >
+                    <option value="none">
+                      &nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;
+                    </option>
+                    <option value="all">
+                      &nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                    </option>
+                    <option value="unread">
+                      &nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;
+                    </option>
+                    <option value="read">
+                      &nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;
+                    </option>
+                  </select>
+                </div>
+              </div>
             )}
-
-            {notificationMessages
-              .filter((message) => selectedMessageIds.includes(message.id))
-              .some((message) => message.readStatus) && (
-              <img
-                src="/assets/close-envelope.png"
-                alt="Mark as Unread"
-                className="message-action-icon"
-                title="Mark as Unread"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectedMessageIds.forEach((id) => {
-                    const msg = notificationMessages.find((m) => m.id === id);
-                    if (msg && msg.readStatus) markMessageAsRead(id);
-                  });
-                }}
-              />
-            )}
-
-            <img
-              src="/assets/delete.png"
-              alt="Delete"
-              className="message-action-icon"
-              title="Delete Selected"
-              onClick={(e) => {
-                e.stopPropagation();
-                const messagesToDelete = notificationMessages.filter((msg) =>
-                  selectedMessageIds.includes(msg.id),
-                );
-
-                if (messagesToDelete.length > 0) {
-                  setMessageToDelete(messagesToDelete);
-                  setShowDeleteOverlay(true);
-                }
-              }}
-            />
-          </>
-        )}
-      </div>
-
-      <input
-        type="checkbox"
-        ref={(el) => {
-          if (el) {
-            el.indeterminate =
-              selectedMessageIds.length > 0 &&
-              selectedMessageIds.length < processedNotifications.length;
-          }
-        }}
-        className="message-tabs-checkbox"
-        checked={
-          processedNotifications.length > 0 &&
-          selectedMessageIds.length === processedNotifications.length
-        }
-        onChange={(e) => {
-          if (e.target.checked) {
-            setSelectedMessageIds(processedNotifications.map((msg) => msg.id));
-          } else {
-            setSelectedMessageIds([]);
-          }
-        }}
-        title="Select All"
-      />
-
-      <select
-        className="message-tabs-select hide-text"
-        onChange={(e) => {
-          const option = e.target.value;
-          setSelectedOption(option);
-
-          let selected = [];
-          if (option === "all") {
-            selected = notificationMessages.map((msg) => msg.id);
-          } else if (option === "unread") {
-            selected = notificationMessages
-              .filter((msg) => !msg.readStatus)
-              .map((msg) => msg.id);
-          } else if (option === "read") {
-            selected = notificationMessages
-              .filter((msg) => msg.readStatus)
-              .map((msg) => msg.id);
-          } else {
-            selected = [];
-          }
-
-          setSelectedMessageIds(selected);
-          e.target.selectedIndex = 0;
-        }}
-        title="More select options"
-      >
-        <option value="none">&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;</option>
-        <option value="all">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</option>
-        <option value="unread">&nbsp;&nbsp;&nbsp;Unread&nbsp;&nbsp;&nbsp;</option>
-        <option value="read">&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;</option>
-      </select>
-    </div>
-  </div>
-)}
           </div>
 
           <div
@@ -2400,49 +2424,60 @@ const handleProfileChatKeyDown = (e) => {
                     </div>
                   </div>
 
-<div className="profile-chat-body" ref={profileChatBodyRef}>
-  {!adminConversation || adminConversation.messages.length === 0 ? (
-    <div className="profile-chat-empty">No conversation yet.</div>
-  ) : (
-    adminConversation.messages.map((msg) => {
-      const isMine = msg.senderUid === user?.uid;
-      return (
-        <div
-          key={`${msg._source}-${msg.id}`}
-          className={`profile-chat-row ${isMine ? "mine" : "other"}`}
-        >
-          <div className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}>
-  {msg.sourcePage === "contact" && (
-    <div className="message-source-chip">From Contact Page</div>
-  )}
-  <div
-    className="profile-chat-text"
-    dangerouslySetInnerHTML={{ __html: msg.content || "" }}
-  />
-  <div className="profile-chat-time">{formatMessageTimestamp(msg)}</div>
-</div>
-        </div>
-      );
-    })
-  )}
-</div>
+                  <div className="profile-chat-body" ref={profileChatBodyRef}>
+                    {!adminConversation ||
+                    adminConversation.messages.length === 0 ? (
+                      <div className="profile-chat-empty">
+                        No conversation yet.
+                      </div>
+                    ) : (
+                      adminConversation.messages.map((msg) => {
+                        const isMine = msg.senderUid === user?.uid;
+                        return (
+                          <div
+                            key={`${msg._source}-${msg.id}`}
+                            className={`profile-chat-row ${isMine ? "mine" : "other"}`}
+                          >
+                            <div
+                              className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}
+                            >
+                              {msg.sourcePage === "contact" && (
+                                <div className="message-source-chip">
+                                  From Contact Page
+                                </div>
+                              )}
+                              <div
+                                className="profile-chat-text"
+                                dangerouslySetInnerHTML={{
+                                  __html: msg.content || "",
+                                }}
+                              />
+                              <div className="profile-chat-time">
+                                {formatMessageTimestamp(msg)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
 
                   <div className="profile-chat-composer">
-<textarea
-  className="profile-chat-input"
-  value={chatInput}
-  onChange={(e) => setChatInput(e.target.value)}
-  onKeyDown={handleProfileChatKeyDown}
-  placeholder="Type your message..."
-/>
-<button
-  className="reply-btn"
-  onClick={sendConversationMessage}
-  disabled={!chatInput.trim()}
-  title="Send"
->
-  Send
-</button>
+                    <textarea
+                      className="profile-chat-input"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={handleProfileChatKeyDown}
+                      placeholder="Type your message..."
+                    />
+                    <button
+                      className="reply-btn"
+                      onClick={sendConversationMessage}
+                      disabled={!chatInput.trim()}
+                      title="Send"
+                    >
+                      Send
+                    </button>
                   </div>
                 </div>
               </div>

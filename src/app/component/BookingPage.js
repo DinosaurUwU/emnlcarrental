@@ -63,6 +63,7 @@ const BookingPage = ({
   const [uploadedID, setUploadedID] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+    const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
   const [previewImage, setPreviewImage] = useState("/assets/images/image1.png");
   const [imageAnimation, setImageAnimation] = useState("");
   const [fileError, setFileError] = useState(false);
@@ -283,7 +284,9 @@ const isReservedUnitSelected = Boolean(selectedUnit?.hidden || lockedReservedReq
     } else {
       setPreviewImage("/assets/images/image1.png");
     }
-  }, [selectedCarId, allUnitData, fetchImageFromFirestore]);
+  // }, [selectedCarId, allUnitData, fetchImageFromFirestore]);
+    }, [selectedCarId, allUnitData]);
+
 
   const galleryRef = useRef(null);
 
@@ -733,7 +736,9 @@ useEffect(() => {
       setPreviewImage("/assets/images/image1.png");
     }
   }
-}, [prefillData, unitData, fetchImageFromFirestore]);
+// }, [prefillData, unitData, fetchImageFromFirestore]);
+}, [prefillData, unitData, allUnitData]);
+
 
 
 // useEffect(() => {
@@ -866,7 +871,9 @@ useEffect(() => {
       setSelectedCarId(unitByName.id);
     }
   }
-}, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
+// }, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
+}, [allUnitData, unitData, prefillData, selectedCarId]);
+
 
 
   // useEffect(() => {
@@ -977,24 +984,111 @@ useEffect(() => {
   const QuotationSummary = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    useEffect(() => {
-      const handleResize = () => {
-        if (window.innerWidth < 900) {
-          setIsCollapsed(false);
-        } else {
-          setIsCollapsed(true);
-        }
-      };
+     useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 900) {
+        setIsSummaryCollapsed(false);
+      } else {
+        setIsSummaryCollapsed(true);
+      }
+    };
 
-      // Set default state when component mounts
-      handleResize();
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-      // Add event listener to handle resizing
-      window.addEventListener("resize", handleResize);
+  const renderQuotationSummary = () => {
+    return (
+      <div className="quotation-summary">
+        <h3
+          className="collapsible-header"
+          onClick={() => setIsSummaryCollapsed(!isSummaryCollapsed)}
+        >
+          QUOTATION SUMMARY
+          <img
+            src="/assets/nxt-btn.png"
+            alt="Hide icon"
+            className={`toggle-icon ${isSummaryCollapsed ? "hidden" : ""}`}
+          />
+          <img
+            src="/assets/prv-btn.png"
+            alt="Show icon"
+            className={`toggle-icon ${!isSummaryCollapsed ? "hidden" : ""}`}
+          />
+        </h3>
 
-      // Cleanup the event listener on unmount
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
+        <div className="checkout-total">
+          <strong>Total Price:</strong>
+          <span className="total-price">₱{totalPrice.toLocaleString()}</span>
+        </div>
+
+        <div className={`sticky-details ${isSummaryCollapsed ? "open" : ""}`}>
+          <div className="checkout-item">
+            <span className={`label ${getColorForSelectedOption(selectedCarId)}`}>
+              <label>Car:</label> <br />
+              {selectedUnit?.name || "Pick a Car"}
+            </span>
+            <span className="price">{getCarRate()}</span>
+          </div>
+
+          <div className="checkout-item">
+            <span className={`label ${getColorForSelectedOption(driveType)}`}>
+              <label>Driving Option:</label> <br />
+              {driveType}
+            </span>
+            <span className="price">{getDrivingPrice(selectedUnit)}</span>
+          </div>
+
+          <div className="checkout-item">
+            <span className={`label ${getColorForSelectedOption(dropOffType)}`}>
+              <label>Pickup / Drop-off:</label> <br />
+              {dropOffType}
+            </span>
+            <span className="price">{getDropOffPrice(selectedUnit)}</span>
+          </div>
+
+          <div className="checkout-item">
+            <span
+              className={`label ${
+                startDate && startTime && endDate && endTime
+                  ? "green-label"
+                  : "red-label"
+              }`}
+            >
+              <label>Rental Period:</label> <br />
+              <span
+                dangerouslySetInnerHTML={{ __html: getRentalPeriodText() }}
+              />
+            </span>
+            <span className="price">{getRentalDuration()}</span>
+            {errorMessage && (
+              <div className="date-error-message">{errorMessage}</div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+    // useEffect(() => {
+    //   const handleResize = () => {
+    //     if (window.innerWidth < 900) {
+    //       setIsCollapsed(false);
+    //     } else {
+    //       setIsCollapsed(true);
+    //     }
+    //   };
+
+    //   // Set default state when component mounts
+    //   handleResize();
+
+    //   // Add event listener to handle resizing
+    //   window.addEventListener("resize", handleResize);
+
+    //   // Cleanup the event listener on unmount
+    //   return () => window.removeEventListener("resize", handleResize);
+    // }, []);
 
     // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
     // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
@@ -2536,7 +2630,7 @@ if (!user) {
                 <input
                   type="text"
                   name="location"
-                  placeholder="Enter Location"
+                  placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
                   value={formData.location}
                   onChange={handleInputChange}
                   required
@@ -2548,7 +2642,7 @@ if (!user) {
                 <input
                   type="text"
                   name="purpose"
-                  placeholder="Enter Purpose"
+                  placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
                   value={formData.purpose}
                   onChange={handleInputChange}
                   required
@@ -2842,7 +2936,9 @@ if (!user) {
           </div>
 
           <div className="booking-column">
-            <QuotationSummary />
+            {/* <QuotationSummary /> */}
+                        {renderQuotationSummary()}
+
           </div>
         </div>
 

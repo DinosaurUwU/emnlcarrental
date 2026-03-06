@@ -4826,7 +4826,7 @@ const RentalActivitySection = ({ subSection }) => {
                       }))
                     }
                     className="default-text-input"
-                    placeholder="Enter location"
+                    placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
                     required
                   />
                 </div>
@@ -4846,7 +4846,7 @@ const RentalActivitySection = ({ subSection }) => {
                       }))
                     }
                     className="default-text-input"
-                    placeholder="Enter purpose"
+                    placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
                     required
                   />
                 </div>
@@ -6173,7 +6173,7 @@ const RentalActivitySection = ({ subSection }) => {
                     value={editFormData?.location || ""}
                     onChange={handleEditInputChange}
                     className="default-text-input"
-                    placeholder="Enter location"
+                    placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
                     required
                   />
                 </div>
@@ -6188,7 +6188,7 @@ const RentalActivitySection = ({ subSection }) => {
                     value={editFormData?.purpose || ""}
                     onChange={handleEditInputChange}
                     className="default-text-input"
-                    placeholder="Enter purpose"
+                    placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
                     required
                   />
                 </div>
@@ -8839,7 +8839,7 @@ onClick={() => {
                                   handleInputChange(selectedUnitId, e)
                                 }
                                 className="default-text-input"
-                                placeholder="Enter location"
+                                placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
                                 required
                               />
                             </div>
@@ -8856,7 +8856,7 @@ onClick={() => {
                                   handleInputChange(selectedUnitId, e)
                                 }
                                 className="default-text-input"
-                                placeholder="Enter purpose"
+                                placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
                                 required
                               />
                             </div>
