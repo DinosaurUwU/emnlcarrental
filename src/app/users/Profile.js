@@ -50,6 +50,7 @@ const Profile = ({ openBooking }) => {
     setActionOverlay,
   } = useUser();
 
+  
   const [showProfileError, setShowProfileError] = useState(false);
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
 
