@@ -5313,8 +5313,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       //   setModalImage(selectedBooking.driverLicense);
                       //   setIsImageModalOpen(true);
                       // }}
+                      // onClick={() => {
+                      //   openPhotoSwipePreview(selectedBooking.driverLicense);
+                      // }}
                       onClick={() => {
-                        openPhotoSwipePreview(selectedBooking.driverLicense);
+                        openPhotoSwipePreview([selectedBooking.driverLicense], 0);
                       }}
                     />
                   ) : (

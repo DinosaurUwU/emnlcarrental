@@ -2,6 +2,8 @@
 //FinancialReports.js
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../lib/UserContext";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import "./FinancialReports.css";
 import XLSX from "xlsx-js-style";
 import {
@@ -279,8 +281,71 @@ const FinancialReports = () => {
 
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
+  const licenseGalleryRef = useRef(null);
+  const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
+  const previewKeyRef = useRef(0);
+  const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+    useEffect(() => {
+    if (!licenseGalleryRef.current) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: licenseGalleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
+
+    lightbox.init();
+    return () => lightbox.destroy();
+  }, []);
+
+  const openPhotoSwipePreview = (src) => {
+    if (!src) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.onerror = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: 1200,
+        height: 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.src = src;
+  };
+
+  useEffect(() => {
+    if (!pendingPreviewKey || !photoSwipePreviewItem) return;
+
+    requestAnimationFrame(() => {
+      document
+        .querySelector(
+          `[data-pswp-index="financial-reports-preview-${pendingPreviewKey}"]`,
+        )
+        ?.click();
+      setPendingPreviewKey(null);
+    });
+  }, [pendingPreviewKey, photoSwipePreviewItem]);
 
   const [sortMode, setSortMode] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
@@ -2142,7 +2207,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
 
   return (
     <div className="financial-reports">
-      {isImageModalOpen && modalImage && (
+      {/* {isImageModalOpen && modalImage && (
         <div
           className="admin-image-modal-overlay"
           onClick={() => setIsImageModalOpen(false)}
@@ -2159,7 +2224,19 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
             />
           </div>
         </div>
-      )}
+      )} */}
+            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+        {photoSwipePreviewItem && (
+          <a
+            href={photoSwipePreviewItem.src}
+            data-pswp-width={photoSwipePreviewItem.width}
+            data-pswp-height={photoSwipePreviewItem.height}
+            data-pswp-index={`financial-reports-preview-${photoSwipePreviewItem.key}`}
+          >
+            <span aria-hidden="true" />
+          </a>
+        )}
+      </div>
 
       {actionOverlay.isVisible && (
         <div
@@ -2761,9 +2838,12 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
                   ) : (
