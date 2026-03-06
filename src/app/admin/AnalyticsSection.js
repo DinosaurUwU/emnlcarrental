@@ -1,6 +1,8 @@
 "use client";
 //AnalyticsSection.js
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -17,7 +19,6 @@ import {
 } from "chart.js";
 import "./AnalyticsSection.css";
 import { generateFilledCalendar } from "./generateFilledCalendar";
-
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { useUser } from "../lib/UserContext";
 import FullCalendar from "@fullcalendar/react";
@@ -78,6 +79,11 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
+    const licenseGalleryRef = useRef(null);
+  const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
+  const previewKeyRef = useRef(0);
+  const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+
   const [showCalendarEventsOverlay, setShowCalendarEventsOverlay] =
     useState(false);
   const [selectedCalendarBooking, setSelectedCalendarBooking] = useState(null);
@@ -124,6 +130,28 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [bookings, setBookings] = useState(0);
   const [unpaidBookingsSum, setUnpaidBookingsSum] = useState(0);
   const [unpaidBookingsCount, setUnpaidBookingsCount] = useState(0);
+
+    useEffect(() => {
+    if (!licenseGalleryRef.current) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: licenseGalleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
+
+    lightbox.init();
+    return () => lightbox.destroy();
+  }, []);
 
   useEffect(() => {
     console.time("summaryData computation");
@@ -524,10 +552,49 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     return `${month}-${day}-${year} | ${hour12}:${minutes} ${ampm}`;
   };
 
-  const closeModal = () => {
-    setIsImageModalOpen(false);
-    setModalImage(null);
+  // const closeModal = () => {
+  //   setIsImageModalOpen(false);
+  //   setModalImage(null);
+  // };
+    const openPhotoSwipePreview = (src) => {
+    if (!src) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.onerror = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: 1200,
+        height: 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.src = src;
   };
+
+  useEffect(() => {
+    if (!pendingPreviewKey || !photoSwipePreviewItem) return;
+
+    requestAnimationFrame(() => {
+      document
+        .querySelector(
+          `[data-pswp-index="analytics-preview-${pendingPreviewKey}"]`,
+        )
+        ?.click();
+      setPendingPreviewKey(null);
+    });
+  }, [pendingPreviewKey, photoSwipePreviewItem]);
 
   useEffect(() => {
     console.log(
@@ -4109,9 +4176,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
                   ) : (
@@ -4614,9 +4684,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                       src={selectedCalendarBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
+                      // onClick={() => {
+                      //   setModalImage(selectedCalendarBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(selectedCalendarBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(selectedCalendarBooking.driverLicense);
                       }}
                     />
                   ) : (
@@ -4931,7 +5004,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {isImageModalOpen && modalImage && (
+      {/* {isImageModalOpen && modalImage && (
         <div className="admin-image-modal-overlay" onClick={closeModal}>
           <img
             src={modalImage}
@@ -4939,7 +5012,19 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
             className="admin-full-image-view"
           />
         </div>
-      )}
+      )} */}
+      <div ref={licenseGalleryRef} style={{ display: "none" }}>
+        {photoSwipePreviewItem && (
+          <a
+            href={photoSwipePreviewItem.src}
+            data-pswp-width={photoSwipePreviewItem.width}
+            data-pswp-height={photoSwipePreviewItem.height}
+            data-pswp-index={`analytics-preview-${photoSwipePreviewItem.key}`}
+          >
+            <span aria-hidden="true" />
+          </a>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,6 +1,8 @@
 "use client";
 //AdminSettings.js
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
 import { MdClose, MdEdit, MdDelete } from "react-icons/md";
@@ -131,6 +133,73 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+
+    const licenseGalleryRef = useRef(null);
+  const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
+  const previewKeyRef = useRef(0);
+  const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+
+   useEffect(() => {
+    if (!licenseGalleryRef.current) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: licenseGalleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
+
+    lightbox.init();
+    return () => lightbox.destroy();
+  }, []);
+
+  const openPhotoSwipePreview = (src) => {
+    if (!src) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.onerror = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: 1200,
+        height: 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.src = src;
+  };
+
+  useEffect(() => {
+    if (!pendingPreviewKey || !photoSwipePreviewItem) return;
+
+    requestAnimationFrame(() => {
+      document
+        .querySelector(
+          `[data-pswp-index="admin-settings-preview-${pendingPreviewKey}"]`,
+        )
+        ?.click();
+      setPendingPreviewKey(null);
+    });
+  }, [pendingPreviewKey, photoSwipePreviewItem]);
 
   const [mainImage, setMainImage] = useState(null);
   const [mainImageLoading, setMainImageLoading] = useState(false);
@@ -3146,11 +3215,27 @@ const AdminSettings = ({ subSection = "overview" }) => {
                               // Existing image: Show with replace/delete buttons (only in edit mode) and overlay for broken images
                               return (
                                 <div key={index} className="gallery-item">
-                                  <img
+                                  {/* <img
                                     src={img.base64}
                                     alt={`Gallery ${index}`}
                                     className="unit-gallery-image"
                                     key={img.updatedAt}
+                                    onError={(e) => {
+                                      // Hide the broken image and show the overlay with plus sign
+                                      e.target.style.display = "none";
+                                      const overlay =
+                                        e.target.nextElementSibling;
+                                      if (overlay)
+                                        overlay.style.display = "flex";
+                                    }}
+                                  /> */}
+                                                                    <img
+                                    src={img.base64}
+                                    alt={`Gallery ${index}`}
+                                    className="unit-gallery-image"
+                                    key={img.updatedAt}
+                                    style={{ cursor: "zoom-in" }}
+                                    onClick={() => openPhotoSwipePreview(img.base64)}
                                     onError={(e) => {
                                       // Hide the broken image and show the overlay with plus sign
                                       e.target.style.display = "none";
@@ -5000,7 +5085,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {isImageModalOpen && modalImage && (
+      {/* {isImageModalOpen && modalImage && (
         <div
           className="admin-image-modal-overlay"
           onClick={() => setIsImageModalOpen(false)}
@@ -5017,7 +5102,19 @@ const AdminSettings = ({ subSection = "overview" }) => {
             />
           </div>
         </div>
-      )}
+      )} */}
+            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+        {photoSwipePreviewItem && (
+          <a
+            href={photoSwipePreviewItem.src}
+            data-pswp-width={photoSwipePreviewItem.width}
+            data-pswp-height={photoSwipePreviewItem.height}
+            data-pswp-index={`admin-settings-preview-${photoSwipePreviewItem.key}`}
+          >
+            <span aria-hidden="true" />
+          </a>
+        )}
+      </div>
 
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
@@ -5212,9 +5309,12 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
                   ) : (

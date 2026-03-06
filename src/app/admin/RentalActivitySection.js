@@ -5,6 +5,8 @@ import { useUser } from "../lib/UserContext";
 import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
 import PrintContract from "./PrintContract";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import "./RentalActivitySection.css";
 import { MdWarning, MdClose } from "react-icons/md";
 
@@ -168,6 +170,71 @@ const RentalActivitySection = ({ subSection }) => {
   const [selectedUnitId, setSelectedUnitId] = useState(null);
 
   const [fetchedImages, setFetchedImages] = useState({});
+
+    const licenseGalleryRef = useRef(null);
+  const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
+  const previewKeyRef = useRef(0);
+  const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+
+  useEffect(() => {
+    if (!licenseGalleryRef.current) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: licenseGalleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
+
+    lightbox.init();
+    return () => lightbox.destroy();
+  }, []);
+
+  const openPhotoSwipePreview = (src) => {
+    if (!src) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: img.naturalWidth || 1200,
+        height: img.naturalHeight || 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.onerror = () => {
+      const key = ++previewKeyRef.current;
+      setPhotoSwipePreviewItem({
+        key,
+        src,
+        width: 1200,
+        height: 800,
+      });
+      setPendingPreviewKey(key);
+    };
+    img.src = src;
+  };
+
+  useEffect(() => {
+    if (!pendingPreviewKey || !photoSwipePreviewItem) return;
+
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-pswp-index="admin-preview-${pendingPreviewKey}"]`)
+        ?.click();
+      setPendingPreviewKey(null);
+    });
+  }, [pendingPreviewKey, photoSwipePreviewItem]);
 
   const [localPaymentEntries, setLocalPaymentEntries] = useState([]);
 
@@ -2114,12 +2181,18 @@ const RentalActivitySection = ({ subSection }) => {
                             }
                             alt="Driver's License"
                             className="admin-confirm-id-preview"
-                            onClick={() => {
+                            // onClick={() => {
+                            //   const previewUrl =
+                            //     filePreviews[confirmUnitId] ||
+                            //     URL.createObjectURL(unitForm.driverLicense);
+                            //   setModalImage(previewUrl);
+                            //   setIsImageModalOpen(true);
+                            // }}
+                              onClick={() => {
                               const previewUrl =
                                 filePreviews[confirmUnitId] ||
                                 URL.createObjectURL(unitForm.driverLicense);
-                              setModalImage(previewUrl);
-                              setIsImageModalOpen(true);
+                              openPhotoSwipePreview(previewUrl);
                             }}
                           />
                         ) : (
@@ -2603,9 +2676,12 @@ const RentalActivitySection = ({ subSection }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
+                                            onClick={() => {
+                        openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
                   ) : (
@@ -3120,9 +3196,12 @@ const RentalActivitySection = ({ subSection }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      onClick={() => {
-                        setModalImage(selectedBooking.driverLicense);
-                        setIsImageModalOpen(true);
+                      // onClick={() => {
+                      //   setModalImage(selectedBooking.driverLicense);
+                      //   setIsImageModalOpen(true);
+                      // }}
+                                            onClick={() => {
+                        openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
                   ) : (
@@ -4875,9 +4954,12 @@ const RentalActivitySection = ({ subSection }) => {
                       alt="Driver's License"
                       className="license-preview"
                       style={{ cursor: "pointer" }}
+                      // onClick={() => {
+                      //   setModalImage(filePreviews.edit);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(filePreviews.edit);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(filePreviews.edit);
                       }}
                     />
                   )}
@@ -6215,9 +6297,12 @@ const RentalActivitySection = ({ subSection }) => {
                       alt="Driver's License"
                       className="license-preview"
                       style={{ cursor: "pointer" }}
+                      // onClick={() => {
+                      //   setModalImage(filePreviews.edit);
+                      //   setIsImageModalOpen(true);
+                      // }}
                       onClick={() => {
-                        setModalImage(filePreviews.edit);
-                        setIsImageModalOpen(true);
+                        openPhotoSwipePreview(filePreviews.edit);
                       }}
                     />
                   )}
@@ -8897,11 +8982,16 @@ onClick={() => {
                                   alt="Driver's License"
                                   className="license-preview"
                                   style={{ cursor: "pointer" }}
-                                  onClick={() => {
-                                    setModalImage(
-                                      filePreviews[selectedUnit.id],
+                                  // onClick={() => {
+                                  //   setModalImage(
+                                  //     filePreviews[selectedUnit.id],
+                                  //   );
+                                  //   setIsImageModalOpen(true);
+                                  // }}
+                                   onClick={() => {
+                                    openPhotoSwipePreview(
+                                      filePreviews[selectedUnitId],
                                     );
-                                    setIsImageModalOpen(true);
                                   }}
                                 />
                               )}
@@ -9777,6 +9867,18 @@ onClick={() => {
           </div>
         )}
       </section>
+            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+        {photoSwipePreviewItem && (
+          <a
+            href={photoSwipePreviewItem.src}
+            data-pswp-width={photoSwipePreviewItem.width}
+            data-pswp-height={photoSwipePreviewItem.height}
+            data-pswp-index={`admin-preview-${photoSwipePreviewItem.key}`}
+          >
+            <span aria-hidden="true" />
+          </a>
+        )}
+      </div>
     </>
   );
 };
