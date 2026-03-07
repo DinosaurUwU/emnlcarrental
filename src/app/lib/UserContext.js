@@ -1031,12 +1031,11 @@ Call them now to check if they want to extend. If no response, call them when re
         },
       });
 
-      
       // ADMIN EMAIL (TEMPLATE 7)
       await sendEmail({
         toName: "EMNL Admin",
         toEmail: adminEmail,
-        templateId: 7, // BREVO TEMPLATE
+        templateId: 17, // BREVO TEMPLATE
         params: {
           userName: fullName || "Customer",
           userContact: booking.contact || "N/A",
