@@ -1707,6 +1707,14 @@ margin-bottom: 6px;
   background: #dc3545;
 }
 
+.profile-overlay-status-badge.status-paid {
+  background: #198754;
+}
+
+.profile-overlay-status-badge.status-unpaid {
+  background: #dc3545;
+}
+
 @media (max-width: 1100px) {
   .profile-main {
     flex-direction: column;

@@ -3346,6 +3346,15 @@ const Profile = ({ openBooking }) => {
                       Reserved Booking
                     </div>
                   )}
+
+                  <span
+                    className={`profile-overlay-status-badge status-${
+                      selectedHistoryRental?.paid === true ? "paid" : "unpaid"
+                    }`}
+                  >
+                    {selectedHistoryRental?.paid === true ? "Paid" : "Unpaid"}
+                  </span>
+
                 </div>
 
                 <div className="admin-confirm-details">
