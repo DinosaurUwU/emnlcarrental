@@ -202,7 +202,7 @@ const Profile = ({ openBooking }) => {
     profilePic: "/assets/profile.png",
   });
 
-  useEffect(() => {
+    useEffect(() => {
     let mounted = true;
 
     const loadAdminMeta = async () => {
@@ -223,7 +223,30 @@ const Profile = ({ openBooking }) => {
     return () => {
       mounted = false;
     };
-  }, [fetchAdminUid]);
+  }, []);
+
+  // useEffect(() => {
+  //   let mounted = true;
+
+  //   const loadAdminMeta = async () => {
+  //     const admin = await fetchAdminUid();
+  //     if (!mounted || !admin) return;
+
+  //     setAdminMeta({
+  //       uid: admin.uid || "",
+  //       name: admin.name || "",
+  //       email: admin.email || "",
+  //       contact: admin.contact || "",
+  //       profilePic: admin.profilePic || "/assets/profile.png",
+  //     });
+  //   };
+
+  //   loadAdminMeta();
+
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, [fetchAdminUid]);
 
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);

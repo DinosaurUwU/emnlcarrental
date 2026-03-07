@@ -2015,19 +2015,38 @@ const fetchAdminUid = async () => {
     let contact = (settingsData.adminContact || "").trim() || "No contact";
     let profilePic = settingsData.adminProfilePic || "/assets/profile.png";
 
-    // Try enriching from users/{adminUid}; non-admin may not have permission (ignore if denied)
-    try {
-      const adminUserSnap = await getDoc(doc(db, "users", uid));
-      if (adminUserSnap.exists()) {
-        const d = adminUserSnap.data() || {};
-        name = (d.name || "").trim() || name;
-        email = (d.email || "").trim() || email;
-        contact = (d.phone || "").trim() || contact;
-        profilePic = d.profilePic || profilePic;
+    // Try enriching from users/{adminUid} only when this user can likely read it.
+    // Regular users should use appSettings values to avoid denied reads + quota waste.
+    if (user?.role === "admin" || user?.uid === uid) {
+      try {
+        const adminUserSnap = await getDoc(doc(db, "users", uid));
+        if (adminUserSnap.exists()) {
+          const d = adminUserSnap.data() || {};
+          name = (d.name || "").trim() || name;
+          email = (d.email || "").trim() || email;
+          contact = (d.phone || "").trim() || contact;
+          profilePic = d.profilePic || profilePic;
+        }
+      } catch (err) {
+        console.warn(
+          "⚠️ users/{adminUid} not readable for this user, using appSettings only.",
+        );
       }
-    } catch (err) {
-      console.warn("⚠️ users/{adminUid} not readable for this user, using appSettings only.");
     }
+
+    // // Try enriching from users/{adminUid}; non-admin may not have permission (ignore if denied)
+    // try {
+    //   const adminUserSnap = await getDoc(doc(db, "users", uid));
+    //   if (adminUserSnap.exists()) {
+    //     const d = adminUserSnap.data() || {};
+    //     name = (d.name || "").trim() || name;
+    //     email = (d.email || "").trim() || email;
+    //     contact = (d.phone || "").trim() || contact;
+    //     profilePic = d.profilePic || profilePic;
+    //   }
+    // } catch (err) {
+    //   console.warn("⚠️ users/{adminUid} not readable for this user, using appSettings only.");
+    // }
 
     setAdminUid(uid);
     setAdminName(name);
