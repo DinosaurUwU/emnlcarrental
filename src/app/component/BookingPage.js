@@ -455,10 +455,14 @@ useEffect(() => {
 
         // Handle driver's license
         if (savedFormData.driverLicense) {
-          setUploadedID({
-            preview: savedFormData.driverLicense,
-          });
+          setUploadedID(savedFormData.driverLicense);
         }
+
+        // if (savedFormData.driverLicense) {
+        //   setUploadedID({
+        //     preview: savedFormData.driverLicense,
+        //   });
+        // }
 
         // Handle car image
         if (savedFormData.selectedCar) {
@@ -698,10 +702,14 @@ useEffect(() => {
 
       // Driver's License
       if (prefillData.driverLicense) {
-        setUploadedID({
-          preview: prefillData.driverLicense,
-        });
+        setUploadedID(prefillData.driverLicense);
       }
+
+      // if (prefillData.driverLicense) {
+      //   setUploadedID({
+      //     preview: prefillData.driverLicense,
+      //   });
+      // }
 
       // Image handling
       // const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
@@ -1298,7 +1306,7 @@ useEffect(() => {
           <>
             <br />(
             <span style={{ color: "#dc3545" }}>
-              {extraHours} hr{extraHours !== 1 ? "s" : ""} ₱
+              +{extraHours} hr{extraHours !== 1 ? "s" : ""} ₱
               {extraHourCharge.toLocaleString()}
             </span>
             )
@@ -1403,7 +1411,7 @@ useEffect(() => {
 
       location: formData.location,
       purpose: formData.purpose,
-      referralSource: formData.referralSource || "Not Specified",
+      referralSource: formData.referralSource || "Walk-in",
       additionalMessage: formData.additionalMessage || "None",
 
       firstName: formData.firstName,
@@ -1992,7 +2000,7 @@ useEffect(() => {
                       purpose: formData.purpose,
                       additionalMessage: formData.additionalMessage,
                       referralSource:
-                        formData.referralSource || "Not Specified",
+                        formData.referralSource || "Walk-in",
                       // selectedCar,
                       selectedCar: selectedUnit?.name || "",
 
@@ -2172,7 +2180,7 @@ useEffect(() => {
                   <div className="confirm-row">
                     <strong className="confirm-label">Referral Source:</strong>
                     <span className="confirm-value">
-                      {bookingPreviewData?.referralSource || "Not specified"}
+                      {bookingPreviewData?.referralSource || "Walk-in"}
                     </span>
                   </div>
 
@@ -2228,7 +2236,19 @@ useEffect(() => {
               <h4 className="confirm-subtitle">DRIVER'S LICENSE</h4>
 
               <div className="confirm-image-container">
-                {uploadedID ? (
+                {uploadedPreviewSrc ? (
+                  <img
+                    src={uploadedPreviewSrc}
+                    alt="Driver's License"
+                    className="confirm-id-preview"
+                    onClick={handleImageClick}
+                  />
+                ) : (
+                  <p className="confirm-no-id">No file uploaded</p>
+                )}
+
+
+                {/* {uploadedID ? (
                   <img
                     // src={URL.createObjectURL(uploadedID)}
                     src={
@@ -2244,7 +2264,7 @@ useEffect(() => {
                   />
                 ) : (
                   <p className="confirm-no-id">No file uploaded</p>
-                )}
+                )} */}
               </div>
 
               <h4 className="confirm-subtitle">QUOTATION SUMMARY</h4>
@@ -2351,6 +2371,8 @@ useEffect(() => {
 
         <h2
           style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: "900",
             fontSize: "1.2rem",
             color:
               editingBookingData?.isResubmitting === true
@@ -2773,7 +2795,7 @@ useEffect(() => {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || "Not Specified"}
+                  value={formData.referralSource || "Walk-in"}
                   onChange={handleInputChange}
                 >
                   {referralSources.map((source) => (

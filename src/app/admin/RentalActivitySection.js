@@ -1009,7 +1009,7 @@ const RentalActivitySection = ({ subSection }) => {
       location: unitForm.location,
       purpose: unitForm.purpose,
 
-      referralSource: unitForm.referralSource || "Not Specified",
+      referralSource: unitForm.referralSource || "Walk-in",
 
       additionalMessage: unitForm.additionalMessage || "None",
 
@@ -2024,7 +2024,7 @@ const RentalActivitySection = ({ subSection }) => {
                             Referral Source:
                           </strong>
                           <span className="confirm-value">
-                            {unitForm.referralSource || "Not specified"}
+                            {unitForm.referralSource || "Walk-in"}
                           </span>
                         </div>
 
@@ -2590,7 +2590,7 @@ const RentalActivitySection = ({ subSection }) => {
                   <div className="confirm-row">
                     <strong className="confirm-label">Referral Source:</strong>
                     <span className="confirm-value">
-                      {selectedBooking.referralSource || "Not specified"}
+                      {selectedBooking.referralSource || "Walk-in"}
                     </span>
                   </div>
 
@@ -3113,7 +3113,7 @@ const RentalActivitySection = ({ subSection }) => {
                   <div className="confirm-row">
                     <strong className="confirm-label">Referral Source:</strong>
                     <span className="confirm-value">
-                      {selectedBooking.referralSource || "Not specified"}
+                      {selectedBooking.referralSource || "Walk-in"}
                     </span>
                   </div>
 
@@ -5120,7 +5120,7 @@ const RentalActivitySection = ({ subSection }) => {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || "Not Specified"}
+                  value={formData.referralSource || "Walk-in"}
                   onChange={handleEditRequestInputChange}
                 >
                   {referralSources.map((source) => (
@@ -6428,7 +6428,7 @@ const RentalActivitySection = ({ subSection }) => {
                 <select
                   name="referralSource"
                   className="referral-info"
-                  value={formData.referralSource || "Not Specified"}
+                  value={formData.referralSource || "Walk-in"}
                   onChange={handleEditInputChange}
                 >
                   {referralSources.map((source) => (
@@ -9290,7 +9290,7 @@ onClick={() => {
                             <select
                               name="referralSource"
                               className="referral-info"
-                              value={unitForm.referralSource || "Not Specified"}
+                              value={unitForm.referralSource || "Walk-in"}
                               onChange={(e) =>
                                 handleInputChange(selectedUnitId, e)
                               }

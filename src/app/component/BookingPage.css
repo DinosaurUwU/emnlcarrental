@@ -364,7 +364,8 @@
 }
 
 .total-price {
-  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
   font-size: 20px;
   color: var(--accent-color);
 }
@@ -392,8 +393,10 @@
 }
 
 .price {
+  font-family: "Montserrat", sans-serif;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
+
   color: var(--supporting-color);
   text-align: right;
 }
@@ -1045,8 +1048,9 @@ select option {
 
 /* Header */
 .confirm-header {
+  font-family: "Montserrat", sans-serif;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 900;
   margin-bottom: 10px;
   color: var(--accent-color);
 }

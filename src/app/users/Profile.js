@@ -1312,7 +1312,7 @@ const Profile = ({ openBooking }) => {
                   <div className="confirm-row">
                     <strong className="confirm-label">Referral Source:</strong>
                     <span className="confirm-value">
-                      {selectedBooking.referralSource || "Not specified"}
+                      {selectedBooking.referralSource || "Walk-in"}
                     </span>
                   </div>
 
@@ -3434,7 +3434,7 @@ const Profile = ({ openBooking }) => {
                         </strong>
                         <span className="confirm-value">
                           {selectedHistoryRental.referralSource ||
-                            "Not specified"}
+                            "Walk-in"}
                         </span>
                       </div>
 
