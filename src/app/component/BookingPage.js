@@ -2074,6 +2074,7 @@ useEffect(() => {
         </div>
       )}
 
+
       {showBookingConfirmOverlay && (
         <div className="booking-confirm-overlay">
           <div className="booking-confirm-container">
