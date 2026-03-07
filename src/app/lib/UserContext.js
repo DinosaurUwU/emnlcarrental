@@ -2063,6 +2063,95 @@ Call them now to check if they want to extend. If no response, call them when re
     }
   };
 
+  const toJsDate = (value) => {
+    if (!value) return null;
+    if (value?.toDate && typeof value.toDate === "function")
+      return value.toDate();
+
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    if (typeof value === "number") {
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    if (typeof value === "string") {
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    return null;
+  };
+
+  const formatBookingDate = (value) => {
+    const d = toJsDate(value);
+    if (!d) return "";
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatBookingTime = (value, baseDate = null) => {
+    if (!value) return "";
+
+    if (
+      typeof value === "number" ||
+      (value?.toDate && typeof value.toDate === "function")
+    ) {
+      const d = toJsDate(value);
+      if (!d) return "";
+      return d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+
+      if (/am|pm/i.test(trimmed)) {
+        const d = new Date(`1970-01-01 ${trimmed}`);
+        if (!Number.isNaN(d.getTime())) {
+          return d.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          });
+        }
+        return trimmed;
+      }
+
+      if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
+        const [h, m] = trimmed.split(":").map(Number);
+        const base = toJsDate(baseDate) || new Date();
+        base.setHours(h, m, 0, 0);
+        return base.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      const d = new Date(trimmed);
+      if (!Number.isNaN(d.getTime())) {
+        return d.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      return trimmed;
+    }
+
+    return "";
+  };
+
   // (ADMIN) SYNC ADMIN INFO TO appSettings (called from AdminSettings.js after admin updates their profile)
   const syncAdminInfoToAppSettings = async ({
     adminUid,
@@ -3208,58 +3297,66 @@ Thank you for choosing EMNL Car Rental Services.`,
       } ${completedData.surname || ""}`.trim();
 
       // Format rental start date/time
-      const startDateStr = completedData.startDate
-        ? new Date(completedData.startDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+      const startDateStr = formatBookingDate(completedData.startDate);
+      const startTimeStr = formatBookingTime(
+        completedData.startTime,
+        completedData.startDate,
+      );
 
-      function formatTime(value) {
-        if (!value) return "";
+      const endDateStr = formatBookingDate(finalEndTimestamp);
+      const endTimeStr = formatBookingTime(finalEndTimestamp);
+      // const startDateStr = completedData.startDate
+      //   ? new Date(completedData.startDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-        if (typeof value === "number") {
-          return new Date(value).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      // function formatTime(value) {
+      //   if (!value) return "";
 
-        if (typeof value === "string") {
-          const [hours, minutes] = value.split(":").map(Number);
-          const d = new Date();
-          d.setHours(hours, minutes);
-          return d.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "number") {
+      //     return new Date(value).toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        return "";
-      }
+      //   if (typeof value === "string") {
+      //     const [hours, minutes] = value.split(":").map(Number);
+      //     const d = new Date();
+      //     d.setHours(hours, minutes);
+      //     return d.toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-      // Rental start time
-      const startTimeStr = formatTime(completedData.startTime);
+      //   return "";
+      // }
 
-      // Rental end date/time
-      const endDateStr = finalEndTimestamp
-        .toDate()
-        .toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
+      // // Rental start time
+      // const startTimeStr = formatTime(completedData.startTime);
 
-      const endTimeStr = finalEndTimestamp
-        .toDate()
-        .toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        });
+      // // Rental end date/time
+      // const endDateStr = finalEndTimestamp
+      //   .toDate()
+      //   .toLocaleDateString("en-US", {
+      //     year: "numeric",
+      //     month: "long",
+      //     day: "numeric",
+      //   });
+
+      // const endTimeStr = finalEndTimestamp
+      //   .toDate()
+      //   .toLocaleTimeString("en-US", {
+      //     hour: "numeric",
+      //     minute: "2-digit",
+      //     hour12: true,
+      //   });
 
       // Send completion email
       await sendEmail({
@@ -3346,13 +3443,14 @@ We hope you had a great experience with EMNL Car Rental Services. Thank you for 
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `Rental Completed<br><br>
+        content: `<b>Rental Completed</b><br><br>
 <b>Customer:</b> ${fullName || "Customer"} <br>
 <b>Car:</b> ${completedData.carName} <br>
 <b>Plate No:</b> ${completedData.plateNo} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
 <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-<b>Travel Location:</b> ${completedData.location || "Not specified"}`,
+<b>Travel Location:</b> ${completedData.location || "Not specified"} <br><br>
+Completion has been recorded on both admin and user history records.`,
         isNotification: true,
       };
 
@@ -3433,47 +3531,57 @@ We hope you had a great experience with EMNL Car Rental Services. Thank you for 
       } ${bookingPayload.surname || ""}`.trim();
 
       // Format dates
-      const startDateStr = bookingPayload.startDate
-        ? new Date(bookingPayload.startDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+      const startDateStr = formatBookingDate(bookingPayload.startDate);
+      const endDateStr = formatBookingDate(bookingPayload.endDate);
+      const startTimeStr = formatBookingTime(
+        bookingPayload.startTime,
+        bookingPayload.startDate,
+      );
+      const endTimeStr = formatBookingTime(
+        bookingPayload.endTime,
+        bookingPayload.endDate,
+      );
+      // const startDateStr = bookingPayload.startDate
+      //   ? new Date(bookingPayload.startDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      const endDateStr = bookingPayload.endDate
-        ? new Date(bookingPayload.endDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+      // const endDateStr = bookingPayload.endDate
+      //   ? new Date(bookingPayload.endDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      // Reuse helper for time formatting
-      function formatTime(value) {
-        if (!value) return "";
-        if (typeof value === "number") {
-          return new Date(value).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
-        if (typeof value === "string") {
-          const [hours, minutes] = value.split(":").map(Number);
-          const d = new Date();
-          d.setHours(hours, minutes);
-          return d.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
-        return "";
-      }
+      // // Reuse helper for time formatting
+      // function formatTime(value) {
+      //   if (!value) return "";
+      //   if (typeof value === "number") {
+      //     return new Date(value).toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
+      //   if (typeof value === "string") {
+      //     const [hours, minutes] = value.split(":").map(Number);
+      //     const d = new Date();
+      //     d.setHours(hours, minutes);
+      //     return d.toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
+      //   return "";
+      // }
 
-      const startTimeStr = formatTime(bookingPayload.startTime);
-      const endTimeStr = formatTime(bookingPayload.endTime);
+      // const startTimeStr = formatTime(bookingPayload.startTime);
+      // const endTimeStr = formatTime(bookingPayload.endTime);
 
       // Send rejection email TEMPLATE 2
       await sendEmail({
@@ -3563,12 +3671,14 @@ If you have any questions or would like to reschedule, please don’t hesitate t
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `Booking request for <b>${bookingPayload.carName} | ${
-          bookingPayload.plateNo || "N/A"
-        }</b> from <b>${
-          fullName || "Unknown"
-        }</b> has been <b>Rejected</b>.<br><br>
-Reason for Rejection: ${reasonText || "No reason specified"}`,
+        content: `<b>Booking Request Rejected</b><br><br>
+<b>Customer:</b> ${fullName || "Unknown"} <br>
+<b>Car:</b> ${bookingPayload.carName} <br>
+<b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
+<b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+<b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+<b>Reason for Rejection:</b> ${reasonText || "No reason specified"} <br><br>
+Please monitor for possible resubmission or customer follow-up.`,
         isNotification: true,
       });
 
@@ -3656,49 +3766,59 @@ Reason for Rejection: ${reasonText || "No reason specified"}`,
       } ${cleanedBookingData.surname || ""}`.trim();
 
       // Format rental start date/time
-      const startDateStr = cleanedBookingData.startDate
-        ? new Date(cleanedBookingData.startDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+      const startDateStr = formatBookingDate(cleanedBookingData.startDate);
+      const startTimeStr = formatBookingTime(
+        cleanedBookingData.startTime,
+        cleanedBookingData.startDate,
+      );
+      const endDateStr = formatBookingDate(cleanedBookingData.endDate);
+      const endTimeStr = formatBookingTime(
+        cleanedBookingData.endTime,
+        cleanedBookingData.endDate,
+      );
+      // const startDateStr = cleanedBookingData.startDate
+      //   ? new Date(cleanedBookingData.startDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      function formatTime(value) {
-        if (!value) return "";
+      // function formatTime(value) {
+      //   if (!value) return "";
 
-        if (typeof value === "number") {
-          return new Date(value).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "number") {
+      //     return new Date(value).toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        if (typeof value === "string") {
-          const [hours, minutes] = value.split(":").map(Number);
-          const d = new Date();
-          d.setHours(hours, minutes);
-          return d.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "string") {
+      //     const [hours, minutes] = value.split(":").map(Number);
+      //     const d = new Date();
+      //     d.setHours(hours, minutes);
+      //     return d.toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        return "";
-      }
+      //   return "";
+      // }
 
-      // Rental start/end times
-      const startTimeStr = formatTime(cleanedBookingData.startTime);
-      const endDateStr = cleanedBookingData.endDate
-        ? new Date(cleanedBookingData.endDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
-      const endTimeStr = formatTime(cleanedBookingData.endTime);
+      // // Rental start/end times
+      // const startTimeStr = formatTime(cleanedBookingData.startTime);
+      // const endDateStr = cleanedBookingData.endDate
+      //   ? new Date(cleanedBookingData.endDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
+      // const endTimeStr = formatTime(cleanedBookingData.endTime);
 
       // Send resubmission confirmation email
       await sendEmail({
@@ -3788,13 +3908,14 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `Booking Resubmitted<br><br>
+        content: `<b>Booking Resubmitted</b><br><br>
 <b>Customer:</b> ${fullName || "Customer"} <br>
 <b>Car:</b> ${cleanedBookingData.carName} <br>
-<b>Plate No:</b> ${cleanedBookingData.plateNo} <br>
+<b>Plate No:</b> ${cleanedBookingData.plateNo || "N/A"} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
 <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-<b>Travel Location:</b> ${cleanedBookingData.location || "Not specified"}`,
+<b>Travel Location:</b> ${cleanedBookingData.location || "Not specified"} <br><br>
+Please review the resubmitted request and continue processing.`,
         isNotification: true,
       };
 
@@ -4666,59 +4787,69 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
       } ${bookingData.surname || ""}`.trim();
 
       // Format rental start date/time
-      const startDateStr = bookingData.startDate
-        ? new Date(bookingData.startDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
-
-      // Combine endDate + endTime into a Date object
-      const finalEndTimestamp = new Date(
-        `${bookingData.endDate}T${bookingData.endTime}`,
+            const startDateStr = formatBookingDate(bookingData.startDate);
+      const startTimeStr = formatBookingTime(
+        bookingData.startTime,
+        bookingData.startDate,
       );
+      const endDateStr = formatBookingDate(bookingData.endDate);
+      const endTimeStr = formatBookingTime(
+        bookingData.endTime,
+        bookingData.endDate,
+      );
+      // const startDateStr = bookingData.startDate
+      //   ? new Date(bookingData.startDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      // Format into separate strings
-      const endDateStr = finalEndTimestamp.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      // // Combine endDate + endTime into a Date object
+      // const finalEndTimestamp = new Date(
+      //   `${bookingData.endDate}T${bookingData.endTime}`,
+      // );
 
-      const endTimeStr = finalEndTimestamp.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+      // // Format into separate strings
+      // const endDateStr = finalEndTimestamp.toLocaleDateString("en-US", {
+      //   year: "numeric",
+      //   month: "long",
+      //   day: "numeric",
+      // });
 
-      function formatTime(value) {
-        if (!value) return "";
+      // const endTimeStr = finalEndTimestamp.toLocaleTimeString("en-US", {
+      //   hour: "numeric",
+      //   minute: "2-digit",
+      //   hour12: true,
+      // });
 
-        if (typeof value === "number") {
-          return new Date(value).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      // function formatTime(value) {
+      //   if (!value) return "";
 
-        if (typeof value === "string") {
-          const [hours, minutes] = value.split(":").map(Number);
-          const d = new Date();
-          d.setHours(hours, minutes);
-          return d.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "number") {
+      //     return new Date(value).toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        return "";
-      }
+      //   if (typeof value === "string") {
+      //     const [hours, minutes] = value.split(":").map(Number);
+      //     const d = new Date();
+      //     d.setHours(hours, minutes);
+      //     return d.toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-      // Rental start time
-      const startTimeStr = formatTime(bookingData.startTime);
+      //   return "";
+      // }
+
+      // // Rental start time
+      // const startTimeStr = formatTime(bookingData.startTime);
 
       // EMAIL NOTIFICATIONS TEMPLATE 11
       await sendEmail({
@@ -4777,14 +4908,12 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
         contact: adminContact,
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `<b>Your booking request has been submitted!</b><br><br>
+        content: `<b>Booking Request Submitted</b><br><br>
 <b>Car:</b> ${bookingData.carName} <br>
-<b>Start Date & Time:</b> ${bookingData.startDate} | ${
-          bookingData.startTime
-        } <br>
-<b>End Date & Time:</b> ${bookingData.endDate} | ${bookingData.endTime} <br>
+<b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+<b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
 <b>Travel Location:</b> ${bookingData.location || "Not specified"} <br><br>
-Please wait while we review your request.`,
+Your request has been received and is now queued for review. We will notify you once there is an update.`,
         isNotification: true,
       });
 
@@ -4799,14 +4928,14 @@ Please wait while we review your request.`,
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `<b>New Booking Request Submitted!</b><br><br>
-<b>Customer:</b> ${fullName} <br>
+        content: `<b>New Booking Request Submitted</b><br><br>
+<b>Customer:</b> ${fullName || "Customer"} <br>
 <b>Car:</b> ${bookingData.carName} <br>
-<b>Plate No:</b> ${bookingData.plateNo} <br>
+<b>Plate No:</b> ${bookingData.plateNo || "N/A"} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
 <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
 <b>Travel Location:</b> ${bookingData.location || "Not specified"} <br><br>
-Check admin panel to approve or decline.`,
+Please review this request in the admin panel and proceed with approval or rejection.`,
         isNotification: true,
       });
 
@@ -5648,51 +5777,61 @@ Check admin panel to approve or decline.`,
       } ${booking.surname || ""}`.trim();
 
       // Format dates
-      const startDateStr = bookingPayload.startDate
-        ? new Date(bookingPayload.startDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+            const startDateStr = formatBookingDate(bookingPayload.startDate);
+      const endDateStr = formatBookingDate(bookingPayload.endDate);
+      const startTimeStr = formatBookingTime(
+        bookingPayload.startTime,
+        bookingPayload.startDate,
+      );
+      const endTimeStr = formatBookingTime(
+        bookingPayload.endTime,
+        bookingPayload.endDate,
+      );
+      // const startDateStr = bookingPayload.startDate
+      //   ? new Date(bookingPayload.startDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      const endDateStr = bookingPayload.endDate
-        ? new Date(bookingPayload.endDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "";
+      // const endDateStr = bookingPayload.endDate
+      //   ? new Date(bookingPayload.endDate).toLocaleDateString("en-US", {
+      //       year: "numeric",
+      //       month: "long",
+      //       day: "numeric",
+      //     })
+      //   : "";
 
-      // Helper to format both numeric timestamps and "HH:mm" strings
-      function formatTime(value) {
-        if (!value) return "";
+      // // Helper to format both numeric timestamps and "HH:mm" strings
+      // function formatTime(value) {
+      //   if (!value) return "";
 
-        if (typeof value === "number") {
-          return new Date(value).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "number") {
+      //     return new Date(value).toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        if (typeof value === "string") {
-          const [hours, minutes] = value.split(":").map(Number);
-          const d = new Date();
-          d.setHours(hours, minutes);
-          return d.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          });
-        }
+      //   if (typeof value === "string") {
+      //     const [hours, minutes] = value.split(":").map(Number);
+      //     const d = new Date();
+      //     d.setHours(hours, minutes);
+      //     return d.toLocaleTimeString("en-US", {
+      //       hour: "numeric",
+      //       minute: "2-digit",
+      //       hour12: true,
+      //     });
+      //   }
 
-        return "";
-      }
+      //   return "";
+      // }
 
-      // Format time
-      const startTimeStr = formatTime(bookingPayload.startTime);
-      const endTimeStr = formatTime(bookingPayload.endTime);
+      // // Format time
+      // const startTimeStr = formatTime(bookingPayload.startTime);
+      // const endTimeStr = formatTime(bookingPayload.endTime);
 
       await sendEmail({
         toName: fullName || "Customer",
