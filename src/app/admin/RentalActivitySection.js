@@ -171,7 +171,7 @@ const RentalActivitySection = ({ subSection }) => {
 
   const [fetchedImages, setFetchedImages] = useState({});
 
-    const licenseGalleryRef = useRef(null);
+  const licenseGalleryRef = useRef(null);
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
@@ -2188,7 +2188,7 @@ const RentalActivitySection = ({ subSection }) => {
                             //   setModalImage(previewUrl);
                             //   setIsImageModalOpen(true);
                             // }}
-                              onClick={() => {
+                            onClick={() => {
                               const previewUrl =
                                 filePreviews[confirmUnitId] ||
                                 URL.createObjectURL(unitForm.driverLicense);
@@ -2386,7 +2386,15 @@ const RentalActivitySection = ({ subSection }) => {
                         </div>
 
                         <li className="confirm-total-price">
-                          <strong className="summary-label">
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "900",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
+                            }}
+                          >
                             Total Price:
                           </strong>
                           <span className="summary-value">
@@ -2408,7 +2416,15 @@ const RentalActivitySection = ({ subSection }) => {
                           return (
                             <>
                               <li>
-                                <strong className="summary-label">
+                                <strong
+                                  className="summary-label"
+                                  style={{
+                                    fontFamily: "Montserrat, sans-serif",
+                                    fontWeight: "700",
+                                    fontSize: "14px",
+                                    textTransform: "uppercase",
+                                  }}
+                                >
                                   Total Paid:
                                 </strong>
                                 <span
@@ -2424,6 +2440,10 @@ const RentalActivitySection = ({ subSection }) => {
                                   style={{
                                     color:
                                       balanceDue === 0 ? "#28a745" : "#ffb347",
+                                    fontFamily: "Montserrat, sans-serif",
+                                    fontWeight: "700",
+                                    fontSize: "20px",
+                                    textTransform: "uppercase",
                                   }}
                                 >
                                   Balance Due:
@@ -2680,7 +2700,7 @@ const RentalActivitySection = ({ subSection }) => {
                       //   setModalImage(selectedBooking.driverLicense);
                       //   setIsImageModalOpen(true);
                       // }}
-                                            onClick={() => {
+                      onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
@@ -2889,7 +2909,17 @@ const RentalActivitySection = ({ subSection }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -2932,7 +2962,17 @@ const RentalActivitySection = ({ subSection }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -2945,6 +2985,10 @@ const RentalActivitySection = ({ subSection }) => {
                             className="summary-label"
                             style={{
                               color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:
@@ -3003,10 +3047,6 @@ const RentalActivitySection = ({ subSection }) => {
               Detailed information about this rental.
             </p>
             <div className="confirm-flag-row">
-              {selectedBooking?.reservation === true && (
-                <div className="confirm-reserved-flag">Reserved Booking</div>
-              )}
-
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -3015,17 +3055,17 @@ const RentalActivitySection = ({ subSection }) => {
                 </div>
               )}
 
-                                    <span
-                        className={`ongoing-unit-status-badge ${
-                          selectedBooking.balanceDue === 0 ? "paid" : "unpaid"
-                        }`}
-                      >
-                        {selectedBooking.status === "Completed"
-                          ? selectedBooking.balanceDue === 0
-                            ? "Pending for ( Mark as Paid )"
-                            : "Unpaid"
-                          : selectedBooking.status}
-                      </span>
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
             </div>
 
             <div className="admin-confirm-details">
@@ -3200,7 +3240,7 @@ const RentalActivitySection = ({ subSection }) => {
                       //   setModalImage(selectedBooking.driverLicense);
                       //   setIsImageModalOpen(true);
                       // }}
-                                            onClick={() => {
+                      onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
                     />
@@ -3409,7 +3449,17 @@ const RentalActivitySection = ({ subSection }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -3452,7 +3502,17 @@ const RentalActivitySection = ({ subSection }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -3465,6 +3525,10 @@ const RentalActivitySection = ({ subSection }) => {
                             className="summary-label"
                             style={{
                               color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:
@@ -4756,13 +4820,33 @@ const RentalActivitySection = ({ subSection }) => {
                         )}
                       </div>
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{pricing.discountedTotal.toLocaleString()}
                         </span>
                       </li>
                       <li>
-                        <strong className="summary-label">Total Paid:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "700",
+                            fontSize: "14px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Paid:
+                        </strong>
                         <span
                           className="summary-value"
                           style={{ color: "#dc3545" }}
@@ -4776,6 +4860,10 @@ const RentalActivitySection = ({ subSection }) => {
                           style={{
                             color:
                               pricing.balanceDue === 0 ? "#28a745" : "#ffb347",
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "700",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
                           }}
                         >
                           Balance Due:
@@ -6064,7 +6152,17 @@ const RentalActivitySection = ({ subSection }) => {
                   );
                   return (
                     <li className="confirm-total-price">
-                      <strong className="summary-label">Total Price:</strong>
+                      <strong
+                        className="summary-label"
+                        style={{
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "900",
+                          fontSize: "20px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Total Price:
+                      </strong>
                       <span className="summary-value">
                         ₱{discountedTotal.toLocaleString()}
                       </span>
@@ -6113,7 +6211,17 @@ const RentalActivitySection = ({ subSection }) => {
                   return (
                     <>
                       <li>
-                        <strong className="summary-label">Total Paid:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "700",
+                            fontSize: "14px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Paid:
+                        </strong>
                         <span
                           className="summary-value"
                           style={{ color: "#dc3545" }}
@@ -6126,6 +6234,10 @@ const RentalActivitySection = ({ subSection }) => {
                           className="summary-label"
                           style={{
                             color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "700",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
                           }}
                         >
                           Balance Due:
@@ -7141,7 +7253,17 @@ const RentalActivitySection = ({ subSection }) => {
                 const discountedTotal = Math.max(0, rawTotal - discountAmount);
                 return (
                   <li className="confirm-total-price">
-                    <strong className="summary-label">Total Price:</strong>
+                    <strong
+                      className="summary-label"
+                      style={{
+                        fontFamily: "Montserrat, sans-serif",
+                        fontWeight: "900",
+                        fontSize: "20px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Total Price:
+                    </strong>
                     <span className="summary-value">
                       ₱{discountedTotal.toLocaleString()}
                     </span>
@@ -7184,7 +7306,17 @@ const RentalActivitySection = ({ subSection }) => {
                 return (
                   <>
                     <li>
-                      <strong className="summary-label">Total Paid:</strong>
+                      <strong
+                        className="summary-label"
+                        style={{
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "700",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Total Paid:
+                      </strong>
                       <span
                         className="summary-value"
                         style={{ color: "#dc3545" }}
@@ -7197,6 +7329,10 @@ const RentalActivitySection = ({ subSection }) => {
                         className="summary-label"
                         style={{
                           color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: "700",
+                          fontSize: "20px",
+                          textTransform: "uppercase",
                         }}
                       >
                         Balance Due:
@@ -8569,7 +8705,17 @@ onClick={() => {
                             </div>
 
                             <div className="quotation-total-banner">
-                              <span className="total-label">TOTAL PRICE:</span>
+                              <span
+                                className="total-label"
+                                style={{
+                                  fontFamily: "Montserrat, sans-serif",
+                                  fontWeight: "800",
+                                  fontSize: "18px",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                TOTAL PRICE:
+                              </span>
                               <span className="total-value">
                                 ₱{total.toLocaleString()}
                               </span>
@@ -8988,7 +9134,7 @@ onClick={() => {
                                   //   );
                                   //   setIsImageModalOpen(true);
                                   // }}
-                                   onClick={() => {
+                                  onClick={() => {
                                     openPhotoSwipePreview(
                                       filePreviews[selectedUnitId],
                                     );
@@ -9737,7 +9883,16 @@ onClick={() => {
                           className="info-block"
                           style={{ fontWeight: "bold" }}
                         >
-                          <span className="label" style={{ fontSize: "1rem" }}>
+                          <span
+                            className="label"
+                            style={{
+                              fontSize: "20px",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
+                            }}
+                          >
                             Balance Due:
                           </span>
                           <span
@@ -9867,7 +10022,7 @@ onClick={() => {
           </div>
         )}
       </section>
-            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+      <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
             href={photoSwipePreviewItem.src}

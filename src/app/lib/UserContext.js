@@ -74,11 +74,9 @@ export const UserProvider = ({ children }) => {
   const [showImportSuccess, setShowImportSuccess] = useState(false);
   const [hideImportAnimation, setHideImportAnimation] = useState(false);
 
-
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [isImportMinimized, setIsImportMinimized] = useState(false);
-
 
   const [theme, setTheme] = useState("default"); // fallback theme
 
@@ -95,12 +93,12 @@ export const UserProvider = ({ children }) => {
 
   const [showBlockedUserOverlay, setShowBlockedUserOverlay] = useState(false);
   const [blockedUserReason, setBlockedUserReason] = useState("");
-const [adminContactInfo, setAdminContactInfo] = useState({
-  email: "",
-  contact: "",
-  name: "",
-  profilePic: "",
-});
+  const [adminContactInfo, setAdminContactInfo] = useState({
+    email: "",
+    contact: "",
+    name: "",
+    profilePic: "",
+  });
 
   const [authLoading, setAuthLoading] = useState(true);
   const [originalUser, setOriginalUser] = useState(null);
@@ -170,7 +168,6 @@ const [adminContactInfo, setAdminContactInfo] = useState({
       return { success: false, error };
     }
   };
-
 
   // SAVE GUEST USER BOOKING FORM AFTER LOGIN
   useEffect(() => {
@@ -392,7 +389,7 @@ const [adminContactInfo, setAdminContactInfo] = useState({
   //   }));
   // };
 
-    const removePaymentEntry = (bookingId, index) => {
+  const removePaymentEntry = (bookingId, index) => {
     setPaymentEntries((prev) => {
       // Safety check: if bookingId doesn't exist or entries is not an array, return unchanged
       if (!prev[bookingId] || !Array.isArray(prev[bookingId])) {
@@ -404,7 +401,6 @@ const [adminContactInfo, setAdminContactInfo] = useState({
       };
     });
   };
-
 
   // REALTIME FETCH UNITS COLLECTION
   useEffect(() => {
@@ -1935,11 +1931,11 @@ Call them now to check if they want to extend. If no response, call them when re
             if (settingsSnap.exists()) {
               const data = settingsSnap.data();
               setAdminContactInfo({
-  email: data.adminEmail || "rentalinquiries.emnl@gmail.com",
-  contact: data.adminContact || "+63 975 477 8178",
-  name: data.adminName || "EMNL Admin",
-  profilePic: data.adminProfilePic || "/assets/profile.png",
-});
+                email: data.adminEmail || "rentalinquiries.emnl@gmail.com",
+                contact: data.adminContact || "+63 975 477 8178",
+                name: data.adminName || "EMNL Admin",
+                profilePic: data.adminProfilePic || "/assets/profile.png",
+              });
             }
           } catch (error) {
             console.error("Error fetching admin contact:", error);
@@ -1991,237 +1987,254 @@ Call them now to check if they want to extend. If no response, call them when re
   };
 
   // (ADMIN) FETCH ADMINUID FOR CONTACT.JS
-const fetchAdminUid = async () => {
-  try {
-    const settingsRef = doc(db, "config", "appSettings");
-    const settingsSnap = await getDoc(settingsRef);
+  const fetchAdminUid = async () => {
+    try {
+      const settingsRef = doc(db, "config", "appSettings");
+      const settingsSnap = await getDoc(settingsRef);
 
-    if (!settingsSnap.exists()) {
-      console.warn("⚠️ appSettings does not exist.");
-      return null;
-    }
-
-    const settingsData = settingsSnap.data() || {};
-    const uid = (settingsData.adminUid || "").trim();
-
-    if (!uid) {
-      console.warn("⚠️ appSettings.adminUid is missing.");
-      return null;
-    }
-
-    // Use appSettings first (publicly readable path for all users)
-    let name = (settingsData.adminName || "").trim() || "Admin";
-    let email = (settingsData.adminEmail || "").trim() || "No email";
-    let contact = (settingsData.adminContact || "").trim() || "No contact";
-    let profilePic = settingsData.adminProfilePic || "/assets/profile.png";
-
-    // Try enriching from users/{adminUid} only when this user can likely read it.
-    // Regular users should use appSettings values to avoid denied reads + quota waste.
-    if (user?.role === "admin" || user?.uid === uid) {
-      try {
-        const adminUserSnap = await getDoc(doc(db, "users", uid));
-        if (adminUserSnap.exists()) {
-          const d = adminUserSnap.data() || {};
-          name = (d.name || "").trim() || name;
-          email = (d.email || "").trim() || email;
-          contact = (d.phone || "").trim() || contact;
-          profilePic = d.profilePic || profilePic;
-        }
-      } catch (err) {
-        console.warn(
-          "⚠️ users/{adminUid} not readable for this user, using appSettings only.",
-        );
+      if (!settingsSnap.exists()) {
+        console.warn("⚠️ appSettings does not exist.");
+        return null;
       }
+
+      const settingsData = settingsSnap.data() || {};
+      const uid = (settingsData.adminUid || "").trim();
+
+      if (!uid) {
+        console.warn("⚠️ appSettings.adminUid is missing.");
+        return null;
+      }
+
+      // Use appSettings first (publicly readable path for all users)
+      let name = (settingsData.adminName || "").trim() || "Admin";
+      let email = (settingsData.adminEmail || "").trim() || "No email";
+      let contact = (settingsData.adminContact || "").trim() || "No contact";
+      let profilePic = settingsData.adminProfilePic || "/assets/profile.png";
+
+      // Try enriching from users/{adminUid} only when this user can likely read it.
+      // Regular users should use appSettings values to avoid denied reads + quota waste.
+      if (user?.role === "admin" || user?.uid === uid) {
+        try {
+          const adminUserSnap = await getDoc(doc(db, "users", uid));
+          if (adminUserSnap.exists()) {
+            const d = adminUserSnap.data() || {};
+            name = (d.name || "").trim() || name;
+            email = (d.email || "").trim() || email;
+            contact = (d.phone || "").trim() || contact;
+            profilePic = d.profilePic || profilePic;
+          }
+        } catch (err) {
+          console.warn(
+            "⚠️ users/{adminUid} not readable for this user, using appSettings only.",
+          );
+        }
+      }
+
+      // // Try enriching from users/{adminUid}; non-admin may not have permission (ignore if denied)
+      // try {
+      //   const adminUserSnap = await getDoc(doc(db, "users", uid));
+      //   if (adminUserSnap.exists()) {
+      //     const d = adminUserSnap.data() || {};
+      //     name = (d.name || "").trim() || name;
+      //     email = (d.email || "").trim() || email;
+      //     contact = (d.phone || "").trim() || contact;
+      //     profilePic = d.profilePic || profilePic;
+      //   }
+      // } catch (err) {
+      //   console.warn("⚠️ users/{adminUid} not readable for this user, using appSettings only.");
+      // }
+
+      setAdminUid(uid);
+      setAdminName(name);
+      setAdminEmail(email);
+      setAdminContact(contact);
+
+      setAdminContactInfo({
+        name,
+        email,
+        contact,
+        profilePic,
+      });
+
+      return { uid, name, email, contact, profilePic };
+    } catch (err) {
+      console.error("🔥 fetchAdminUid failed:", err);
+      return null;
     }
+  };
 
-    // // Try enriching from users/{adminUid}; non-admin may not have permission (ignore if denied)
-    // try {
-    //   const adminUserSnap = await getDoc(doc(db, "users", uid));
-    //   if (adminUserSnap.exists()) {
-    //     const d = adminUserSnap.data() || {};
-    //     name = (d.name || "").trim() || name;
-    //     email = (d.email || "").trim() || email;
-    //     contact = (d.phone || "").trim() || contact;
-    //     profilePic = d.profilePic || profilePic;
-    //   }
-    // } catch (err) {
-    //   console.warn("⚠️ users/{adminUid} not readable for this user, using appSettings only.");
-    // }
+  // (ADMIN) SYNC ADMIN INFO TO appSettings (called from AdminSettings.js after admin updates their profile)
+  const syncAdminInfoToAppSettings = async ({
+    adminUid,
+    adminName,
+    adminEmail,
+    adminContact,
+    adminProfilePic,
+  }) => {
+    try {
+      const nextUid = adminUid || "";
+      const nextName = adminName || "";
+      const nextEmail = adminEmail || "";
+      const nextContact = adminContact || "";
 
-    setAdminUid(uid);
-    setAdminName(name);
-    setAdminEmail(email);
-    setAdminContact(contact);
+      await setDoc(
+        doc(db, "config", "appSettings"),
+        {
+          adminUid: nextUid,
+          adminName: nextName,
+          adminEmail: nextEmail,
+          adminContact: nextContact,
+          ...(adminProfilePic ? { adminProfilePic } : {}),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
 
-setAdminContactInfo({
-  name,
-  email,
-  contact,
-  profilePic,
-});
+      // instant UI sync (no manual reload needed)
+      setAdminUid(nextUid);
+      setAdminName(nextName);
+      setAdminEmail(nextEmail);
+      setAdminContact(nextContact);
+      setAdminContactInfo((prev) => ({
+        ...prev,
+        name: nextName,
+        email: nextEmail,
+        contact: nextContact,
+        profilePic: adminProfilePic || prev.profilePic || "/assets/profile.png",
+      }));
 
-    return { uid, name, email, contact, profilePic };
-  } catch (err) {
-    console.error("🔥 fetchAdminUid failed:", err);
-    return null;
-  }
-};
-
-// (ADMIN) SYNC ADMIN INFO TO appSettings (called from AdminSettings.js after admin updates their profile)
-const syncAdminInfoToAppSettings = async ({
-  adminUid,
-  adminName,
-  adminEmail,
-  adminContact,
-  adminProfilePic,
-}) => {
-  try {
-    const nextUid = adminUid || "";
-    const nextName = adminName || "";
-    const nextEmail = adminEmail || "";
-    const nextContact = adminContact || "";
-
-    await setDoc(
-      doc(db, "config", "appSettings"),
-      {
-        adminUid: nextUid,
-        adminName: nextName,
-        adminEmail: nextEmail,
-        adminContact: nextContact,
-        ...(adminProfilePic ? { adminProfilePic } : {}),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
-
-    // instant UI sync (no manual reload needed)
-    setAdminUid(nextUid);
-    setAdminName(nextName);
-    setAdminEmail(nextEmail);
-    setAdminContact(nextContact);
-    setAdminContactInfo((prev) => ({
-      ...prev,
-      name: nextName,
-      email: nextEmail,
-      contact: nextContact,
-      profilePic: adminProfilePic || prev.profilePic || "/assets/profile.png",
-    }));
-
-    return { success: true };
-  } catch (error) {
-    console.error("❌ Failed to sync admin info to appSettings:", error);
-    return { success: false, error: error.message };
-  }
-};
-
-const resetAdminToAppSettingsOriginal = async () => {
-  try {
-    const settingsRef = doc(db, "config", "appSettings");
-    const settingsSnap = await getDoc(settingsRef);
-
-    if (!settingsSnap.exists()) {
-      return { success: false, error: "appSettings not found" };
+      return { success: true };
+    } catch (error) {
+      console.error("❌ Failed to sync admin info to appSettings:", error);
+      return { success: false, error: error.message };
     }
+  };
 
-    const data = settingsSnap.data() || {};
+  const resetAdminToAppSettingsOriginal = async () => {
+    try {
+      const settingsRef = doc(db, "config", "appSettings");
+      const settingsSnap = await getDoc(settingsRef);
 
-    const originalUid = (data.originalAdminUid || data.adminUid || "").trim();
-    const originalName = (data.originalAdminName || data.adminName || "Admin").trim();
-    const originalEmail = (data.originalAdminEmail || data.adminEmail || "").trim();
-    const originalContact = (data.originalAdminContact || data.adminContact || "").trim();
-    const originalProfilePic =
-      data.originalAdminProfilePic || data.adminProfilePic || "/assets/profile.png";
+      if (!settingsSnap.exists()) {
+        return { success: false, error: "appSettings not found" };
+      }
 
-    if (!originalUid) {
-      return { success: false, error: "originalAdminUid/adminUid is missing" };
+      const data = settingsSnap.data() || {};
+
+      const originalUid = (data.originalAdminUid || data.adminUid || "").trim();
+      const originalName = (
+        data.originalAdminName ||
+        data.adminName ||
+        "Admin"
+      ).trim();
+      const originalEmail = (
+        data.originalAdminEmail ||
+        data.adminEmail ||
+        ""
+      ).trim();
+      const originalContact = (
+        data.originalAdminContact ||
+        data.adminContact ||
+        ""
+      ).trim();
+      const originalProfilePic =
+        data.originalAdminProfilePic ||
+        data.adminProfilePic ||
+        "/assets/profile.png";
+
+      if (!originalUid) {
+        return {
+          success: false,
+          error: "originalAdminUid/adminUid is missing",
+        };
+      }
+
+      // Reset admin user document based on appSettings originals
+      await updateDoc(doc(db, "users", originalUid), {
+        name: originalName,
+        phone: originalContact,
+        profilePic: originalProfilePic,
+      });
+
+      // Also reset current appSettings public fields
+      await setDoc(
+        settingsRef,
+        {
+          adminUid: originalUid,
+          adminName: originalName,
+          adminEmail: originalEmail,
+          adminContact: originalContact,
+          adminProfilePic: originalProfilePic,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+      setAdminUid(originalUid);
+      setAdminName(originalName);
+      setAdminEmail(originalEmail);
+      setAdminContact(originalContact);
+      setAdminContactInfo({
+        name: originalName,
+        email: originalEmail,
+        contact: originalContact,
+        profilePic: originalProfilePic,
+      });
+
+      return {
+        success: true,
+        data: {
+          adminUid: originalUid,
+          adminName: originalName,
+          adminEmail: originalEmail,
+          adminContact: originalContact,
+          adminProfilePic: originalProfilePic,
+        },
+      };
+    } catch (error) {
+      console.error("❌ resetAdminToAppSettingsOriginal failed:", error);
+      return { success: false, error: error.message || "Reset failed" };
     }
+  };
 
-    // Reset admin user document based on appSettings originals
-    await updateDoc(doc(db, "users", originalUid), {
-      name: originalName,
-      phone: originalContact,
-      profilePic: originalProfilePic,
-    });
+  //   const fetchAdminUid = async () => {
+  //   try {
+  //     const settingsRef = doc(db, "config", "appSettings");
+  //     const settingsSnap = await getDoc(settingsRef);
 
-    // Also reset current appSettings public fields
-    await setDoc(
-      settingsRef,
-      {
-        adminUid: originalUid,
-        adminName: originalName,
-        adminEmail: originalEmail,
-        adminContact: originalContact,
-        adminProfilePic: originalProfilePic,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+  //     if (settingsSnap.exists()) {
+  //       const data = settingsSnap.data();
+  //       const uid = data.adminUid;
+  //       const name = data.adminName;
+  //       const email = data.adminEmail;
+  //       const contact = data.adminContact;
 
-    setAdminUid(originalUid);
-    setAdminName(originalName);
-    setAdminEmail(originalEmail);
-    setAdminContact(originalContact);
-    setAdminContactInfo({
-      name: originalName,
-      email: originalEmail,
-      contact: originalContact,
-      profilePic: originalProfilePic,
-    });
+  //       if (uid) {
+  //         let profilePic = "/assets/profile.png";
+  //         const adminUserSnap = await getDoc(doc(db, "users", uid));
+  //         if (adminUserSnap.exists()) {
+  //           profilePic = adminUserSnap.data()?.profilePic || "/assets/profile.png";
+  //         }
 
-    return {
-      success: true,
-      data: {
-        adminUid: originalUid,
-        adminName: originalName,
-        adminEmail: originalEmail,
-        adminContact: originalContact,
-        adminProfilePic: originalProfilePic,
-      },
-    };
-  } catch (error) {
-    console.error("❌ resetAdminToAppSettingsOriginal failed:", error);
-    return { success: false, error: error.message || "Reset failed" };
-  }
-};
+  //         setAdminUid(uid);
+  //         setAdminName(name);
+  //         setAdminEmail(email);
+  //         setAdminContact(contact);
 
-//   const fetchAdminUid = async () => {
-//   try {
-//     const settingsRef = doc(db, "config", "appSettings");
-//     const settingsSnap = await getDoc(settingsRef);
-
-//     if (settingsSnap.exists()) {
-//       const data = settingsSnap.data();
-//       const uid = data.adminUid;
-//       const name = data.adminName;
-//       const email = data.adminEmail;
-//       const contact = data.adminContact;
-
-//       if (uid) {
-//         let profilePic = "/assets/profile.png";
-//         const adminUserSnap = await getDoc(doc(db, "users", uid));
-//         if (adminUserSnap.exists()) {
-//           profilePic = adminUserSnap.data()?.profilePic || "/assets/profile.png";
-//         }
-
-//         setAdminUid(uid);
-//         setAdminName(name);
-//         setAdminEmail(email);
-//         setAdminContact(contact);
-
-//         return { uid, name, email, contact, profilePic };
-//       } else {
-//         console.warn("⚠️ adminUid field is missing in appSettings.");
-//         return null;
-//       }
-//     } else {
-//       console.warn("⚠️ appSettings document does not exist.");
-//       return null;
-//     }
-//   } catch (err) {
-//     console.error("🔥 Error fetching admin UID from appSettings:", err);
-//     return null;
-//   }
-// };
+  //         return { uid, name, email, contact, profilePic };
+  //       } else {
+  //         console.warn("⚠️ adminUid field is missing in appSettings.");
+  //         return null;
+  //       }
+  //     } else {
+  //       console.warn("⚠️ appSettings document does not exist.");
+  //       return null;
+  //     }
+  //   } catch (err) {
+  //     console.error("🔥 Error fetching admin UID from appSettings:", err);
+  //     return null;
+  //   }
+  // };
   // const fetchAdminUid = async () => {
   //   try {
   //     const settingsRef = doc(db, "config", "appSettings");
@@ -2420,7 +2433,7 @@ const resetAdminToAppSettingsOriginal = async () => {
         //   now >= booking.startTimestamp?.toDate?.()
         // ) {
         const hasConflict = booking?.reservationConflict === true;
-        
+
         if (
           booking.status === "Pending" &&
           !hasConflict &&
@@ -2442,57 +2455,53 @@ const resetAdminToAppSettingsOriginal = async () => {
     return () => clearInterval(intervalId);
   }, [adminUid, activeBookings]);
 
+  //   // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE BOOKINGS (ADMIN) - NEW APPROACH: TRIGGERED BY ACTIVE BOOKINGS CHANGES
+  //   useEffect(() => {
+  //   if (!adminUid || user?.role !== "admin") return;
 
+  //   const syncUnitsHiddenFromActiveBookings = async () => {
+  //     try {
+  //       const activePlateSet = new Set(
+  //         (activeBookings || [])
+  //           .filter((booking) => {
+  //             const status = String(booking?.status || "").toLowerCase();
+  //             return status === "active" || status === "pending";
+  //           })
+  //           .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
+  //           .filter(Boolean),
+  //       );
 
-//   // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE BOOKINGS (ADMIN) - NEW APPROACH: TRIGGERED BY ACTIVE BOOKINGS CHANGES
-//   useEffect(() => {
-//   if (!adminUid || user?.role !== "admin") return;
+  //       const unitsSnap = await getDocs(collection(db, "units"));
+  //       const updateTasks = [];
 
-//   const syncUnitsHiddenFromActiveBookings = async () => {
-//     try {
-//       const activePlateSet = new Set(
-//         (activeBookings || [])
-//           .filter((booking) => {
-//             const status = String(booking?.status || "").toLowerCase();
-//             return status === "active" || status === "pending";
-//           })
-//           .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
-//           .filter(Boolean),
-//       );
+  //       unitsSnap.docs.forEach((unitSnap) => {
+  //         const unitData = unitSnap.data() || {};
+  //         const plate = String(unitData.plateNo || unitSnap.id || "")
+  //           .trim()
+  //           .toUpperCase();
 
-//       const unitsSnap = await getDocs(collection(db, "units"));
-//       const updateTasks = [];
+  //         if (!plate) return;
 
-//       unitsSnap.docs.forEach((unitSnap) => {
-//         const unitData = unitSnap.data() || {};
-//         const plate = String(unitData.plateNo || unitSnap.id || "")
-//           .trim()
-//           .toUpperCase();
+  //         const shouldBeHidden = activePlateSet.has(plate);
+  //         const currentHidden = !!unitData.hidden;
 
-//         if (!plate) return;
+  //         if (currentHidden !== shouldBeHidden) {
+  //           updateTasks.push(
+  //             updateDoc(doc(db, "units", unitSnap.id), { hidden: shouldBeHidden }),
+  //           );
+  //         }
+  //       });
 
-//         const shouldBeHidden = activePlateSet.has(plate);
-//         const currentHidden = !!unitData.hidden;
+  //       if (updateTasks.length > 0) {
+  //         await Promise.all(updateTasks);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error syncing units.hidden from activeBookings:", error);
+  //     }
+  //   };
 
-//         if (currentHidden !== shouldBeHidden) {
-//           updateTasks.push(
-//             updateDoc(doc(db, "units", unitSnap.id), { hidden: shouldBeHidden }),
-//           );
-//         }
-//       });
-
-//       if (updateTasks.length > 0) {
-//         await Promise.all(updateTasks);
-//       }
-//     } catch (error) {
-//       console.error("Error syncing units.hidden from activeBookings:", error);
-//     }
-//   };
-
-//   syncUnitsHiddenFromActiveBookings();
-// }, [adminUid, user?.role, activeBookings]);
-
-
+  //   syncUnitsHiddenFromActiveBookings();
+  // }, [adminUid, user?.role, activeBookings]);
 
   // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE/PENDING BOOKINGS
   useEffect(() => {
@@ -2507,7 +2516,9 @@ const resetAdminToAppSettingsOriginal = async () => {
               return status === "active" || status === "pending";
             })
             .map((booking) =>
-              String(booking?.plateNo || "").trim().toUpperCase(),
+              String(booking?.plateNo || "")
+                .trim()
+                .toUpperCase(),
             )
             .filter(Boolean),
         );
@@ -2667,8 +2678,6 @@ const resetAdminToAppSettingsOriginal = async () => {
     reconcileReservationConflicts();
   }, [adminUid, user?.role, activeBookings]);
 
-
-
   // (ADMIN) EXTEND RENTAL
   const extendRentalDuration = async (rentalId, addedSeconds) => {
     console.log("🧪 adminUid:", adminUid);
@@ -2811,7 +2820,7 @@ const resetAdminToAppSettingsOriginal = async () => {
         );
       }
 
-            // Detect conflicts: extended ACTIVE booking vs same-unit reserved PENDING bookings
+      // Detect conflicts: extended ACTIVE booking vs same-unit reserved PENDING bookings
       const parseBookingMs = (booking, edge) => {
         const tsKey = edge === "start" ? "startTimestamp" : "endTimestamp";
         const dateKey = edge === "start" ? "startDate" : "endDate";
@@ -2827,7 +2836,8 @@ const resetAdminToAppSettingsOriginal = async () => {
         return edge === "start" ? 0 : Number.MAX_SAFE_INTEGER;
       };
 
-      const extendedStartMs = startTimestamp?.getTime?.() || parseBookingMs(rentalData, "start");
+      const extendedStartMs =
+        startTimestamp?.getTime?.() || parseBookingMs(rentalData, "start");
       const extendedEndMs = endTimestamp.toDate().getTime();
 
       const activeBookingsSnap = await getDocs(
@@ -3848,47 +3858,46 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
     }
   };
 
-
-// (ADMIN) RESERVE RENTAL (FLAG ACTIVE BOOKING AS RESERVED)
-const reserveUnit = async (rentalId) => {
-  try {
-    const bookingRef = doc(
-      db,
-      "users",
-      adminUid,
-      "activeBookings",
-      String(rentalId),
-    );
-    const bookingSnap = await getDoc(bookingRef);
-
-    if (!bookingSnap.exists()) {
-      console.warn("⚠️ Active booking not found for reserve:", rentalId);
-      return;
-    }
-
-    const bookingData = bookingSnap.data() || {};
-    await updateDoc(bookingRef, { reservation: true });
-
-    const renterUid = bookingData.createdBy;
-    if (renterUid && renterUid !== "admin" && renterUid !== adminUid) {
-      const userRentalRef = doc(
+  // (ADMIN) RESERVE RENTAL (FLAG ACTIVE BOOKING AS RESERVED)
+  const reserveUnit = async (rentalId) => {
+    try {
+      const bookingRef = doc(
         db,
         "users",
-        renterUid,
-        "activeRentals",
+        adminUid,
+        "activeBookings",
         String(rentalId),
       );
-      const userRentalSnap = await getDoc(userRentalRef);
-      if (userRentalSnap.exists()) {
-        await updateDoc(userRentalRef, { reservation: true });
-      }
-    }
+      const bookingSnap = await getDoc(bookingRef);
 
-    console.log("✅ Booking reserved:", rentalId);
-  } catch (error) {
-    console.error("🔥 Error in reserveUnit:", error);
-  }
-};
+      if (!bookingSnap.exists()) {
+        console.warn("⚠️ Active booking not found for reserve:", rentalId);
+        return;
+      }
+
+      const bookingData = bookingSnap.data() || {};
+      await updateDoc(bookingRef, { reservation: true });
+
+      const renterUid = bookingData.createdBy;
+      if (renterUid && renterUid !== "admin" && renterUid !== adminUid) {
+        const userRentalRef = doc(
+          db,
+          "users",
+          renterUid,
+          "activeRentals",
+          String(rentalId),
+        );
+        const userRentalSnap = await getDoc(userRentalRef);
+        if (userRentalSnap.exists()) {
+          await updateDoc(userRentalRef, { reservation: true });
+        }
+      }
+
+      console.log("✅ Booking reserved:", rentalId);
+    } catch (error) {
+      console.error("🔥 Error in reserveUnit:", error);
+    }
+  };
 
   // (ADMIN) RESERVE RENTAL
   // const reserveUnit = async (unitId) => {
@@ -3936,286 +3945,282 @@ const reserveUnit = async (rentalId) => {
   };
 
   // (ADMIN & USER) SEND MESSAGE BETWEEN USERS
-const sendMessage = async ({
-  name,
-  email,
-  phone,
-  message,
-  recipientUid,
-  senderUid,
-  isAdminSender,
-  recipientName,
-  recipientEmail,
-  recipientPhone,
-  sourcePage = "chat",       // <-- add
-  sourceLabel = "Chat",      // <-- add
-}) => {
-  if (!senderUid || !recipientUid) {
-    console.error("❌ Missing senderUid or recipientUid.");
-    return { success: false, error: "Missing senderUid or recipientUid." };
-  }
-
-  try {
-    const senderSentRef = collection(db, "users", senderUid, "sentMessages");
-    const recipientInboxRef = collection(
-      db,
-      "users",
-      recipientUid,
-      "receivedMessages",
-    );
-
-    const newMessage = {
-      senderUid,
-      recipientUid,
-      name,
-      email,
-      contact: phone,
-      content: message,
-      recipientName,
-      recipientEmail,
-      recipientContact: recipientPhone,
-      sourcePage,              // <-- add
-      sourceLabel,             // <-- add
-      date: new Date().toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      time: new Date().toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      startTimestamp: serverTimestamp(),
-      clientCreatedAt: Date.now(),
-      formattedDateTime: new Date().toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Manila",
-      }),
-      profilePic: user.profilePic || null,
-      readStatus: false,
-    };
-
-    await setDoc(doc(senderSentRef), newMessage);
-    await setDoc(doc(recipientInboxRef), newMessage);
-
-    return { success: true };
-  } catch (err) {
-    console.error("🔥 Error sending message:", err);
-    return { success: false, error: err?.message || "Failed to send message." };
-  }
-};
-
-// (GUEST) BUILD STABLE SENDER UID BASED ON GUEST DETAILS OR LOCAL STORAGE
-const buildStableGuestSenderUid = ({ name, email, phone }) => {
-  const normalize = (v) =>
-    (v || "")
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, " ");
-
-  const slug = (v) =>
-    normalize(v)
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/^_+|_+$/g, "")
-      .slice(0, 32);
-
-  const emailKey = slug(email);
-  const phoneKey = slug((phone || "").replace(/[^\d+]/g, ""));
-  const nameKey = slug(name);
-
-  // Deterministic ID for same guest details (prevents new conversation per message)
-  const deterministic = [emailKey, phoneKey, nameKey].filter(Boolean).join("_");
-
-  if (deterministic) {
-    return `guest_${deterministic}`.slice(0, 120);
-  }
-
-  // Fallback: persistent browser-level guest ID
-  const storageKey = "guest_contact_sender_uid";
-  const existing =
-    typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
-  if (existing) return existing;
-
-  const generated = `guest_local_${Math.random().toString(36).slice(2, 12)}`;
-  if (typeof window !== "undefined") localStorage.setItem(storageKey, generated);
-  return generated;
-};
-
-
-
-
-// (GUEST) SEND CONTACT MESSAGE TO ADMIN
-const sendGuestContactMessage = async ({
-  name,
-  email,
-  phone,
-  message,
-  recipientUid,
-  recipientName,
-  recipientEmail,
-  recipientPhone,
-}) => {
-  try {
-    if (!recipientUid) {
-      return { success: false, error: "Missing recipientUid." };
+  const sendMessage = async ({
+    name,
+    email,
+    phone,
+    message,
+    recipientUid,
+    senderUid,
+    isAdminSender,
+    recipientName,
+    recipientEmail,
+    recipientPhone,
+    sourcePage = "chat", // <-- add
+    sourceLabel = "Chat", // <-- add
+  }) => {
+    if (!senderUid || !recipientUid) {
+      console.error("❌ Missing senderUid or recipientUid.");
+      return { success: false, error: "Missing senderUid or recipientUid." };
     }
 
-    const safeName = (name || "Guest").trim() || "Guest";
-    const safeEmail = (email || "No email").trim() || "No email";
-    const safePhone = (phone || "No contact").trim() || "No contact";
-    const safeMessage = (message || "").trim();
+    try {
+      const senderSentRef = collection(db, "users", senderUid, "sentMessages");
+      const recipientInboxRef = collection(
+        db,
+        "users",
+        recipientUid,
+        "receivedMessages",
+      );
 
-    if (!safeMessage) {
-      return { success: false, error: "Message is required." };
+      const newMessage = {
+        senderUid,
+        recipientUid,
+        name,
+        email,
+        contact: phone,
+        content: message,
+        recipientName,
+        recipientEmail,
+        recipientContact: recipientPhone,
+        sourcePage, // <-- add
+        sourceLabel, // <-- add
+        date: new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        startTimestamp: serverTimestamp(),
+        clientCreatedAt: Date.now(),
+        formattedDateTime: new Date().toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Manila",
+        }),
+        profilePic: user.profilePic || null,
+        readStatus: false,
+      };
+
+      await setDoc(doc(senderSentRef), newMessage);
+      await setDoc(doc(recipientInboxRef), newMessage);
+
+      return { success: true };
+    } catch (err) {
+      console.error("🔥 Error sending message:", err);
+      return {
+        success: false,
+        error: err?.message || "Failed to send message.",
+      };
+    }
+  };
+
+  // (GUEST) BUILD STABLE SENDER UID BASED ON GUEST DETAILS OR LOCAL STORAGE
+  const buildStableGuestSenderUid = ({ name, email, phone }) => {
+    const normalize = (v) =>
+      (v || "").toString().trim().toLowerCase().replace(/\s+/g, " ");
+
+    const slug = (v) =>
+      normalize(v)
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 32);
+
+    const emailKey = slug(email);
+    const phoneKey = slug((phone || "").replace(/[^\d+]/g, ""));
+    const nameKey = slug(name);
+
+    // Deterministic ID for same guest details (prevents new conversation per message)
+    const deterministic = [emailKey, phoneKey, nameKey]
+      .filter(Boolean)
+      .join("_");
+
+    if (deterministic) {
+      return `guest_${deterministic}`.slice(0, 120);
     }
 
-    const guestSenderUid = buildStableGuestSenderUid({
-      name: safeName,
-      email: safeEmail,
-      phone: safePhone,
-    });
+    // Fallback: persistent browser-level guest ID
+    const storageKey = "guest_contact_sender_uid";
+    const existing =
+      typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+    if (existing) return existing;
 
-    const guestMessage = {
-      senderUid: guestSenderUid,
-      recipientUid,
-      name: safeName,
-      email: safeEmail,
-      contact: safePhone,
-      content: safeMessage,
-      recipientName: recipientName || "Admin",
-      recipientEmail: recipientEmail || "",
-      recipientContact: recipientPhone || "",
-      sourcePage: "contact-guest",
-      sourceLabel: "Guest Contact Page",
-      isGuest: true,
-      date: new Date().toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      time: new Date().toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      startTimestamp: serverTimestamp(),
-      clientCreatedAt: Date.now(),
-      formattedDateTime: new Date().toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Manila",
-      }),
-      profilePic: "/assets/profile.png",
-      readStatus: false,
-    };
+    const generated = `guest_local_${Math.random().toString(36).slice(2, 12)}`;
+    if (typeof window !== "undefined")
+      localStorage.setItem(storageKey, generated);
+    return generated;
+  };
 
-    await setDoc(
-      doc(collection(db, "users", recipientUid, "receivedMessages")),
-      guestMessage,
-    );
+  // (GUEST) SEND CONTACT MESSAGE TO ADMIN
+  const sendGuestContactMessage = async ({
+    name,
+    email,
+    phone,
+    message,
+    recipientUid,
+    recipientName,
+    recipientEmail,
+    recipientPhone,
+  }) => {
+    try {
+      if (!recipientUid) {
+        return { success: false, error: "Missing recipientUid." };
+      }
 
-    return { success: true, viaInApp: true, guest: true };
-  } catch (error) {
-    console.error("❌ sendGuestContactMessage failed:", error);
-    return { success: false, error: error.message || "Guest send failed." };
-  }
-};
+      const safeName = (name || "Guest").trim() || "Guest";
+      const safeEmail = (email || "No email").trim() || "No email";
+      const safePhone = (phone || "No contact").trim() || "No contact";
+      const safeMessage = (message || "").trim();
 
+      if (!safeMessage) {
+        return { success: false, error: "Message is required." };
+      }
 
+      const guestSenderUid = buildStableGuestSenderUid({
+        name: safeName,
+        email: safeEmail,
+        phone: safePhone,
+      });
 
-// const sendGuestContactMessage = async ({
-//   name,
-//   email,
-//   phone,
-//   message,
-//   recipientUid,
-//   recipientName,
-//   recipientEmail,
-//   recipientPhone,
-// }) => {
-//   try {
-//     if (!recipientUid) {
-//       return { success: false, error: "Missing recipientUid." };
-//     }
+      const guestMessage = {
+        senderUid: guestSenderUid,
+        recipientUid,
+        name: safeName,
+        email: safeEmail,
+        contact: safePhone,
+        content: safeMessage,
+        recipientName: recipientName || "Admin",
+        recipientEmail: recipientEmail || "",
+        recipientContact: recipientPhone || "",
+        sourcePage: "contact-guest",
+        sourceLabel: "Guest Contact Page",
+        isGuest: true,
+        date: new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        startTimestamp: serverTimestamp(),
+        clientCreatedAt: Date.now(),
+        formattedDateTime: new Date().toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Manila",
+        }),
+        profilePic: "/assets/profile.png",
+        readStatus: false,
+      };
 
-//     const safeName = (name || "Guest").trim() || "Guest";
-//     const safeEmail = (email || "No email").trim() || "No email";
-//     const safePhone = (phone || "No contact").trim() || "No contact";
-//     const safeMessage = (message || "").trim();
+      await setDoc(
+        doc(collection(db, "users", recipientUid, "receivedMessages")),
+        guestMessage,
+      );
 
-//     if (!safeMessage) {
-//       return { success: false, error: "Message is required." };
-//     }
+      return { success: true, viaInApp: true, guest: true };
+    } catch (error) {
+      console.error("❌ sendGuestContactMessage failed:", error);
+      return { success: false, error: error.message || "Guest send failed." };
+    }
+  };
 
-//     const guestKey = `${safeEmail}_${safePhone}_${Date.now()}`
-//       .toLowerCase()
-//       .replace(/[^a-z0-9]+/g, "_")
-//       .replace(/^_+|_+$/g, "")
-//       .slice(0, 64);
+  // const sendGuestContactMessage = async ({
+  //   name,
+  //   email,
+  //   phone,
+  //   message,
+  //   recipientUid,
+  //   recipientName,
+  //   recipientEmail,
+  //   recipientPhone,
+  // }) => {
+  //   try {
+  //     if (!recipientUid) {
+  //       return { success: false, error: "Missing recipientUid." };
+  //     }
 
-//     const guestSenderUid = `guest_${guestKey}`;
+  //     const safeName = (name || "Guest").trim() || "Guest";
+  //     const safeEmail = (email || "No email").trim() || "No email";
+  //     const safePhone = (phone || "No contact").trim() || "No contact";
+  //     const safeMessage = (message || "").trim();
 
-//     const guestMessage = {
-//       senderUid: guestSenderUid,
-//       recipientUid,
-//       name: safeName,
-//       email: safeEmail,
-//       contact: safePhone,
-//       content: safeMessage,
-//       recipientName: recipientName || "Admin",
-//       recipientEmail: recipientEmail || "",
-//       recipientContact: recipientPhone || "",
-//       sourcePage: "contact-guest",
-//       sourceLabel: "Guest Contact Page",
-//       isGuest: true,
-//       date: new Date().toLocaleDateString("en-US", {
-//         weekday: "long",
-//         year: "numeric",
-//         month: "long",
-//         day: "numeric",
-//       }),
-//       time: new Date().toLocaleTimeString("en-US", {
-//         hour: "2-digit",
-//         minute: "2-digit",
-//       }),
-//       startTimestamp: serverTimestamp(),
-//       clientCreatedAt: Date.now(),
-//       formattedDateTime: new Date().toLocaleString("en-US", {
-//         year: "numeric",
-//         month: "short",
-//         day: "numeric",
-//         hour: "numeric",
-//         minute: "2-digit",
-//         hour12: true,
-//         timeZone: "Asia/Manila",
-//       }),
-//       profilePic: "/assets/profile.png",
-//       readStatus: false,
-//     };
+  //     if (!safeMessage) {
+  //       return { success: false, error: "Message is required." };
+  //     }
 
-//     await setDoc(
-//       doc(collection(db, "users", recipientUid, "receivedMessages")),
-//       guestMessage,
-//     );
+  //     const guestKey = `${safeEmail}_${safePhone}_${Date.now()}`
+  //       .toLowerCase()
+  //       .replace(/[^a-z0-9]+/g, "_")
+  //       .replace(/^_+|_+$/g, "")
+  //       .slice(0, 64);
 
-//     return { success: true, viaInApp: true, guest: true };
-//   } catch (error) {
-//     console.error("❌ sendGuestContactMessage failed:", error);
-//     return { success: false, error: error.message || "Guest send failed." };
-//   }
-// };
+  //     const guestSenderUid = `guest_${guestKey}`;
 
+  //     const guestMessage = {
+  //       senderUid: guestSenderUid,
+  //       recipientUid,
+  //       name: safeName,
+  //       email: safeEmail,
+  //       contact: safePhone,
+  //       content: safeMessage,
+  //       recipientName: recipientName || "Admin",
+  //       recipientEmail: recipientEmail || "",
+  //       recipientContact: recipientPhone || "",
+  //       sourcePage: "contact-guest",
+  //       sourceLabel: "Guest Contact Page",
+  //       isGuest: true,
+  //       date: new Date().toLocaleDateString("en-US", {
+  //         weekday: "long",
+  //         year: "numeric",
+  //         month: "long",
+  //         day: "numeric",
+  //       }),
+  //       time: new Date().toLocaleTimeString("en-US", {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       }),
+  //       startTimestamp: serverTimestamp(),
+  //       clientCreatedAt: Date.now(),
+  //       formattedDateTime: new Date().toLocaleString("en-US", {
+  //         year: "numeric",
+  //         month: "short",
+  //         day: "numeric",
+  //         hour: "numeric",
+  //         minute: "2-digit",
+  //         hour12: true,
+  //         timeZone: "Asia/Manila",
+  //       }),
+  //       profilePic: "/assets/profile.png",
+  //       readStatus: false,
+  //     };
+
+  //     await setDoc(
+  //       doc(collection(db, "users", recipientUid, "receivedMessages")),
+  //       guestMessage,
+  //     );
+
+  //     return { success: true, viaInApp: true, guest: true };
+  //   } catch (error) {
+  //     console.error("❌ sendGuestContactMessage failed:", error);
+  //     return { success: false, error: error.message || "Guest send failed." };
+  //   }
+  // };
 
   // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
   useEffect(() => {
@@ -4544,11 +4549,10 @@ const sendGuestContactMessage = async ({
 
       // const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
 
-            // Use the provided bookingUid as docId to ensure consistency
+      // Use the provided bookingUid as docId to ensure consistency
       const docId = bookingUid;
 
       const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
-
 
       const userStartTime =
         bookingData.startTimestamp?.toDate?.() || new Date();
@@ -5726,16 +5730,13 @@ Check admin panel to approve or decline.`,
         contact: adminContact,
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `Hi ${fullName || "Customer"}, <br><br>
-Buckle up! Your car rental booking for <b>${
-          bookingPayload.carName
-        }</b> has been <b>Approved</b>.<br><br>
+ content: `Hi ${fullName || "Customer"}, <br><br>
+Your booking for <b>${bookingPayload.carName}</b> has been <b>Approved ✅</b>.<br><br>
 <b>Car:</b> ${bookingPayload.carName} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
 <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
 <b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
-Your ride is officially ready to roll on the road. If you need any assistance or would like to extend your rental, feel free to reach out anytime. <br><br>
-Wishing you a smooth and safe trip!`,
+Your rental is now confirmed. If you need assistance or schedule adjustments, please contact us anytime.`,
         isNotification: true,
       };
 
@@ -5771,14 +5772,14 @@ Wishing you a smooth and safe trip!`,
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
-        content: `<b>New Booking Approved!</b><br><br>
+ content: `<b>Booking Approved</b><br><br>
 <b>Customer:</b> ${fullName || "Customer"} <br>
 <b>Car:</b> ${bookingPayload.carName} <br>
-<b>Plate No:</b> ${bookingPayload.plateNo} <br>
+<b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
 <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
 <b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
-Please ensure follow-ups and updates for the customer.`,
+Please continue operational follow-ups and payment tracking for this rental.`,
         isNotification: true,
       };
 
@@ -5949,25 +5950,26 @@ Please ensure follow-ups and updates for the customer.`,
             // ✅ Rebuild flat bookings array for this plateNo
             const allBookings = [];
             for (const key in newMap[plateNo]) {
-              if (["carType", "unitImage", "carName", "bookings"].includes(key)) continue;
+              if (["carType", "unitImage", "carName", "bookings"].includes(key))
+                continue;
               if (Array.isArray(newMap[plateNo][key]?.bookings)) {
                 allBookings.push(...newMap[plateNo][key].bookings);
               }
             }
-            
+
             // Deduplicate by id
             const uniqueMap = new Map();
             allBookings.forEach((booking) => {
-              const key = booking.id || `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}`;
+              const key =
+                booking.id ||
+                `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}`;
               uniqueMap.set(key, booking);
             });
-            
+
             newMap[plateNo].bookings = Array.from(uniqueMap.values());
 
             return newMap;
           });
-
-
 
           // Add to calendar
           if (data.startTimestamp?.seconds) {
@@ -6492,155 +6494,136 @@ Please ensure follow-ups and updates for the customer.`,
   //   }
   // };
 
+  // Use: users/{adminUid}/financialReports/{type}/{year}/gridData
+  // Example: users/xxx/financialReports/revenue/2026/gridData
 
+  const saveFinancialReport = async (type, gridData, year) => {
+    console.log("saveFinancialReport called:", { type, year, adminUid });
 
+    if (!adminUid || !type || !db) {
+      console.warn("Early return - missing params");
+      return;
+    }
 
+    const reportYear = `${year || new Date().getFullYear()}`;
 
-// Use: users/{adminUid}/financialReports/{type}/{year}/gridData
-// Example: users/xxx/financialReports/revenue/2026/gridData
+    try {
+      console.log("Creating docRef...");
+      const docPath = `users/${adminUid}/financialReports/${type}/${reportYear}/gridData`;
+      console.log("Doc path:", docPath);
 
-const saveFinancialReport = async (type, gridData, year) => {
-  console.log("saveFinancialReport called:", { type, year, adminUid });
+      const docRef = doc(db, docPath);
+      console.log("docRef created:", docRef);
 
-  if (!adminUid || !type || !db) {
-    console.warn("Early return - missing params");
-    return;
-  }
+      // Convert object format to Firestore-compatible format
+      const firestoreData = {};
 
-  const reportYear = `${year || new Date().getFullYear()}`;
-  
-  try {
-    console.log("Creating docRef...");
-    const docPath = `users/${adminUid}/financialReports/${type}/${reportYear}/gridData`;
-    console.log("Doc path:", docPath);
-    
-    const docRef = doc(db, docPath);
-    console.log("docRef created:", docRef);
-    
-    // Convert object format to Firestore-compatible format
-    const firestoreData = {};
-    
-    Object.keys(gridData).forEach((monthKey) => {
-      const monthRows = gridData[monthKey];
-      firestoreData[monthKey] = {};
-      
-      Object.keys(monthRows).forEach((rowKey) => {
-        const row = monthRows[rowKey];
-        firestoreData[monthKey][rowKey] = Array.isArray(row) ? row : [];
-      });
-    });
+      Object.keys(gridData).forEach((monthKey) => {
+        const monthRows = gridData[monthKey];
+        firestoreData[monthKey] = {};
 
-    await setDoc(docRef, {
-      gridData: firestoreData,
-      updatedAt: serverTimestamp(),
-    });
-    console.log("✅ Saved successfully");
-  } catch (err) {
-    console.error("ERROR in saveFinancialReport:", err);
-    console.error("Error name:", err.name);
-    console.error("Error message:", err.message);
-  }
-};
-
-
-
-
-
-const loadFinancialReport = async (type, year) => {
-  console.log("LOAD FINANCIAL REPORT INPUTS:", { type, year, adminUid });
-  
-  if (!adminUid || !type || !db) {
-    return { gridData: {} };
-  }
-
-  const reportYear = `${year || new Date().getFullYear()}`;
-  
-  console.log("About to create docRef with:", {
-    segment1: "users",
-    segment2: adminUid,
-    segment3: "financialReports",
-    segment4: type,
-    segment5: reportYear,
-    segment6: "gridData"
-  });
-  
-  try {
-    const docRef = doc(db, "users", adminUid, "financialReports", type, reportYear, "gridData");
-    console.log("docRef created successfully:", docRef);
-    const docSnap = await getDoc(docRef);
-    console.log("getDoc completed, exists:", docSnap.exists());
-    
-    if (docSnap.exists()) {
-      const firestoreData = docSnap.data().gridData || {};
-      
-      // Convert object format back to UI format
-      const gridData = {};
-      
-      Object.keys(firestoreData).forEach((monthKey) => {
-        const monthData = firestoreData[monthKey];
-        gridData[monthKey] = {};
-        
-        Object.keys(monthData).forEach((rowKey) => {
-          gridData[monthKey][rowKey] = monthData[rowKey];
+        Object.keys(monthRows).forEach((rowKey) => {
+          const row = monthRows[rowKey];
+          firestoreData[monthKey][rowKey] = Array.isArray(row) ? row : [];
         });
       });
 
-      console.log("✅ Loaded gridData:", gridData);
-      return { gridData, updatedAt: docSnap.data().updatedAt };
+      await setDoc(docRef, {
+        gridData: firestoreData,
+        updatedAt: serverTimestamp(),
+      });
+      console.log("✅ Saved successfully");
+    } catch (err) {
+      console.error("ERROR in saveFinancialReport:", err);
+      console.error("Error name:", err.name);
+      console.error("Error message:", err.message);
+    }
+  };
+
+  const loadFinancialReport = async (type, year) => {
+    console.log("LOAD FINANCIAL REPORT INPUTS:", { type, year, adminUid });
+
+    if (!adminUid || !type || !db) {
+      return { gridData: {} };
     }
 
-    // Return blank grid
-    console.log("No existing data, returning blank grid");
-    const blankGrid = {};
-    for (let i = 0; i < 12; i++) {
-      blankGrid[i] = {
-        Row_0: ["", "", "", "", ""],
-        Row_1: ["", "", "", "", ""],
-        Row_2: ["", "", "", "", ""],
-        Row_3: ["", "", "", "", ""],
-        Row_4: ["", "", "", "", ""],
-      };
+    const reportYear = `${year || new Date().getFullYear()}`;
+
+    console.log("About to create docRef with:", {
+      segment1: "users",
+      segment2: adminUid,
+      segment3: "financialReports",
+      segment4: type,
+      segment5: reportYear,
+      segment6: "gridData",
+    });
+
+    try {
+      const docRef = doc(
+        db,
+        "users",
+        adminUid,
+        "financialReports",
+        type,
+        reportYear,
+        "gridData",
+      );
+      console.log("docRef created successfully:", docRef);
+      const docSnap = await getDoc(docRef);
+      console.log("getDoc completed, exists:", docSnap.exists());
+
+      if (docSnap.exists()) {
+        const firestoreData = docSnap.data().gridData || {};
+
+        // Convert object format back to UI format
+        const gridData = {};
+
+        Object.keys(firestoreData).forEach((monthKey) => {
+          const monthData = firestoreData[monthKey];
+          gridData[monthKey] = {};
+
+          Object.keys(monthData).forEach((rowKey) => {
+            gridData[monthKey][rowKey] = monthData[rowKey];
+          });
+        });
+
+        console.log("✅ Loaded gridData:", gridData);
+        return { gridData, updatedAt: docSnap.data().updatedAt };
+      }
+
+      // Return blank grid
+      console.log("No existing data, returning blank grid");
+      const blankGrid = {};
+      for (let i = 0; i < 12; i++) {
+        blankGrid[i] = {
+          Row_0: ["", "", "", "", ""],
+          Row_1: ["", "", "", "", ""],
+          Row_2: ["", "", "", "", ""],
+          Row_3: ["", "", "", "", ""],
+          Row_4: ["", "", "", "", ""],
+        };
+      }
+      return { gridData: blankGrid };
+    } catch (err) {
+      console.error("ERROR in loadFinancialReport:", err);
+      console.error("Error name:", err.name);
+      console.error("Error message:", err.message);
+      console.error("Error code:", err.code);
+
+      // Return blank grid on error
+      const blankGrid = {};
+      for (let i = 0; i < 12; i++) {
+        blankGrid[i] = {
+          Row_0: ["", "", "", "", ""],
+          Row_1: ["", "", "", "", ""],
+          Row_2: ["", "", "", "", ""],
+          Row_3: ["", "", "", "", ""],
+          Row_4: ["", "", "", "", ""],
+        };
+      }
+      return { gridData: blankGrid };
     }
-    return { gridData: blankGrid };
-  } catch (err) {
-    console.error("ERROR in loadFinancialReport:", err);
-    console.error("Error name:", err.name);
-    console.error("Error message:", err.message);
-    console.error("Error code:", err.code);
-    
-    // Return blank grid on error
-    const blankGrid = {};
-    for (let i = 0; i < 12; i++) {
-      blankGrid[i] = {
-        Row_0: ["", "", "", "", ""],
-        Row_1: ["", "", "", "", ""],
-        Row_2: ["", "", "", "", ""],
-        Row_3: ["", "", "", "", ""],
-        Row_4: ["", "", "", "", ""],
-      };
-    }
-    return { gridData: blankGrid };
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  };
 
   // Function to upload image to images collection
   const uploadImageToFirestore = async (
@@ -6665,7 +6648,6 @@ const loadFinancialReport = async (type, year) => {
         updatedAt: serverTimestamp(),
       });
 
-
       // Keep client cache in sync immediately after admin upload
       const localData = {
         base64,
@@ -6681,8 +6663,6 @@ const loadFinancialReport = async (type, year) => {
 
       // notify consumers (Carousel/FleetDetails) in this session
       setImageUpdateTrigger((prev) => prev + 1);
-
-
 
       console.log(
         `✅ Image uploaded: ${imageId} | Final size: ${sizeInKB} KB @ quality ${quality}`,
@@ -6779,12 +6759,7 @@ const loadFinancialReport = async (type, year) => {
   //   }
   // };
 
-
-  
-
-  
-
-    // Clear cache for a specific image (call this when image is updated)
+  // Clear cache for a specific image (call this when image is updated)
   const clearImageCache = async (imageId) => {
     // Clear from React state
     setImageCache((prev) => {
@@ -6792,7 +6767,7 @@ const loadFinancialReport = async (type, year) => {
       delete updated[imageId];
       return updated;
     });
-    
+
     // Clear from IndexedDB
     try {
       const db = await getImageDB();
@@ -6807,14 +6782,14 @@ const loadFinancialReport = async (type, year) => {
     }
   };
 
-    // Update cache with new image data (call this when image is updated)
+  // Update cache with new image data (call this when image is updated)
   const updateImageCache = async (imageId, data) => {
     // Update React state
     setImageCache((prev) => ({
       ...prev,
       [imageId]: data,
     }));
-    
+
     // Update IndexedDB
     try {
       const db = await getImageDB();
@@ -6829,8 +6804,6 @@ const loadFinancialReport = async (type, year) => {
     }
   };
 
-
-  
   // Single DB connection reference
   const imageDBRef = useRef(null);
 
@@ -6867,7 +6840,9 @@ const loadFinancialReport = async (type, year) => {
         });
         transaction.oncomplete = () => resolve(results);
       });
-    } catch (e) { return {}; }
+    } catch (e) {
+      return {};
+    }
   };
 
   const getCachedImage = async (imageId) => {
@@ -6879,7 +6854,9 @@ const loadFinancialReport = async (type, year) => {
         const request = store.get(imageId);
         request.onsuccess = () => resolve(request.result?.data || null);
       });
-    } catch (e) { return null; }
+    } catch (e) {
+      return null;
+    }
   };
 
   const setCachedImage = async (imageId, data) => {
@@ -6894,57 +6871,47 @@ const loadFinancialReport = async (type, year) => {
     } catch (e) {}
   };
 
+  useEffect(() => {
+    let cancelled = false;
 
+    const preloadImages = async () => {
+      const imageIds = [];
 
-useEffect(() => {
-  let cancelled = false;
+      for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
+      for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
 
-  const preloadImages = async () => {
-    const imageIds = [];
-
-    for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
-    for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
-
-    const cachedImages = await getMultipleCachedImages(imageIds);
-    if (cancelled) return;
-
-    // Defer heavy base64 state injection so route transitions stay snappy.
-    setTimeout(() => {
+      const cachedImages = await getMultipleCachedImages(imageIds);
       if (cancelled) return;
-      setImageCache((prev) => ({ ...prev, ...cachedImages }));
-    }, 0);
-  };
 
-  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-    const id = window.requestIdleCallback(preloadImages, { timeout: 1200 });
+      // Defer heavy base64 state injection so route transitions stay snappy.
+      setTimeout(() => {
+        if (cancelled) return;
+        setImageCache((prev) => ({ ...prev, ...cachedImages }));
+      }, 0);
+    };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(preloadImages, { timeout: 1200 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(id);
+      };
+    }
+
+    preloadImages();
     return () => {
       cancelled = true;
-      window.cancelIdleCallback(id);
     };
-  }
-
-  preloadImages();
-  return () => {
-    cancelled = true;
-  };
-}, []);
-
-
-
-
-
-
-
-
+  }, []);
 
   //   // Pre-load all images on app startup
   // useEffect(() => {
   //   const preloadImages = async () => {
   //     const imageIds = [];
-      
+
   //     // FleetPage carousel images
   //     for (let i = 0; i < 20; i++) imageIds.push(`FleetPage_${i}`);
-      
+
   //     // LandingPage carousel images
   //     for (let i = 0; i < 5; i++) imageIds.push(`LandingPage_${i}`);
 
@@ -6954,9 +6921,6 @@ useEffect(() => {
   //   };
   //   preloadImages();
   // }, []);
-
-
-
 
   const fetchImageFromFirestore = async (imageId, skipValidation = false) => {
     // Check React state cache first
@@ -6968,7 +6932,7 @@ useEffect(() => {
     // Check IndexedDB cache
     try {
       const cachedData = await getCachedImage(imageId);
-      
+
       if (cachedData) {
         // If skipValidation is true, use cache without checking Firestore
         if (skipValidation) {
@@ -6976,31 +6940,35 @@ useEffect(() => {
             ...prev,
             [imageId]: cachedData,
           }));
-          console.log(`✅ Image ${imageId} loaded from IndexedDB cache (no validation)`);
+          console.log(
+            `✅ Image ${imageId} loaded from IndexedDB cache (no validation)`,
+          );
           return cachedData;
         }
-        
+
         // Otherwise, validate with Firestore
         const docRef = doc(db, "images", imageId);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const serverUpdatedAt = docSnap.data().updatedAt;
-          
+
           if (serverUpdatedAt === cachedData.updatedAt) {
             setImageCache((prev) => ({
               ...prev,
               [imageId]: cachedData,
             }));
-            console.log(`✅ Image ${imageId} loaded from IndexedDB cache (validated)`);
+            console.log(
+              `✅ Image ${imageId} loaded from IndexedDB cache (validated)`,
+            );
             return cachedData;
           }
-          
+
           // Timestamps don't match - fetch new version
           console.log(`🔄 Image ${imageId} outdated, fetching new version...`);
           const base64 = docSnap.data().base64;
           const result = { base64, updatedAt: serverUpdatedAt };
-          
+
           setImageCache((prev) => ({ ...prev, [imageId]: result }));
           await setCachedImage(imageId, result);
           return result;
@@ -7031,18 +6999,6 @@ useEffect(() => {
       return null;
     }
   };
-
-
-
-
-
-
-
-
-
-
-
-
 
   // UpdateUnitImage Function
   const updateUnitImage = async (
@@ -7321,23 +7277,23 @@ useEffect(() => {
   };
 
   // UPDATE ADMIN PROFILE PICTURE
-const updateAdminProfilePic = async (adminId, file) => {
-  try {
-    const compressedBase64 = await compressAndConvertFileToBase64(file);
-    const adminDocRef = doc(db, "users", adminId);
+  const updateAdminProfilePic = async (adminId, file) => {
+    try {
+      const compressedBase64 = await compressAndConvertFileToBase64(file);
+      const adminDocRef = doc(db, "users", adminId);
 
-    await updateDoc(adminDocRef, {
-      profilePic: compressedBase64,
-      updatedAt: serverTimestamp(),
-    });
+      await updateDoc(adminDocRef, {
+        profilePic: compressedBase64,
+        updatedAt: serverTimestamp(),
+      });
 
-    console.log("✅ Admin profile picture updated in Firestore");
-    return { success: true, profilePic: compressedBase64 };
-  } catch (error) {
-    console.error("❌ Error updating admin profile picture:", error);
-    return { success: false, error: error.message };
-  }
-};
+      console.log("✅ Admin profile picture updated in Firestore");
+      return { success: true, profilePic: compressedBase64 };
+    } catch (error) {
+      console.error("❌ Error updating admin profile picture:", error);
+      return { success: false, error: error.message };
+    }
+  };
 
   // RESET ADMIN PROFILE PICTURE TO ORIGINAL
   const resetAdminProfilePic = async (adminId) => {
@@ -7360,7 +7316,7 @@ const updateAdminProfilePic = async (adminId, file) => {
   };
 
   // FUNCTION TO COPY A COLLECTION RECURSIVELY
-    const WRITE_THROTTLE_MS = 120;
+  const WRITE_THROTTLE_MS = 120;
   const READ_THROTTLE_MS = 20;
 
   const sleepMs = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -7387,12 +7343,12 @@ const updateAdminProfilePic = async (adminId, file) => {
     onProgress,
   ) => {
     try {
-       const snapshot = await throttledGetDocs(sourceColl);
+      const snapshot = await throttledGetDocs(sourceColl);
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         await throttledSetDoc(doc(targetColl, docSnap.id), data);
         if (onProgress) onProgress();
-        
+
         // Recursively copy known subcollections
         for (const subName of subCollNames) {
           const sourceSub = collection(sourceColl, docSnap.id, subName);
@@ -7411,7 +7367,7 @@ const updateAdminProfilePic = async (adminId, file) => {
   };
 
   // FUNCTION TO CREATE BACKUP
- const createBackup = async (selectedCollections = null) => {
+  const createBackup = async (selectedCollections = null) => {
     if (!user || user.role !== "admin") {
       console.error("Unauthorized: Only admins can create backups");
       return;
@@ -7441,8 +7397,14 @@ const updateAdminProfilePic = async (adminId, file) => {
         return acc;
       }, {});
 
-
-    const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
+    const allCollections = [
+      "config",
+      "images",
+      "reviews",
+      "terms",
+      "units",
+      "users",
+    ];
 
     const adminAvailableSubcollections = [
       "completedBookings",
@@ -7474,7 +7436,9 @@ const updateAdminProfilePic = async (adminId, file) => {
     let usersOptions = defaultUsersOptions;
 
     if (Array.isArray(selectedCollections)) {
-      rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
+      rootCollections = allCollections.filter((key) =>
+        selectedCollections.includes(key),
+      );
     } else if (selectedCollections && typeof selectedCollections === "object") {
       const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
         selectedCollections,
@@ -7484,12 +7448,16 @@ const updateAdminProfilePic = async (adminId, file) => {
       if (hasCollectionsKey) {
         const selectedRoot = selectedCollections.collections;
         if (Array.isArray(selectedRoot)) {
-          rootCollections = allCollections.filter((key) => selectedRoot.includes(key));
+          rootCollections = allCollections.filter((key) =>
+            selectedRoot.includes(key),
+          );
         } else if (selectedRoot && typeof selectedRoot === "object") {
           rootCollections = allCollections.filter((key) => selectedRoot[key]);
         }
       } else {
-        rootCollections = allCollections.filter((key) => selectedCollections[key]);
+        rootCollections = allCollections.filter(
+          (key) => selectedCollections[key],
+        );
       }
 
       if (
@@ -7499,25 +7467,33 @@ const updateAdminProfilePic = async (adminId, file) => {
         const usersConfig = selectedCollections.users;
         const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
         const normalizedScope =
-          scopeRaw === "admin" ||
-          scopeRaw === "user" ||
-          scopeRaw === "specific"
+          scopeRaw === "admin" || scopeRaw === "user" || scopeRaw === "specific"
             ? scopeRaw
             : "all";
 
         const specificUserIds = Array.isArray(usersConfig.specificUserIds)
-          ? [...new Set(usersConfig.specificUserIds.filter(Boolean).map((id) => String(id)))]
+          ? [
+              ...new Set(
+                usersConfig.specificUserIds
+                  .filter(Boolean)
+                  .map((id) => String(id)),
+              ),
+            ]
           : [];
 
         const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
         const userSubsRaw = usersConfig.subcollectionsByRole?.user;
 
         const adminSubs = Array.isArray(adminSubsRaw)
-          ? adminAvailableSubcollections.filter((name) => adminSubsRaw.includes(name))
+          ? adminAvailableSubcollections.filter((name) =>
+              adminSubsRaw.includes(name),
+            )
           : adminAvailableSubcollections;
 
         const userSubs = Array.isArray(userSubsRaw)
-          ? userAvailableSubcollections.filter((name) => userSubsRaw.includes(name))
+          ? userAvailableSubcollections.filter((name) =>
+              userSubsRaw.includes(name),
+            )
           : userAvailableSubcollections;
 
         usersOptions = {
@@ -7536,7 +7512,7 @@ const updateAdminProfilePic = async (adminId, file) => {
     }
 
     const selectedLabel = `[${rootCollections.join(", ")}]`;
-const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+    const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
     const normalizeUserRole = (roleValue) =>
       String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
@@ -7548,11 +7524,15 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
       }
 
       if (usersOptions.scope === "admin") {
-        return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "admin");
+        return docs.filter(
+          (docSnap) => normalizeUserRole(docSnap.data()?.role) === "admin",
+        );
       }
 
       if (usersOptions.scope === "user") {
-        return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "user");
+        return docs.filter(
+          (docSnap) => normalizeUserRole(docSnap.data()?.role) === "user",
+        );
       }
 
       return docs;
@@ -7582,7 +7562,9 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
         for (const userDoc of filteredUsers) {
           const selectedSubs = getSubcollectionsForRole(userDoc.data()?.role);
           for (const subName of selectedSubs) {
-            const subSnap = await throttledGetDocs(collection(db, "users", userDoc.id, subName));
+            const subSnap = await throttledGetDocs(
+              collection(db, "users", userDoc.id, subName),
+            );
             totalDocs += subSnap.size;
           }
         }
@@ -7608,14 +7590,9 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
             collName,
           );
 
-          await copyCollectionRecursive(
-            sourceColl,
-            targetColl,
-            [],
-            () => {
-              advanceProgress(1);
-            },
-          );
+          await copyCollectionRecursive(sourceColl, targetColl, [], () => {
+            advanceProgress(1);
+          });
           continue;
         }
 
@@ -7651,14 +7628,9 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
               subName,
             );
 
-            await copyCollectionRecursive(
-              sourceSub,
-              targetSub,
-              [],
-              () => {
-                advanceProgress(1);
-              },
-            );
+            await copyCollectionRecursive(sourceSub, targetSub, [], () => {
+              advanceProgress(1);
+            });
           }
         }
       }
@@ -7692,252 +7664,557 @@ const backupId = `Backup_${selectedLabel}_${parts.month}${parts.day}${parts.year
     }
   };
 
-
   // FUNCTION TO CREATE DOWNLOAD
-const createDownload = async (selectedCollections = null) => {
-  if (!user || user.role !== "admin") {
-    console.error("Unauthorized: Only admins can download data");
-    return;
-  }
-
-  setIsDownloading(true);
-  setDownloadProgress(0);
-  setIsDownloadMinimized(false);
-
-  const now = new Date();
-
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Manila",
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  })
-    .formatToParts(now)
-    .reduce((acc, part) => {
-      acc[part.type] = part.value;
-      return acc;
-    }, {});
-
-  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
-
-  const adminAvailableSubcollections = [
-    "completedBookings",
-    "financialReports",
-    "activeBookings",
-    "adminBookingRequests",
-    "sentMessages",
-    "receivedMessages",
-  ];
-
-  const userAvailableSubcollections = [
-    "rentalHistory",
-    "activeRentals",
-    "userBookingRequest",
-    "sentMessages",
-    "receivedMessages",
-  ];
-
-  const defaultUsersOptions = {
-    scope: "all",
-    specificUserIds: [],
-    subcollectionsByRole: {
-      admin: adminAvailableSubcollections,
-      user: userAvailableSubcollections,
-    },
-  };
-
-  let rootCollections = allCollections;
-  let usersOptions = defaultUsersOptions;
-
-  if (Array.isArray(selectedCollections)) {
-    rootCollections = allCollections.filter((key) => selectedCollections.includes(key));
-  } else if (selectedCollections && typeof selectedCollections === "object") {
-    const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
-      selectedCollections,
-      "collections",
-    );
-
-    if (hasCollectionsKey) {
-      const selectedRoot = selectedCollections.collections;
-      if (Array.isArray(selectedRoot)) {
-        rootCollections = allCollections.filter((key) => selectedRoot.includes(key));
-      } else if (selectedRoot && typeof selectedRoot === "object") {
-        rootCollections = allCollections.filter((key) => selectedRoot[key]);
-      }
-    } else {
-      rootCollections = allCollections.filter((key) => selectedCollections[key]);
+  const createDownload = async (selectedCollections = null) => {
+    if (!user || user.role !== "admin") {
+      console.error("Unauthorized: Only admins can download data");
+      return;
     }
 
-    if (
-      selectedCollections.users &&
-      typeof selectedCollections.users === "object"
-    ) {
-      const usersConfig = selectedCollections.users;
-      const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
-      const normalizedScope =
-        scopeRaw === "admin" ||
-        scopeRaw === "user" ||
-        scopeRaw === "specific"
-          ? scopeRaw
-          : "all";
-
-      const specificUserIds = Array.isArray(usersConfig.specificUserIds)
-        ? [...new Set(usersConfig.specificUserIds.filter(Boolean).map((id) => String(id)))]
-        : [];
-
-      const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
-      const userSubsRaw = usersConfig.subcollectionsByRole?.user;
-
-      const adminSubs = Array.isArray(adminSubsRaw)
-        ? adminAvailableSubcollections.filter((name) => adminSubsRaw.includes(name))
-        : adminAvailableSubcollections;
-
-      const userSubs = Array.isArray(userSubsRaw)
-        ? userAvailableSubcollections.filter((name) => userSubsRaw.includes(name))
-        : userAvailableSubcollections;
-
-      usersOptions = {
-        scope: normalizedScope,
-        specificUserIds,
-        subcollectionsByRole: {
-          admin: adminSubs,
-          user: userSubs,
-        },
-      };
-    }
-  }
-
-  if (!rootCollections.length) {
-    console.warn("No collections selected for download");
-    setIsDownloading(false);
+    setIsDownloading(true);
     setDownloadProgress(0);
-    return;
-  }
+    setIsDownloadMinimized(false);
 
-  const selectedLabel = `[${rootCollections.join(", ")}]`;
-  const downloadId = `Download_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
+    const now = new Date();
 
-  const triggerBlobDownload = (blob, filename) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Manila",
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+      .formatToParts(now)
+      .reduce((acc, part) => {
+        acc[part.type] = part.value;
+        return acc;
+      }, {});
 
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 2000);
-  };
+    const allCollections = [
+      "config",
+      "images",
+      "reviews",
+      "terms",
+      "units",
+      "users",
+    ];
 
-  const normalizeUserRole = (roleValue) =>
-    String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
+    const adminAvailableSubcollections = [
+      "completedBookings",
+      "financialReports",
+      "activeBookings",
+      "adminBookingRequests",
+      "sentMessages",
+      "receivedMessages",
+    ];
 
-  const sortUsersDocs = (docs) => {
-    return [...docs].sort((a, b) => {
-      const roleA = normalizeUserRole(a.data()?.role);
-      const roleB = normalizeUserRole(b.data()?.role);
+    const userAvailableSubcollections = [
+      "rentalHistory",
+      "activeRentals",
+      "userBookingRequest",
+      "sentMessages",
+      "receivedMessages",
+    ];
 
-      if (roleA === "admin" && roleB !== "admin") return -1;
-      if (roleA !== "admin" && roleB === "admin") return 1;
-      return a.id.localeCompare(b.id);
-    });
-  };
-
-  const filterUsersByScope = (docs) => {
-    if (usersOptions.scope === "specific") {
-      const idSet = new Set(usersOptions.specificUserIds);
-      return docs.filter((docSnap) => idSet.has(docSnap.id));
-    }
-
-    if (usersOptions.scope === "admin") {
-      return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "admin");
-    }
-
-    if (usersOptions.scope === "user") {
-      return docs.filter((docSnap) => normalizeUserRole(docSnap.data()?.role) === "user");
-    }
-
-    return docs;
-  };
-
-  const getSubcollectionsForRole = (roleValue) => {
-    const normalizedRole = normalizeUserRole(roleValue);
-    return normalizedRole === "admin"
-      ? usersOptions.subcollectionsByRole.admin
-      : usersOptions.subcollectionsByRole.user;
-  };
-
-  const exportUserWithSubcollections = async (userDocSnap) => {
-    const userData = {
-      id: userDocSnap.id,
-      ...userDocSnap.data(),
-      _subcollections: {},
+    const defaultUsersOptions = {
+      scope: "all",
+      specificUserIds: [],
+      subcollectionsByRole: {
+        admin: adminAvailableSubcollections,
+        user: userAvailableSubcollections,
+      },
     };
 
-    const selectedSubcollections = getSubcollectionsForRole(userDocSnap.data()?.role);
+    let rootCollections = allCollections;
+    let usersOptions = defaultUsersOptions;
 
-    for (const subName of selectedSubcollections) {
-      const subRef = collection(db, "users", userDocSnap.id, subName);
-      const subSnap = await throttledGetDocs(subRef);
-      userData._subcollections[subName] = subSnap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
+    if (Array.isArray(selectedCollections)) {
+      rootCollections = allCollections.filter((key) =>
+        selectedCollections.includes(key),
+      );
+    } else if (selectedCollections && typeof selectedCollections === "object") {
+      const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
+        selectedCollections,
+        "collections",
+      );
+
+      if (hasCollectionsKey) {
+        const selectedRoot = selectedCollections.collections;
+        if (Array.isArray(selectedRoot)) {
+          rootCollections = allCollections.filter((key) =>
+            selectedRoot.includes(key),
+          );
+        } else if (selectedRoot && typeof selectedRoot === "object") {
+          rootCollections = allCollections.filter((key) => selectedRoot[key]);
+        }
+      } else {
+        rootCollections = allCollections.filter(
+          (key) => selectedCollections[key],
+        );
+      }
+
+      if (
+        selectedCollections.users &&
+        typeof selectedCollections.users === "object"
+      ) {
+        const usersConfig = selectedCollections.users;
+        const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
+        const normalizedScope =
+          scopeRaw === "admin" || scopeRaw === "user" || scopeRaw === "specific"
+            ? scopeRaw
+            : "all";
+
+        const specificUserIds = Array.isArray(usersConfig.specificUserIds)
+          ? [
+              ...new Set(
+                usersConfig.specificUserIds
+                  .filter(Boolean)
+                  .map((id) => String(id)),
+              ),
+            ]
+          : [];
+
+        const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
+        const userSubsRaw = usersConfig.subcollectionsByRole?.user;
+
+        const adminSubs = Array.isArray(adminSubsRaw)
+          ? adminAvailableSubcollections.filter((name) =>
+              adminSubsRaw.includes(name),
+            )
+          : adminAvailableSubcollections;
+
+        const userSubs = Array.isArray(userSubsRaw)
+          ? userAvailableSubcollections.filter((name) =>
+              userSubsRaw.includes(name),
+            )
+          : userAvailableSubcollections;
+
+        usersOptions = {
+          scope: normalizedScope,
+          specificUserIds,
+          subcollectionsByRole: {
+            admin: adminSubs,
+            user: userSubs,
+          },
+        };
+      }
     }
 
-    return userData;
-  };
-
-  try {
-    let totalDocs = 0;
-
-    for (const collName of rootCollections) {
-      const sourceColl = collection(db, collName);
-      const snapshot = await throttledGetDocs(sourceColl);
-      totalDocs += snapshot.size;
+    if (!rootCollections.length) {
+      console.warn("No collections selected for download");
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      return;
     }
 
-    if (rootCollections.includes("users")) {
-      const usersSnap = await throttledGetDocs(collection(db, "users"));
-      const filteredUsers = filterUsersByScope(sortUsersDocs(usersSnap.docs));
+    const selectedLabel = `[${rootCollections.join(", ")}]`;
+    const downloadId = `Download_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
-      totalDocs = totalDocs - usersSnap.size + filteredUsers.length;
+    const triggerBlobDownload = (blob, filename) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
 
-      for (const userDoc of filteredUsers) {
-        const selectedSubcollections = getSubcollectionsForRole(userDoc.data()?.role);
-        for (const subName of selectedSubcollections) {
-          const subSnap = await throttledGetDocs(collection(db, "users", userDoc.id, subName));
-          totalDocs += subSnap.size;
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 2000);
+    };
+
+    const normalizeUserRole = (roleValue) =>
+      String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
+
+    const sortUsersDocs = (docs) => {
+      return [...docs].sort((a, b) => {
+        const roleA = normalizeUserRole(a.data()?.role);
+        const roleB = normalizeUserRole(b.data()?.role);
+
+        if (roleA === "admin" && roleB !== "admin") return -1;
+        if (roleA !== "admin" && roleB === "admin") return 1;
+        return a.id.localeCompare(b.id);
+      });
+    };
+
+    const filterUsersByScope = (docs) => {
+      if (usersOptions.scope === "specific") {
+        const idSet = new Set(usersOptions.specificUserIds);
+        return docs.filter((docSnap) => idSet.has(docSnap.id));
+      }
+
+      if (usersOptions.scope === "admin") {
+        return docs.filter(
+          (docSnap) => normalizeUserRole(docSnap.data()?.role) === "admin",
+        );
+      }
+
+      if (usersOptions.scope === "user") {
+        return docs.filter(
+          (docSnap) => normalizeUserRole(docSnap.data()?.role) === "user",
+        );
+      }
+
+      return docs;
+    };
+
+    const getSubcollectionsForRole = (roleValue) => {
+      const normalizedRole = normalizeUserRole(roleValue);
+      return normalizedRole === "admin"
+        ? usersOptions.subcollectionsByRole.admin
+        : usersOptions.subcollectionsByRole.user;
+    };
+
+    const exportUserWithSubcollections = async (userDocSnap) => {
+      const userData = {
+        id: userDocSnap.id,
+        ...userDocSnap.data(),
+        _subcollections: {},
+      };
+
+      const selectedSubcollections = getSubcollectionsForRole(
+        userDocSnap.data()?.role,
+      );
+
+      for (const subName of selectedSubcollections) {
+        const subRef = collection(db, "users", userDocSnap.id, subName);
+        const subSnap = await throttledGetDocs(subRef);
+        userData._subcollections[subName] = subSnap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+      }
+
+      return userData;
+    };
+
+    try {
+      let totalDocs = 0;
+
+      for (const collName of rootCollections) {
+        const sourceColl = collection(db, collName);
+        const snapshot = await throttledGetDocs(sourceColl);
+        totalDocs += snapshot.size;
+      }
+
+      if (rootCollections.includes("users")) {
+        const usersSnap = await throttledGetDocs(collection(db, "users"));
+        const filteredUsers = filterUsersByScope(sortUsersDocs(usersSnap.docs));
+
+        totalDocs = totalDocs - usersSnap.size + filteredUsers.length;
+
+        for (const userDoc of filteredUsers) {
+          const selectedSubcollections = getSubcollectionsForRole(
+            userDoc.data()?.role,
+          );
+          for (const subName of selectedSubcollections) {
+            const subSnap = await throttledGetDocs(
+              collection(db, "users", userDoc.id, subName),
+            );
+            totalDocs += subSnap.size;
+          }
         }
       }
-    }
 
-    let copiedDocs = 0;
-    const allData = {};
-    const excelData = {};
+      let copiedDocs = 0;
+      const allData = {};
+      const excelData = {};
 
-    const sanitizeForExcel = (value, maxLength = 32767) => {
-      if (typeof value === "string") {
-        return value.length > maxLength
-          ? value.substring(0, maxLength - 3) + "..."
-          : value;
+      const sanitizeForExcel = (value, maxLength = 32767) => {
+        if (typeof value === "string") {
+          return value.length > maxLength
+            ? value.substring(0, maxLength - 3) + "..."
+            : value;
+        }
+
+        if (Array.isArray(value)) {
+          return value.map((item) => sanitizeForExcel(item, maxLength));
+        }
+
+        if (value && typeof value === "object") {
+          const out = {};
+          for (const key of Object.keys(value)) {
+            out[key] = sanitizeForExcel(value[key], maxLength);
+          }
+          return out;
+        }
+
+        return value;
+      };
+
+      for (const collName of rootCollections) {
+        const sourceColl = collection(db, collName);
+        const snapshot = await throttledGetDocs(sourceColl);
+
+        let rawData = [];
+
+        if (collName === "users") {
+          const filteredUsers = filterUsersByScope(
+            sortUsersDocs(snapshot.docs),
+          );
+          rawData = await Promise.all(
+            filteredUsers.map((docSnap) =>
+              exportUserWithSubcollections(docSnap),
+            ),
+          );
+
+          copiedDocs += filteredUsers.length;
+          setDownloadProgress(
+            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
+          );
+
+          for (const userRow of rawData) {
+            const subcollections = userRow?._subcollections || {};
+            for (const subName of Object.keys(subcollections)) {
+              copiedDocs += Array.isArray(subcollections[subName])
+                ? subcollections[subName].length
+                : 0;
+            }
+
+            setDownloadProgress(
+              totalDocs > 0
+                ? Math.min(100, (copiedDocs / totalDocs) * 100)
+                : 100,
+            );
+          }
+        } else {
+          rawData = snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+          }));
+
+          copiedDocs += snapshot.size;
+          setDownloadProgress(
+            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
+          );
+        }
+
+        allData[collName] = rawData;
+        excelData[collName] = rawData.map((row) => sanitizeForExcel(row));
       }
 
+      const XLSX = await import("xlsx");
+      const wb = XLSX.utils.book_new();
+
+      for (const collName of rootCollections) {
+        const ws = XLSX.utils.json_to_sheet(excelData[collName] || []);
+        XLSX.utils.book_append_sheet(wb, ws, collName);
+      }
+
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const excelBlob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const jsonData = JSON.stringify(allData, null, 2);
+      const jsonBlob = new Blob([jsonData], { type: "application/json" });
+
+      triggerBlobDownload(excelBlob, `${downloadId}.xlsx`);
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      triggerBlobDownload(jsonBlob, `${downloadId}.json`);
+
+      showActionOverlay({
+        message: "Download completed successfully!",
+        type: "success",
+      });
+
+      setShowDownloadSuccess(true);
+      setHideDownloadAnimation(false);
+
+      setTimeout(() => {
+        setHideDownloadAnimation(true);
+        setTimeout(() => setShowDownloadSuccess(false), 400);
+      }, 5000);
+    } catch (error) {
+      console.error("Error creating download:", error);
+      showActionOverlay({
+        message: "Download failed. Please try again.",
+        type: "warning",
+      });
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress(0);
+    }
+  };
+
+  // FUNCTION TO IMPORT DATA FROM JSON
+  const importDataFromJson = async (
+    importedData,
+    { mode = "merge", selectedCollections = null } = {},
+  ) => {
+    if (!user || user.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    setIsImporting(true);
+    setImportProgress(0);
+    setIsImportMinimized(false);
+
+    const allCollections = [
+      "config",
+      "images",
+      "reviews",
+      "terms",
+      "units",
+      "users",
+    ];
+
+    const adminAvailableSubcollections = [
+      "completedBookings",
+      "financialReports",
+      "activeBookings",
+      "adminBookingRequests",
+      "sentMessages",
+      "receivedMessages",
+    ];
+
+    const userAvailableSubcollections = [
+      "rentalHistory",
+      "activeRentals",
+      "userBookingRequest",
+      "sentMessages",
+      "receivedMessages",
+    ];
+
+    const defaultUsersOptions = {
+      scope: "all",
+      specificUserIds: [],
+      subcollectionsByRole: {
+        admin: adminAvailableSubcollections,
+        user: userAvailableSubcollections,
+      },
+    };
+
+    let targetCollections = allCollections;
+    let usersOptions = defaultUsersOptions;
+
+    if (Array.isArray(selectedCollections)) {
+      targetCollections = allCollections.filter((k) =>
+        selectedCollections.includes(k),
+      );
+    } else if (selectedCollections && typeof selectedCollections === "object") {
+      const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
+        selectedCollections,
+        "collections",
+      );
+
+      if (hasCollectionsKey) {
+        const selectedRoot = selectedCollections.collections;
+        if (Array.isArray(selectedRoot)) {
+          targetCollections = allCollections.filter((k) =>
+            selectedRoot.includes(k),
+          );
+        } else if (selectedRoot && typeof selectedRoot === "object") {
+          targetCollections = allCollections.filter((k) => selectedRoot[k]);
+        }
+      } else {
+        targetCollections = allCollections.filter(
+          (k) => selectedCollections[k],
+        );
+      }
+
+      if (
+        selectedCollections.users &&
+        typeof selectedCollections.users === "object"
+      ) {
+        const usersConfig = selectedCollections.users;
+        const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
+        const normalizedScope =
+          scopeRaw === "admin" || scopeRaw === "user" || scopeRaw === "specific"
+            ? scopeRaw
+            : "all";
+
+        const specificUserIds = Array.isArray(usersConfig.specificUserIds)
+          ? [
+              ...new Set(
+                usersConfig.specificUserIds
+                  .filter(Boolean)
+                  .map((id) => String(id)),
+              ),
+            ]
+          : [];
+
+        const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
+        const userSubsRaw = usersConfig.subcollectionsByRole?.user;
+
+        const adminSubs = Array.isArray(adminSubsRaw)
+          ? adminAvailableSubcollections.filter((name) =>
+              adminSubsRaw.includes(name),
+            )
+          : adminAvailableSubcollections;
+
+        const userSubs = Array.isArray(userSubsRaw)
+          ? userAvailableSubcollections.filter((name) =>
+              userSubsRaw.includes(name),
+            )
+          : userAvailableSubcollections;
+
+        usersOptions = {
+          scope: normalizedScope,
+          specificUserIds,
+          subcollectionsByRole: {
+            admin: adminSubs,
+            user: userSubs,
+          },
+        };
+      }
+    }
+
+    if (!targetCollections.length) {
+      setIsImporting(false);
+      setImportProgress(0);
+      return { success: false, error: "No collections selected" };
+    }
+
+    const normalizeUserRole = (roleValue) =>
+      String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
+
+    const getSubcollectionsForRole = (roleValue) => {
+      return normalizeUserRole(roleValue) === "admin"
+        ? usersOptions.subcollectionsByRole.admin
+        : usersOptions.subcollectionsByRole.user;
+    };
+
+    const shouldIncludeUserByScope = (userId, roleValue) => {
+      if (usersOptions.scope === "specific") {
+        return usersOptions.specificUserIds.includes(String(userId));
+      }
+      if (usersOptions.scope === "admin") {
+        return normalizeUserRole(roleValue) === "admin";
+      }
+      if (usersOptions.scope === "user") {
+        return normalizeUserRole(roleValue) === "user";
+      }
+      return true;
+    };
+
+    // Convert exported JSON timestamp objects back to Firestore Timestamp
+    const normalizeFirestoreValue = (value) => {
       if (Array.isArray(value)) {
-        return value.map((item) => sanitizeForExcel(item, maxLength));
+        return value.map(normalizeFirestoreValue);
       }
 
       if (value && typeof value === "object") {
+        const keys = Object.keys(value);
+
+        if (
+          keys.length === 2 &&
+          keys.includes("seconds") &&
+          keys.includes("nanoseconds") &&
+          typeof value.seconds === "number" &&
+          typeof value.nanoseconds === "number"
+        ) {
+          return new Timestamp(value.seconds, value.nanoseconds);
+        }
+
         const out = {};
-        for (const key of Object.keys(value)) {
-          out[key] = sanitizeForExcel(value[key], maxLength);
+        for (const key of keys) {
+          out[key] = normalizeFirestoreValue(value[key]);
         }
         return out;
       }
@@ -7945,465 +8222,224 @@ const createDownload = async (selectedCollections = null) => {
       return value;
     };
 
-    for (const collName of rootCollections) {
-      const sourceColl = collection(db, collName);
-       const snapshot = await throttledGetDocs(sourceColl);
+    try {
+      // Count total incoming docs for progress %
+      let totalDocs = 0;
 
-      let rawData = [];
+      for (const collName of targetCollections) {
+        const incoming = Array.isArray(importedData?.[collName])
+          ? importedData[collName]
+          : [];
 
-      if (collName === "users") {
-        const filteredUsers = filterUsersByScope(sortUsersDocs(snapshot.docs));
-        rawData = await Promise.all(
-          filteredUsers.map((docSnap) => exportUserWithSubcollections(docSnap)),
-        );
-
-        copiedDocs += filteredUsers.length;
-        setDownloadProgress(
-          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
-        );
-
-        for (const userRow of rawData) {
-          const subcollections = userRow?._subcollections || {};
-          for (const subName of Object.keys(subcollections)) {
-            copiedDocs += Array.isArray(subcollections[subName])
-              ? subcollections[subName].length
-              : 0;
-          }
-
-          setDownloadProgress(
-            totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
-          );
-        }
-      } else {
-        rawData = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-        }));
-
-        copiedDocs += snapshot.size;
-        setDownloadProgress(
-          totalDocs > 0 ? Math.min(100, (copiedDocs / totalDocs) * 100) : 100,
-        );
-      }
-
-      allData[collName] = rawData;
-      excelData[collName] = rawData.map((row) => sanitizeForExcel(row));
-    }
-
-    const XLSX = await import("xlsx");
-    const wb = XLSX.utils.book_new();
-
-    for (const collName of rootCollections) {
-      const ws = XLSX.utils.json_to_sheet(excelData[collName] || []);
-      XLSX.utils.book_append_sheet(wb, ws, collName);
-    }
-
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const excelBlob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const jsonData = JSON.stringify(allData, null, 2);
-    const jsonBlob = new Blob([jsonData], { type: "application/json" });
-
-    triggerBlobDownload(excelBlob, `${downloadId}.xlsx`);
-    await new Promise((resolve) => setTimeout(resolve, 350));
-    triggerBlobDownload(jsonBlob, `${downloadId}.json`);
-
-    showActionOverlay({
-      message: "Download completed successfully!",
-      type: "success",
-    });
-
-    setShowDownloadSuccess(true);
-    setHideDownloadAnimation(false);
-
-    setTimeout(() => {
-      setHideDownloadAnimation(true);
-      setTimeout(() => setShowDownloadSuccess(false), 400);
-    }, 5000);
-  } catch (error) {
-    console.error("Error creating download:", error);
-    showActionOverlay({
-      message: "Download failed. Please try again.",
-      type: "warning",
-    });
-  } finally {
-    setIsDownloading(false);
-    setDownloadProgress(0);
-  }
-};
-
-
-
-
-
-
-  // FUNCTION TO IMPORT DATA FROM JSON
-const importDataFromJson = async (
-  importedData,
-  { mode = "merge", selectedCollections = null } = {},
-) => {
-  if (!user || user.role !== "admin") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  setIsImporting(true);
-  setImportProgress(0);
-  setIsImportMinimized(false);
-
-  const allCollections = ["config", "images", "reviews", "terms", "units", "users"];
-
-  const adminAvailableSubcollections = [
-    "completedBookings",
-    "financialReports",
-    "activeBookings",
-    "adminBookingRequests",
-    "sentMessages",
-    "receivedMessages",
-  ];
-
-  const userAvailableSubcollections = [
-    "rentalHistory",
-    "activeRentals",
-    "userBookingRequest",
-    "sentMessages",
-    "receivedMessages",
-  ];
-
-  const defaultUsersOptions = {
-    scope: "all",
-    specificUserIds: [],
-    subcollectionsByRole: {
-      admin: adminAvailableSubcollections,
-      user: userAvailableSubcollections,
-    },
-  };
-
-  let targetCollections = allCollections;
-  let usersOptions = defaultUsersOptions;
-
-  if (Array.isArray(selectedCollections)) {
-    targetCollections = allCollections.filter((k) => selectedCollections.includes(k));
-  } else if (selectedCollections && typeof selectedCollections === "object") {
-    const hasCollectionsKey = Object.prototype.hasOwnProperty.call(
-      selectedCollections,
-      "collections",
-    );
-
-    if (hasCollectionsKey) {
-      const selectedRoot = selectedCollections.collections;
-      if (Array.isArray(selectedRoot)) {
-        targetCollections = allCollections.filter((k) => selectedRoot.includes(k));
-      } else if (selectedRoot && typeof selectedRoot === "object") {
-        targetCollections = allCollections.filter((k) => selectedRoot[k]);
-      }
-    } else {
-      targetCollections = allCollections.filter((k) => selectedCollections[k]);
-    }
-
-    if (
-      selectedCollections.users &&
-      typeof selectedCollections.users === "object"
-    ) {
-      const usersConfig = selectedCollections.users;
-      const scopeRaw = String(usersConfig.scope || "all").toLowerCase();
-      const normalizedScope =
-        scopeRaw === "admin" ||
-        scopeRaw === "user" ||
-        scopeRaw === "specific"
-          ? scopeRaw
-          : "all";
-
-      const specificUserIds = Array.isArray(usersConfig.specificUserIds)
-        ? [...new Set(usersConfig.specificUserIds.filter(Boolean).map((id) => String(id)))]
-        : [];
-
-      const adminSubsRaw = usersConfig.subcollectionsByRole?.admin;
-      const userSubsRaw = usersConfig.subcollectionsByRole?.user;
-
-      const adminSubs = Array.isArray(adminSubsRaw)
-        ? adminAvailableSubcollections.filter((name) => adminSubsRaw.includes(name))
-        : adminAvailableSubcollections;
-
-      const userSubs = Array.isArray(userSubsRaw)
-        ? userAvailableSubcollections.filter((name) => userSubsRaw.includes(name))
-        : userAvailableSubcollections;
-
-      usersOptions = {
-        scope: normalizedScope,
-        specificUserIds,
-        subcollectionsByRole: {
-          admin: adminSubs,
-          user: userSubs,
-        },
-      };
-    }
-  }
-
-  if (!targetCollections.length) {
-    setIsImporting(false);
-    setImportProgress(0);
-    return { success: false, error: "No collections selected" };
-  }
-
-  const normalizeUserRole = (roleValue) =>
-    String(roleValue || "").toLowerCase() === "admin" ? "admin" : "user";
-
-  const getSubcollectionsForRole = (roleValue) => {
-    return normalizeUserRole(roleValue) === "admin"
-      ? usersOptions.subcollectionsByRole.admin
-      : usersOptions.subcollectionsByRole.user;
-  };
-
-  const shouldIncludeUserByScope = (userId, roleValue) => {
-    if (usersOptions.scope === "specific") {
-      return usersOptions.specificUserIds.includes(String(userId));
-    }
-    if (usersOptions.scope === "admin") {
-      return normalizeUserRole(roleValue) === "admin";
-    }
-    if (usersOptions.scope === "user") {
-      return normalizeUserRole(roleValue) === "user";
-    }
-    return true;
-  };
-
-  // Convert exported JSON timestamp objects back to Firestore Timestamp
-  const normalizeFirestoreValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.map(normalizeFirestoreValue);
-    }
-
-    if (value && typeof value === "object") {
-      const keys = Object.keys(value);
-
-      if (
-        keys.length === 2 &&
-        keys.includes("seconds") &&
-        keys.includes("nanoseconds") &&
-        typeof value.seconds === "number" &&
-        typeof value.nanoseconds === "number"
-      ) {
-        return new Timestamp(value.seconds, value.nanoseconds);
-      }
-
-      const out = {};
-      for (const key of keys) {
-        out[key] = normalizeFirestoreValue(value[key]);
-      }
-      return out;
-    }
-
-    return value;
-  };
-
-  try {
-    // Count total incoming docs for progress %
-    let totalDocs = 0;
-
-    for (const collName of targetCollections) {
-      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
-
-      if (collName !== "users") {
-        totalDocs += incoming.filter((item) => item?.id).length;
-        continue;
-      }
-
-      const filteredUsers = incoming.filter(
-        (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
-      );
-
-      totalDocs += filteredUsers.length;
-
-      for (const userItem of filteredUsers) {
-        const selectedSubs = getSubcollectionsForRole(userItem.role);
-        const subcollections = userItem?._subcollections || {};
-
-        for (const subName of selectedSubs) {
-          const incomingSub = Array.isArray(subcollections[subName])
-            ? subcollections[subName].filter((subItem) => subItem?.id)
-            : [];
-          totalDocs += incomingSub.length;
-        }
-      }
-    }
-
-    let processedDocs = 0;
-
-    for (const collName of targetCollections) {
-      const incoming = Array.isArray(importedData?.[collName]) ? importedData[collName] : [];
-
-      if (collName !== "users") {
-        // OVERWRITE: remove docs not present in incoming file
-        if (mode === "overwrite") {
-          const existingSnap = await throttledGetDocs(collection(db, collName));
-          const incomingIds = new Set(incoming.map((d) => d?.id).filter(Boolean));
-
-          for (const docSnap of existingSnap.docs) {
-            if (!incomingIds.has(docSnap.id)) {
-              await throttledDeleteDoc(doc(db, collName, docSnap.id));
-            }
-          }
+        if (collName !== "users") {
+          totalDocs += incoming.filter((item) => item?.id).length;
+          continue;
         }
 
-        // MERGE/OVERWRITE write pass
-        for (const item of incoming) {
-          if (!item?.id) continue;
-          const { id, ...payload } = item;
-          const normalizedPayload = normalizeFirestoreValue(payload);
-
-await throttledSetDoc(
-            doc(db, collName, id),
-            normalizedPayload,
-            { merge: mode === "merge" },
-          );
-
-          processedDocs += 1;
-          setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
-        }
-
-        continue;
-      }
-
-      const filteredUsers = incoming.filter(
-        (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
-      );
-
-      if (mode === "overwrite") {
-        const existingUsersSnap = await throttledGetDocs(collection(db, "users"));
-        const targetExistingUsers = existingUsersSnap.docs.filter((docSnap) =>
-          shouldIncludeUserByScope(docSnap.id, docSnap.data()?.role),
+        const filteredUsers = incoming.filter(
+          (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
         );
-        const incomingUserIds = new Set(filteredUsers.map((u) => String(u.id)));
 
-        for (const docSnap of targetExistingUsers) {
-          if (!incomingUserIds.has(docSnap.id)) {
-            await throttledDeleteDoc(doc(db, "users", docSnap.id));
+        totalDocs += filteredUsers.length;
 
+        for (const userItem of filteredUsers) {
+          const selectedSubs = getSubcollectionsForRole(userItem.role);
+          const subcollections = userItem?._subcollections || {};
+
+          for (const subName of selectedSubs) {
+            const incomingSub = Array.isArray(subcollections[subName])
+              ? subcollections[subName].filter((subItem) => subItem?.id)
+              : [];
+            totalDocs += incomingSub.length;
           }
         }
       }
 
-      for (const userItem of filteredUsers) {
-        const { id: userId, _subcollections = {}, ...userPayload } = userItem;
-        const normalizedUserPayload = normalizeFirestoreValue(userPayload);
+      let processedDocs = 0;
 
-await throttledSetDoc(
-          doc(db, "users", userId),
-          normalizedUserPayload,
-          { merge: mode === "merge" },
-        );
+      for (const collName of targetCollections) {
+        const incoming = Array.isArray(importedData?.[collName])
+          ? importedData[collName]
+          : [];
 
-        processedDocs += 1;
-        setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
-
-        const selectedSubs = getSubcollectionsForRole(userPayload.role);
-
-        for (const subName of selectedSubs) {
-          const incomingSub = Array.isArray(_subcollections[subName])
-            ? _subcollections[subName].filter((subItem) => subItem?.id)
-            : [];
-
+        if (collName !== "users") {
+          // OVERWRITE: remove docs not present in incoming file
           if (mode === "overwrite") {
-            const existingSubSnap = await throttledGetDocs(collection(db, "users", userId, subName));
-            const incomingSubIds = new Set(incomingSub.map((sub) => String(sub.id)));
+            const existingSnap = await throttledGetDocs(
+              collection(db, collName),
+            );
+            const incomingIds = new Set(
+              incoming.map((d) => d?.id).filter(Boolean),
+            );
 
-            for (const existingDoc of existingSubSnap.docs) {
-              if (!incomingSubIds.has(existingDoc.id)) {
-                await throttledDeleteDoc(doc(db, "users", userId, subName, existingDoc.id));
+            for (const docSnap of existingSnap.docs) {
+              if (!incomingIds.has(docSnap.id)) {
+                await throttledDeleteDoc(doc(db, collName, docSnap.id));
               }
             }
           }
 
-          for (const subItem of incomingSub) {
-            const { id: subId, ...subPayload } = subItem;
-            const normalizedSubPayload = normalizeFirestoreValue(subPayload);
+          // MERGE/OVERWRITE write pass
+          for (const item of incoming) {
+            if (!item?.id) continue;
+            const { id, ...payload } = item;
+            const normalizedPayload = normalizeFirestoreValue(payload);
 
- await throttledSetDoc(
-              doc(db, "users", userId, subName, subId),
-              normalizedSubPayload,
-              { merge: mode === "merge" },
-            );
+            await throttledSetDoc(doc(db, collName, id), normalizedPayload, {
+              merge: mode === "merge",
+            });
 
             processedDocs += 1;
-            setImportProgress(totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100);
+            setImportProgress(
+              totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100,
+            );
+          }
+
+          continue;
+        }
+
+        const filteredUsers = incoming.filter(
+          (item) => item?.id && shouldIncludeUserByScope(item.id, item.role),
+        );
+
+        if (mode === "overwrite") {
+          const existingUsersSnap = await throttledGetDocs(
+            collection(db, "users"),
+          );
+          const targetExistingUsers = existingUsersSnap.docs.filter((docSnap) =>
+            shouldIncludeUserByScope(docSnap.id, docSnap.data()?.role),
+          );
+          const incomingUserIds = new Set(
+            filteredUsers.map((u) => String(u.id)),
+          );
+
+          for (const docSnap of targetExistingUsers) {
+            if (!incomingUserIds.has(docSnap.id)) {
+              await throttledDeleteDoc(doc(db, "users", docSnap.id));
+            }
+          }
+        }
+
+        for (const userItem of filteredUsers) {
+          const { id: userId, _subcollections = {}, ...userPayload } = userItem;
+          const normalizedUserPayload = normalizeFirestoreValue(userPayload);
+
+          await throttledSetDoc(
+            doc(db, "users", userId),
+            normalizedUserPayload,
+            { merge: mode === "merge" },
+          );
+
+          processedDocs += 1;
+          setImportProgress(
+            totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100,
+          );
+
+          const selectedSubs = getSubcollectionsForRole(userPayload.role);
+
+          for (const subName of selectedSubs) {
+            const incomingSub = Array.isArray(_subcollections[subName])
+              ? _subcollections[subName].filter((subItem) => subItem?.id)
+              : [];
+
+            if (mode === "overwrite") {
+              const existingSubSnap = await throttledGetDocs(
+                collection(db, "users", userId, subName),
+              );
+              const incomingSubIds = new Set(
+                incomingSub.map((sub) => String(sub.id)),
+              );
+
+              for (const existingDoc of existingSubSnap.docs) {
+                if (!incomingSubIds.has(existingDoc.id)) {
+                  await throttledDeleteDoc(
+                    doc(db, "users", userId, subName, existingDoc.id),
+                  );
+                }
+              }
+            }
+
+            for (const subItem of incomingSub) {
+              const { id: subId, ...subPayload } = subItem;
+              const normalizedSubPayload = normalizeFirestoreValue(subPayload);
+
+              await throttledSetDoc(
+                doc(db, "users", userId, subName, subId),
+                normalizedSubPayload,
+                { merge: mode === "merge" },
+              );
+
+              processedDocs += 1;
+              setImportProgress(
+                totalDocs > 0 ? (processedDocs / totalDocs) * 100 : 100,
+              );
+            }
           }
         }
       }
+
+      if (
+        targetCollections.includes("units") &&
+        mode === "overwrite" &&
+        adminUid
+      ) {
+        const activeBookingsSnap = await throttledGetDocs(
+          collection(db, "users", adminUid, "activeBookings"),
+        );
+
+        const activePlateSet = new Set(
+          activeBookingsSnap.docs
+            .map((snap) => String(snap.data()?.plateNo || "").trim())
+            .filter(Boolean),
+        );
+
+        const unitsSnap = await throttledGetDocs(collection(db, "units"));
+
+        for (const unitSnap of unitsSnap.docs) {
+          const unitData = unitSnap.data() || {};
+          const plateNo = String(unitData.plateNo || unitSnap.id || "").trim();
+          const shouldBeHidden = activePlateSet.has(plateNo);
+
+          if (unitData.hidden !== shouldBeHidden) {
+            await throttledSetDoc(
+              doc(db, "units", unitSnap.id),
+              { hidden: shouldBeHidden },
+              { merge: true },
+            );
+          }
+        }
+      }
+
+      setImportProgress(100);
+
+      showActionOverlay({
+        message: `Import completed (${mode}).`,
+        type: "success",
+      });
+
+      setShowImportSuccess(true);
+      setHideImportAnimation(false);
+
+      setTimeout(() => {
+        setHideImportAnimation(true);
+        setTimeout(() => setShowImportSuccess(false), 400);
+      }, 5000);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Import failed:", error);
+      showActionOverlay({
+        message: "Import failed. Please check your file.",
+        type: "warning",
+      });
+      return { success: false, error: error.message };
+    } finally {
+      setTimeout(() => {
+        setIsImporting(false);
+        setImportProgress(0);
+      }, 300);
     }
-
-    if (targetCollections.includes("units") && mode === "overwrite" && adminUid) {
-  const activeBookingsSnap = await throttledGetDocs(
-    collection(db, "users", adminUid, "activeBookings"),
-  );
-
-  const activePlateSet = new Set(
-    activeBookingsSnap.docs
-      .map((snap) => String(snap.data()?.plateNo || "").trim())
-      .filter(Boolean),
-  );
-
-  const unitsSnap = await throttledGetDocs(collection(db, "units"));
-
-  for (const unitSnap of unitsSnap.docs) {
-    const unitData = unitSnap.data() || {};
-    const plateNo = String(unitData.plateNo || unitSnap.id || "").trim();
-    const shouldBeHidden = activePlateSet.has(plateNo);
-
-    if (unitData.hidden !== shouldBeHidden) {
-      await throttledSetDoc(
-        doc(db, "units", unitSnap.id),
-        { hidden: shouldBeHidden },
-        { merge: true },
-      );
-    }
-  }
-}
-
-    setImportProgress(100);
-
-    showActionOverlay({
-      message: `Import completed (${mode}).`,
-      type: "success",
-    });
-
-    setShowImportSuccess(true);
-    setHideImportAnimation(false);
-
-    setTimeout(() => {
-      setHideImportAnimation(true);
-      setTimeout(() => setShowImportSuccess(false), 400);
-    }, 5000);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Import failed:", error);
-    showActionOverlay({
-      message: "Import failed. Please check your file.",
-      type: "warning",
-    });
-    return { success: false, error: error.message };
-  } finally {
-    setTimeout(() => {
-      setIsImporting(false);
-      setImportProgress(0);
-    }, 300);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
+  };
 
   return (
     <UserContext.Provider
@@ -8537,7 +8573,6 @@ await throttledSetDoc(
         setIsDownloadMinimized,
         createDownload,
 
-
         importDataFromJson,
         isImporting,
         importProgress,
@@ -8547,8 +8582,6 @@ await throttledSetDoc(
         setShowImportSuccess,
         hideImportAnimation,
         setHideImportAnimation,
-
-
 
         showBackupSuccess,
         setShowBackupSuccess,
@@ -8633,14 +8666,6 @@ await throttledSetDoc(
   );
 };
 
-
-
-
-
-
-
-
-
 //   const createBackup = async (selectedCollections = null) => {
 //     if (!user || user.role !== "admin") {
 //       console.error("Unauthorized: Only admins can create backups");
@@ -8695,7 +8720,6 @@ await throttledSetDoc(
 //       rootCollections = allCollections;
 // }
 
-
 //     // Map of known subcollections for each root collection (based on your Firestore structure)
 //     const subCollMap = {
 //       config: [],
@@ -8714,7 +8738,6 @@ await throttledSetDoc(
 //         "financialReports",
 //       ],
 //     };
-
 
 //     try {
 //       // Count total documents for progress calculation
@@ -9220,7 +9243,6 @@ await throttledSetDoc(
 //   const selectedLabel = `[${rootCollections.join(", ")}]`;
 //   const downloadId = `Download_${selectedLabel}_${parts.month}${parts.day}${parts.year}${parts.hour}${parts.minute}${parts.second}_${now.getMilliseconds()}_PHT`;
 
-
 //   const triggerBlobDownload = (blob, filename) => {
 //     const url = URL.createObjectURL(blob);
 //     const a = document.createElement("a");
@@ -9332,11 +9354,6 @@ await throttledSetDoc(
 //   }
 // };
 
-
-
-
-
-
 // const importDataFromJson = async (
 //   importedData,
 //   { mode = "merge", selectedCollections = null } = {},
@@ -9435,16 +9452,6 @@ await throttledSetDoc(
 //     }, 300);
 //   }
 // };
-
-
-
-
-
-
-
-
-
-
 
 // const state = useMemo(() => ({
 //   isUpdatingUser,

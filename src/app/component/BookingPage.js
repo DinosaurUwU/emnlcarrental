@@ -299,7 +299,7 @@ const BookingPage = ({
   //   return () => lightbox.destroy();
   // }, []);
 
-useEffect(() => {
+  useEffect(() => {
     // const lightbox = new PhotoSwipeLightbox({
     //   gallery: galleryRef.current,
     //   children: "a",
@@ -310,7 +310,7 @@ useEffect(() => {
     //   maxHeight: window.innerHeight * 0.8,
     //   preloaderDelay: 0,
     // });
-        const lightbox = new PhotoSwipeLightbox({
+    const lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -331,7 +331,7 @@ useEffect(() => {
     return () => lightbox.destroy();
   }, []);
 
-    const uploadedPreviewSrc = useMemo(() => {
+  const uploadedPreviewSrc = useMemo(() => {
     return (
       uploadedID?.preview ||
       (typeof uploadedID === "string" ? uploadedID : null) ||
@@ -342,7 +342,7 @@ useEffect(() => {
     );
   }, [uploadedID]);
 
-   const [previewImageSize, setPreviewImageSize] = useState({
+  const [previewImageSize, setPreviewImageSize] = useState({
     width: 1200,
     height: 800,
   });
@@ -1071,7 +1071,16 @@ useEffect(() => {
         </h3>
 
         <div className="checkout-total">
-          <strong style={{fontFamily: "Montserrat, sans-serif", fontWeight: "800", fontSize:"18px", textTransform:"uppercase"}}>Total Price:</strong>
+          <strong
+            style={{
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: "800",
+              fontSize: "18px",
+              textTransform: "uppercase",
+            }}
+          >
+            Total Price:
+          </strong>
           <span className="total-price">₱{totalPrice.toLocaleString()}</span>
         </div>
 
@@ -1439,7 +1448,8 @@ useEffect(() => {
 
       address: formData.address,
       // driverLicense: uploadedID,
-       driverLicense: uploadedID?.file || uploadedID?.preview || uploadedID || null,
+      driverLicense:
+        uploadedID?.file || uploadedID?.preview || uploadedID || null,
       billedDays,
       drivingPrice,
       pickupPrice,
@@ -2015,8 +2025,7 @@ useEffect(() => {
                       dropoffLocation: formData.dropoffLocation,
                       purpose: formData.purpose,
                       additionalMessage: formData.additionalMessage,
-                      referralSource:
-                        formData.referralSource || "Walk-in",
+                      referralSource: formData.referralSource || "Walk-in",
                       // selectedCar,
                       selectedCar: selectedUnit?.name || "",
 
@@ -2098,7 +2107,6 @@ useEffect(() => {
           </div>
         </div>
       )}
-
 
       {showBookingConfirmOverlay && (
         <div className="booking-confirm-overlay">
@@ -2263,7 +2271,6 @@ useEffect(() => {
                   <p className="confirm-no-id">No file uploaded</p>
                 )}
 
-
                 {/* {uploadedID ? (
                   <img
                     // src={URL.createObjectURL(uploadedID)}
@@ -2334,7 +2341,17 @@ useEffect(() => {
                         </span>
                       </li>
                       <li className="confirm-total-price">
-                        <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{totalPrice.toLocaleString()}
                         </span>
@@ -2675,7 +2692,7 @@ useEffect(() => {
                   })()}
                 </div>
               )} */}
-                            {uploadedPreviewSrc && (
+              {uploadedPreviewSrc && (
                 <div className="image-preview">
                   <img
                     src={uploadedPreviewSrc}
@@ -2865,7 +2882,7 @@ useEffect(() => {
         </a>
       </div> */}
 
-            <div ref={galleryRef} style={{ display: "none" }}>
+      <div ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
           // data-pswp-width={2873}
@@ -2899,7 +2916,7 @@ useEffect(() => {
             </a>
           );
         })()} */}
-                {uploadedPreviewSrc && (
+        {uploadedPreviewSrc && (
           <a
             href={uploadedPreviewSrc}
             data-pswp-width={uploadedPreviewSize.width}
@@ -2909,9 +2926,7 @@ useEffect(() => {
             <img src={uploadedPreviewSrc} alt="" />
           </a>
         )}
-
       </div>
-
     </div>
   );
 };

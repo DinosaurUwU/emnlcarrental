@@ -134,12 +134,12 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
-    const licenseGalleryRef = useRef(null);
+  const licenseGalleryRef = useRef(null);
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!licenseGalleryRef.current) return;
 
     const lightbox = new PhotoSwipeLightbox({
@@ -274,8 +274,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     contact: ["/assets/images/default.png"],
   });
 
-  
-  
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
@@ -3229,13 +3227,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                         overlay.style.display = "flex";
                                     }}
                                   /> */}
-                                                                    <img
+                                  <img
                                     src={img.base64}
                                     alt={`Gallery ${index}`}
                                     className="unit-gallery-image"
                                     key={img.updatedAt}
                                     style={{ cursor: "zoom-in" }}
-                                    onClick={() => openPhotoSwipePreview(img.base64)}
+                                    onClick={() =>
+                                      openPhotoSwipePreview(img.base64)
+                                    }
                                     onError={(e) => {
                                       // Hide the broken image and show the overlay with plus sign
                                       e.target.style.display = "none";
@@ -5103,7 +5103,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
           </div>
         </div>
       )} */}
-            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+      <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
             href={photoSwipePreviewItem.src}
@@ -5317,7 +5317,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       //   openPhotoSwipePreview(selectedBooking.driverLicense);
                       // }}
                       onClick={() => {
-                        openPhotoSwipePreview([selectedBooking.driverLicense], 0);
+                        openPhotoSwipePreview(
+                          [selectedBooking.driverLicense],
+                          0,
+                        );
                       }}
                     />
                   ) : (
@@ -5525,7 +5528,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -5568,7 +5581,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -5584,6 +5607,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                 selectedBooking.balanceDue === 0
                                   ? "#28a745"
                                   : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:

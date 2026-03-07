@@ -79,7 +79,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
-    const licenseGalleryRef = useRef(null);
+  const licenseGalleryRef = useRef(null);
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
@@ -131,7 +131,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [unpaidBookingsSum, setUnpaidBookingsSum] = useState(0);
   const [unpaidBookingsCount, setUnpaidBookingsCount] = useState(0);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!licenseGalleryRef.current) return;
 
     const lightbox = new PhotoSwipeLightbox({
@@ -556,7 +556,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   //   setIsImageModalOpen(false);
   //   setModalImage(null);
   // };
-    const openPhotoSwipePreview = (src) => {
+  const openPhotoSwipePreview = (src) => {
     if (!src) return;
 
     const img = new Image();
@@ -4389,7 +4389,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -4432,7 +4442,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -4448,6 +4468,10 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                                 selectedBooking.balanceDue === 0
                                   ? "#28a745"
                                   : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:
@@ -4689,7 +4713,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                       //   setIsImageModalOpen(true);
                       // }}
                       onClick={() => {
-                        openPhotoSwipePreview(selectedCalendarBooking.driverLicense);
+                        openPhotoSwipePreview(
+                          selectedCalendarBooking.driverLicense,
+                        );
                       }}
                     />
                   ) : (
@@ -4908,7 +4934,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -4952,7 +4988,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -4968,6 +5014,10 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                                 selectedCalendarBooking.balanceDue === 0
                                   ? "#28a745"
                                   : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:

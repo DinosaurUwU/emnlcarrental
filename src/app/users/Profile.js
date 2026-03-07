@@ -99,7 +99,7 @@ const Profile = ({ openBooking }) => {
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!licenseGalleryRef.current) return;
 
     const lightbox = new PhotoSwipeLightbox({
@@ -153,7 +153,9 @@ const Profile = ({ openBooking }) => {
 
     requestAnimationFrame(() => {
       document
-        .querySelector(`[data-pswp-index="profile-preview-${pendingPreviewKey}"]`)
+        .querySelector(
+          `[data-pswp-index="profile-preview-${pendingPreviewKey}"]`,
+        )
         ?.click();
       setPendingPreviewKey(null);
     });
@@ -202,7 +204,7 @@ const Profile = ({ openBooking }) => {
     profilePic: "/assets/profile.png",
   });
 
-    useEffect(() => {
+  useEffect(() => {
     let mounted = true;
 
     const loadAdminMeta = async () => {
@@ -1220,8 +1222,6 @@ const Profile = ({ openBooking }) => {
             </p>
 
             <div className="profile-overlay-badge-row">
-
-
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}
@@ -1230,7 +1230,7 @@ const Profile = ({ openBooking }) => {
                 </div>
               )}
 
-                            {selectedBooking?.reservation === true && (
+              {selectedBooking?.reservation === true && (
                 <div className="profile-overlay-reserved-badge">
                   Reserved Booking
                 </div>
@@ -1240,7 +1240,7 @@ const Profile = ({ openBooking }) => {
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
-{String(selectedBooking?.status || "").toLowerCase() ===
+                  {String(selectedBooking?.status || "").toLowerCase() ===
                     "rejected" && (
                     <div className="confirm-row">
                       <strong className="confirm-label">
@@ -1428,11 +1428,13 @@ const Profile = ({ openBooking }) => {
                       //   setModalImage(selectedBooking.driverLicense);
                       //   setIsImageModalOpen(true);
                       // }}
-                                            onClick={() => {
+                      onClick={() => {
                         const licenseSrc =
                           typeof selectedBooking.driverLicense === "string"
                             ? selectedBooking.driverLicense
-                            : URL.createObjectURL(selectedBooking.driverLicense);
+                            : URL.createObjectURL(
+                                selectedBooking.driverLicense,
+                              );
                         openPhotoSwipePreview(licenseSrc);
                       }}
                     />
@@ -1647,7 +1649,17 @@ const Profile = ({ openBooking }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label"style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>Total Price:</strong>
+                        <strong
+                          className="summary-label"
+                          style={{
+                            fontFamily: "Montserrat, sans-serif",
+                            fontWeight: "900",
+                            fontSize: "20px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Total Price:
+                        </strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -1690,7 +1702,17 @@ const Profile = ({ openBooking }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "700", fontSize:"14px", textTransform:"uppercase"}}>Total Paid:</strong>
+                          <strong
+                            className="summary-label"
+                            style={{
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Total Paid:
+                          </strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -1706,7 +1728,7 @@ const Profile = ({ openBooking }) => {
                               fontFamily: "Montserrat, sans-serif",
                               fontWeight: "700",
                               fontSize: "20px",
-                              textTransform: "uppercase"
+                              textTransform: "uppercase",
                             }}
                           >
                             Balance Due:
@@ -2738,8 +2760,6 @@ const Profile = ({ openBooking }) => {
                               Reserved Booking
                             </span>
                           )}
-
-
                         </div>
                         <button
                           className="ongoing-unit-details-button"
@@ -3348,14 +3368,17 @@ const Profile = ({ openBooking }) => {
                   />
                 </button>
 
-                <h3 className="confirm-header"style={{color:"var(--accent-color)", fontSize: "20px"}}>RENTAL DETAILS</h3>
+                <h3
+                  className="confirm-header"
+                  style={{ color: "var(--accent-color)", fontSize: "20px" }}
+                >
+                  RENTAL DETAILS
+                </h3>
                 <p className="confirm-text">
                   Detailed information about this rental.
                 </p>
 
                 <div className="profile-overlay-badge-row">
-
-
                   {typeof selectedHistoryRental?.status === "string" && (
                     <span
                       className={`profile-overlay-status-badge status-${selectedHistoryRental.status.toLowerCase()}`}
@@ -3364,7 +3387,7 @@ const Profile = ({ openBooking }) => {
                     </span>
                   )}
 
-                                    {selectedHistoryRental?.reservation === true && (
+                  {selectedHistoryRental?.reservation === true && (
                     <div className="profile-overlay-reserved-badge">
                       Reserved Booking
                     </div>
@@ -3377,7 +3400,6 @@ const Profile = ({ openBooking }) => {
                   >
                     {selectedHistoryRental?.paid === true ? "Paid" : "Unpaid"}
                   </span>
-
                 </div>
 
                 <div className="admin-confirm-details">
@@ -3473,8 +3495,7 @@ const Profile = ({ openBooking }) => {
                           Referral Source:
                         </strong>
                         <span className="confirm-value">
-                          {selectedHistoryRental.referralSource ||
-                            "Walk-in"}
+                          {selectedHistoryRental.referralSource || "Walk-in"}
                         </span>
                       </div>
 
@@ -3579,7 +3600,7 @@ const Profile = ({ openBooking }) => {
                           //   setModalImage(selectedHistoryRental.driverLicense);
                           //   setIsImageModalOpen(true);
                           // }}
-                                                    onClick={() => {
+                          onClick={() => {
                             const licenseSrc =
                               typeof selectedHistoryRental.driverLicense ===
                               "string"
@@ -3815,7 +3836,15 @@ const Profile = ({ openBooking }) => {
                         );
                         return (
                           <li className="confirm-total-price">
-                            <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>
+                            <strong
+                              className="summary-label"
+                              style={{
+                                fontFamily: "Montserrat, sans-serif",
+                                fontWeight: "900",
+                                fontSize: "20px",
+                                textTransform: "uppercase",
+                              }}
+                            >
                               Total Price:
                             </strong>
                             <span className="summary-value">
@@ -3864,7 +3893,15 @@ const Profile = ({ openBooking }) => {
                         return (
                           <>
                             <li>
-                              <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "700", fontSize:"14px", textTransform:"uppercase"}}>
+                              <strong
+                                className="summary-label"
+                                style={{
+                                  fontFamily: "Montserrat, sans-serif",
+                                  fontWeight: "700",
+                                  fontSize: "14px",
+                                  textTransform: "uppercase",
+                                }}
+                              >
                                 Total Paid:
                               </strong>
                               <span
@@ -3880,7 +3917,7 @@ const Profile = ({ openBooking }) => {
                                 style={{
                                   color:
                                     balanceDue === 0 ? "#28a745" : "#ffb347",
-                                    fontFamily: "Montserrat, sans-serif",
+                                  fontFamily: "Montserrat, sans-serif",
                                   fontWeight: "700",
                                   fontSize: "20px",
                                   textTransform: "uppercase",
