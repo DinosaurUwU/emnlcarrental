@@ -300,7 +300,17 @@ const BookingPage = ({
   // }, []);
 
 useEffect(() => {
-    const lightbox = new PhotoSwipeLightbox({
+    // const lightbox = new PhotoSwipeLightbox({
+    //   gallery: galleryRef.current,
+    //   children: "a",
+    //   pswpModule: () => import("photoswipe"),
+    //   showHideAnimationType: "fade",
+    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+    //   maxWidth: window.innerWidth * 0.8,
+    //   maxHeight: window.innerHeight * 0.8,
+    //   preloaderDelay: 0,
+    // });
+        const lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
       pswpModule: () => import("photoswipe"),
@@ -309,6 +319,12 @@ useEffect(() => {
       maxWidth: window.innerWidth * 0.8,
       maxHeight: window.innerHeight * 0.8,
       preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
     });
 
     lightbox.init();
@@ -1055,7 +1071,7 @@ useEffect(() => {
         </h3>
 
         <div className="checkout-total">
-          <strong>Total Price:</strong>
+          <strong style={{fontFamily: "Montserrat, sans-serif", fontWeight: "800", fontSize:"18px", textTransform:"uppercase"}}>Total Price:</strong>
           <span className="total-price">₱{totalPrice.toLocaleString()}</span>
         </div>
 
@@ -2318,7 +2334,7 @@ useEffect(() => {
                         </span>
                       </li>
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>Total Price:</strong>
                         <span className="summary-value">
                           ₱{totalPrice.toLocaleString()}
                         </span>

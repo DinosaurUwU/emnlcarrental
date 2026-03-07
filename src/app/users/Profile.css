@@ -1698,6 +1698,10 @@ margin-bottom: 6px;
   background: #198754;
 }
 
+.profile-overlay-status-badge.status-completed {
+  background: #28a745;
+}
+
 .profile-overlay-status-badge.status-rejected {
   background: #dc3545;
 }

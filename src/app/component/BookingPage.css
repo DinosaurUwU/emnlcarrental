@@ -1192,7 +1192,9 @@ select option {
 
 /* Left side (values) */
 .summary-value {
-  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+
+  font-weight: 700;
   color: var(--accent-color);
   text-align: right;
   flex: 1;

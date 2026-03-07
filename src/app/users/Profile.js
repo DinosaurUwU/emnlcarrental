@@ -1197,17 +1197,19 @@ const Profile = ({ openBooking }) => {
             </p>
 
             <div className="profile-overlay-badge-row">
-              {selectedBooking?.reservation === true && (
-                <div className="profile-overlay-reserved-badge">
-                  Reserved Booking
-                </div>
-              )}
+
 
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}
                 >
                   {selectedBooking?.status}
+                </div>
+              )}
+
+                            {selectedBooking?.reservation === true && (
+                <div className="profile-overlay-reserved-badge">
+                  Reserved Booking
                 </div>
               )}
             </div>
@@ -1622,7 +1624,7 @@ const Profile = ({ openBooking }) => {
                     );
                     return (
                       <li className="confirm-total-price">
-                        <strong className="summary-label">Total Price:</strong>
+                        <strong className="summary-label"style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>Total Price:</strong>
                         <span className="summary-value">
                           ₱{discountedTotal.toLocaleString()}
                         </span>
@@ -1665,7 +1667,7 @@ const Profile = ({ openBooking }) => {
                     return (
                       <>
                         <li>
-                          <strong className="summary-label">Total Paid:</strong>
+                          <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "700", fontSize:"14px", textTransform:"uppercase"}}>Total Paid:</strong>
                           <span
                             className="summary-value"
                             style={{ color: "#dc3545" }}
@@ -1678,6 +1680,10 @@ const Profile = ({ openBooking }) => {
                             className="summary-label"
                             style={{
                               color: balanceDue === 0 ? "#28a745" : "#ffb347",
+                              fontFamily: "Montserrat, sans-serif",
+                              fontWeight: "700",
+                              fontSize: "20px",
+                              textTransform: "uppercase"
                             }}
                           >
                             Balance Due:
@@ -3325,11 +3331,7 @@ const Profile = ({ openBooking }) => {
                 </p>
 
                 <div className="profile-overlay-badge-row">
-                  {selectedHistoryRental?.reservation === true && (
-                    <div className="profile-overlay-reserved-badge">
-                      Reserved Booking
-                    </div>
-                  )}
+
 
                   {typeof selectedHistoryRental?.status === "string" && (
                     <span
@@ -3337,6 +3339,12 @@ const Profile = ({ openBooking }) => {
                     >
                       {selectedHistoryRental.status}
                     </span>
+                  )}
+
+                                    {selectedHistoryRental?.reservation === true && (
+                    <div className="profile-overlay-reserved-badge">
+                      Reserved Booking
+                    </div>
                   )}
                 </div>
 
@@ -3775,7 +3783,7 @@ const Profile = ({ openBooking }) => {
                         );
                         return (
                           <li className="confirm-total-price">
-                            <strong className="summary-label">
+                            <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "900", fontSize:"20px", textTransform:"uppercase"}}>
                               Total Price:
                             </strong>
                             <span className="summary-value">
@@ -3824,7 +3832,7 @@ const Profile = ({ openBooking }) => {
                         return (
                           <>
                             <li>
-                              <strong className="summary-label">
+                              <strong className="summary-label" style={{fontFamily: "Montserrat, sans-serif", fontWeight: "700", fontSize:"14px", textTransform:"uppercase"}}>
                                 Total Paid:
                               </strong>
                               <span
@@ -3840,6 +3848,10 @@ const Profile = ({ openBooking }) => {
                                 style={{
                                   color:
                                     balanceDue === 0 ? "#28a745" : "#ffb347",
+                                    fontFamily: "Montserrat, sans-serif",
+                                  fontWeight: "700",
+                                  fontSize: "20px",
+                                  textTransform: "uppercase",
                                 }}
                               >
                                 Balance Due:
