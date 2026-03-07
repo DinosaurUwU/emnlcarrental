@@ -1001,7 +1001,7 @@ Call them now to check if they want to extend. If no response, call them when re
       await sendEmail({
         toName: fullName || "Customer",
         toEmail: booking.email,
-        templateId: 3, // BREVO TEMPLATE
+        templateId: 16, // BREVO TEMPLATE
         params: {
           fullName: fullName || "Customer",
           carName: booking.carName || "Selected Car",
