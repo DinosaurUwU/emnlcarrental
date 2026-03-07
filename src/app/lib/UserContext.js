@@ -4787,7 +4787,7 @@ Please review the resubmitted request and continue processing.`,
       } ${bookingData.surname || ""}`.trim();
 
       // Format rental start date/time
-            const startDateStr = formatBookingDate(bookingData.startDate);
+      const startDateStr = formatBookingDate(bookingData.startDate);
       const startTimeStr = formatBookingTime(
         bookingData.startTime,
         bookingData.startDate,
@@ -5777,7 +5777,7 @@ Please review this request in the admin panel and proceed with approval or rejec
       } ${booking.surname || ""}`.trim();
 
       // Format dates
-            const startDateStr = formatBookingDate(bookingPayload.startDate);
+      const startDateStr = formatBookingDate(bookingPayload.startDate);
       const endDateStr = formatBookingDate(bookingPayload.endDate);
       const startTimeStr = formatBookingTime(
         bookingPayload.startTime,
@@ -5869,7 +5869,7 @@ Please review this request in the admin panel and proceed with approval or rejec
         contact: adminContact,
         formattedDateTime,
         startTimestamp: serverTimestamp(),
- content: `Hi ${fullName || "Customer"}, <br><br>
+        content: `Hi ${fullName || "Customer"}, <br><br>
 Your booking for <b>${bookingPayload.carName}</b> has been <b>Approved ✅</b>.<br><br>
 <b>Car:</b> ${bookingPayload.carName} <br>
 <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
@@ -5911,7 +5911,7 @@ Your rental is now confirmed. If you need assistance or schedule adjustments, pl
         contact: "Notification",
         formattedDateTime,
         startTimestamp: serverTimestamp(),
- content: `<b>Booking Approved</b><br><br>
+        content: `<b>Booking Approved</b><br><br>
 <b>Customer:</b> ${fullName || "Customer"} <br>
 <b>Car:</b> ${bookingPayload.carName} <br>
 <b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
