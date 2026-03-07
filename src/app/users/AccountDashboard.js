@@ -4,13 +4,17 @@ import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Header from "../component/Header";
 import Footer from "../component/Footer";
+import { useBooking } from "../component/BookingProvider";
 import "./AccountDashboard.css";
 import Profile from "./Profile";
 
-const AccountDashboard = ({ openBooking }) => {
+// const AccountDashboard = ({ openBooking }) => {
+  const AccountDashboard = ({ openBooking: openBookingProp }) => {
   const router = useRouter();
   // const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const { openBooking: openBookingFromContext } = useBooking();
+  const openBooking = openBookingProp || openBookingFromContext;
 
   // Removed useEffect that forces login
   

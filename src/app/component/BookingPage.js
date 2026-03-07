@@ -1414,7 +1414,8 @@ useEffect(() => {
       occupation: formData.occupation,
 
       address: formData.address,
-      driverLicense: uploadedID,
+      // driverLicense: uploadedID,
+       driverLicense: uploadedID?.file || uploadedID?.preview || uploadedID || null,
       billedDays,
       drivingPrice,
       pickupPrice,
