@@ -3836,7 +3836,7 @@ Please monitor for possible resubmission or customer follow-up.`,
         },
       });
 
-
+      
       console.log("📧 Resubmission email sent to user");
 
       // (WEBSITE) IN-APP MESSAGE NOTIFICATION
@@ -4676,11 +4676,58 @@ Please review the resubmitted request and continue processing.`,
 
       const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
 
-      const userStartTime =
+      // const userStartTime =
+      //   bookingData.startTimestamp?.toDate?.() || new Date();
+      // const hasStarted = userStartTime.getTime() <= Date.now();
+      // const rentalStatus = hasStarted ? "Active" : "Pending";
+      // const imageId = `${plateNo}_main`;
+
+      // await setDoc(bookingRef, {
+      //   totalDurationInSeconds,
+      //   ...bookingData,
+      //   driverLicense: driverLicenseUrl || null,
+      //   plateNo,
+      //   createdBy: user?.uid || "admin",
+      //   status: rentalStatus,
+      //   bookingUid,
+      // });
+
+       const userStartTime =
         bookingData.startTimestamp?.toDate?.() || new Date();
       const hasStarted = userStartTime.getTime() <= Date.now();
       const rentalStatus = hasStarted ? "Active" : "Pending";
       const imageId = `${plateNo}_main`;
+
+      const paymentEntries = Array.isArray(bookingData.paymentEntries)
+        ? bookingData.paymentEntries
+        : [];
+
+      const totalPaid =
+        typeof bookingData.totalPaid === "number"
+          ? bookingData.totalPaid
+          : paymentEntries.reduce(
+              (sum, entry) => sum + Number(entry?.amount || 0),
+              0,
+            );
+
+      const discountType = bookingData.discountType || "peso";
+      const discountValue = Number(bookingData.discountValue || 0);
+      const baseTotalPrice = Number(bookingData.totalPrice || 0);
+
+      const discountedTotal =
+        discountType === "percent"
+          ? Math.max(0, baseTotalPrice - baseTotalPrice * (discountValue / 100))
+          : Math.max(0, baseTotalPrice - discountValue);
+
+      const balanceDue =
+        typeof bookingData.balanceDue === "number"
+          ? Math.max(0, bookingData.balanceDue)
+          : Math.max(0, discountedTotal - totalPaid);
+
+      const paid =
+        typeof bookingData.paid === "boolean"
+          ? bookingData.paid
+          : balanceDue === 0;
 
       await setDoc(bookingRef, {
         totalDurationInSeconds,
@@ -4690,6 +4737,13 @@ Please review the resubmitted request and continue processing.`,
         createdBy: user?.uid || "admin",
         status: rentalStatus,
         bookingUid,
+        paymentEntries,
+        totalPaid,
+        balanceDue,
+        paid,
+        discountType,
+        discountValue,
+        imageId,
       });
 
       console.log(
@@ -4946,7 +5000,6 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
-  
   // (USER) SAVE BOOKING FORM DATA
   const saveBookingFormData = async (formData) => {
     try {
@@ -5756,12 +5809,56 @@ Please review this request in the admin panel and proceed with approval or rejec
         );
       }
 
+      // const now = new Date();
+      // const bookingPayload = {
+      //   ...booking,
+      //   driverLicense: driverLicenseBase64,
+      //   movedToActiveAt: Timestamp.fromDate(now),
+      //   status: "Pending",
+      // };
       const now = new Date();
+
+      const paymentEntries = Array.isArray(booking.paymentEntries)
+        ? booking.paymentEntries
+        : [];
+
+      const totalPaid =
+        typeof booking.totalPaid === "number"
+          ? booking.totalPaid
+          : paymentEntries.reduce(
+              (sum, entry) => sum + Number(entry?.amount || 0),
+              0,
+            );
+
+      const discountType = booking.discountType || "peso";
+      const discountValue = Number(booking.discountValue || 0);
+      const baseTotalPrice = Number(booking.totalPrice || 0);
+
+      const discountedTotal =
+        discountType === "percent"
+          ? Math.max(0, baseTotalPrice - baseTotalPrice * (discountValue / 100))
+          : Math.max(0, baseTotalPrice - discountValue);
+
+      const balanceDue =
+        typeof booking.balanceDue === "number"
+          ? Math.max(0, booking.balanceDue)
+          : Math.max(0, discountedTotal - totalPaid);
+
+      const paid =
+        typeof booking.paid === "boolean" ? booking.paid : balanceDue === 0;
+
       const bookingPayload = {
         ...booking,
         driverLicense: driverLicenseBase64,
         movedToActiveAt: Timestamp.fromDate(now),
         status: "Pending",
+        paymentEntries,
+        totalPaid,
+        balanceDue,
+        paid,
+        discountType,
+        discountValue,
+        assignedDriver: booking.assignedDriver || "",
       };
 
       await Promise.all([
