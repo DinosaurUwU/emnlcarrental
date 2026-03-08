@@ -296,7 +296,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
       const promises = [...imageIds].map(async (id) => {
         try {
-          const image = await fetchImageFromFirestore(id);
+          // const image = await fetchImageFromFirestore(id);
+          const image = await fetchImageFromFirestore(id, true);
+
           if (image) return { [id]: image };
           return {
             [id]: {
@@ -328,7 +330,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     };
 
     fetchTableImages();
-  }, [unitData, activeBookings, imageUpdateTrigger]);
+}, [unitData, activeBookings, imageUpdateTrigger, imageCache, fetchImageFromFirestore]);
 
   const [calendarViewMode, setCalendarViewMode] = useState("ALL"); // "ALL" or unitId
   const carUnitOptions = Object.entries(analyticsData).map(
