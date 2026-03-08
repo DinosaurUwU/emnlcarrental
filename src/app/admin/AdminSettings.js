@@ -1448,7 +1448,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
       const results = await Promise.all(
         ids.map(async (id) => {
           try {
-            const image = await fetchImageFromFirestore(id, false);
+            const image = await fetchImageFromFirestore(id, true);
             return image ? { [id]: image } : null;
           } catch {
             return null;
