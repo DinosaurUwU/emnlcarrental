@@ -4632,6 +4632,7 @@ Please review the resubmitted request and continue processing.`,
     return new File([u8arr], filename, { type: mime });
   }
 
+  
   // (ADMIN) SEND BOOKING DATA TO FIRESTORE
   const saveBookingToFirestore = async (plateNo, bookingData, bookingUid) => {
     try {
