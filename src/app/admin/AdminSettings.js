@@ -27,6 +27,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     activeBookings,
     updateUnitImage,
     imageUpdateTrigger,
+    imageCache,
     updateUnitGalleryImages,
     deleteImageFromFirestore,
     fetchImageFromFirestore,
@@ -1364,6 +1365,55 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   const [fetchedImages, setFetchedImages] = useState({});
 
+  // useEffect(() => {
+  //   const fetchTableImages = async () => {
+  //     if (!unitData || unitData.length === 0) return;
+
+  //     const imageIds = new Set();
+
+  //     // Add unit images
+  //     unitData.forEach((unit) => {
+  //       if (unit.imageId) imageIds.add(unit.imageId);
+  //       else if (unit.plateNo) imageIds.add(`${unit.plateNo}_main`);
+  //     });
+
+  //     // Add active bookings images
+  //     activeBookings?.forEach((booking) => {
+  //       if (booking.imageId) imageIds.add(booking.imageId);
+  //       else if (booking.plateNo) imageIds.add(`${booking.plateNo}_main`);
+  //     });
+
+  //     const promises = [...imageIds].map(async (id) => {
+  //       try {
+  //         const image = await fetchImageFromFirestore(id);
+  //         if (image) return { [id]: image };
+  //         return {
+  //           [id]: {
+  //             base64: "/assets/images/default.png",
+  //             updatedAt: Date.now(),
+  //           },
+  //         };
+  //       } catch {
+  //         return {
+  //           [id]: {
+  //             base64: "/assets/images/default.png",
+  //             updatedAt: Date.now(),
+  //           },
+  //         };
+  //       }
+  //     });
+
+  //     const results = await Promise.all(promises);
+  //     const merged = results
+  //       .filter(Boolean)
+  //       .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+
+  //     setFetchedImages((prev) => ({ ...prev, ...merged }));
+  //   };
+
+  //   fetchTableImages();
+  // }, [unitData, activeBookings, imageUpdateTrigger]);
+
   useEffect(() => {
     const fetchTableImages = async () => {
       if (!unitData || unitData.length === 0) return;
@@ -1382,36 +1432,41 @@ const AdminSettings = ({ subSection = "overview" }) => {
         else if (booking.plateNo) imageIds.add(`${booking.plateNo}_main`);
       });
 
-      const promises = [...imageIds].map(async (id) => {
-        try {
-          const image = await fetchImageFromFirestore(id);
-          if (image) return { [id]: image };
-          return {
-            [id]: {
-              base64: "/assets/images/default.png",
-              updatedAt: Date.now(),
-            },
-          };
-        } catch {
-          return {
-            [id]: {
-              base64: "/assets/images/default.png",
-              updatedAt: Date.now(),
-            },
-          };
-        }
-      });
+      const ids = [...imageIds];
+      if (ids.length === 0) return;
 
-      const results = await Promise.all(promises);
+      // 1) Instant paint from React cache (no network, no validation wait)
+      const cachedMap = ids.reduce((acc, id) => {
+        if (imageCache[id]) acc[id] = imageCache[id];
+        return acc;
+      }, {});
+      if (Object.keys(cachedMap).length > 0) {
+        setFetchedImages((prev) => ({ ...prev, ...cachedMap }));
+      }
+
+      // 2) Background refresh/validation (Firestore + IndexedDB logic in UserContext)
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const image = await fetchImageFromFirestore(id, false);
+            return image ? { [id]: image } : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+
       const merged = results
         .filter(Boolean)
         .reduce((acc, cur) => ({ ...acc, ...cur }), {});
 
-      setFetchedImages((prev) => ({ ...prev, ...merged }));
+      if (Object.keys(merged).length > 0) {
+        setFetchedImages((prev) => ({ ...prev, ...merged }));
+      }
     };
 
     fetchTableImages();
-  }, [unitData, activeBookings, imageUpdateTrigger]);
+  }, [unitData, activeBookings, imageUpdateTrigger, imageCache, fetchImageFromFirestore]);
 
   // Fetch main image when unit is selected
   useEffect(() => {

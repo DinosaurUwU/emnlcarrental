@@ -79,6 +79,7 @@ const RentalActivitySection = ({ subSection }) => {
     referralSources,
     fetchImageFromFirestore,
     imageUpdateTrigger,
+    imageCache,
     user,
     userAccounts,
   } = useUser();
@@ -246,13 +247,45 @@ const RentalActivitySection = ({ subSection }) => {
     date: "",
   });
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (!unitData || unitData.length === 0) return;
+
+  //   const fetchImages = async () => {
+  //     const imageIds = new Set();
+
+  //     // Collect imageIds from bookings and units (ignore hidden)
+  //     unitData.forEach((unit) => {
+  //       if (unit.imageId) imageIds.add(unit.imageId);
+  //     });
+
+  //     activeBookings.forEach((booking) => {
+  //       if (booking.imageId) imageIds.add(booking.imageId);
+  //       else imageIds.add(`${booking.plateNo}_main`);
+  //     });
+
+  //     const results = await Promise.all(
+  //       [...imageIds].map(async (id) => {
+  //         const image = await fetchImageFromFirestore(id);
+  //         return image ? { [id]: image } : null;
+  //       }),
+  //     );
+
+  //     setFetchedImages((prev) => ({
+  //       ...prev,
+  //       ...Object.assign({}, ...results.filter(Boolean)),
+  //     }));
+  //   };
+
+  //   fetchImages();
+  // }, [unitData, activeBookings, imageUpdateTrigger]);
+
+   useEffect(() => {
     if (!unitData || unitData.length === 0) return;
 
     const fetchImages = async () => {
       const imageIds = new Set();
 
-      // Collect imageIds from bookings and units (ignore hidden)
+      // Collect imageIds from bookings and units
       unitData.forEach((unit) => {
         if (unit.imageId) imageIds.add(unit.imageId);
       });
@@ -262,21 +295,47 @@ const RentalActivitySection = ({ subSection }) => {
         else imageIds.add(`${booking.plateNo}_main`);
       });
 
+      const ids = [...imageIds];
+      if (ids.length === 0) return;
+
+      // 1) Instant paint from cache
+      const cachedMap = ids.reduce((acc, id) => {
+        if (imageCache[id]) acc[id] = imageCache[id];
+        return acc;
+      }, {});
+      if (Object.keys(cachedMap).length > 0) {
+        setFetchedImages((prev) => ({ ...prev, ...cachedMap }));
+      }
+
+      // 2) Background refresh/validation
       const results = await Promise.all(
-        [...imageIds].map(async (id) => {
-          const image = await fetchImageFromFirestore(id);
-          return image ? { [id]: image } : null;
+        ids.map(async (id) => {
+          try {
+            const image = await fetchImageFromFirestore(id, false);
+            return image ? { [id]: image } : null;
+          } catch {
+            return null;
+          }
         }),
       );
 
-      setFetchedImages((prev) => ({
-        ...prev,
-        ...Object.assign({}, ...results.filter(Boolean)),
-      }));
+      const merged = results
+        .filter(Boolean)
+        .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+
+      if (Object.keys(merged).length > 0) {
+        setFetchedImages((prev) => ({ ...prev, ...merged }));
+      }
     };
 
     fetchImages();
-  }, [unitData, activeBookings, imageUpdateTrigger]);
+  }, [
+    unitData,
+    activeBookings,
+    imageUpdateTrigger,
+    imageCache,
+    fetchImageFromFirestore,
+  ]);
 
   const clientsList = useMemo(() => {
     const allBookings = [
