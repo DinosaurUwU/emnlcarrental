@@ -342,7 +342,8 @@ const Profile = ({ openBooking }) => {
       const results = await Promise.all(
         [...imageIds].map(async (id) => {
           try {
-            const image = await fetchImageFromFirestore(id);
+            const image = await fetchImageFromFirestore(id, true);
+
             return image
               ? { [id]: image }
               : {
