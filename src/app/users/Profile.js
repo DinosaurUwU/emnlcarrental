@@ -1748,6 +1748,7 @@ const Profile = ({ openBooking }) => {
                 </ul>
               </div>
 
+
               <div className="confirm-details-button-group">
                 <button
                   className="confirm-details-btn"
