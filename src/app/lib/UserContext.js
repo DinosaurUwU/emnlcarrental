@@ -2446,6 +2446,24 @@ Call them now to check if they want to extend. If no response, call them when re
   //   return () => unsubscribe();
   // }, []);
 
+  //   // (USER) RENTAL HISTORY LISTENER BETTER???
+  // useEffect(() => {
+  //   if (!user?.uid) return;
+
+  //   const rentalHistoryRef = collection(db, "users", user.uid, "rentalHistory");
+  //   const q = query(rentalHistoryRef, orderBy("movedToActiveAt", "desc"));
+
+  //   const unsubscribe = onSnapshot(q, (snapshot) => {
+  //     const rentals = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setUserRentalHistory(rentals);
+  //   });
+
+  //   return () => unsubscribe();
+  // }, [user?.uid]);
+
   // (USER) RENTAL HISTORY LISTENER
   useEffect(() => {
     if (!user?.uid) return;
