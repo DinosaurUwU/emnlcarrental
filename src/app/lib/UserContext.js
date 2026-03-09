@@ -2446,19 +2446,26 @@ Call them now to check if they want to extend. If no response, call them when re
   //   return () => unsubscribe();
   // }, []);
 
-  // (USER) RENTAL HISTORY LISTENER BETTER???
+  // (USER) RENTAL HISTORY LISTENER
   useEffect(() => {
     if (!user?.uid) return;
 
     const rentalHistoryRef = collection(db, "users", user.uid, "rentalHistory");
-    const q = query(rentalHistoryRef, orderBy("movedToActiveAt", "desc"));
+    // Get all rentals and sort client-side by dateCompleted (newest first)
+    const q = query(rentalHistoryRef);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const rentals = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setUserRentalHistory(rentals);
+      // Sort client-side by dateCompleted (newest first)
+      const sortedRentals = rentals.sort((a, b) => {
+        const dateA = a.dateCompleted ? new Date(a.dateCompleted) : new Date(0);
+        const dateB = b.dateCompleted ? new Date(b.dateCompleted) : new Date(0);
+        return dateB - dateA;
+      });
+      setUserRentalHistory(sortedRentals);
     });
 
     return () => unsubscribe();
