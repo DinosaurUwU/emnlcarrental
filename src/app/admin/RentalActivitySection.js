@@ -519,11 +519,45 @@ const RentalActivitySection = ({ subSection }) => {
         carData.bookings.forEach((booking) => {
           // Show only unpaid rentals (paid = false)
           if (booking.paid === false) {
+            const paymentList =
+              paymentEntries?.[String(booking.id)] ||
+              booking.paymentEntries ||
+              [];
+            const billedDays = Number(booking.billedDays || 0);
+            const discountedRate = Number(booking.discountedRate || 0);
+            const drivingPrice = Number(booking.drivingPrice || 0);
+            const extraHourCharge = Number(booking.extraHourCharge || 0);
+            const pickupPrice = Number(booking.pickupPrice || 0);
+            const rawTotal =
+              billedDays * discountedRate +
+              billedDays * drivingPrice +
+              extraHourCharge +
+              pickupPrice;
+            const discountValue = Number(booking.discountValue || 0);
+            const discountType = booking.discountType || "peso";
+            let discountAmount = 0;
+            if (discountType === "peso") {
+              discountAmount = Math.min(discountValue, rawTotal);
+            } else if (discountType === "percent") {
+              discountAmount = Math.min(
+                (discountValue / 100) * rawTotal,
+                rawTotal,
+              );
+            }
+            const discountedTotal = Math.max(0, rawTotal - discountAmount);
+            const totalPaid = paymentList.reduce(
+              (sum, entry) => sum + Number(entry.amount || 0),
+              0,
+            );
+            const balanceDue = Math.max(0, discountedTotal - totalPaid);
+
             allBookings.push({
               ...booking,
               carName: carData.carName,
               carType: carData.carType,
               unitImage: carData.unitImage,
+              paymentEntries: paymentList,
+              balanceDue,
             });
           }
         });
@@ -532,7 +566,7 @@ const RentalActivitySection = ({ subSection }) => {
 
     console.log("✅ Flattened unpaid bookings:", allBookings);
     setBalanceDueBookings(allBookings);
-  }, [completedBookingsAnalytics]);
+  }, [completedBookingsAnalytics, paymentEntries, activeBookings]);
 
   const filteredBalanceBookings = balanceDueBookings
     .filter((booking) => {
