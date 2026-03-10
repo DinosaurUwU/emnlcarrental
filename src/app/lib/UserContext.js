@@ -640,7 +640,38 @@ export const UserProvider = ({ children }) => {
   // }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
 
 
-    // Sync bookings to a specific user (moved outside useEffect for access in saveBookingToFirestore)
+    
+  
+  // REAL-TIME SYNC - Watch admin's activeBookings for new bookings
+  useEffect(() => {
+    if (!adminUid) return;
+
+    const adminActiveRef = collection(db, "users", adminUid, "activeBookings");
+    const unsubscribe = onSnapshot(adminActiveRef, (snapshot) => {
+      const changes = snapshot.docChanges();
+      for (const change of changes) {
+        if (change.type === "added") {
+          const booking = change.doc.data();
+          const bookingEmail = booking.email?.trim().toLowerCase();
+          const bookingCreatedBy = booking.createdBy;
+          
+          if (bookingEmail && bookingCreatedBy && bookingCreatedBy !== adminUid) {
+            // Skip if already synced
+            if (!booking.syncedFromAdmin) {
+              syncBookingsToUser(bookingCreatedBy, bookingEmail);
+            }
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [adminUid]);
+
+
+
+  
+  // Sync bookings to a specific user (moved outside useEffect for access in saveBookingToFirestore)
   const syncBookingsToUser = async (userId, userEmail) => {
     try {
       const adminActiveRef = collection(
@@ -4843,10 +4874,27 @@ Please review the resubmitted request and continue processing.`,
 
       
       // Sync to user's activeRentals after saving
-      const userId = bookingData?.createdBy;
-      if (userId && userId !== adminUid && bookingData?.email) {
-        await syncBookingsToUser(userId, bookingData.email);
+      console.log("🔄 Starting manual sync for:", bookingData?.email);
+      const userEmail = bookingData?.email?.trim().toLowerCase();
+      
+      if (userEmail) {
+        // Find user by email
+        const usersRef = collection(db, "users");
+        const userQuery = query(usersRef, where("email", "==", userEmail));
+        const userSnapshot = await getDocs(userQuery);
+        
+        if (!userSnapshot.empty) {
+          const userDoc = userSnapshot.docs[0];
+          const userId = userDoc.id;
+          console.log("🔄 Found user:", userId, "syncing...");
+          await syncBookingsToUser(userId, userEmail);
+          console.log("🔄 syncBookingsToUser completed");
+        } else {
+          console.log("🔄 User not found for email:", userEmail);
+        }
       }
+
+
 
 
       console.log("✅ Unit hidden status updated.");
