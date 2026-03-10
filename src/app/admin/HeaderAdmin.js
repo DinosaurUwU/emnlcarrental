@@ -2,17 +2,12 @@
 //HeaderAdmin.js
 import React, { useState, useEffect, useRef } from "react";
 
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
-
-
 import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
 import { FiMenu, FiUser } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
-
 
 const Header = ({
   onNavClick,
@@ -553,58 +548,6 @@ const Header = ({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [onCollapseChange]);
-
-const fetchFirestoreUsage = async () => {
-  if (!selectedAdmin?.uid) return;
-  try {
-    const usageRef = doc(db, "system_metrics", "firestore_usage");
-    const snap = await getDoc(usageRef);
-    
-    if (!snap.exists()) {
-      // Create with initial values
-      await setDoc(usageRef, {
-        reads: 0,
-        writes: 0,
-        deletes: 0,
-        lastReset: new Date().toISOString().split('T')[0]
-      });
-      setFirestoreUsage({ reads: 0, writes: 0, deletes: 0 });
-    } else {
-      const data = snap.data();
-      
-      // Check if it's past 4PM reset time
-      const lastResetDate = data.lastReset ? new Date(data.lastReset) : null;
-      const now = new Date();
-      const today4PM = new Date(now);
-      today4PM.setHours(16, 0, 0, 0); // 4 PM
-      
-      // Reset if past 4PM and last reset was before today
-      if (now > today4PM && (!lastResetDate || lastResetDate.toDateString() !== now.toDateString())) {
-        await updateDoc(usageRef, {
-          reads: 0,
-          writes: 0,
-          deletes: 0,
-          lastReset: now.toISOString().split('T')[0]
-        });
-        setFirestoreUsage({ reads: 0, writes: 0, deletes: 0, lastReset: now.toISOString().split('T')[0] });
-      } else {
-        setFirestoreUsage(data);
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching usage:", error);
-  }
-};
-
-
-
-useEffect(() => {
-  if (showAdminDetailsOverlay) {
-    fetchFirestoreUsage();
-  }
-}, [showAdminDetailsOverlay]);
-
-
 
   const handleEditUnit = (unit) => {
     setEditingUnit(unit.id);
@@ -1752,28 +1695,6 @@ useEffect(() => {
                           ? formatDate(new Date(selectedAdmin.backupAt))
                           : "None"}
                       </p>
-                                            {firestoreUsage && (
-                        <div>
-                          <p style={{ margin: "5px 0", fontSize: "22px" }}>
-                            <strong>Firestore Usage:</strong>
-                          </p>
-                          <p style={{ margin: "3px 0", fontSize: "21px" }}>
-                            Reads: {firestoreUsage.reads?.toLocaleString() || 0} / 50,000
-                          </p>
-                          <p style={{ margin: "3px 0", fontSize: "21px" }}>
-                            Writes: {firestoreUsage.writes?.toLocaleString() || 0} / 20,000
-                          </p>
-                          <p style={{ margin: "3px 0", fontSize: "21px" }}>
-                            Deletes: {firestoreUsage.deletes?.toLocaleString() || 0} / 20,000
-                          </p>
-                          {firestoreUsage.reads > 40000 && (
-                            <p style={{ color: "red", fontSize: "21px" }}>
-                              ⚠️ Approaching daily limit!
-                            </p>
-                          )}
-                        </div>
-                      )}
-
                     </div>
                   </div>
 
