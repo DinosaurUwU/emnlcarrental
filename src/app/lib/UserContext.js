@@ -464,180 +464,238 @@ export const UserProvider = ({ children }) => {
   };
 
   // REAL-TIME SYNC BOOKINGS TO USERS
-  useEffect(() => {
-    // Only run when someone is logged in
-    if (!user?.uid || !adminUid) {
-      return;
-    }
+  // useEffect(() => {
+  //   // Only run when someone is logged in
+  //   if (!user?.uid || !adminUid) {
+  //     return;
+  //   }
 
-    let unsubscribeUsers;
+  //   let unsubscribeUsers;
 
-    // Sync bookings to a specific user
-    const syncBookingsToUser = async (userId, userEmail) => {
-      try {
-        const adminActiveRef = collection(
-          db,
-          "users",
-          adminUid,
-          "activeBookings",
-        );
-        const bookingQuery = query(
-          adminActiveRef,
-          where("email", "==", userEmail),
-        );
-        const bookingSnapshot = await getDocs(bookingQuery);
+  //   // Sync bookings to a specific user
+  //   const syncBookingsToUser = async (userId, userEmail) => {
+  //     try {
+  //       const adminActiveRef = collection(
+  //         db,
+  //         "users",
+  //         adminUid,
+  //         "activeBookings",
+  //       );
+  //       const bookingQuery = query(
+  //         adminActiveRef,
+  //         where("email", "==", userEmail),
+  //       );
+  //       const bookingSnapshot = await getDocs(bookingQuery);
 
-        if (!bookingSnapshot.empty) {
-          const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
-            const bookingData = docSnap.data();
+  //       if (!bookingSnapshot.empty) {
+  //         const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
+  //           const bookingData = docSnap.data();
 
-            const userBookingData = {
-              ...bookingData,
-              createdBy: userId,
-              syncedFromAdmin: true,
-              syncedAt: serverTimestamp(),
-            };
+  //           const userBookingData = {
+  //             ...bookingData,
+  //             createdBy: userId,
+  //             syncedFromAdmin: true,
+  //             syncedAt: serverTimestamp(),
+  //           };
 
-            // Save booking under user's activeRentals
-            const userRentalRef = doc(
-              db,
-              "users",
-              userId,
-              "activeRentals",
-              docSnap.id,
-            );
-            await setDoc(userRentalRef, userBookingData);
+  //           // Save booking under user's activeRentals
+  //           const userRentalRef = doc(
+  //             db,
+  //             "users",
+  //             userId,
+  //             "activeRentals",
+  //             docSnap.id,
+  //           );
+  //           await setDoc(userRentalRef, userBookingData);
 
-            // Update admin's copy so cancelRental still works
-            const adminBookingRef = doc(
-              db,
-              "users",
-              adminUid,
-              "activeBookings",
-              docSnap.id,
-            );
-            await updateDoc(adminBookingRef, { createdBy: userId });
+  //           // Update admin's copy so cancelRental still works
+  //           const adminBookingRef = doc(
+  //             db,
+  //             "users",
+  //             adminUid,
+  //             "activeBookings",
+  //             docSnap.id,
+  //           );
+  //           await updateDoc(adminBookingRef, { createdBy: userId });
 
-            console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
-          });
+  //           console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
+  //         });
 
-          await Promise.all(copyPromises);
-          console.log(
-            `✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`,
-          );
-        } else {
-          console.log(`ℹ️ No admin bookings found for ${userEmail}`);
-        }
-      } catch (err) {
-        console.error("❌ Error syncing bookings to user:", err);
-      }
-    };
+  //         await Promise.all(copyPromises);
+  //         console.log(
+  //           `✅ Auto-synced ${bookingSnapshot.docs.length} booking(s) for ${userEmail}`,
+  //         );
+  //       } else {
+  //         console.log(`ℹ️ No admin bookings found for ${userEmail}`);
+  //       }
+  //     } catch (err) {
+  //       console.error("❌ Error syncing bookings to user:", err);
+  //     }
+  //   };
 
-    const setupSmartSync = async () => {
-      console.log(
-        "🔄 Setting up smart booking sync for:",
-        user.role,
-        user.email,
+  //   const setupSmartSync = async () => {
+  //     console.log(
+  //       "🔄 Setting up smart booking sync for:",
+  //       user.role,
+  //       user.email,
+  //     );
+
+  //     if (user.role === "admin") {
+  //       // ADMIN MODE - Watch for new users being added
+  //       console.log("👑 Admin mode: Watching for new users");
+
+  //       const usersRef = collection(db, "users");
+  //       const qUsers = query(usersRef, where("role", "==", "user"));
+
+  //       unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
+  //         const changes = snapshot.docChanges();
+  //         for (const change of changes) {
+  //           if (change.type === "added") {
+  //             const newUser = change.doc.data();
+  //             const newUserId = change.doc.id;
+  //             const newUserEmail = newUser.email?.trim().toLowerCase();
+
+  //             console.log("👤 New user detected:", newUserEmail);
+  //             if (newUserEmail) {
+  //               await syncBookingsToUser(newUserId, newUserEmail);
+  //             }
+  //           }
+  //         }
+  //       });
+
+  //       // REMOVED: adminActiveBookings listener (not needed)
+  //       // User mode already handles sync when user logs in
+  //     } else {
+  //       // USER MODE - Check for existing admin bookings on login
+  //       console.log("👤 User mode: Checking for existing admin bookings");
+
+  //       if (lastSyncedUid === user.uid) {
+  //         console.log("⏭️ User already synced, skipping");
+  //         return;
+  //       }
+
+  //       try {
+  //         const adminActiveRef = collection(
+  //           db,
+  //           "users",
+  //           adminUid,
+  //           "activeBookings",
+  //         );
+  //         const emailToSearch = user.email?.trim().toLowerCase();
+  //         const q = query(adminActiveRef, where("email", "==", emailToSearch));
+
+  //         console.log(
+  //           "🔍 User searching for bookings with email:",
+  //           emailToSearch,
+  //         );
+  //         const snapshot = await getDocs(q);
+
+  //         if (snapshot.empty) {
+  //           console.log("✅ No admin bookings found for this user");
+  //           setLastSyncedUid(user.uid);
+  //           return;
+  //         }
+
+  //         const copyPromises = snapshot.docs.map(async (docSnap) => {
+  //           const bookingData = docSnap.data();
+
+  //           const userBookingData = {
+  //             ...bookingData,
+  //             createdBy: user.uid,
+  //             syncedFromAdmin: true,
+  //             syncedAt: serverTimestamp(),
+  //           };
+
+  //           const userRentalRef = doc(
+  //             db,
+  //             "users",
+  //             user.uid,
+  //             "activeRentals",
+  //             docSnap.id,
+  //           );
+  //           await setDoc(userRentalRef, userBookingData);
+
+  //           console.log("✅ User synced booking:", docSnap.id);
+  //         });
+
+  //         await Promise.all(copyPromises);
+  //         console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
+  //         setLastSyncedUid(user.uid);
+  //       } catch (error) {
+  //         console.error("❌ User sync error:", error);
+  //       }
+  //     }
+  //   };
+
+  //   // Start
+  //   setupSmartSync();
+
+  //   // Cleanup
+  //   return () => {
+  //     if (unsubscribeUsers) {
+  //       console.log("🧹 Cleaning up user listener");
+  //       unsubscribeUsers();
+  //     }
+  //   };
+  // }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
+
+
+    // Sync bookings to a specific user (moved outside useEffect for access in saveBookingToFirestore)
+  const syncBookingsToUser = async (userId, userEmail) => {
+    try {
+      const adminActiveRef = collection(
+        db,
+        "users",
+        adminUid,
+        "activeBookings",
       );
+      const bookingQuery = query(
+        adminActiveRef,
+        where("email", "==", userEmail),
+      );
+      const bookingSnapshot = await getDocs(bookingQuery);
 
-      if (user.role === "admin") {
-        // ADMIN MODE - Watch for new users being added
-        console.log("👑 Admin mode: Watching for new users");
+      if (!bookingSnapshot.empty) {
+        const copyPromises = bookingSnapshot.docs.map(async (docSnap) => {
+          const bookingData = docSnap.data();
 
-        const usersRef = collection(db, "users");
-        const qUsers = query(usersRef, where("role", "==", "user"));
+          const userBookingData = {
+            ...bookingData,
+            createdBy: userId,
+            syncedFromAdmin: true,
+            syncedAt: serverTimestamp(),
+          };
 
-        unsubscribeUsers = onSnapshot(qUsers, async (snapshot) => {
-          const changes = snapshot.docChanges();
-          for (const change of changes) {
-            if (change.type === "added") {
-              const newUser = change.doc.data();
-              const newUserId = change.doc.id;
-              const newUserEmail = newUser.email?.trim().toLowerCase();
+          // Save booking under user's activeRentals
+          const userRentalRef = doc(
+            db,
+            "users",
+            userId,
+            "activeRentals",
+            docSnap.id,
+          );
+          await setDoc(userRentalRef, userBookingData);
 
-              console.log("👤 New user detected:", newUserEmail);
-              if (newUserEmail) {
-                await syncBookingsToUser(newUserId, newUserEmail);
-              }
-            }
-          }
-        });
-
-        // REMOVED: adminActiveBookings listener (not needed)
-        // User mode already handles sync when user logs in
-      } else {
-        // USER MODE - Check for existing admin bookings on login
-        console.log("👤 User mode: Checking for existing admin bookings");
-
-        if (lastSyncedUid === user.uid) {
-          console.log("⏭️ User already synced, skipping");
-          return;
-        }
-
-        try {
-          const adminActiveRef = collection(
+          // Update admin's copy so cancelRental still works
+          const adminBookingRef = doc(
             db,
             "users",
             adminUid,
             "activeBookings",
+            docSnap.id,
           );
-          const emailToSearch = user.email?.trim().toLowerCase();
-          const q = query(adminActiveRef, where("email", "==", emailToSearch));
+          await updateDoc(adminBookingRef, { createdBy: userId });
 
-          console.log(
-            "🔍 User searching for bookings with email:",
-            emailToSearch,
-          );
-          const snapshot = await getDocs(q);
+          console.log(`✅ Synced booking ${docSnap.id} to user ${userEmail}`);
+        });
 
-          if (snapshot.empty) {
-            console.log("✅ No admin bookings found for this user");
-            setLastSyncedUid(user.uid);
-            return;
-          }
-
-          const copyPromises = snapshot.docs.map(async (docSnap) => {
-            const bookingData = docSnap.data();
-
-            const userBookingData = {
-              ...bookingData,
-              createdBy: user.uid,
-              syncedFromAdmin: true,
-              syncedAt: serverTimestamp(),
-            };
-
-            const userRentalRef = doc(
-              db,
-              "users",
-              user.uid,
-              "activeRentals",
-              docSnap.id,
-            );
-            await setDoc(userRentalRef, userBookingData);
-
-            console.log("✅ User synced booking:", docSnap.id);
-          });
-
-          await Promise.all(copyPromises);
-          console.log(`✅ User synced ${snapshot.docs.length} booking(s)`);
-          setLastSyncedUid(user.uid);
-        } catch (error) {
-          console.error("❌ User sync error:", error);
-        }
+        await Promise.all(copyPromises);
       }
-    };
+    } catch (err) {
+      console.error("❌ Error syncing bookings to user:", err);
+    }
+  };
 
-    // Start
-    setupSmartSync();
-
-    // Cleanup
-    return () => {
-      if (unsubscribeUsers) {
-        console.log("🧹 Cleaning up user listener");
-        unsubscribeUsers();
-      }
-    };
-  }, [user?.uid, user?.role, adminUid, lastSyncedUid]);
 
   // useEffect(() => {
   //   // Only run when someone is logged in
@@ -4785,9 +4843,11 @@ Please review the resubmitted request and continue processing.`,
 
       console.log("✅ Unit hidden status updated.");
       return docId;
+      
     } catch (error) {
       console.error("❌ saveBookingToFirestore:", error);
     }
+    
   };
 
   // (USER) SUBMIT USER BOOKING REQUEST TO FIRESTORE
@@ -5026,7 +5086,6 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
-  
   // (USER) SAVE BOOKING FORM DATA
   const saveBookingFormData = async (formData) => {
     try {
