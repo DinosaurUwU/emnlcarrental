@@ -52,6 +52,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     expenseGrid,
     fetchImageFromFirestore,
     imageUpdateTrigger,
+    imageCache,
     activeBookings,
     generateCalendarEventsWithVacant,
   } = useUser();

@@ -4841,9 +4841,18 @@ Please review the resubmitted request and continue processing.`,
       const unitRef = doc(db, "units", plateNo);
       await updateDoc(unitRef, { hidden: true });
 
+      
+      // Sync to user's activeRentals after saving
+      const userId = bookingData?.createdBy;
+      if (userId && userId !== adminUid && bookingData?.email) {
+        await syncBookingsToUser(userId, bookingData.email);
+      }
+
+
       console.log("✅ Unit hidden status updated.");
       return docId;
-      
+
+
     } catch (error) {
       console.error("❌ saveBookingToFirestore:", error);
     }

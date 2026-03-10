@@ -267,7 +267,7 @@ useEffect(() => {
           <button className="cta-button-book-now" onClick={openBooking}>
             Book Now
           </button>
-          <a href="tel:+639123456789" className="cta-button-call-us">
+          <a href="tel:+639754778178" className="cta-button-call-us">
             Call Us
           </a>
         </div>
