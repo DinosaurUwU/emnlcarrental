@@ -90,6 +90,16 @@ body.modal-open {
   padding-top: 10px;
 }
 
+.message-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
+
+
 .message-actions-topright {
   position: absolute;
   top: 8px;

@@ -5165,18 +5165,35 @@ Please review this request in the admin panel and proceed with approval or rejec
       };
 
       await updateDoc(completedBookingRef, dataToUpdate);
-            // Also update user's rentalHistory
+
+      
+      // Also update user's rentalHistory
+      const userEmail = bookingData.email?.trim().toLowerCase();
       const userId = bookingData.createdBy;
-      if (userId) {
+      
+      // If createdBy is admin, find user by email
+      let actualUserId = userId;
+      if (userId === adminUid && userEmail) {
+        // Find user by email
+        const usersRef = collection(db, "users");
+        const userQuery = query(usersRef, where("email", "==", userEmail));
+        const userSnapshot = await getDocs(userQuery);
+        if (!userSnapshot.empty) {
+          actualUserId = userSnapshot.docs[0].id;
+        }
+      }
+      
+      if (actualUserId && actualUserId !== adminUid) {
         const userRentalHistoryRef = doc(
           db,
           "users",
-          userId,
+          actualUserId,
           "rentalHistory",
           bookingId
         );
         await updateDoc(userRentalHistoryRef, dataToUpdate);
       }
+
 
 
       console.log("✅ Balance due booking updated successfully");
