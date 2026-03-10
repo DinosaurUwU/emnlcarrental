@@ -5165,6 +5165,19 @@ Please review this request in the admin panel and proceed with approval or rejec
       };
 
       await updateDoc(completedBookingRef, dataToUpdate);
+            // Also update user's rentalHistory
+      const userId = bookingData.createdBy;
+      if (userId) {
+        const userRentalHistoryRef = doc(
+          db,
+          "users",
+          userId,
+          "rentalHistory",
+          bookingId
+        );
+        await updateDoc(userRentalHistoryRef, dataToUpdate);
+      }
+
 
       console.log("✅ Balance due booking updated successfully");
     } catch (error) {
