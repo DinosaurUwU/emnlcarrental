@@ -7642,6 +7642,15 @@ const RentalActivitySection = ({ subSection }) => {
 
                   try {
                     await markBookingAsPaid(selectedBooking.id);
+                    setBalanceDueBookings((prev) =>
+                      prev.filter(
+                        (booking) =>
+                          String(booking.id) !== String(selectedBooking.id),
+                      ),
+                    );
+                    setSelectedBooking((prev) =>
+                      prev ? { ...prev, paid: true } : prev,
+                    );
 
                     setActionOverlay({
                       isVisible: true,
