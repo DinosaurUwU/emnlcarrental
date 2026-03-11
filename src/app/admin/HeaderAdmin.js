@@ -213,6 +213,7 @@ const Header = ({
     setHideDownloadAnimation,
 
     showActionOverlay,
+    toggleBookingPaid,
   } = useUser();
 
   const displayAdminName =
@@ -232,6 +233,12 @@ const Header = ({
   const importFileInputRef = useRef(null);
 
   const [pendingTheme, setPendingTheme] = useState(theme);
+
+    const [showTogglePaidDialog, setShowTogglePaidDialog] = useState(false);
+  const [isTogglingPaid, setIsTogglingPaid] = useState(false);
+  const [showToggledPaidSuccess, setShowToggledPaidSuccess] = useState(false);
+  const [hideToggledPaidAnimation, setHideToggledPaidAnimation] = useState(false);
+
 
   const profilePic = user?.profilePic || "/assets/account.svg";
 
@@ -1979,8 +1986,28 @@ const Header = ({
               <div className="unit-additional-container">
                 <div className="specs-grid">
                   <div className="spec-item">
-                    <label>Paid</label>
-                    <span>{selectedBooking.paid ? "Yes" : "No"}</span>
+                    {/* <label>Paid</label>
+                    <span>{selectedBooking.paid ? "Yes" : "No"}</span> */}
+                    <label
+                      style={{ cursor: "pointer"}}
+                      onClick={() => setShowTogglePaidDialog(true)}
+                    >
+                      Paid (Click to Toggle)
+                    </label>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        color: selectedBooking.paid ? "#28a745" : "#dc3545",
+                        fontFamily: "Montserrat, sans-serif", 
+                        fontWeight: "900px",
+                      }}
+                      onClick={() => setShowTogglePaidDialog(true)}
+                    >
+                      {selectedBooking.paid ? "Yes" : "No"}
+                    </span>
+
+
+
                   </div>
 
                   <div className="spec-item">
@@ -2193,6 +2220,94 @@ const Header = ({
           <div className="sent-ongoing-progress-bar"></div>
         </div>
       )}
+
+            {/* 🔴 Loading Overlay (Toggling Paid Status) */}
+      {isTogglingPaid && (
+        <div className="submitting-overlay">
+          <div className="loading-container">
+            <div className="loading-bar-road">
+              <img
+                src="/assets/images/submitting.gif"
+                alt="Toggling paid status..."
+                className="car-gif"
+              />
+            </div>
+            <p className="submitting-text">Toggling paid status...</p>
+          </div>
+        </div>
+      )}
+
+      {/* 🟢 Success Overlay (Paid Status Toggled) */}
+      {showToggledPaidSuccess && (
+        <div
+          className={`sent-ongoing-overlay ${
+            hideToggledPaidAnimation ? "hide" : ""
+          }`}
+        >
+          <button
+            className="close-sent-ongoing"
+            onClick={() => {
+              setHideToggledPaidAnimation(true);
+              setTimeout(() => setShowToggledPaidSuccess(false), 400);
+            }}
+          >
+            ✖
+          </button>
+          <span className="warning-text" style={{ color: "#28a745" }}>
+            Paid status toggled successfully!
+          </span>
+          <div className="sent-ongoing-progress-bar"></div>
+        </div>
+      )}
+
+
+            {showTogglePaidDialog && (
+        <div className="overlay-delete">
+          <div className="confirm-modal" style={{ minWidth: "350px" }}>
+            <h3>Toggle Paid Status?</h3>
+            <p style={{ marginBottom: "20px" }}>
+              Current status: <strong>{selectedBooking.paid ? "Paid" : "Unpaid"}</strong>
+            </p>
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn delete"
+                onClick={async () => {
+                  setIsTogglingPaid(true);
+                  try {
+                    await toggleBookingPaid(selectedBooking.id);
+                    setSelectedBooking(prev => ({
+                      ...prev,
+                      paid: !prev.paid
+                    }));
+                    setShowTogglePaidDialog(false);
+                    setIsTogglingPaid(false);
+                    // Show success overlay
+                    setShowToggledPaidSuccess(true);
+                    setHideToggledPaidAnimation(false);
+                    setTimeout(() => {
+                      setHideToggledPaidAnimation(true);
+                      setTimeout(() => setShowToggledPaidSuccess(false), 400);
+                    }, 5000);
+                  } catch (err) {
+                    console.error("Failed to toggle paid status:", err);
+                    setIsTogglingPaid(false);
+                  }
+                }}
+              >
+                Yes
+              </button>
+
+              <button
+                className="confirm-btn cancel"
+                onClick={() => setShowTogglePaidDialog(false)}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* DATA BACKUP */}
       {showBackupConfirmDialog && (

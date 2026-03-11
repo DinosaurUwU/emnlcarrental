@@ -5264,6 +5264,67 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
+    // (ADMIN) TOGGLE BOOKING PAID STATUS
+  const toggleBookingPaid = async (bookingId) => {
+    try {
+      const appSettingsDoc = await getDoc(doc(db, "config", "appSettings"));
+      const adminUid = appSettingsDoc.data()?.adminUid;
+      if (!adminUid) throw new Error("Admin UID not found.");
+
+      const completedBookingRef = doc(
+        db,
+        "users",
+        adminUid,
+        "completedBookings",
+        bookingId,
+      );
+      const bookingSnap = await getDoc(completedBookingRef);
+      if (!bookingSnap.exists()) throw new Error("Booking not found.");
+
+      const bookingData = bookingSnap.data();
+      const currentPaid = bookingData.paid === true;
+      const newPaid = !currentPaid;
+
+      // 1. Toggle in admin's completedBookings
+      await updateDoc(completedBookingRef, {
+        paid: newPaid,
+      });
+
+      // 2. Also toggle in user's rentalHistory
+      const userId = bookingData.createdBy;
+      const userEmailForQuery = bookingData.email?.trim().toLowerCase();
+      
+      let actualUserId = userId;
+      if (userId === adminUid && userEmailForQuery) {
+        const usersRef = collection(db, "users");
+        const userQuery = query(usersRef, where("email", "==", userEmailForQuery));
+        const userSnapshot = await getDocs(userQuery);
+        if (!userSnapshot.empty) {
+          actualUserId = userSnapshot.docs[0].id;
+        }
+      }
+      
+      if (actualUserId && actualUserId !== adminUid) {
+        const userRentalHistoryRef = doc(
+          db,
+          "users",
+          actualUserId,
+          "rentalHistory",
+          bookingId
+        );
+        await updateDoc(userRentalHistoryRef, {
+          paid: newPaid,
+        });
+      }
+
+      console.log(`✅ Booking paid status toggled to: ${newPaid}`);
+    } catch (error) {
+      console.error("❌ Error toggling booking paid status:", error);
+      throw error;
+    }
+  };
+
+
   // (USER) CANCEL USER BOOKING REQUEST
   const cancelUserBookingRequest = async (docId) => {
     try {
@@ -6094,7 +6155,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           }
         }
 
-        // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
+                // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.status !== "Completed") return;
@@ -6103,30 +6164,80 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           const plateNo = data.plateNo || "UNKNOWN_UNIT";
           const carName = data.carName || plateNo;
 
+          console.log("🔔 Modified booking detected:", docId, "paid:", data.paid);
+
           // Only update analytics - no need to add to calendar again
           setCompletedBookingsAnalytics((prevMap) => {
             const newMap = { ...prevMap };
-            if (!newMap[plateNo]) return newMap;
+            if (!newMap[plateNo]) {
+              console.log("⚠️ No plateNo found in map:", plateNo);
+              return newMap;
+            }
 
             // Find and update the booking in all time keys
+            let found = false;
             for (const key in newMap[plateNo]) {
               if (["carType", "unitImage", "carName", "bookings"].includes(key))
                 continue;
               
               if (!newMap[plateNo][key]?.bookings) continue;
               
-              const bookings = newMap[plateNo][key].bookings;
-              const index = bookings.findIndex((b) => b.id === docId);
+              // Create a new array to trigger React re-render
+              const oldBookings = newMap[plateNo][key].bookings;
+              const index = oldBookings.findIndex((b) => b.id === docId);
               
               if (index !== -1) {
-                // Update the existing booking with new data (including paid status)
-                bookings[index] = { ...bookings[index], ...data };
+                // Create new array with updated booking
+                const newBookings = [...oldBookings];
+                newBookings[index] = { ...oldBookings[index], ...data };
+                newMap[plateNo][key].bookings = newBookings;
+                found = true;
+                console.log("✅ Updated booking in key:", key);
               }
+            }
+
+            if (!found) {
+              console.log("⚠️ Booking not found in any key:", docId);
             }
 
             return newMap;
           });
         }
+
+
+        // // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
+        // if (change.type === "modified") {
+        //   const data = change.doc.data();
+        //   if (data.status !== "Completed") return;
+
+        //   const docId = change.doc.id;
+        //   const plateNo = data.plateNo || "UNKNOWN_UNIT";
+        //   const carName = data.carName || plateNo;
+
+        //   // Only update analytics - no need to add to calendar again
+        //   setCompletedBookingsAnalytics((prevMap) => {
+        //     const newMap = { ...prevMap };
+        //     if (!newMap[plateNo]) return newMap;
+
+        //     // Find and update the booking in all time keys
+        //     for (const key in newMap[plateNo]) {
+        //       if (["carType", "unitImage", "carName", "bookings"].includes(key))
+        //         continue;
+              
+        //       if (!newMap[plateNo][key]?.bookings) continue;
+              
+        //       const bookings = newMap[plateNo][key].bookings;
+        //       const index = bookings.findIndex((b) => b.id === docId);
+              
+        //       if (index !== -1) {
+        //         // Update the existing booking with new data (including paid status)
+        //         bookings[index] = { ...bookings[index], ...data };
+        //       }
+        //     }
+
+        //     return newMap;
+        //   });
+        // }
       });
 
     });
@@ -8734,6 +8845,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
 
         completedBookingsAnalytics,
         calendarEvents,
+        toggleBookingPaid,
 
         generatePerDayCalendarEvents,
         submitUserBookingRequest,
