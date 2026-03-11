@@ -506,6 +506,7 @@ const RentalActivitySection = ({ subSection }) => {
 
   // BALANCE DUE DISPLAY
   useEffect(() => {
+    console.log("🔍 DEBUG: completedBookingsAnalytics:", JSON.stringify(completedBookingsAnalytics, null, 2));
     if (
       !completedBookingsAnalytics ||
       typeof completedBookingsAnalytics !== "object"

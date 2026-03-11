@@ -6155,20 +6155,19 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           }
         }
 
-                // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
+                        // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.status !== "Completed") return;
 
           const docId = change.doc.id;
           const plateNo = data.plateNo || "UNKNOWN_UNIT";
-          const carName = data.carName || plateNo;
 
           console.log("🔔 Modified booking detected:", docId, "paid:", data.paid);
 
           // Only update analytics - no need to add to calendar again
           setCompletedBookingsAnalytics((prevMap) => {
-            const newMap = { ...prevMap };
+            const newMap = JSON.parse(JSON.stringify(prevMap)); // Deep clone to ensure new references
             if (!newMap[plateNo]) {
               console.log("⚠️ No plateNo found in map:", plateNo);
               return newMap;
@@ -6182,17 +6181,13 @@ Please continue operational follow-ups and payment tracking for this rental.`,
               
               if (!newMap[plateNo][key]?.bookings) continue;
               
-              // Create a new array to trigger React re-render
-              const oldBookings = newMap[plateNo][key].bookings;
-              const index = oldBookings.findIndex((b) => b.id === docId);
+              const index = newMap[plateNo][key].bookings.findIndex((b) => b.id === docId);
               
               if (index !== -1) {
-                // Create new array with updated booking
-                const newBookings = [...oldBookings];
-                newBookings[index] = { ...oldBookings[index], ...data };
-                newMap[plateNo][key].bookings = newBookings;
+                // Replace the entire booking object with the updated data
+                newMap[plateNo][key].bookings[index] = { id: docId, ...data };
                 found = true;
-                console.log("✅ Updated booking in key:", key);
+                console.log("✅ Updated booking in key:", key, "paid:", data.paid);
               }
             }
 
