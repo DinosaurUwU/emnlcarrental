@@ -6240,7 +6240,59 @@ Please continue operational follow-ups and payment tracking for this rental.`,
     const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
       const changes = snapshot.docChanges();
 
-      changes.forEach((change) => {
+      // changes.forEach((change) => {
+      //   if (change.type === "added" || change.type === "modified") {
+      //     const data = change.doc.data();
+      //     if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
+      //       return;
+
+      //     const docId = change.doc.id;
+      //     const start = new Date(data.startTimestamp.seconds * 1000);
+      //     const [year, month, day] = data.endDate.split("-");
+      //     const [hour, minute] = data.endTime.split(":");
+      //     const end = data.endTimestamp?.seconds
+      //       ? new Date(data.endTimestamp.seconds * 1000)
+      //       : new Date(
+      //           Number(year),
+      //           Number(month) - 1,
+      //           Number(day),
+      //           Number(hour),
+      //           Number(minute),
+      //         );
+
+      //     const carName = data.carName || "Unknown Car";
+      //     const status =
+      //       data.status?.charAt(0).toUpperCase() +
+      //         data.status?.slice(1).toLowerCase() || "Unknown";
+
+      //     setCalendarEventsSafe((prev) => {
+      //       const filtered = prev.filter((e) => e.fullData?.id !== docId);
+      //       return [
+      //         ...filtered,
+      //         {
+      //           title: `${status}: ${carName}`,
+      //           start: start.toISOString(),
+      //           end: end.toISOString(),
+      //           fullData: data,
+      //           backgroundColor: statusColorMap[status] || "#6c757d",
+      //           borderColor: "#00000020",
+      //           textColor: "#fff",
+      //           source: status.toLowerCase(),
+      //         },
+      //       ];
+      //     });
+      //   }
+
+      //   if (change.type === "removed") {
+      //     const docId = change.doc.id;
+      //     setCalendarEventsSafe((prev) =>
+      //       prev.filter((e) => e.fullData?.id !== docId),
+      //     );
+
+
+
+
+changes.forEach((change) => {
         if (change.type === "added" || change.type === "modified") {
           const data = change.doc.data();
           if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
@@ -6265,15 +6317,23 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             data.status?.charAt(0).toUpperCase() +
               data.status?.slice(1).toLowerCase() || "Unknown";
 
+          const fullData = { id: docId, ...data };
+
           setCalendarEventsSafe((prev) => {
-            const filtered = prev.filter((e) => e.fullData?.id !== docId);
+            const filtered = prev.filter(
+              (e) =>
+                e.id !== docId &&
+                e.fullData?.id !== docId &&
+                e.fullData?.bookingId !== docId,
+            );
             return [
               ...filtered,
               {
+                id: docId,
                 title: `${status}: ${carName}`,
                 start: start.toISOString(),
                 end: end.toISOString(),
-                fullData: data,
+                fullData,
                 backgroundColor: statusColorMap[status] || "#6c757d",
                 borderColor: "#00000020",
                 textColor: "#fff",
@@ -6286,8 +6346,18 @@ Please continue operational follow-ups and payment tracking for this rental.`,
         if (change.type === "removed") {
           const docId = change.doc.id;
           setCalendarEventsSafe((prev) =>
-            prev.filter((e) => e.fullData?.id !== docId),
+            prev.filter(
+              (e) =>
+                e.id !== docId &&
+                e.fullData?.id !== docId &&
+                e.fullData?.bookingId !== docId,
+            ),
           );
+        
+
+
+
+
         }
       });
     });

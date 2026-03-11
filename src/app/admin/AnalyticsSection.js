@@ -3707,7 +3707,8 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
       {(subSection === "overview" || subSection === "calendar") && (
         <div
-          className={`calendar-container ${subSection === "calendar" ? "single-calendar" : ""}`}
+          // className={`calendar-container ${subSection === "calendar" ? "single-calendar" : ""}`}
+          className={`calendar-container ${subSection === "calendar" ? "single-calendar" : ""} ${showCalendarImagesOnly ? "images-only" : ""}`}
         >
           <h3 className="calendar-title">
             Monthly Report <br /> (
@@ -3762,9 +3763,10 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                 color: showCalendarImagesOnly ? "#fff" : "#333",
                 border: "1px solid #ccc",
                 borderRadius: "4px",
-                padding: "8px 12px",
+                padding: "8px 20px",
                 cursor: "pointer",
                 fontWeight: "bold",
+                marginBottom: "5px",
               }}
             >
               {showCalendarImagesOnly ? "Images Only" : "Show Events"}

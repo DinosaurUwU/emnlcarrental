@@ -2707,6 +2707,16 @@ body.analytics-no-scroll {
   border-color: var(--supporting-color) !important;
 }
 
+/* Force square day cells */
+/* .fc .fc-daygrid-day-frame,
+.fc .fc-scrollgrid-sync-inner {
+  aspect-ratio: 1 / 1;
+}
+
+.fc .fc-daygrid-day-frame {
+  height: auto !important;
+} */
+
 .fc .fc-button {
   background-color: #28a74680 !important;
   color: #fff !important;
@@ -2782,6 +2792,23 @@ body.analytics-no-scroll {
   font-weight: bold;
 }
 
+.fc-view-harness.fc-view-harness-active {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.fc-view-harness.fc-view-harness-active > .fc-view {
+  min-width: 1200px;
+}
+
+.fc-view-harness.fc-view-harness-active::-webkit-scrollbar {
+  height: 5px;
+}
+
+.fc-view-harness.fc-view-harness-active::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 5px;
+}
 
 
 /* Calendar Images Only - Fixed height per day cell */
@@ -2803,6 +2830,69 @@ body.analytics-no-scroll {
   height: 50px !important;
   max-height: 50px !important;
   object-fit: cover !important;
+}
+
+
+.calendar-container.images-only .fc-daygrid-day-events {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  align-content: start;
+  grid-auto-flow: row dense;
+}
+
+.calendar-container.images-only
+  .fc-daygrid-day-events:not(
+    :has(> .fc-daygrid-event-harness:nth-child(2))
+  ) {
+  grid-template-columns: 1fr;
+}
+
+.calendar-container.images-only
+  .fc-daygrid-day-events:has(
+    > .fc-daygrid-event-harness:nth-child(2)
+  ):not(
+    :has(> .fc-daygrid-event-harness:nth-child(3))
+  ) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.calendar-container.images-only
+  .fc-daygrid-day-events:has(
+    > .fc-daygrid-event-harness:nth-child(3)
+  ):not(
+    :has(> .fc-daygrid-event-harness:nth-child(4))
+  ) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.calendar-container.images-only .fc-daygrid-day-bottom,
+.calendar-container.images-only .fc-daygrid-more-link {
+  display: none !important;
+}
+
+.calendar-container.images-only .fc-daygrid-event-harness,
+.calendar-container.images-only .fc-daygrid-event-harness-abs {
+  margin: 0 !important;
+  width: 100% !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  grid-column: span 1 !important;
+}
+
+.calendar-container.images-only .fc-daygrid-event {
+  margin: 0 !important;
+}
+
+.calendar-container.images-only .fc-event-images-only,
+.calendar-container.images-only .fc-event-images-only img {
+  width: 100% !important;
+}
+
+.calendar-container.images-only .fc-daygrid-day-events::before {
+  display: none !important;
+  content: none !important;
 }
 
 
