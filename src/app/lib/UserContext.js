@@ -6634,6 +6634,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
     }
   };
 
+  
   const deleteImageFromFirestore = async (imageId) => {
     try {
       const docRef = doc(db, "images", imageId);
