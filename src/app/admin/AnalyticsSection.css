@@ -2782,15 +2782,29 @@ body.analytics-no-scroll {
   font-weight: bold;
 }
 
-/* Calendar Images Only Mode */
-.calendar-images-only .fc-event {
-  background: transparent !important;
-  border: none !important;
+
+
+/* Calendar Images Only - Fixed height per day cell */
+.fc-daygrid-event-harness {
+  max-height: 60px !important;
+  overflow: hidden !important;
 }
 
-.calendar-images-only .fc-event-main {
-  padding: 0 !important;
+.fc-daygrid-event-harness-abs {
+  max-height: 60px !important;
 }
+
+.fc-event-images-only {
+  height: 50px !important;
+  max-height: 50px !important;
+}
+
+.fc-event-images-only img {
+  height: 50px !important;
+  max-height: 50px !important;
+  object-fit: cover !important;
+}
+
 
 
 @media (max-width: 768px) {

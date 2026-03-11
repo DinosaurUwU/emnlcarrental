@@ -347,6 +347,55 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
   const [calendarStatusFilter, setCalendarStatusFilter] = useState("ALL");
 
+  const expandCalendarEventsByDay = (events) => {
+    const timeZone = "Asia/Manila";
+
+    return events.flatMap((eventItem) => {
+      if (!eventItem?.start) return [eventItem];
+
+      const startDate = new Date(eventItem.start);
+      const endDate = eventItem.end ? new Date(eventItem.end) : new Date(eventItem.start);
+
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
+      if (eventItem.allDay && eventItem.end) {
+        const endOriginal = new Date(eventItem.end);
+        if (
+          endOriginal.getHours() === 0 &&
+          endOriginal.getMinutes() === 0 &&
+          endDate.getTime() > startDate.getTime()
+        ) {
+          endDate.setDate(endDate.getDate() - 1);
+        }
+      }
+
+      const oneDay = 1000 * 60 * 60 * 24;
+      const totalDays = Math.max(
+        0,
+        Math.round((endDate.getTime() - startDate.getTime()) / oneDay),
+      );
+
+      const expanded = [];
+      for (let i = 0; i <= totalDays; i += 1) {
+        const current = new Date(startDate.getTime() + i * oneDay);
+        const iso = current.toLocaleDateString("en-CA", { timeZone });
+        const nextEvent = {
+          ...eventItem,
+          start: iso,
+          end: undefined,
+          allDay: true,
+        };
+        if (eventItem.id) {
+          nextEvent.id = `${eventItem.id}-${iso}`;
+        }
+        expanded.push(nextEvent);
+      }
+
+      return expanded;
+    });
+  };
+
   const filteredCalendarEvents = useMemo(() => {
     let filtered = calendarEvents;
 
@@ -464,11 +513,22 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
         return generatePerDayCalendarEvents(fullData);
       });
 
-      return [...vacantEvents, ...perDayTransformed];
+      const combined = [...vacantEvents, ...perDayTransformed];
+      return showCalendarImagesOnly
+        ? expandCalendarEventsByDay(combined)
+        : combined;
     }
 
-    return filtered;
-  }, [calendarViewMode, calendarStatusFilter, calendarEvents]);
+    return showCalendarImagesOnly
+      ? expandCalendarEventsByDay(filtered)
+      : filtered;
+  }, [
+    calendarViewMode,
+    calendarStatusFilter,
+    calendarEvents,
+    showCalendarImagesOnly,
+    generatePerDayCalendarEvents,
+  ]);
 
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
   useEffect(() => {
@@ -2654,31 +2714,53 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   };
 
   // Custom event content component for calendar images
-const CalendarEventContent = ({ event, fetchedImages }) => {
-  const fullData = event.extendedProps?.fullData || {};
-  const imageId = fullData.imageId || `${fullData.plateNo}_main`;
-  const image = fetchedImages[imageId];
-  
-  if (image?.base64) {
+  const CalendarEventContent = ({ event, fetchedImages, showImagesOnly }) => {
+    const fullData = event.extendedProps?.fullData || {};
+    const imageId = fullData.imageId || `${fullData.plateNo}_main`;
+    const image = fetchedImages[imageId];
+    
+    // If images only mode is ON, show only the image
+    if (showImagesOnly) {
+      if (image?.base64) {
+        return (
+          <div 
+            className="fc-event-images-only"
+            style={{ 
+              width: "100%", 
+              height: "50px", 
+              maxHeight: "50px",
+              padding: 0, 
+              margin: 0, 
+              overflow: "hidden" 
+            }}
+          >
+            <img 
+              src={image.base64} 
+              alt={event.title}
+              style={{ 
+                width: "100%", 
+                height: "50px", 
+                maxHeight: "50px",
+                objectFit: "cover" 
+              }}
+            />
+          </div>
+        );
+      }
+      // No image available, show nothing
+      return null;
+    }
+    
+    // If images only mode is OFF, show only the default event (text + color)
     return (
-      <div style={{ width: "100%", height: "100%", padding: 0, margin: 0, overflow: "hidden" }}>
-        <img 
-          src={image.base64} 
-          alt={event.title}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+      <div>
+        <b>{event.timeText}</b>
+        <i>{event.title}</i>
       </div>
     );
-  }
-  
-  // Fallback to default rendering
-  return (
-    <div>
-      <b>{event.timeText}</b>
-      <i>{event.title}</i>
-    </div>
-  );
-};
+  };
+
+
 
 
   return (
@@ -3728,11 +3810,20 @@ const CalendarEventContent = ({ event, fetchedImages }) => {
 
             
 
-            eventContent={
-              showCalendarImagesOnly
-                ? (eventInfo) => <CalendarEventContent event={eventInfo.event} fetchedImages={fetchedImages} />
-                : undefined
-            }
+            // eventContent={
+            //   showCalendarImagesOnly
+            //     ? (eventInfo) => <CalendarEventContent event={eventInfo.event} fetchedImages={fetchedImages} />
+            //     : undefined
+            // }
+
+            eventContent={(eventInfo) => (
+              <CalendarEventContent 
+                event={eventInfo.event} 
+                fetchedImages={fetchedImages} 
+                showImagesOnly={showCalendarImagesOnly}
+              />
+            )}
+
 
 
 
