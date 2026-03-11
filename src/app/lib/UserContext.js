@@ -5220,9 +5220,42 @@ Please review this request in the admin panel and proceed with approval or rejec
       const bookingSnap = await getDoc(completedBookingRef);
       if (!bookingSnap.exists()) throw new Error("Booking not found.");
 
+      const bookingData = bookingSnap.data();
+      const userEmail = bookingData.email?.trim().toLowerCase();
+
       await updateDoc(completedBookingRef, {
         paid: true,
       });
+
+      // 2. Also update user's rentalHistory (same logic as updateBalanceDueBooking)
+      const userId = bookingData.createdBy;
+      const userEmailForQuery = bookingData.email?.trim().toLowerCase();
+      
+      // If createdBy is admin, find user by email
+      let actualUserId = userId;
+      if (userId === adminUid && userEmailForQuery) {
+        // Find user by email in users collection (not userAccounts!)
+        const usersRef = collection(db, "users");
+        const userQuery = query(usersRef, where("email", "==", userEmailForQuery));
+        const userSnapshot = await getDocs(userQuery);
+        if (!userSnapshot.empty) {
+          actualUserId = userSnapshot.docs[0].id;
+        }
+      }
+      
+      if (actualUserId && actualUserId !== adminUid) {
+        const userRentalHistoryRef = doc(
+          db,
+          "users",
+          actualUserId,
+          "rentalHistory",
+          bookingId
+        );
+        await updateDoc(userRentalHistoryRef, {
+          paid: true,
+        });
+        console.log("✅ Updated user rentalHistory with paid=true");
+      }
 
       console.log("✅ Booking marked as PAID");
     } catch (error) {
@@ -5805,7 +5838,153 @@ Please continue operational follow-ups and payment tracking for this rental.`,
     const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
       const changes = snapshot.docChanges();
 
-      changes.forEach((change) => {
+      // changes.forEach((change) => {
+      //   if (change.type === "added") {
+      //     const data = change.doc.data();
+      //     if (data.status !== "Completed") return;
+
+      //     const docId = change.doc.id;
+      //     if (processedCompleted.has(docId)) return; // Skip duplicates
+      //     processedCompleted.add(docId);
+
+      //     // Process ONLY the new document
+      //     const plateNo = data.plateNo || "UNKNOWN_UNIT";
+      //     const carType = data.carType || "UNKNOWN";
+      //     const carName = data.carName || plateNo;
+      //     const totalRevenue = Number(data.totalPaid) || 0;
+      //     const durationSec = Number(data.totalDurationInSeconds) || 0;
+
+      //     if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime))
+      //       return;
+
+      //     let rentalEnd;
+      //     if (data.endTimestamp?.seconds) {
+      //       rentalEnd = new Date(data.endTimestamp.seconds * 1000);
+      //     } else if (data.endDate && data.endTime) {
+      //       const [year, month, day] = data.endDate.split("-");
+      //       const [hour, minute] = data.endTime.split(":");
+      //       rentalEnd = new Date(
+      //         Number(year),
+      //         Number(month) - 1,
+      //         Number(day),
+      //         Number(hour),
+      //         Number(minute),
+      //       );
+      //     } else {
+      //       return;
+      //     }
+
+      //     // // Update analyticsMap with new data
+      //     // setCompletedBookingsAnalytics((prevMap) => {
+      //     //   const newMap = { ...prevMap };
+      //     //   if (!newMap[plateNo]) {
+      //     //     newMap[plateNo] = {
+      //     //       carName,
+      //     //       carType,
+      //     //       unitImage: data.unitImage || "",
+      //     //     };
+      //     //   }
+
+      //     //   const dayKey = rentalEnd.toISOString().slice(0, 10);
+      //     //   const monthKey = rentalEnd.toISOString().slice(0, 7);
+      //     //   const yearKey = rentalEnd.getFullYear().toString();
+      //     //   const keys = [dayKey, monthKey, yearKey];
+
+      //     //   keys.forEach((key) => {
+      //     //     if (!newMap[plateNo][key]) {
+      //     //       newMap[plateNo][key] = {
+      //     //         revenue: 0,
+      //     //         hours: 0,
+      //     //         timesRented: 0,
+      //     //         bookings: [],
+      //     //       };
+      //     //     }
+      //     //     newMap[plateNo][key].revenue += totalRevenue;
+      //     //     newMap[plateNo][key].hours += durationSec / 3600;
+      //     //     newMap[plateNo][key].timesRented += 1;
+      //     //     newMap[plateNo][key].bookings.push({ id: docId, ...data });
+      //     //   });
+
+      //     //   return newMap;
+      //     // });
+
+      //     // Update analyticsMap with new data
+      //     setCompletedBookingsAnalytics((prevMap) => {
+      //       const newMap = { ...prevMap };
+      //       if (!newMap[plateNo]) {
+      //         newMap[plateNo] = {
+      //           carName,
+      //           carType,
+      //           unitImage: data.unitImage || "",
+      //         };
+      //       }
+
+      //       const dayKey = rentalEnd.toISOString().slice(0, 10);
+      //       const monthKey = rentalEnd.toISOString().slice(0, 7);
+      //       const yearKey = rentalEnd.getFullYear().toString();
+      //       const keys = [dayKey, monthKey, yearKey];
+
+      //       keys.forEach((key) => {
+      //         if (!newMap[plateNo][key]) {
+      //           newMap[plateNo][key] = {
+      //             revenue: 0,
+      //             hours: 0,
+      //             timesRented: 0,
+      //             bookings: [],
+      //           };
+      //         }
+      //         newMap[plateNo][key].revenue += totalRevenue;
+      //         newMap[plateNo][key].hours += durationSec / 3600;
+      //         newMap[plateNo][key].timesRented += 1;
+      //         newMap[plateNo][key].bookings.push({ id: docId, ...data });
+      //       });
+
+      //       // ✅ Rebuild flat bookings array for this plateNo
+      //       const allBookings = [];
+      //       for (const key in newMap[plateNo]) {
+      //         if (["carType", "unitImage", "carName", "bookings"].includes(key))
+      //           continue;
+      //         if (Array.isArray(newMap[plateNo][key]?.bookings)) {
+      //           allBookings.push(...newMap[plateNo][key].bookings);
+      //         }
+      //       }
+
+      //       // Deduplicate by id
+      //       const uniqueMap = new Map();
+      //       allBookings.forEach((booking) => {
+      //         const key =
+      //           booking.id ||
+      //           `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}`;
+      //         uniqueMap.set(key, booking);
+      //       });
+
+      //       newMap[plateNo].bookings = Array.from(uniqueMap.values());
+
+      //       return newMap;
+      //     });
+
+      //     // Add to calendar
+      //     if (data.startTimestamp?.seconds) {
+      //       const start = new Date(data.startTimestamp.seconds * 1000);
+      //       setCalendarEventsSafe((prev) => [
+      //         ...prev,
+      //         {
+      //           title: `Completed: ${carName}`,
+      //           start: start.toISOString(),
+      //           end: rentalEnd.toISOString(),
+      //           fullData: data,
+      //           backgroundColor: statusColorMap["Completed"],
+      //           borderColor: "#00000020",
+      //           textColor: "#fff",
+      //           source: "completed",
+      //         },
+      //       ]);
+      //     }
+      //   }
+      // });
+    
+    
+            changes.forEach((change) => {
         if (change.type === "added") {
           const data = change.doc.data();
           if (data.status !== "Completed") return;
@@ -5840,40 +6019,6 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           } else {
             return;
           }
-
-          // // Update analyticsMap with new data
-          // setCompletedBookingsAnalytics((prevMap) => {
-          //   const newMap = { ...prevMap };
-          //   if (!newMap[plateNo]) {
-          //     newMap[plateNo] = {
-          //       carName,
-          //       carType,
-          //       unitImage: data.unitImage || "",
-          //     };
-          //   }
-
-          //   const dayKey = rentalEnd.toISOString().slice(0, 10);
-          //   const monthKey = rentalEnd.toISOString().slice(0, 7);
-          //   const yearKey = rentalEnd.getFullYear().toString();
-          //   const keys = [dayKey, monthKey, yearKey];
-
-          //   keys.forEach((key) => {
-          //     if (!newMap[plateNo][key]) {
-          //       newMap[plateNo][key] = {
-          //         revenue: 0,
-          //         hours: 0,
-          //         timesRented: 0,
-          //         bookings: [],
-          //       };
-          //     }
-          //     newMap[plateNo][key].revenue += totalRevenue;
-          //     newMap[plateNo][key].hours += durationSec / 3600;
-          //     newMap[plateNo][key].timesRented += 1;
-          //     newMap[plateNo][key].bookings.push({ id: docId, ...data });
-          //   });
-
-          //   return newMap;
-          // });
 
           // Update analyticsMap with new data
           setCompletedBookingsAnalytics((prevMap) => {
@@ -5948,7 +6093,42 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             ]);
           }
         }
+
+        // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
+        if (change.type === "modified") {
+          const data = change.doc.data();
+          if (data.status !== "Completed") return;
+
+          const docId = change.doc.id;
+          const plateNo = data.plateNo || "UNKNOWN_UNIT";
+          const carName = data.carName || plateNo;
+
+          // Only update analytics - no need to add to calendar again
+          setCompletedBookingsAnalytics((prevMap) => {
+            const newMap = { ...prevMap };
+            if (!newMap[plateNo]) return newMap;
+
+            // Find and update the booking in all time keys
+            for (const key in newMap[plateNo]) {
+              if (["carType", "unitImage", "carName", "bookings"].includes(key))
+                continue;
+              
+              if (!newMap[plateNo][key]?.bookings) continue;
+              
+              const bookings = newMap[plateNo][key].bookings;
+              const index = bookings.findIndex((b) => b.id === docId);
+              
+              if (index !== -1) {
+                // Update the existing booking with new data (including paid status)
+                bookings[index] = { ...bookings[index], ...data };
+              }
+            }
+
+            return newMap;
+          });
+        }
       });
+
     });
 
     // LISTEN TO ACTIVE BOOKINGS (incremental only)
@@ -6634,7 +6814,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
     }
   };
 
-  
+
   const deleteImageFromFirestore = async (imageId) => {
     try {
       const docRef = doc(db, "images", imageId);

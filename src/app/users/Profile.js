@@ -3284,6 +3284,22 @@ const Profile = ({ openBooking }) => {
               {userRentalHistory.length > 0 ? (
                 userRentalHistory.map((history, index) => (
                   <div key={index} className="history-item">
+                    <span
+                      className={`history-payment-badge ${
+                        history.paid === true
+                          ? "paid"
+                          : history.balanceDue === 0
+                          ? "pending"
+                          : "unpaid"
+                      }`}
+                    >
+                      {history.paid === true
+                        ? "Paid"
+                        : history.balanceDue === 0
+                        ? "Pending for Marking as Paid"
+                        : "Unpaid"}
+                    </span>
+
                     <button
                       className="history-details-btn"
                       onClick={() => {

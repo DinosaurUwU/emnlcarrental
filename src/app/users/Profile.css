@@ -1608,6 +1608,32 @@ margin-bottom: 6px;
   border-left: 5px solid #28a745;
 }
 
+.history-payment-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  border-radius: 3px;
+  z-index: 10;
+}
+
+.history-payment-badge.paid {
+  background-color: #198754;
+}
+
+.history-payment-badge.pending {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.history-payment-badge.unpaid {
+  background-color: #dc3545;
+}
+
+
 .empty-message {
   text-align: center;
   font-size: 16px;
