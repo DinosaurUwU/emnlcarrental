@@ -334,6 +334,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 }, [unitData, activeBookings, imageUpdateTrigger, imageCache, fetchImageFromFirestore]);
 
   const [calendarViewMode, setCalendarViewMode] = useState("ALL"); // "ALL" or unitId
+
+    const [showCalendarImagesOnly, setShowCalendarImagesOnly] = useState(false); // Toggle for images only
+
   const carUnitOptions = Object.entries(analyticsData).map(
     ([unitId, carData]) => ({
       unitId,
@@ -2650,6 +2653,34 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     animation: { duration: 400 },
   };
 
+  // Custom event content component for calendar images
+const CalendarEventContent = ({ event, fetchedImages }) => {
+  const fullData = event.extendedProps?.fullData || {};
+  const imageId = fullData.imageId || `${fullData.plateNo}_main`;
+  const image = fetchedImages[imageId];
+  
+  if (image?.base64) {
+    return (
+      <div style={{ width: "100%", height: "100%", padding: 0, margin: 0, overflow: "hidden" }}>
+        <img 
+          src={image.base64} 
+          alt={event.title}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+    );
+  }
+  
+  // Fallback to default rendering
+  return (
+    <div>
+      <b>{event.timeText}</b>
+      <i>{event.title}</i>
+    </div>
+  );
+};
+
+
   return (
     <div className="analytics-section">
       <h2 className="analytics-title">Analytics</h2>
@@ -3642,6 +3673,22 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
             </select>
           </div>
 
+<button
+              onClick={() => setShowCalendarImagesOnly(!showCalendarImagesOnly)}
+              style={{
+                background: showCalendarImagesOnly ? "#4caf50" : "#f0f0f0",
+                color: showCalendarImagesOnly ? "#fff" : "#333",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                padding: "8px 12px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              {showCalendarImagesOnly ? "Images Only" : "Show Events"}
+            </button>
+
+
           <div className="calendar-controls">
             <button
               onClick={() => {
@@ -3678,6 +3725,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
             events={filteredCalendarEvents}
+
+            
+
+            eventContent={
+              showCalendarImagesOnly
+                ? (eventInfo) => <CalendarEventContent event={eventInfo.event} fetchedImages={fetchedImages} />
+                : undefined
+            }
+
+
+
             eventClick={(info) => {
               const fullData = info.event.extendedProps?.fullData;
 

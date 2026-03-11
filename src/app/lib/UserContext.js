@@ -6088,7 +6088,6 @@ Please continue operational follow-ups and payment tracking for this rental.`,
               newMap[plateNo] = {
                 carName,
                 carType,
-                unitImage: data.unitImage || "",
               };
             }
 
@@ -6115,7 +6114,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             // ✅ Rebuild flat bookings array for this plateNo
             const allBookings = [];
             for (const key in newMap[plateNo]) {
-              if (["carType", "unitImage", "carName", "bookings"].includes(key))
+              if (["carType", "carName", "bookings"].includes(key))
                 continue;
               if (Array.isArray(newMap[plateNo][key]?.bookings)) {
                 allBookings.push(...newMap[plateNo][key].bookings);
@@ -6176,7 +6175,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             // Find and update the booking in all time keys
             let found = false;
             for (const key in newMap[plateNo]) {
-              if (["carType", "unitImage", "carName", "bookings"].includes(key))
+              if (["carType", "carName", "bookings"].includes(key))
                 continue;
               
               if (!newMap[plateNo][key]?.bookings) continue;

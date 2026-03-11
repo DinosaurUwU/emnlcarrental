@@ -2782,6 +2782,17 @@ body.analytics-no-scroll {
   font-weight: bold;
 }
 
+/* Calendar Images Only Mode */
+.calendar-images-only .fc-event {
+  background: transparent !important;
+  border: none !important;
+}
+
+.calendar-images-only .fc-event-main {
+  padding: 0 !important;
+}
+
+
 @media (max-width: 768px) {
   .fc .fc-toolbar {
     flex-direction: column !important;
