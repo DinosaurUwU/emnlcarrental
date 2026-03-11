@@ -179,7 +179,7 @@ const buildUnitImageMap = (units, cache) => {
 
     (async () => {
       await Promise.all(
-        ids.map((id) => fetchImageFromFirestore(id, false).catch(() => null)),
+        ids.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
       );
     })();
   }, [fetchImageFromFirestore, imageUpdateTrigger]);
@@ -456,7 +456,7 @@ useEffect(() => {
 
   (async () => {
     const results = await Promise.all(
-      unitImageIds.map((id) => fetchImageFromFirestore(id, false).catch(() => null)),
+      unitImageIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
     );
 
     if (cancelled) return;

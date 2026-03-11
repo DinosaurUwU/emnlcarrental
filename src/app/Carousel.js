@@ -161,7 +161,7 @@ function Carousel() {
 
     (async () => {
       await Promise.all(
-        ids.map((id) => fetchImageFromFirestore(id, false).catch(() => null)),
+        ids.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
       );
     })();
   }, [fetchImageFromFirestore, imageUpdateTrigger]);
