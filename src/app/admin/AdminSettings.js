@@ -1107,24 +1107,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
         currentGalleryIndex,
       );
 
-      // if (result.success) {
-      //   const base64 = result.base64;
-
-      //   if (currentImageType === "main") {
-      //     setMainImage({ base64, updatedAt: Date.now() }); // Object
-      //   } else if (
-      //     currentImageType === "gallery" &&
-      //     currentGalleryIndex !== null
-      //   ) {
-      //     const updatedGallery = [...galleryImages];
-      //     updatedGallery[currentGalleryIndex] = {
-      //       base64,
-      //       updatedAt: Date.now(),
-      //     }; // Object
-      //     setGalleryImages(updatedGallery);
-      //   }
-      // }
-
       if (result.success) {
         const base64 = result.base64;
 
@@ -1182,9 +1164,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
               imageId,
               compressed.base64,
             );
-
-            // // Clear cache for this image
-            // await clearImageCache(imageId);
 
             if (!uploadResult.success) {
               setAdminErrorMessage(
@@ -1329,55 +1308,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const currentUnit = isEditing ? editedUnit : selectedUnit;
 
   const [fetchedImages, setFetchedImages] = useState({});
-
-  // useEffect(() => {
-  //   const fetchTableImages = async () => {
-  //     if (!unitData || unitData.length === 0) return;
-
-  //     const imageIds = new Set();
-
-  //     // Add unit images
-  //     unitData.forEach((unit) => {
-  //       if (unit.imageId) imageIds.add(unit.imageId);
-  //       else if (unit.plateNo) imageIds.add(`${unit.plateNo}_main`);
-  //     });
-
-  //     // Add active bookings images
-  //     activeBookings?.forEach((booking) => {
-  //       if (booking.imageId) imageIds.add(booking.imageId);
-  //       else if (booking.plateNo) imageIds.add(`${booking.plateNo}_main`);
-  //     });
-
-  //     const promises = [...imageIds].map(async (id) => {
-  //       try {
-  //         const image = await fetchImageFromFirestore(id);
-  //         if (image) return { [id]: image };
-  //         return {
-  //           [id]: {
-  //             base64: "/assets/images/default.png",
-  //             updatedAt: Date.now(),
-  //           },
-  //         };
-  //       } catch {
-  //         return {
-  //           [id]: {
-  //             base64: "/assets/images/default.png",
-  //             updatedAt: Date.now(),
-  //           },
-  //         };
-  //       }
-  //     });
-
-  //     const results = await Promise.all(promises);
-  //     const merged = results
-  //       .filter(Boolean)
-  //       .reduce((acc, cur) => ({ ...acc, ...cur }), {});
-
-  //     setFetchedImages((prev) => ({ ...prev, ...merged }));
-  //   };
-
-  //   fetchTableImages();
-  // }, [unitData, activeBookings, imageUpdateTrigger]);
 
   useEffect(() => {
     const fetchTableImages = async () => {
