@@ -3812,11 +3812,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
             
 
-            // eventContent={
-            //   showCalendarImagesOnly
-            //     ? (eventInfo) => <CalendarEventContent event={eventInfo.event} fetchedImages={fetchedImages} />
-            //     : undefined
-            // }
 
             eventContent={(eventInfo) => (
               <CalendarEventContent 
@@ -4330,10 +4325,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
@@ -4862,10 +4853,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                       src={selectedCalendarBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedCalendarBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(
                           selectedCalendarBooking.driverLicense,
