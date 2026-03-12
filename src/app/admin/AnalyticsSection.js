@@ -3707,7 +3707,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
       {(subSection === "overview" || subSection === "calendar") && (
         <div
-          // className={`calendar-container ${subSection === "calendar" ? "single-calendar" : ""}`}
           className={`calendar-container ${subSection === "calendar" ? "single-calendar" : ""} ${showCalendarImagesOnly ? "images-only" : ""}`}
         >
           <h3 className="calendar-title">
