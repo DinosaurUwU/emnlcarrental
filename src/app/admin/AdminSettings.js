@@ -624,7 +624,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   useEffect(() => {
     if (showMOPSuccess) {
-      // Auto-hide after 5 seconds
+
       const timer = setTimeout(() => {
         setHideMOPSuccessAnimation(true);
         setTimeout(() => {
@@ -639,7 +639,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   useEffect(() => {
     if (showPOPSuccess) {
-      // Auto-hide after 5 seconds
+
       const timer = setTimeout(() => {
         setHidePOPSuccessAnimation(true);
         setTimeout(() => {
@@ -993,41 +993,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const result = await updateUnitData(selectedUnitId, normalizedUnit);
 
     if (result.success) {
-      //   // Upload main image if changed
-      //   if (editedMainImageFile) {
-      //     const uploadResult = await updateUnitImage(
-      //       selectedUnitId,
-      //       "main",
-      //       editedMainImageFile,
-      //     );
-      //     if (uploadResult.success) {
-      //       setMainImage({ base64: uploadResult.base64, updatedAt: Date.now() }); // Object
-      //     } else {
-      //       setAdminErrorMessage(
-      //         "Failed to upload main image: " + uploadResult.error,
-      //       );
-      //       setShowAdminError(true);
-      //     }
-      //   } else {
-      //     setMainImage(editedMainImage || mainImage); // Already object
-      //   }
-
-      //   // Update gallery images
-      //   const galleryResult = await updateUnitGalleryImages(
-      //     selectedUnitId,
-      //     editedGalleryImages,
-      //     editedGalleryImageFiles,
-      //     galleryImages,
-      //     currentUnit.galleryIds,
-      //   );
-      //   if (galleryResult.success) {
-      //     setGalleryImages(galleryResult.newGalleryImages); // Now objects
-      //   } else {
-      //     setAdminErrorMessage(
-      //       "Failed to update gallery: " + galleryResult.error,
-      //     );
-      //     setShowAdminError(true);
-      //   }
 
       // Upload main image if changed
       if (editedMainImageFile) {
