@@ -5165,13 +5165,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
-                      // onClick={() => {
-                      //   openPhotoSwipePreview(selectedBooking.driverLicense);
-                      // }}
+
                       onClick={() => {
                         openPhotoSwipePreview(
                           [selectedBooking.driverLicense],
