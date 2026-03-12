@@ -4958,24 +4958,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* {isImageModalOpen && modalImage && (
-        <div
-          className="admin-image-modal-overlay"
-          onClick={() => setIsImageModalOpen(false)}
-        >
-          <div
-            className="image-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={modalImage}
-              alt="Driver's License"
-              className="admin-full-image-view"
-              style={{ width: "90vw", height: "90vh", objectFit: "contain" }}
-            />
-          </div>
-        </div>
-      )} */}
+
       <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
