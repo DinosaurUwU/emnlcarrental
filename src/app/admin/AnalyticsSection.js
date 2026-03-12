@@ -5208,15 +5208,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* {isImageModalOpen && modalImage && (
-        <div className="admin-image-modal-overlay" onClick={closeModal}>
-          <img
-            src={modalImage}
-            alt="Full License"
-            className="admin-full-image-view"
-          />
-        </div>
-      )} */}
       <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
