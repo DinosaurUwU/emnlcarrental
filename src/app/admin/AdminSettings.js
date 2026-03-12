@@ -3942,63 +3942,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                     </div>
                   </div>
 
-                  {/* <div className="features-row">
-                    <div className="description-row">
-                      <label>Features</label>
-                      {isEditing ? (
-                        <textarea
-                          value={
-                            currentUnit.details?.specifications?.Features || ""
-                          }
-                          onChange={(e) =>
-                            setEditedUnit({
-                              ...editedUnit,
-                              details: {
-                                ...editedUnit.details,
-                                specifications: {
-                                  ...editedUnit.details.specifications,
-                                  Features: e.target.value,
-                                },
-                              },
-                            })
-                          }
-                          className="features-input"
-                        />
-                      ) : (
-                        <div className="description-text">
-                          {currentUnit.details?.specifications?.Features}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="description-row">
-                      <label>Trunk</label>
-                      {isEditing ? (
-                        <textarea
-                          value={
-                            currentUnit.details?.specifications?.Trunk || ""
-                          }
-                          onChange={(e) =>
-                            setEditedUnit({
-                              ...editedUnit,
-                              details: {
-                                ...editedUnit.details,
-                                specifications: {
-                                  ...editedUnit.details.specifications,
-                                  Trunk: e.target.value,
-                                },
-                              },
-                            })
-                          }
-                          className="features-input"
-                        />
-                      ) : (
-                        <div className="description-text">
-                          {currentUnit.details?.specifications?.Trunk}
-                        </div>
-                      )}
-                    </div>
-                  </div> */}
+                  
                 </div>
               </div>
 
