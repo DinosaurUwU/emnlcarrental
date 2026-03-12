@@ -1448,28 +1448,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
     fetchImageFromFirestore,
   ]);
 
-  // useEffect(() => {
-  //   if (selectedUnitId && currentUnit?.galleryIds?.length > 0 && !isEditing) {
-  //     setGalleryImagesLoading(true);
-  //     const fetchPromises = currentUnit.galleryIds.map((id) =>
-  //       fetchImageFromFirestore(id).catch(() => null),
-  //     );
-  //     Promise.all(fetchPromises)
-  //       .then((results) => {
-  //         // Filter out nulls (broken images) so they're not shown as placeholders
-  //         const filteredResults = results.filter((r) => r !== null);
-  //         setGalleryImages(filteredResults);
-  //         setGalleryImagesLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         setGalleryImagesLoading(false);
-  //       });
-  //   } else if (!isEditing) {
-  //     setGalleryImages([]);
-  //     setGalleryImagesLoading(false);
-  //   }
-  // }, [selectedUnitId, currentUnit?.galleryIds, isEditing, imageUpdateTrigger]);
-
+  
   const handleAddMOP = () => {
     setIsAddingMOP(true);
     setOldMopType("");
@@ -2027,11 +2006,11 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         Type: "",
                       },
                     },
-                    hidden: false, // Add hidden default false
-                    id: "", // Will be set to plateNo
+                    hidden: false,
+                    id: "",
                     imageId: "", // Will be set to `${plateNo}_main`
-                    reservation: 0, // Add reservation default 0
-                    status: "Vacant", // Add status default 'Vacant'
+                    reservation: 0,
+                    status: "Vacant",
                   });
                   setEditedMainImage(null);
                   setEditedGalleryImages([]);
