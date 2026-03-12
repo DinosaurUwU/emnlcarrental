@@ -2810,7 +2810,6 @@ body.analytics-no-scroll {
   border-radius: 5px;
 }
 
-
 /* Calendar Images Only - Fixed height per day cell */
 .fc-daygrid-event-harness {
   max-height: 60px !important;
@@ -2832,7 +2831,6 @@ body.analytics-no-scroll {
   object-fit: cover !important;
 }
 
-
 .calendar-container.images-only .fc-daygrid-day-events {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2842,25 +2840,19 @@ body.analytics-no-scroll {
 }
 
 .calendar-container.images-only
-  .fc-daygrid-day-events:not(
-    :has(> .fc-daygrid-event-harness:nth-child(2))
-  ) {
+  .fc-daygrid-day-events:not(:has(> .fc-daygrid-event-harness:nth-child(2))) {
   grid-template-columns: 1fr;
 }
 
 .calendar-container.images-only
-  .fc-daygrid-day-events:has(
-    > .fc-daygrid-event-harness:nth-child(2)
-  ):not(
+  .fc-daygrid-day-events:has(> .fc-daygrid-event-harness:nth-child(2)):not(
     :has(> .fc-daygrid-event-harness:nth-child(3))
   ) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .calendar-container.images-only
-  .fc-daygrid-day-events:has(
-    > .fc-daygrid-event-harness:nth-child(3)
-  ):not(
+  .fc-daygrid-day-events:has(> .fc-daygrid-event-harness:nth-child(3)):not(
     :has(> .fc-daygrid-event-harness:nth-child(4))
   ) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2894,8 +2886,6 @@ body.analytics-no-scroll {
   display: none !important;
   content: none !important;
 }
-
-
 
 @media (max-width: 768px) {
   .fc .fc-toolbar {

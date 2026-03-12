@@ -624,7 +624,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   useEffect(() => {
     if (showMOPSuccess) {
-
       const timer = setTimeout(() => {
         setHideMOPSuccessAnimation(true);
         setTimeout(() => {
@@ -639,7 +638,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   useEffect(() => {
     if (showPOPSuccess) {
-
       const timer = setTimeout(() => {
         setHidePOPSuccessAnimation(true);
         setTimeout(() => {
@@ -993,7 +991,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     const result = await updateUnitData(selectedUnitId, normalizedUnit);
 
     if (result.success) {
-
       // Upload main image if changed
       if (editedMainImageFile) {
         const uploadResult = await updateUnitImage(
@@ -1361,7 +1358,13 @@ const AdminSettings = ({ subSection = "overview" }) => {
     };
 
     fetchTableImages();
-  }, [unitData, activeBookings, imageUpdateTrigger, imageCache, fetchImageFromFirestore]);
+  }, [
+    unitData,
+    activeBookings,
+    imageUpdateTrigger,
+    imageCache,
+    fetchImageFromFirestore,
+  ]);
 
   // Fetch main image when unit is selected
   useEffect(() => {
@@ -1448,7 +1451,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
     fetchImageFromFirestore,
   ]);
 
-  
   const handleAddMOP = () => {
     setIsAddingMOP(true);
     setOldMopType("");
@@ -3941,8 +3943,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       )}
                     </div>
                   </div>
-
-                  
                 </div>
               </div>
 
@@ -4958,7 +4958,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-
       <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
@@ -5165,7 +5164,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-
                       onClick={() => {
                         openPhotoSwipePreview(
                           [selectedBooking.driverLicense],
@@ -5616,104 +5614,3 @@ const AdminSettings = ({ subSection = "overview" }) => {
 // export default AdminSettings;
 
 export default React.memo(AdminSettings);
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-// const mopData = useMemo(() => {
-//   const counts = {};
-//   const balances = {};
-//   const recents = {};
-//   Object.values(revenueGrid).forEach((monthRows) => {
-//     monthRows.forEach((row) => {
-//       const mop = row[2];
-//       const amountStr = row[1];
-//       const dateStr = row[4];
-//       if (mop && amountStr) {
-//         counts[mop] = (counts[mop] || 0) + 1;
-//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-//         balances[mop] = (balances[mop] || 0) + amount;
-//         const date = new Date(dateStr);
-//         if (date && (!recents[mop] || date > recents[mop])) {
-//           recents[mop] = date;
-//         }
-//       }
-//     });
-//   });
-//   return { counts, balances, recents };
-// }, [revenueGrid]);
-
-// const popData = useMemo(() => {
-//   const counts = {};
-//   const balances = {};
-//   const recents = {};
-//   Object.values(revenueGrid).forEach((monthRows) => {
-//     monthRows.forEach((row) => {
-//       const pop = row[3];
-//       const amountStr = row[1];
-//       const dateStr = row[4];
-//       if (pop && amountStr) {
-//         counts[pop] = (counts[pop] || 0) + 1;
-//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-//         balances[pop] = (balances[pop] || 0) + amount;
-//         const date = new Date(dateStr);
-//         if (date && (!recents[pop] || date > recents[pop])) {
-//           recents[pop] = date;
-//         }
-//       }
-//     });
-//   });
-//   return { counts, balances, recents };
-// }, [revenueGrid]);
-
-// const poeData = useMemo(() => {
-//   const counts = {};
-//   const balances = {};
-//   const recents = {};
-//   Object.values(expenseGrid).forEach((monthRows) => {
-//     monthRows.forEach((row) => {
-//       const poe = row[3];
-//       const amountStr = row[1];
-//       const dateStr = row[4];
-//       if (poe && amountStr) {
-//         counts[poe] = (counts[poe] || 0) + 1;
-//         const amount = parseFloat(amountStr.replace(/[^\d.-]/g, ""));
-//         balances[poe] = (balances[poe] || 0) + amount;
-//         const date = new Date(dateStr);
-//         if (date && (!recents[poe] || date > recents[poe])) {
-//           recents[poe] = date;
-//         }
-//       }
-//     });
-//   });
-//   return { counts, balances, recents };
-// }, [expenseGrid]);
-
-//   // Filter units by search term ONLY, ignore hidden
-// const filteredUnitData =
-//   allUnitData?.filter((car) => {
-//     if (!searchTerm) return true;
-//     const search = searchTerm.toLowerCase();
-//     const analytics = completedBookingsAnalytics[car.plateNo];
-//     const bookingsCount = analytics?.bookings?.length || 0;
-//     return (
-//       car.name.toLowerCase().includes(search) ||
-//       car.plateNo.toLowerCase().includes(search) ||
-//       String(car.owner || "")
-//         .toLowerCase()
-//         .includes(search) ||
-//       car.carType.toLowerCase().includes(search) ||
-//       String(car.details?.specifications?.Transmission || "")
-//         .toLowerCase()
-//         .includes(search) ||
-//       String(car.details?.specifications?.Fuel || "")
-//         .toLowerCase()
-//         .includes(search) ||
-//       String(car.details?.specifications?.Capacity || "")
-//         .toLowerCase()
-//         .includes(search) ||
-//       String(car.details?.specifications?.Color || "")
-//         .toLowerCase()
-//         .includes(search) ||
-//       bookingsCount.toString().includes(search)
-//     );
-//   }) || [];
