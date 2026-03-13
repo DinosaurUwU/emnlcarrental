@@ -60,7 +60,6 @@ const FinancialReports = () => {
   const exportDropdownRef = useRef(null);
   const manualLoadRef = useRef(null);
 
-
   const [showMonthYearDropdown, setShowMonthYearDropdown] = useState(false);
   const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
@@ -285,7 +284,7 @@ const FinancialReports = () => {
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
-    useEffect(() => {
+  useEffect(() => {
     if (!licenseGalleryRef.current) return;
 
     const lightbox = new PhotoSwipeLightbox({
@@ -443,10 +442,13 @@ const FinancialReports = () => {
     };
   }, [showManualLoadConfirm]);
 
-    // Close export dropdown when clicking outside
+  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (exportDropdownRef.current && !exportDropdownRef.current.contains(e.target)) {
+      if (
+        exportDropdownRef.current &&
+        !exportDropdownRef.current.contains(e.target)
+      ) {
         setShowExportDropdown(false);
       }
     };
@@ -460,8 +462,7 @@ const FinancialReports = () => {
     };
   }, [showExportDropdown]);
 
-
-    // Close manual load dropdown when clicking outside
+  // Close manual load dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (manualLoadRef.current && !manualLoadRef.current.contains(e.target)) {
@@ -477,7 +478,6 @@ const FinancialReports = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showManualLoadMenu]);
-
 
   useEffect(() => {
     if (serverChangeCounter > 0 && !justSaved.current) {
@@ -1149,10 +1149,6 @@ const FinancialReports = () => {
     return result;
   };
 
-
-
-
-
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
 
@@ -1180,7 +1176,7 @@ const FinancialReports = () => {
       TITLE_BG: "28A745",
       UNIT_HDR: "A8E6CF",
       AMOUNT_HDR: "B3E5FC",
-            MOP_HDR: "D4C4E8",      // Darker lavender for header
+      MOP_HDR: "D4C4E8", // Darker lavender for header
 
       POP_HDR: "F8BBD0",
       DATE_HDR: "FFE0B2",
@@ -1237,7 +1233,10 @@ const FinancialReports = () => {
       } else if (data[monthIndex] && typeof data[monthIndex] === "object") {
         const rowKeys = Object.keys(data[monthIndex])
           .filter((k) => k.startsWith("Row_"))
-          .sort((a, b) => parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")));
+          .sort(
+            (a, b) =>
+              parseInt(a.replace("Row_", "")) - parseInt(b.replace("Row_", "")),
+          );
         monthRows = rowKeys.map((k) => data[monthIndex][k]);
       }
       return monthRows;
@@ -1257,7 +1256,7 @@ const FinancialReports = () => {
         for (let col = 0; col < 3; col++) {
           const m = row * 3 + col;
           if (m >= 12) break;
-          
+
           const monthRows = getMonthRows(gridData, m);
           // Use total rows count (not just filled)
           maxHeight = Math.max(maxHeight, monthRows.length + 3); // +3 for title, header, total
@@ -1269,13 +1268,12 @@ const FinancialReports = () => {
         blockHeights.push(maxHeight);
       }
 
-
       for (let m = 0; m < 12; m++) {
         const month = monthNames[m];
         const monthRows = getMonthRows(gridData, m);
 
         const startCol = (m % MONTHS_PER_ROW) * BLOCK_COLS;
-        
+
         // Calculate startRow dynamically based on previous block heights
         let startRow = 0;
         const monthRow = Math.floor(m / MONTHS_PER_ROW);
@@ -1291,7 +1289,7 @@ const FinancialReports = () => {
 
         for (let col = startCol; col <= startCol + 4; col++) {
           ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
-                        v: col === startCol ? `${month} ${exportYear}` : "",
+            v: col === startCol ? `${month} ${exportYear}` : "",
 
             t: "s",
             s: {
@@ -1485,12 +1483,6 @@ const FinancialReports = () => {
     XLSX.writeFile(wb, fileName);
   };
 
-
-  
-
-
-
-
   const handleResetGrid = () => {
     // Step 1: Clear ONLY the selected month from localStorage
     const currentLocalStorage =
@@ -1541,14 +1533,16 @@ const FinancialReports = () => {
 
   // Autofill payments when context changes
   useEffect(() => {
-
-    console.log("📊 USEFFECT RUNNING - cancelTrigger:", cancelTrigger, "paymentEntries keys:", Object.keys(paymentEntries || {}));
-
+    console.log(
+      "📊 USEFFECT RUNNING - cancelTrigger:",
+      cancelTrigger,
+      "paymentEntries keys:",
+      Object.keys(paymentEntries || {}),
+    );
 
     // CASE 1: Handle booking cancellation cleanup
     if (cancelTrigger) {
-      
-console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
+      console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
       console.log("🔴 CANCEL TRIGGER TYPE:", typeof cancelTrigger);
 
       setRevenueGrid((prev) => {
@@ -1607,7 +1601,6 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
 
     // Skip if no payment entries
     if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
-
 
     console.log("🟢 AUTOFILL TRIGGERED with paymentEntries:", paymentEntries);
 
@@ -2225,7 +2218,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
           </div>
         </div>
       )} */}
-            <div ref={licenseGalleryRef} style={{ display: "none" }}>
+      <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
             href={photoSwipePreviewItem.src}
@@ -3439,7 +3432,8 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
               <div className="g1-item-ml">
                 <div
                   className="manual-load-dropdown"
-                  style={{ position: "relative" }} ref={manualLoadRef}
+                  style={{ position: "relative" }}
+                  ref={manualLoadRef}
                 >
                   <button
                     onClick={() => setShowManualLoadMenu(!showManualLoadMenu)}
@@ -3537,9 +3531,13 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
               </div>
 
               {/* Column 2: Export Button */}
-              <div className="group-right export-block" style={{ position: "relative" }} ref={exportDropdownRef}>
-                <button 
-                  className="export-btn" 
+              <div
+                className="group-right export-block"
+                style={{ position: "relative" }}
+                ref={exportDropdownRef}
+              >
+                <button
+                  className="export-btn"
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
                 >
                   <span
@@ -3554,7 +3552,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                   </span>
                 </button>
                 {showExportDropdown && (
-                  <div 
+                  <div
                     className="export-dropdown"
                     style={{
                       position: "absolute",
@@ -3567,7 +3565,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                       padding: "15px",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                       zIndex: 1000,
-                      minWidth: "200px"
+                      minWidth: "200px",
                     }}
                   >
                     <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
@@ -3581,7 +3579,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                         padding: "8px",
                         borderRadius: "4px",
                         border: "1px solid #ccc",
-                        marginBottom: "10px"
+                        marginBottom: "10px",
                       }}
                     >
                       {yearOptions.map((year) => (
@@ -3603,7 +3601,7 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                         border: "none",
                         borderRadius: "4px",
                         cursor: "pointer",
-                        fontWeight: "bold"
+                        fontWeight: "bold",
                       }}
                     >
                       Confirm Export
@@ -3626,11 +3624,8 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
                   </span>
                 </button>
               </div>
-
             </div>
           </div>
-
-
 
           {/* Spreadsheet Grid */}
           <div
@@ -4721,633 +4716,3 @@ console.log("🔴 CANCEL TRIGGER RECEIVED:", cancelTrigger);
 export default FinancialReports;
 
 // export default React.memo(FinancialReports);
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-  // const handleExport = () => {
-  //   const wb = XLSX.utils.book_new();
-
-  //   const fileName = `EMNL Financial Report ${currentYear}.xlsx`;
-
-  //   const formatExportDate = (val) => {
-  //     if (!val) return "";
-  //     const d = new Date(val);
-  //     if (isNaN(d)) return val;
-
-  //     let mm = String(d.getMonth() + 1).padStart(2, "0");
-  //     let dd = String(d.getDate()).padStart(2, "0");
-  //     let yyyy = d.getFullYear();
-
-  //     let hr = d.getHours();
-  //     let min = String(d.getMinutes()).padStart(2, "0");
-  //     let ampm = hr >= 12 ? "PM" : "AM";
-  //     hr = hr % 12 || 12;
-
-  //     return `${mm}/${dd}/${yyyy} | ${hr}:${min} ${ampm}`;
-  //   };
-
-  //   // Colors for REVENUE sheet
-  //   const REVENUE_COLORS = {
-  //     TITLE_BG: "28A745",
-  //     UNIT_HDR: "A8E6CF",
-  //     AMOUNT_HDR: "B3E5FC",
-  //     MOP_HDR: "B3E5FC",
-  //     POP_HDR: "F8BBD0",
-  //     DATE_HDR: "FFE0B2",
-
-  //     UNIT_ROW: "DFF7EE",
-  //     AMOUNT_ROW: "E3F6FE",
-  //     MOP_ROW: "EEE9F7",
-  //     POP_ROW: "FDE6EE",
-  //     DATE_ROW: "FFF3E0",
-  //   };
-
-  //   // Colors for EXPENSE sheet
-  //   const EXPENSE_COLORS = {
-  //     ...REVENUE_COLORS,
-  //     TITLE_BG: "DC3545",
-  //   };
-
-  //   const monthNames = [
-  //     "JANUARY",
-  //     "FEBRUARY",
-  //     "MARCH",
-  //     "APRIL",
-  //     "MAY",
-  //     "JUNE",
-  //     "JULY",
-  //     "AUGUST",
-  //     "SEPTEMBER",
-  //     "OCTOBER",
-  //     "NOVEMBER",
-  //     "DECEMBER",
-  //   ];
-
-  //       const COLUMNS_PER_BLOCK = 5;
-
-  //   const GAP_COLS = 2;
-  //   const BLOCK_COLS = COLUMNS_PER_BLOCK + GAP_COLS;
-  //   const MONTHS_PER_ROW = 3;
-  //       const BLOCK_ROWS = 11; // Increased to accommodate TOTAL row
-
-
-  //   const borderFull = {
-  //     top: { style: "thin", color: { rgb: "000000" } },
-  //     bottom: { style: "thin", color: { rgb: "000000" } },
-  //     left: { style: "thin", color: { rgb: "000000" } },
-  //     right: { style: "thin", color: { rgb: "000000" } },
-  //   };
-
-  //   const leftBorder = { left: { style: "thin", color: { rgb: "000000" } } };
-  //   const rightBorder = { right: { style: "thin", color: { rgb: "000000" } } };
-  //   const bottomBorder = {
-  //     bottom: { style: "thin", color: { rgb: "000000" } },
-  //   };
-
-  //   // REUSABLE SHEET GENERATOR
-  //   function generateSheet(gridData, sheetName, COLORS, isExpense = false) {
-  //     const ws = {};
-  //     ws["!merges"] = [];
-
-  //     let maxRowUsed = 0;
-
-  //     for (let m = 0; m < 12; m++) {
-  //       const month = monthNames[m];
-  //       // const monthRows = Array.isArray(gridData[m]) ? gridData[m] : [];
-
-  //       // Handle both array format and object with Row_X keys
-  //       let monthRows = [];
-  //       if (Array.isArray(gridData[m])) {
-  //         monthRows = gridData[m];
-  //       } else if (gridData[m] && typeof gridData[m] === "object") {
-  //         // Convert object with Row_X keys to array
-  //         const rowKeys = Object.keys(gridData[m])
-  //           .filter((k) => k.startsWith("Row_"))
-  //           .sort(
-  //             (a, b) =>
-  //               parseInt(a.replace("Row_", "")) -
-  //               parseInt(b.replace("Row_", "")),
-  //           );
-  //         monthRows = rowKeys.map((k) => gridData[m][k]);
-  //       }
-
-  //       const startCol = (m % MONTHS_PER_ROW) * BLOCK_COLS;
-  //       const startRow = Math.floor(m / MONTHS_PER_ROW) * BLOCK_ROWS;
-
-  //       // MONTH TITLE
-  //               ws["!merges"].push({
-  //         s: { r: startRow, c: startCol },
-  //         e: { r: startRow, c: startCol + 4 },
-  //       });
-
-
-  //               for (let col = startCol; col <= startCol + 4; col++) {
-
-  //         ws[XLSX.utils.encode_cell({ r: startRow, c: col })] = {
-  //           v: col === startCol ? `${month} ${currentYear}` : "",
-  //           t: "s",
-  //           s: {
-  //             fill: { fgColor: { rgb: COLORS.TITLE_BG } },
-  //             font: {
-  //               name: "Arial Black",
-  //               bold: true,
-  //               sz: 14,
-  //               color: { rgb: "FFFFFFFF" },
-  //             },
-  //             alignment: { horizontal: "center", vertical: "center" },
-  //             border: borderFull,
-  //           },
-  //         };
-  //       }
-
-  //       // HEADERS
-  //               const headers = isExpense
-  //         ? ["UNIT", "AMOUNT", "MOP", "POE", "DATE"]
-  //         : ["UNIT", "AMOUNT", "MOP", "POP", "DATE"];
-
-  //       const headerBGs = [
-  //         COLORS.UNIT_HDR,
-  //         COLORS.AMOUNT_HDR,
-  //         COLORS.MOP_HDR,
-  //         COLORS.POP_HDR,
-  //         COLORS.DATE_HDR,
-  //       ];
-
-
-  //       for (let i = 0; i < 5; i++) {
-  //         ws[XLSX.utils.encode_cell({ r: startRow + 1, c: startCol + i })] = {
-  //           v: headers[i],
-  //           t: "s",
-  //           s: {
-  //             fill: { fgColor: { rgb: headerBGs[i] } },
-  //             font: { name: "Arial", bold: true, sz: 11 },
-  //             alignment: { horizontal: "center" },
-  //             border: borderFull,
-  //           },
-  //         };
-  //       }
-
-  //       // Calculate month total
-  //       let monthTotal = 0;
-  //       for (let r = 0; r < monthRows.length; r++) {
-  //         const raw = monthRows[r];
-  //         if (raw && raw[1]) {
-  //           const cleaned = Number(raw[1]?.toString().replace(/[₱,]/g, ""));
-  //           if (!isNaN(cleaned)) {
-  //             monthTotal += cleaned;
-  //           }
-  //         }
-  //       }
-
-
-  //       const rowsToShow = Math.max(monthRows.length, 5);
-
-  //       for (let r = 0; r < rowsToShow; r++) {
-  //         const raw = monthRows[r] || ["", "", "", "", ""];
-
-  //         const formattedRow = [
-  //           raw[0] ?? "",
-  //           raw[1] ?? "",
-  //           raw[2] ?? "",
-  //           raw[3] ?? "",
-  //           formatExportDate(raw[4]),
-  //         ];
-
-  //         const isColored = r % 2 === 0;
-  //         const rowBGs = isColored
-  //           ? [
-  //               COLORS.UNIT_ROW,
-  //               COLORS.AMOUNT_ROW,
-  //               COLORS.MOP_ROW,
-  //               COLORS.POP_ROW,
-  //               COLORS.DATE_ROW,
-  //             ]
-  //           : [null, null, null, null, null];
-
-  //         for (let c = 0; c < 5; c++) {
-  //           const rr = startRow + 2 + r;
-  //           const cc = startCol + c;
-
-  //           const cellStyle = {
-  //             font: { name: "Calibri", bold: true, sz: 11 },
-  //             alignment: { horizontal: "center", vertical: "center" },
-  //             border: {
-  //               ...(c === 0 ? leftBorder : {}),
-  //               ...rightBorder,
-  //             },
-  //             ...(rowBGs[c] ? { fill: { fgColor: { rgb: rowBGs[c] } } } : {}),
-  //           };
-
-  //           const ref = XLSX.utils.encode_cell({ r: rr, c: cc });
-
-  //           // AMOUNT column (#1)
-  //           if (c === 1) {
-  //             const cleaned = Number(raw[1]?.toString().replace(/[₱,]/g, ""));
-  //             if (!raw[1]) {
-  //               ws[ref] = { v: "", t: "s", s: cellStyle };
-  //             } else {
-  //               ws[ref] = {
-  //                 v: cleaned,
-  //                 t: "n",
-  //                 z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
-  //                 s: {
-  //                   ...cellStyle,
-  //                   alignment: { horizontal: "right", vertical: "center" },
-  //                 },
-  //               };
-  //             }
-  //           } else {
-  //             ws[ref] = { v: formattedRow[c], t: "s", s: cellStyle };
-  //           }
-
-  //           maxRowUsed = Math.max(maxRowUsed, rr);
-  //         }
-  //       }
-
-  //       // Add TOTAL row at the bottom
-  //       const totalRow = startRow + 2 + rowsToShow;
-  //       const totalRowStyle = {
-  //         font: { name: "Calibri", bold: true, sz: 12 },
-  //         alignment: { horizontal: "center", vertical: "center" },
-  //         border: borderFull,
-  //         fill: { fgColor: { rgb: "FFD700" } }, // Gold background
-  //       };
-
-  //       // TOTAL label in first column
-  //       ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol })] = {
-  //         v: "TOTAL",
-  //         t: "s",
-  //         s: totalRowStyle,
-  //       };
-
-  //       // Total amount in second column
-  //       ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + 1 })] = {
-  //         v: monthTotal,
-  //         t: "n",
-  //         z: '"₱"* #,##0.00;[Red]"₱"* (#,##0.00)',
-  //         s: {
-  //           ...totalRowStyle,
-  //           alignment: { horizontal: "right", vertical: "center" },
-  //         },
-  //       };
-
-  //       // Empty cells for remaining columns
-  //       for (let c = 2; c < 5; c++) {
-  //         ws[XLSX.utils.encode_cell({ r: totalRow, c: startCol + c })] = {
-  //           v: "",
-  //           t: "s",
-  //           s: totalRowStyle,
-  //         };
-  //       }
-
-  //       maxRowUsed = Math.max(maxRowUsed, totalRow);
-
-  //     }
-
-
-
-  //     // Column widths
-  //     const totalCols = MONTHS_PER_ROW * BLOCK_COLS;
-  //     ws["!cols"] = Array(totalCols).fill({ wch: 2 });
-
-  //     for (let b = 0; b < MONTHS_PER_ROW; b++) {
-  //       const base = b * BLOCK_COLS;
-  //       ws["!cols"][base + 0] = { wch: 20 };
-  //       ws["!cols"][base + 1] = { wch: 18 };
-  //       ws["!cols"][base + 2] = { wch: 14 };
-  //       ws["!cols"][base + 3] = { wch: 20 };
-  //       ws["!cols"][base + 4] = { wch: 22 };
-  //     }
-
-
-  //     ws["!ref"] = XLSX.utils.encode_range({
-  //       s: { r: 0, c: 0 },
-  //       e: { r: maxRowUsed + 2, c: totalCols - 1 },
-  //     });
-
-  //     XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  //   }
-
-  //   // CREATE BOTH SHEETS - pass the current year's data
-  //   generateSheet(
-  //     revenueGrid[currentYear] || {},
-  //     `REVENUE ${currentYear}`,
-  //     REVENUE_COLORS,
-  //     false,
-  //   );
-  //   generateSheet(
-  //     expenseGrid[currentYear] || {},
-  //     `EXPENSE ${currentYear}`,
-  //     EXPENSE_COLORS,
-  //     true,
-  //   );
-
-  //   XLSX.writeFile(wb, fileName);
-  // };
-
-
-
-// const saveAllPendingToFirestore = async () => {
-//   setSavingStatus(true);
-//   const pendingKeys = [];
-//   const savedYears = new Set(); // Track which years were saved
-//   const savedTabs = new Set(); // Track which tabs were saved
-
-//   for (let i = 0; i < localStorage.length; i++) {
-//     const key = localStorage.key(i);
-//     if (key.startsWith(LOCAL_STORAGE_KEY)) {
-//       pendingKeys.push(key);
-
-//       // Extract tab and year from key
-//       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-//       if (parts.length >= 2) {
-//         savedTabs.add(parts[0]);
-//         savedYears.add(parseInt(parts[1]));
-//       }
-//     }
-//   }
-
-//   console.log(
-//     `📤 Found ${pendingKeys.length} pending items to save to Database`,
-//   );
-//   console.log(`📋 Tabs to refresh: ${[...savedTabs].join(", ")}`);
-//   console.log(`📅 Years to refresh: ${[...savedYears].join(", ")}`);
-
-//   for (const key of pendingKeys) {
-//     try {
-//       const data = JSON.parse(localStorage.getItem(key));
-
-//       // SKIP if no actual data
-//       if (!hasActualData(data)) {
-//         console.log(`⏭️ Skipping ${key} - no data`);
-//         const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-//         clearLocalStorage(parts[0], parseInt(parts[1]));
-//         continue;
-//       }
-
-//       const parts = key.replace(LOCAL_STORAGE_KEY + "_", "").split("_");
-//       const tab = parts[0];
-//       const year = parseInt(parts[1]);
-
-//       console.log(`📤 Saving ${tab}/${year} to Database...`);
-//       await saveFinancialReport(tab, data, year);
-//       clearLocalStorage(tab, year);
-//     } catch (error) {
-//       console.error(`❌ Error saving ${key} to Database:`, error);
-//     }
-//   }
-
-//   // Reload ALL saved tabs and years (not just activeTab/currentYear)
-//   console.log("🔄 Reloading all saved data from Database...");
-
-//   // Reload current active tab/year first
-//   const currentResult = await loadFinancialReport(activeTab, currentYear);
-//   const currentFreshData = currentResult.gridData || createBlankGrid();
-
-//   if (activeTab === "revenue") {
-//     setRevenueGrid((prev) => ({
-//       ...prev,
-//       [currentYear]: currentFreshData,
-//     }));
-//   } else {
-//     setExpenseGrid((prev) => ({
-//       ...prev,
-//       [currentYear]: currentFreshData,
-//     }));
-//   }
-//   setGridData(currentFreshData);
-//   lastSavedGridRef.current = currentFreshData;
-
-//   // Reload all other saved years and tabs
-//   for (const year of savedYears) {
-//     if (year === currentYear) continue; // Already reloaded
-
-//     if (savedTabs.has("revenue")) {
-//       const revenueResult = await loadFinancialReport("revenue", year);
-//       setRevenueGrid((prev) => ({
-//         ...prev,
-//         [year]: revenueResult.gridData || {},
-//       }));
-//     }
-
-//     if (savedTabs.has("expense")) {
-//       const expenseResult = await loadFinancialReport("expense", year);
-//       setExpenseGrid((prev) => ({
-//         ...prev,
-//         [year]: expenseResult.gridData || {},
-//       }));
-//     }
-//   }
-
-//   setLastSavedAt(new Date());
-//   setIsSynced(true);
-//   setHasServerChange(false);
-//   setSavingStatus(false);
-
-//   console.log("✅ All data saved and reloaded from Database!");
-// };
-
-//   // Autofill payments when context changes
-//   useEffect(() => {
-//     // CASE 1: Handle booking cancellation cleanup
-//     // if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
-//     // Wait for grid data to be loaded before processing autofill
-// if (!paymentEntries || Object.keys(paymentEntries).length === 0) return;
-// if (isTabLoading) return; // Don't process while data is loading
-// if (isHydratingRef.current) return; // Don't process during initial hydration
-
-//     if (cancelTrigger) {
-//       try {
-//         const deletedBookingId = String(cancelTrigger);
-
-//         // const newGrid =
-//         //   structuredClone?.(revenueGrid) ||
-//         //   JSON.parse(JSON.stringify(revenueGrid));
-
-//         const currentYearData = revenueGrid[currentYear] || {};
-//         const newGrid =
-//           structuredClone?.(currentYearData) ||
-//           JSON.parse(JSON.stringify(currentYearData));
-
-//         // Debug: show all bookingIds before deletion
-//         const beforeIds = [];
-//         Object.keys(newGrid).forEach((mIndex) => {
-//           newGrid[mIndex].forEach((row) => {
-//             if (row?._isAutoFill) beforeIds.push(row._bookingId);
-//           });
-//         });
-
-//         // Remove only rows matching that bookingId
-//         Object.keys(newGrid).forEach((mIndex) => {
-//           const beforeCount = newGrid[mIndex].length;
-
-//           newGrid[mIndex] = newGrid[mIndex].filter(
-//             (row) => !(row?._isAutoFill && row._bookingId === deletedBookingId),
-//           );
-
-//           const afterCount = newGrid[mIndex].length;
-//           const removedCount = beforeCount - afterCount;
-
-//           if (removedCount > 0)
-//             // keep structure
-//             while (newGrid[mIndex].length < 5) {
-//               newGrid[mIndex].push(Array(5).fill(""));
-//             }
-//         });
-
-//         // Debug remaining
-//         const remainingIds = [];
-//         Object.keys(newGrid).forEach((mIndex) => {
-//           newGrid[mIndex].forEach((row) => {
-//             if (row?._isAutoFill) remainingIds.push(row._bookingId);
-//           });
-//         });
-
-//         // setRevenueGrid(newGrid);
-//         // if (activeTab === "revenue") {
-//         //   setGridData(newGrid);
-//         // }
-
-//         // Update ONLY the current year in revenueGrid
-//         setRevenueGrid((prev) => ({
-//           ...prev,
-//           [currentYear]: newGrid,
-//         }));
-//         if (activeTab === "revenue") {
-//           setGridData(newGrid);
-//         }
-//       } catch (err) {
-//         console.error("❌ Error in cancelTrigger handling:", err);
-//       }
-//       return; // Do not rebuild below
-//     }
-
-//     // CASE 2: Handle normal rebuild from autofill trigger
-//     if (!autoFillTrigger || !paymentEntries) return;
-
-//     // try {
-//     //   const newGrid =
-//     //     structuredClone?.(revenueGrid) ||
-//     //     JSON.parse(JSON.stringify(revenueGrid));
-
-//     try {
-//       // Clone ONLY the current year's data, not the entire revenueGrid
-//       const currentYearData = revenueGrid[currentYear] || {};
-//       const newGrid =
-//         structuredClone?.(currentYearData) ||
-//         JSON.parse(JSON.stringify(currentYearData));
-
-//       // Ensure all months exist
-//       months.forEach((_, i) => {
-//         if (!newGrid[i])
-//           newGrid[i] = Array(5)
-//             .fill()
-//             .map(() => Array(5).fill(""));
-//       });
-
-//       const validKeys = new Set();
-
-//       Object.entries(paymentEntries).forEach(([bookingId, entries]) => {
-//         if (!Array.isArray(entries)) return;
-
-//         entries.forEach((entry, entryIndex) => {
-//           if (!entry?.date) return;
-
-//           // Validate date to prevent invalid Date objects
-//           const date = new Date(entry.date);
-//           if (isNaN(date.getTime())) {
-//             return;
-//           }
-
-//           const monthIndex = date.getMonth();
-
-//           const formattedAmount =
-//             entry.amount !== undefined && entry.amount !== null
-//               ? `₱${Number(entry.amount).toLocaleString("en-PH", {
-//                   minimumFractionDigits: 2,
-//                   maximumFractionDigits: 2,
-//                 })}`
-//               : "₱0.00";
-
-//           const rowArray = [
-//             entry.carName || "",
-//             formattedAmount,
-//             entry.mop || "",
-//             entry.pop || "",
-//             entry.date || "",
-//           ];
-
-//           rowArray._isAutoFill = true;
-//           rowArray._bookingId = String(bookingId);
-//           rowArray._entryIndex = entryIndex;
-
-//           validKeys.add(`${bookingId}-${entryIndex}`);
-
-//           const existingIndex = newGrid[monthIndex].findIndex(
-//             (r) =>
-//               r?._isAutoFill &&
-//               r._bookingId === String(bookingId) &&
-//               r._entryIndex === entryIndex,
-//           );
-
-//           if (existingIndex !== -1) {
-//             newGrid[monthIndex][existingIndex] = rowArray;
-//           } else {
-//             const emptyIndex = newGrid[monthIndex].findIndex(
-//               (r) => Array.isArray(r) && r.every((c) => c === ""),
-//             );
-//             if (emptyIndex !== -1) {
-//               newGrid[monthIndex][emptyIndex] = rowArray;
-//             } else {
-//               newGrid[monthIndex].push(rowArray);
-//             }
-//           }
-
-//           while (newGrid[monthIndex].length < 5) {
-//             newGrid[monthIndex].push(Array(5).fill(""));
-//           }
-//         });
-//       });
-
-//       // Cleanup stale rows
-//       Object.keys(newGrid).forEach((mIndex) => {
-//         newGrid[mIndex] = newGrid[mIndex].filter((row) => {
-//           if (row?._isAutoFill) {
-//             const key = `${row._bookingId}-${row._entryIndex}`;
-//             return validKeys.has(key);
-//           }
-//           return true;
-//         });
-
-//         while (newGrid[mIndex].length < 5) {
-//           newGrid[mIndex].push(Array(5).fill(""));
-//         }
-//       });
-
-//       // Debug final booking IDs
-//       const finalIds = [];
-//       Object.keys(newGrid).forEach((mIndex) => {
-//         newGrid[mIndex].forEach((row) => {
-//           if (row?._isAutoFill) finalIds.push(row._bookingId);
-//         });
-//       });
-
-//       // setRevenueGrid(newGrid);
-//       // if (activeTab === "revenue") {
-//       //   setGridData(newGrid);
-//       // }
-//       // Update ONLY the current year in revenueGrid
-//       setRevenueGrid((prev) => ({
-//         ...prev,
-//         [currentYear]: newGrid,
-//       }));
-//       if (activeTab === "revenue") {
-//         setGridData(newGrid);
-//       }
-
-//       setIsSynced(false);
-//     } catch (err) {
-//       console.error("❌ Error in autofill rebuild:", err);
-//     }
-// }, [autoFillTrigger, cancelTrigger, paymentEntries, activeTab, currentYear]);
