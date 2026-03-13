@@ -1066,12 +1066,6 @@
   max-width: 100%;
 }
 
-/* .sidebar.collapsed .sidebar-nav-item {
-  grid-template-columns: 24px 0 0;
-  column-gap: 0;
-  padding: 15px 18px;
-} */
-
 /* Dropdown container for the Dashboard nav item */
 .sidebar-nav-item-dropdown {
   position: relative;
@@ -1283,14 +1277,6 @@
   transform: translateY(-10px);
   pointer-events: none;
 }
-
-/* .sidebar-icon {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  fill: var(--accent-color);
-  transition: all 0.3s ease;
-} */
 
 .sidebar-icon.account-icon {
   width: 24px;
@@ -1660,7 +1646,6 @@
   opacity: 0.8;
 }
 
-/* Triangle facing RIGHT when minimized (slides out) */
 .backup-triangle-left {
   transform: rotate(0deg);
 }
