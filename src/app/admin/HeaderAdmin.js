@@ -3107,8 +3107,6 @@ const Header = ({
         </div>
       )}
 
-
-
       {showImportDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal">
