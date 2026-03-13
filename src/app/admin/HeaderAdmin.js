@@ -234,11 +234,11 @@ const Header = ({
 
   const [pendingTheme, setPendingTheme] = useState(theme);
 
-    const [showTogglePaidDialog, setShowTogglePaidDialog] = useState(false);
+  const [showTogglePaidDialog, setShowTogglePaidDialog] = useState(false);
   const [isTogglingPaid, setIsTogglingPaid] = useState(false);
   const [showToggledPaidSuccess, setShowToggledPaidSuccess] = useState(false);
-  const [hideToggledPaidAnimation, setHideToggledPaidAnimation] = useState(false);
-
+  const [hideToggledPaidAnimation, setHideToggledPaidAnimation] =
+    useState(false);
 
   const profilePic = user?.profilePic || "/assets/account.svg";
 
@@ -1989,7 +1989,7 @@ const Header = ({
                     {/* <label>Paid</label>
                     <span>{selectedBooking.paid ? "Yes" : "No"}</span> */}
                     <label
-                      style={{ cursor: "pointer"}}
+                      style={{ cursor: "pointer" }}
                       onClick={() => setShowTogglePaidDialog(true)}
                     >
                       Paid (Click to Toggle)
@@ -1998,16 +1998,13 @@ const Header = ({
                       style={{
                         cursor: "pointer",
                         color: selectedBooking.paid ? "#28a745" : "#dc3545",
-                        fontFamily: "Montserrat, sans-serif", 
+                        fontFamily: "Montserrat, sans-serif",
                         fontWeight: "900px",
                       }}
                       onClick={() => setShowTogglePaidDialog(true)}
                     >
                       {selectedBooking.paid ? "Yes" : "No"}
                     </span>
-
-
-
                   </div>
 
                   <div className="spec-item">
@@ -2221,7 +2218,7 @@ const Header = ({
         </div>
       )}
 
-            {/* 🔴 Loading Overlay (Toggling Paid Status) */}
+      {/* 🔴 Loading Overlay (Toggling Paid Status) */}
       {isTogglingPaid && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -2260,13 +2257,13 @@ const Header = ({
         </div>
       )}
 
-
-            {showTogglePaidDialog && (
+      {showTogglePaidDialog && (
         <div className="overlay-delete">
           <div className="confirm-modal" style={{ minWidth: "350px" }}>
             <h3>Toggle Paid Status?</h3>
             <p style={{ marginBottom: "20px" }}>
-              Current status: <strong>{selectedBooking.paid ? "Paid" : "Unpaid"}</strong>
+              Current status:{" "}
+              <strong>{selectedBooking.paid ? "Paid" : "Unpaid"}</strong>
             </p>
             <div className="confirm-buttons">
               <button
@@ -2275,9 +2272,9 @@ const Header = ({
                   setIsTogglingPaid(true);
                   try {
                     await toggleBookingPaid(selectedBooking.id);
-                    setSelectedBooking(prev => ({
+                    setSelectedBooking((prev) => ({
                       ...prev,
-                      paid: !prev.paid
+                      paid: !prev.paid,
                     }));
                     setShowTogglePaidDialog(false);
                     setIsTogglingPaid(false);
@@ -2307,7 +2304,6 @@ const Header = ({
           </div>
         </div>
       )}
-
 
       {/* DATA BACKUP */}
       {showBackupConfirmDialog && (
