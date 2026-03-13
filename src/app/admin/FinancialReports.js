@@ -625,8 +625,6 @@ const FinancialReports = () => {
     loadBothTabs();
   }, [currentYear, activeTab]);
 
- 
-
   // Debounced auto-save for manual inputs
   useEffect(() => {
     // Skip if auto-save disabled, no data, or during hydration
@@ -1039,8 +1037,6 @@ const FinancialReports = () => {
 
       return updated;
     });
-
-
 
     setIsSynced(false);
 
@@ -1669,8 +1665,6 @@ const FinancialReports = () => {
         });
       });
 
-
-
       console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
 
       updatedGrid = newGrid;
@@ -2141,7 +2135,6 @@ const FinancialReports = () => {
 
   return (
     <div className="financial-reports">
-
       <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
@@ -2452,8 +2445,6 @@ const FinancialReports = () => {
                     // Create a new grid - clear data instead of deleting rows
                     const updatedGrid = { ...currentGrid };
 
-
-
                     // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
                       // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
@@ -2747,7 +2738,6 @@ const FinancialReports = () => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-
                       onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
@@ -3240,8 +3230,6 @@ const FinancialReports = () => {
                                   parseInt(a.replace("Row_", "")) -
                                   parseInt(b.replace("Row_", "")),
                               );
-
-
 
                             let targetRowKey = null;
 
