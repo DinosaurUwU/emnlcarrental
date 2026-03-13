@@ -331,11 +331,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     };
 
     fetchTableImages();
-}, [unitData, activeBookings, imageUpdateTrigger, imageCache, fetchImageFromFirestore]);
+  }, [
+    unitData,
+    activeBookings,
+    imageUpdateTrigger,
+    imageCache,
+    fetchImageFromFirestore,
+  ]);
 
   const [calendarViewMode, setCalendarViewMode] = useState("ALL"); // "ALL" or unitId
 
-    const [showCalendarImagesOnly, setShowCalendarImagesOnly] = useState(false); // Toggle for images only
+  const [showCalendarImagesOnly, setShowCalendarImagesOnly] = useState(false); // Toggle for images only
 
   const carUnitOptions = Object.entries(analyticsData).map(
     ([unitId, carData]) => ({
@@ -354,7 +360,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       if (!eventItem?.start) return [eventItem];
 
       const startDate = new Date(eventItem.start);
-      const endDate = eventItem.end ? new Date(eventItem.end) : new Date(eventItem.start);
+      const endDate = eventItem.end
+        ? new Date(eventItem.end)
+        : new Date(eventItem.start);
 
       startDate.setHours(0, 0, 0, 0);
       endDate.setHours(0, 0, 0, 0);
@@ -618,10 +626,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     return `${month}-${day}-${year} | ${hour12}:${minutes} ${ampm}`;
   };
 
-  // const closeModal = () => {
-  //   setIsImageModalOpen(false);
-  //   setModalImage(null);
-  // };
   const openPhotoSwipePreview = (src) => {
     if (!src) return;
 
@@ -1345,10 +1349,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       revenueData.push(totalRevenue);
       expenseData.push(totalExpense);
 
-      // bookingsData.push(totalBookings > 0 ? totalBookings : 0.01);
-      // unpaidBookingsData.push(totalUnpaidCount > 0 ? totalUnpaidCount : 0.01);
-      // dueBalancesData.push(totalUnpaidSum > 0 ? totalUnpaidSum : 0.01);
-
       bookingsData.push(totalBookings);
       unpaidBookingsData.push(totalUnpaidCount);
       dueBalancesData.push(totalUnpaidSum);
@@ -1627,7 +1627,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           {
             label: "No Data",
             data: [1],
-            backgroundColor: ["#dc3545"], // red
+            backgroundColor: ["#dc3545"],
             radius: "100%",
             cutout: "70%",
           },
@@ -2426,7 +2426,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           if (label === "Profit") return "#dcfada"; // light green
           if (label === "Revenue") return "#f8ebda"; // light yellow
           if (label === "Expenses") return "#f8d7da"; // light red
-          if (label === "Bookings") return "#dae7ff";
+          if (label === "Bookings") return "#dae7ff"; // light blue
 
           return "#ffffff";
         },
@@ -2718,30 +2718,30 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     const fullData = event.extendedProps?.fullData || {};
     const imageId = fullData.imageId || `${fullData.plateNo}_main`;
     const image = fetchedImages[imageId];
-    
+
     // If images only mode is ON, show only the image
     if (showImagesOnly) {
       if (image?.base64) {
         return (
-          <div 
+          <div
             className="fc-event-images-only"
-            style={{ 
-              width: "100%", 
-              height: "50px", 
+            style={{
+              width: "100%",
+              height: "50px",
               maxHeight: "50px",
-              padding: 0, 
-              margin: 0, 
-              overflow: "hidden" 
+              padding: 0,
+              margin: 0,
+              overflow: "hidden",
             }}
           >
-            <img 
-              src={image.base64} 
+            <img
+              src={image.base64}
               alt={event.title}
-              style={{ 
-                width: "100%", 
-                height: "50px", 
+              style={{
+                width: "100%",
+                height: "50px",
                 maxHeight: "50px",
-                objectFit: "cover" 
+                objectFit: "cover",
               }}
             />
           </div>
@@ -2750,7 +2750,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       // No image available, show nothing
       return null;
     }
-    
+
     // If images only mode is OFF, show only the default event (text + color)
     return (
       <div>
@@ -2759,9 +2759,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       </div>
     );
   };
-
-
-
 
   return (
     <div className="analytics-section">
@@ -3755,22 +3752,21 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
             </select>
           </div>
 
-<button
-              onClick={() => setShowCalendarImagesOnly(!showCalendarImagesOnly)}
-              style={{
-                background: showCalendarImagesOnly ? "#4caf50" : "#f0f0f0",
-                color: showCalendarImagesOnly ? "#fff" : "#333",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                padding: "8px 20px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                marginBottom: "5px",
-              }}
-            >
-              {showCalendarImagesOnly ? "Images Only" : "Show Events"}
-            </button>
-
+          <button
+            onClick={() => setShowCalendarImagesOnly(!showCalendarImagesOnly)}
+            style={{
+              background: showCalendarImagesOnly ? "#4caf50" : "#f0f0f0",
+              color: showCalendarImagesOnly ? "#fff" : "#333",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              padding: "8px 20px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginBottom: "5px",
+            }}
+          >
+            {showCalendarImagesOnly ? "Images Only" : "Show Events"}
+          </button>
 
           <div className="calendar-controls">
             <button
@@ -3808,21 +3804,13 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
             events={filteredCalendarEvents}
-
-            
-
-
             eventContent={(eventInfo) => (
-              <CalendarEventContent 
-                event={eventInfo.event} 
-                fetchedImages={fetchedImages} 
+              <CalendarEventContent
+                event={eventInfo.event}
+                fetchedImages={fetchedImages}
                 showImagesOnly={showCalendarImagesOnly}
               />
             )}
-
-
-
-
             eventClick={(info) => {
               const fullData = info.event.extendedProps?.fullData;
 
