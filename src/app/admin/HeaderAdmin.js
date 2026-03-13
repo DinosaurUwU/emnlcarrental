@@ -3109,75 +3109,7 @@ const Header = ({
         </div>
       )}
 
-      {/* {showDownloadConfirmDialog && (
-        <div className="overlay-delete">
-          <div className="confirm-modal" style={{ minWidth: "400px" }}>
-            <h3>Start Data Download?</h3>
-            <p style={{ marginBottom: "15px" }}>
-              Select which collections to download:
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
-              {Object.keys(selectedDownloadCollections).map((collection) => (
-                <label
-                  key={collection}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "10px", cursor: "pointer",
-                    padding: "12px 16px", borderRadius: "12px", textTransform: "capitalize",
-                    fontWeight: "600", fontSize: "14px", transition: "all 0.3s ease",
-                    background: selectedDownloadCollections[collection] ? "#e8f5e9" : "#fff",
-                    border: selectedDownloadCollections[collection] ? "2px solid #4caf50" : "2px solid #e0e0e0",
-                    boxShadow: selectedDownloadCollections[collection] ? "0 2px 8px rgba(76, 175, 80, 0.2)" : "0 1px 3px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <div style={{
-                    width: "24px", height: "24px", borderRadius: "8px", display: "flex",
-                    alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", flexShrink: 0,
-                    border: selectedDownloadCollections[collection] ? "2px solid #4caf50" : "2px solid #bdbdbd",
-                    background: selectedDownloadCollections[collection] ? "#4caf50" : "#fff",
-                  }}>
-                    {selectedDownloadCollections[collection] && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    )}
-                  </div>
-                  <input type="checkbox" checked={selectedDownloadCollections[collection]}
-                    onChange={() => setSelectedDownloadCollections((prev) => ({ ...prev, [collection]: !prev[collection] }))}
-                    style={{ display: "none" }} />
-                  {collection}
-                </label>
-              ))}
-            </div>
-            <div className="confirm-buttons">
-              <button
-                className="confirm-btn delete"
-                onClick={() => {
-                  const selected = Object.keys(selectedDownloadCollections).filter(
-                    (key) => selectedDownloadCollections[key]
-                  );
 
-                  if (selected.length === 0) {
-                    console.warn("No collections selected for download.");
-                    return;
-                  }
-
-                  console.log("Download started for:", selected);
-                  createDownload(selectedDownloadCollections); // or createDownload(selected)
-                  setShowDownloadConfirmDialog(false);
-                }}
-              >
-                Yes, Download
-              </button>
-              <button
-                className="confirm-btn cancel"
-                onClick={() => setShowDownloadConfirmDialog(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {showImportDialog && (
         <div className="overlay-delete">
