@@ -1986,8 +1986,6 @@ const Header = ({
               <div className="unit-additional-container">
                 <div className="specs-grid">
                   <div className="spec-item">
-                    {/* <label>Paid</label>
-                    <span>{selectedBooking.paid ? "Yes" : "No"}</span> */}
                     <label
                       style={{ cursor: "pointer" }}
                       onClick={() => setShowTogglePaidDialog(true)}
