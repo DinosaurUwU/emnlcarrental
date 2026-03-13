@@ -389,7 +389,7 @@ const FinancialReports = () => {
   const [actionOverlay, setActionOverlay] = useState({
     isVisible: false,
     message: "",
-    type: "warning", // "warning" for red, "success" for green
+    type: "warning",
   });
 
   const [showManualLoadConfirm, setShowManualLoadConfirm] = useState(false);
@@ -625,50 +625,7 @@ const FinancialReports = () => {
     loadBothTabs();
   }, [currentYear, activeTab]);
 
-  // AUTO SAVE
-  // useEffect(() => {
-  //   if (
-  //     !autoSaveEnabled ||
-  //     Object.keys(gridData).length === 0 ||
-  //     isSavingAuto
-
-  //   )
-  //     return;
-
-  //   lastSavedGridRef.current = gridData;
-  //   setIsSavingAuto(true);
-
-  //   (async () => {
-  //     try {
-  //       setSavingStatus(true);
-
-  //       // Update the year-specific state before saving
-  //       if (activeTab === "revenue") {
-  //         setRevenueGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: gridData,
-  //         }));
-  //       } else {
-  //         setExpenseGrid((prev) => ({
-  //           ...prev,
-  //           [currentYear]: gridData,
-  //         }));
-  //       }
-
-  //       await saveFinancialReport(activeTab, gridData, currentYear);
-
-  //       const now = new Date();
-  //       setLastSavedAt(now);
-  //       setIsSynced(true);
-  //       setHasServerChange(false);
-  //       justSaved.current = true;
-  //       setTimeout(() => (justSaved.current = false), 1000);
-  //     } finally {
-  //       setSavingStatus(false);
-  //       setIsSavingAuto(false);
-  //     }
-  //   })();
-  // }, [gridData, activeTab, autoSaveEnabled, isSavingAuto, currentYear]);
+ 
 
   // Debounced auto-save for manual inputs
   useEffect(() => {
@@ -1083,12 +1040,7 @@ const FinancialReports = () => {
       return updated;
     });
 
-    //   setIsSynced(false);
 
-    //   if (colIndex === 4) {
-    //     setTimeout(() => applySorting(monthIndex), 0);
-    //   }
-    // };
 
     setIsSynced(false);
 
@@ -1176,7 +1128,7 @@ const FinancialReports = () => {
       TITLE_BG: "28A745",
       UNIT_HDR: "A8E6CF",
       AMOUNT_HDR: "B3E5FC",
-      MOP_HDR: "D4C4E8", // Darker lavender for header
+      MOP_HDR: "D4C4E8",
 
       POP_HDR: "F8BBD0",
       DATE_HDR: "FFE0B2",
@@ -1717,18 +1669,7 @@ const FinancialReports = () => {
         });
       });
 
-      // // Cleanup stale autofill rows
-      // Object.keys(newGrid).forEach((mIndex) => {
-      //   Object.keys(newGrid[mIndex]).forEach((rowKey) => {
-      //     const row = newGrid[mIndex][rowKey];
-      //     if (Array.isArray(row) && row[5]?._isAutoFill) {
-      //       const key = `${row[5]._bookingId}-${row[5]._entryIndex}`;
-      //       if (!validKeys.has(key)) {
-      //         newGrid[mIndex][rowKey] = Array(5).fill("");
-      //       }
-      //     }
-      //   });
-      // });
+
 
       console.log("🟢 UPDATED revenueGrid for year", currentYear, ":", newGrid);
 
@@ -2200,24 +2141,7 @@ const FinancialReports = () => {
 
   return (
     <div className="financial-reports">
-      {/* {isImageModalOpen && modalImage && (
-        <div
-          className="admin-image-modal-overlay"
-          onClick={() => setIsImageModalOpen(false)}
-        >
-          <div
-            className="image-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={modalImage}
-              alt="Driver's License"
-              className="admin-full-image-view"
-              style={{ width: "90vw", height: "90vh", objectFit: "contain" }}
-            />
-          </div>
-        </div>
-      )} */}
+
       <div ref={licenseGalleryRef} style={{ display: "none" }}>
         {photoSwipePreviewItem && (
           <a
@@ -2528,15 +2452,7 @@ const FinancialReports = () => {
                     // Create a new grid - clear data instead of deleting rows
                     const updatedGrid = { ...currentGrid };
 
-                    // // Clear the selected rows (set to empty) instead of deleting
-                    // rowsToDelete.forEach((rowKey) => {
-                    //   // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
-                    //   const actualRowKey = rowKey.includes("-")
-                    //     ? rowKey.split("-")[1]
-                    //     : rowKey;
-                    //   // Clear the row data but keep the row
-                    //   updatedGrid[actualRowKey] = ["", "", "", "", ""];
-                    // });
+
 
                     // Clear the selected rows (set to empty) instead of deleting
                     rowsToDelete.forEach((rowKey) => {
@@ -2831,10 +2747,7 @@ const FinancialReports = () => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
+
                       onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
@@ -3328,19 +3241,7 @@ const FinancialReports = () => {
                                   parseInt(b.replace("Row_", "")),
                               );
 
-                            // let targetRowKey = null;
-                            // for (const rowKey of rowKeys) {
-                            //   if (newGrid[monthIndex][rowKey].slice(0, 5).every(c => c === "")) {
-                            //     targetRowKey = rowKey;
-                            //     break;
-                            //   }
-                            // }
 
-                            // if (targetRowKey) {
-                            //   newGrid[monthIndex][targetRowKey] = rowArray;
-                            // } else {
-                            //   newGrid[monthIndex][`Row_${Object.keys(newGrid[monthIndex]).length}`] = rowArray;
-                            // }
 
                             let targetRowKey = null;
 
@@ -4509,7 +4410,6 @@ const FinancialReports = () => {
                     // For transaction tab, use gridData (which has all localStorage data)
                     // gridData.revenue and gridData.expense are arrays of transaction objects
                     if (activeTab === "transaction" && gridData.revenue) {
-                      // gridData.revenue is already an array of {year, month, rowKey, data}
                       gridData.revenue.forEach((tx) => {
                         transactions.push({
                           date: tx.data[4] || "",
@@ -4553,7 +4453,6 @@ const FinancialReports = () => {
 
                     // Collect from expense grid
                     if (activeTab === "transaction" && gridData.expense) {
-                      // gridData.expense is already an array of {year, month, rowKey, data}
                       gridData.expense.forEach((tx) => {
                         transactions.push({
                           date: tx.data[4] || "",
