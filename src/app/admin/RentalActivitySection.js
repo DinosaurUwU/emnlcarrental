@@ -279,7 +279,7 @@ const RentalActivitySection = ({ subSection }) => {
   //   fetchImages();
   // }, [unitData, activeBookings, imageUpdateTrigger]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!unitData || unitData.length === 0) return;
 
     const fetchImages = async () => {
@@ -506,7 +506,10 @@ const RentalActivitySection = ({ subSection }) => {
 
   // BALANCE DUE DISPLAY
   useEffect(() => {
-    console.log("🔍 DEBUG: completedBookingsAnalytics:", JSON.stringify(completedBookingsAnalytics, null, 2));
+    console.log(
+      "🔍 DEBUG: completedBookingsAnalytics:",
+      JSON.stringify(completedBookingsAnalytics, null, 2),
+    );
     if (
       !completedBookingsAnalytics ||
       typeof completedBookingsAnalytics !== "object"
