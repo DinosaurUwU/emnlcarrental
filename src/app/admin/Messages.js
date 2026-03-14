@@ -181,15 +181,6 @@ const Messages = () => {
       }
     }
 
-    // const threads = Array.from(map.values())
-    //   .map((thread) => ({
-    //     ...thread,
-    //     messages: [...thread.messages].sort((a, b) => getMs(a) - getMs(b)),
-    //   }))
-    //   .sort((a, b) => getMs(b.latest) - getMs(a.latest));
-
-    // return threads;
-
     const threads = Array.from(map.values())
       .map((thread) => {
         const messages = [...thread.messages].sort(
@@ -900,12 +891,6 @@ const Messages = () => {
                   </p>
                 ) : (
                   conversationThreads.map((thread) => {
-                    // const latestSourceTag =
-                    //   thread.latest?.sourcePage === "contact" ? "[Contact] " : "";
-                    // const lastText =
-                    //   latestSourceTag +
-                    //   (thread.latest?.content || "").replace(/<[^>]+>/g, "");
-
                     const sourceTag =
                       thread.latest?.sourcePage === "contact-guest"
                         ? "[Guest Contact] "
