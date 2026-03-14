@@ -8038,7 +8038,7 @@ const RentalActivitySection = ({ subSection }) => {
                   subSection === "overview" || subSection === "ongoing-rent"
                     ? "block"
                     : "none",
-              }} // New: conditional display
+              }}
             >
               <div className="ongoing-units-header-wrapper">
                 <h2 className="ongoing-units-header">
@@ -8460,15 +8460,7 @@ const RentalActivitySection = ({ subSection }) => {
                               Cancel
                             </button>
 
-                            {/* <button
-                              className="action-button finish"
-                              onClick={() => {
-                                setFinishRentalId(rental.id);
-                                setShowFinishConfirm(true);
-                              }}
-                            >
-                              Finish
-                            </button> */}
+
                             {String(rental.status || "").toLowerCase() !==
                               "pending" && (
                               <button
