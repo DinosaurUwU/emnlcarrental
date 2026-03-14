@@ -99,7 +99,6 @@ body.modal-open {
   border-radius: 5px;
 }
 
-
 .message-actions-topright {
   position: absolute;
   top: 8px;
@@ -179,7 +178,7 @@ body.modal-open {
 .message-item:hover {
   background: #c2f8c3;
   box-shadow: 0 0 10px var(--accent-color);
-    border-left: 5px solid #28a745;
+  border-left: 5px solid #28a745;
 }
 
 /* Profile Picture */
@@ -500,7 +499,6 @@ body.modal-open {
   background: #f3f9f4;
 }
 
-
 .conversation-thread-row {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
@@ -572,8 +570,6 @@ body.modal-open {
   flex-shrink: 0;
 }
 
-
-
 .thread-bottom-row {
   display: flex;
   align-items: center;
@@ -611,7 +607,10 @@ body.modal-open {
   opacity: 0;
   pointer-events: none;
   transform: translateX(4px);
-  transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background-color 0.18s ease;
 }
 
 .conversation-thread-item:hover .thread-delete-btn {
@@ -623,8 +622,6 @@ body.modal-open {
 .thread-delete-btn:hover {
   background-color: rgba(220, 53, 69, 0.12);
 }
-
-
 
 .conversation-chat-panel {
   border: 1px solid #ddd;
@@ -691,16 +688,15 @@ body.modal-open {
 }
 
 .message-source-chip {
-display: inline-block;
-font-size: 11px;
-font-weight: 700;
-color: #b45309;
-background: rgba(245, 158, 11, 0.16);
-border: 1px solid rgba(245, 158, 11, 0.45);
-border-radius: 999px;
-padding: 2px 8px;
-margin-bottom: 6px;
-
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-bottom: 6px;
 }
 
 .conversation-bubble.mine {
@@ -783,7 +779,7 @@ margin-bottom: 6px;
     min-height: 420px;
   }
 
-    .conversation-chat-actions {
+  .conversation-chat-actions {
     min-width: 110px;
   }
 }
