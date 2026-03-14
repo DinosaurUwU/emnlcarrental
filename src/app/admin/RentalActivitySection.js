@@ -247,38 +247,6 @@ const RentalActivitySection = ({ subSection }) => {
     date: "",
   });
 
-  // useEffect(() => {
-  //   if (!unitData || unitData.length === 0) return;
-
-  //   const fetchImages = async () => {
-  //     const imageIds = new Set();
-
-  //     // Collect imageIds from bookings and units (ignore hidden)
-  //     unitData.forEach((unit) => {
-  //       if (unit.imageId) imageIds.add(unit.imageId);
-  //     });
-
-  //     activeBookings.forEach((booking) => {
-  //       if (booking.imageId) imageIds.add(booking.imageId);
-  //       else imageIds.add(`${booking.plateNo}_main`);
-  //     });
-
-  //     const results = await Promise.all(
-  //       [...imageIds].map(async (id) => {
-  //         const image = await fetchImageFromFirestore(id);
-  //         return image ? { [id]: image } : null;
-  //       }),
-  //     );
-
-  //     setFetchedImages((prev) => ({
-  //       ...prev,
-  //       ...Object.assign({}, ...results.filter(Boolean)),
-  //     }));
-  //   };
-
-  //   fetchImages();
-  // }, [unitData, activeBookings, imageUpdateTrigger]);
-
   useEffect(() => {
     if (!unitData || unitData.length === 0) return;
 
@@ -592,7 +560,7 @@ const RentalActivitySection = ({ subSection }) => {
 
       allUnitData.forEach((unit) => {
         if (!unit.hidden) {
-          const analytics = completedBookingsAnalytics?.[unit.id]; // ✅ Safe with optional chaining
+          const analytics = completedBookingsAnalytics?.[unit.id]; // Optional chaining
           const timesRented = analytics?.timesRented || 0;
 
           if (timesRented < leastTimes) {
@@ -606,7 +574,7 @@ const RentalActivitySection = ({ subSection }) => {
         setSelectedUnitId(leastRentedUnit);
       }
     }
-  }, [allUnitData]); // ✅ Only depends on allUnitData
+  }, [allUnitData]);
 
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
   useEffect(() => {
@@ -862,17 +830,6 @@ const RentalActivitySection = ({ subSection }) => {
     return await markRentalAsCompleted(completedRental);
   };
 
-  // const handleConfirmBooking = () => {
-  //   const handleConfirmBooking = async () => {
-  //   const currentUnit = unitData.find((u) => u.id === confirmUnitId);
-
-  //   const sourceReservedBookingId =
-  // unitForm.reservation === true && reserveUnitId
-  //   ? String(reserveUnitId)
-  //   : null;
-
-  //   const unitForm = formData[confirmUnitId] || {};
-
   const handleConfirmBooking = async () => {
     const unitForm = formData[confirmUnitId] || {};
     const currentUnit =
@@ -913,26 +870,6 @@ const RentalActivitySection = ({ subSection }) => {
 
     const isReservedFlow =
       !!sourceReservedBookingId || unitForm.reservation === true;
-
-    // const sourceReservedBookingId =
-    //   unitForm.reservation === true && reserveUnitId
-    //     ? String(reserveUnitId)
-    //     : null;
-
-    // // Check for unit conflict BEFORE processing
-    // const isUnitInUse = activeBookings.some(
-    //   (booking) => booking.plateNo === currentUnit.plateNo,
-    // );
-
-    // if (isUnitInUse) {
-    //   setHideAnimation(false);
-    //   setShowUnitConflict(true);
-    //   setTimeout(() => {
-    //     setHideAnimation(true);
-    //     setTimeout(() => setShowUnitConflict(false), 400);
-    //   }, 3000);
-    //   return;
-    // }
 
     // Check for unit conflict BEFORE processing (time-window aware)
     const requestedStart = new Date(
@@ -1114,8 +1051,6 @@ const RentalActivitySection = ({ subSection }) => {
       discountType: unitForm.discountType || "peso",
       discountValue: Number(unitForm.discountValue || 0),
 
-      // Include reservation toggle
-      // reservation: !!unitForm.reservation,
       reservation: isReservedFlow,
 
       // Breakdown of pricing
@@ -1144,59 +1079,6 @@ const RentalActivitySection = ({ subSection }) => {
 
       bookingUid,
     };
-
-    //     // Save to Firestore
-    //     // saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-    //     await saveBookingToFirestore(String(confirmUnitId), bookingData, bookingUid);
-    //         if (sourceReservedBookingId) {
-    //       await updateActiveBooking(sourceReservedBookingId, {
-    //         reservation: false,
-    //       });
-    //       setReserveUnitId(null);
-    //     }
-
-    //     setFormData((prev) => ({
-    //   ...prev,
-    //   [confirmUnitId]: {
-    //     ...(prev[confirmUnitId] || {}),
-    //     reservation: false,
-    //   },
-    // }));
-
-    //     // 🟢 Merge new booking into existing paymentEntries first
-    //     triggerAutoFill((prevPaymentEntries) => ({
-    //       ...prevPaymentEntries,
-    //       [bookingUid]: (localPaymentEntries || []).map((entry) => ({
-    //         ...entry,
-    //         carName: currentUnit.name,
-    //         bookingId: bookingUid,
-    //       })),
-    //     }));
-
-    //     // UI cleanup
-    //     setShowBookingConfirmOverlay(false);
-    //     console.log("Clearing form for unit ID:", clearUnitId); // Debug
-    //     console.log("Confirming booking for unit ID:", confirmUnitId); // Debug
-    //     console.log("CURRENT UNIT:", currentUnit); // Debug
-    //     console.log("BOOKING DATA:", bookingData); // Debug
-    //     console.log("PRICING:", discountedRate); // Debug
-
-    //     handleClearForm(confirmUnitId);
-
-    //     setSuccessMessage(`${currentUnit.name} sent to Ongoing Rentals`);
-    //     setShowSuccessBooking(true);
-
-    //     setSelectedUnitId(null);
-
-    //     setTimeout(() => {
-    //       setHideAnimation(true);
-
-    //       setTimeout(() => {
-    //         setShowSuccessBooking(false);
-    //         setHideAnimation(false);
-    //       }, 400);
-    //     }, 5000);
-    //   };
 
     // Save to Firestore with processing -> result overlay flow
     setProcessingBooking({
@@ -2017,10 +1899,6 @@ const RentalActivitySection = ({ subSection }) => {
                 <div className="admin-confirm-details">
                   {/* Car info to additional message */}
                   {(() => {
-                    // const currentUnit = unitData.find(
-                    //   (u) => u.id === confirmUnitId,
-                    // );
-
                     const currentUnit =
                       allUnitData.find((u) => u.id === confirmUnitId) ||
                       unitData.find((u) => u.id === confirmUnitId) ||
@@ -2165,9 +2043,6 @@ const RentalActivitySection = ({ subSection }) => {
               {/* Second section: personal info to summary */}
               <div className="admin-confirm-details">
                 {(() => {
-                  // const currentUnit = unitData.find(
-                  //   (u) => u.id === confirmUnitId,
-                  // );
                   const currentUnit =
                     allUnitData.find((u) => u.id === confirmUnitId) ||
                     unitData.find((u) => u.id === confirmUnitId) ||
@@ -2278,13 +2153,6 @@ const RentalActivitySection = ({ subSection }) => {
                             }
                             alt="Driver's License"
                             className="admin-confirm-id-preview"
-                            // onClick={() => {
-                            //   const previewUrl =
-                            //     filePreviews[confirmUnitId] ||
-                            //     URL.createObjectURL(unitForm.driverLicense);
-                            //   setModalImage(previewUrl);
-                            //   setIsImageModalOpen(true);
-                            // }}
                             onClick={() => {
                               const previewUrl =
                                 filePreviews[confirmUnitId] ||
@@ -2793,10 +2661,6 @@ const RentalActivitySection = ({ subSection }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
@@ -3333,10 +3197,6 @@ const RentalActivitySection = ({ subSection }) => {
                       src={selectedBooking.driverLicense}
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(selectedBooking.driverLicense);
                       }}
@@ -3701,7 +3561,7 @@ const RentalActivitySection = ({ subSection }) => {
                 className="confirm-btn delete"
                 onClick={() => {
                   setShowExtendConfirm(false);
-                  setShowFinalExtendConfirm(true); // Show next modal
+                  setShowFinalExtendConfirm(true);
                 }}
               >
                 Yes, Extend
@@ -4017,71 +3877,6 @@ const RentalActivitySection = ({ subSection }) => {
             <div className="confirm-buttons">
               <button
                 className="confirm-btn delete"
-                // onClick={async () => {
-                //   setShowReserveConfirm(false);
-
-                //   setProcessingBooking({
-                //     isProcessing: true,
-                //     message: "Reserving Unit...",
-                //     textClass: "submitting-text",
-                //   });
-
-                //   try {
-                //     await reserveUnit(reserveUnitId);
-
-                //     setProcessingBooking({
-                //       isProcessing: false,
-                //       message: "",
-                //       textClass: "submitting-text",
-                //     });
-
-                //     setHideCancelAnimation(false);
-                //     setActionOverlay({
-                //       isVisible: true,
-                //       message: "Unit Reserved Successfully!",
-                //       type: "success",
-                //     });
-
-                //     setTimeout(() => {
-                //       setHideCancelAnimation(true);
-                //       setTimeout(
-                //         () =>
-                //           setActionOverlay({
-                //             ...actionOverlay,
-                //             isVisible: false,
-                //           }),
-                //         400,
-                //       );
-                //     }, 5000);
-                //   } catch (err) {
-                //     console.error("❌ Failed to reserve unit:", err);
-
-                //     setProcessingBooking({
-                //       isProcessing: false,
-                //       message: "",
-                //       textClass: "submitting-text",
-                //     });
-
-                //     setHideCancelAnimation(false);
-                //     setActionOverlay({
-                //       isVisible: true,
-                //       message: "Failed to Reserve Unit!",
-                //       type: "warning",
-                //     });
-
-                //     setTimeout(() => {
-                //       setHideCancelAnimation(true);
-                //       setTimeout(
-                //         () =>
-                //           setActionOverlay({
-                //             ...actionOverlay,
-                //             isVisible: false,
-                //           }),
-                //         400,
-                //       );
-                //     }, 5000);
-                //   }
-                // }}
                 onClick={async () => {
                   setShowReserveConfirm(false);
 
@@ -4453,7 +4248,7 @@ const RentalActivitySection = ({ subSection }) => {
                 className="confirm-btn delete"
                 onClick={() => {
                   setShowEditRequest(true);
-                  setShowEditRequestConfirmOverlay(false); // Proceed next overlay
+                  setShowEditRequestConfirmOverlay(false);
                 }}
               >
                 Yes, Edit
@@ -5139,10 +4934,6 @@ const RentalActivitySection = ({ subSection }) => {
                       alt="Driver's License"
                       className="license-preview"
                       style={{ cursor: "pointer" }}
-                      // onClick={() => {
-                      //   setModalImage(filePreviews.edit);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(filePreviews.edit);
                       }}
@@ -6506,10 +6297,6 @@ const RentalActivitySection = ({ subSection }) => {
                       alt="Driver's License"
                       className="license-preview"
                       style={{ cursor: "pointer" }}
-                      // onClick={() => {
-                      //   setModalImage(filePreviews.edit);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         openPhotoSwipePreview(filePreviews.edit);
                       }}
@@ -6676,7 +6463,7 @@ const RentalActivitySection = ({ subSection }) => {
                   // Handle print contract logic using editFormData
                   const enrichedBooking = {
                     ...editFormData,
-                    carName: selectedBooking.carName, // From selectedBooking
+                    carName: selectedBooking.carName,
                   };
                   generateFilledContract(enrichedBooking);
                 }}
@@ -8460,7 +8247,6 @@ const RentalActivitySection = ({ subSection }) => {
                               Cancel
                             </button>
 
-
                             {String(rental.status || "").toLowerCase() !==
                               "pending" && (
                               <button
@@ -8491,7 +8277,6 @@ const RentalActivitySection = ({ subSection }) => {
 
                               {showMoreFor === rental.id && (
                                 <div className="more-dropdown">
-
                                   {String(rental.status || "").toLowerCase() !==
                                     "pending" && (
                                     <button
@@ -8668,7 +8453,6 @@ const RentalActivitySection = ({ subSection }) => {
                           String(booking?.status || "").toLowerCase() ===
                             "active",
                       );
-
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
@@ -9211,7 +8995,6 @@ const RentalActivitySection = ({ subSection }) => {
                                   alt="Driver's License"
                                   className="license-preview"
                                   style={{ cursor: "pointer" }}
-
                                   onClick={() => {
                                     openPhotoSwipePreview(
                                       filePreviews[selectedUnitId],
@@ -9260,8 +9043,6 @@ const RentalActivitySection = ({ subSection }) => {
                               />
                             </div>
                           </div>
-
-
 
                           <div className="personal-info-section">
                             <h4>Personal Information</h4>
