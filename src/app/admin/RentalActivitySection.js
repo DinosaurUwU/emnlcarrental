@@ -8562,7 +8562,7 @@ onClick={() => {
                   subSection === "overview" || subSection === "available-units"
                     ? "block"
                     : "none",
-              }} // New: conditional display
+              }}
             >
               <div className="available-units-header-wrapper">
                 <h2 className="available-units-header">BOOKINGS</h2>
@@ -8685,13 +8685,7 @@ onClick={() => {
                           String(booking?.status || "").toLowerCase() ===
                             "active",
                       );
-                      //                       const reservedActiveBooking = (activeBookings || []).find(
-                      //   (booking) =>
-                      //     String(booking?.plateNo || "").toUpperCase() ===
-                      //       String(selectedUnit?.plateNo || "").toUpperCase() &&
-                      //     booking?.reservation === true &&
-                      //     ["active", "pending"].includes(String(booking?.status || "").toLowerCase()),
-                      // );
+
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
@@ -9234,12 +9228,7 @@ onClick={() => {
                                   alt="Driver's License"
                                   className="license-preview"
                                   style={{ cursor: "pointer" }}
-                                  // onClick={() => {
-                                  //   setModalImage(
-                                  //     filePreviews[selectedUnit.id],
-                                  //   );
-                                  //   setIsImageModalOpen(true);
-                                  // }}
+
                                   onClick={() => {
                                     openPhotoSwipePreview(
                                       filePreviews[selectedUnitId],
@@ -9289,110 +9278,7 @@ onClick={() => {
                             </div>
                           </div>
 
-                          {/* <div className="personal-info-section">
-                            <h4>Personal Information</h4>
-                            <div className="personal-info-fields">
-                              <div className="input-with-icon">
-                                <input
-                                  type="text"
-                                  name="firstName"
-                                  placeholder="First Name"
-                                  className="personal-info-input"
-                                  value={unitForm.firstName || ""}
-                                  onChange={(e) =>
-                                    handleInputChange(selectedUnitId, e)
-                                  }
-                                  required
-                                />
-                                <div
-                                  className="icon-container"
-                                  onClick={() =>
-                                    setShowCustomerSelectDialog(true)
-                                  }
-                                >
-                                  <img
-                                    src="/assets/passenger.png"
-                                    alt="Passenger"
-                                  />
-                                </div>
-                              </div>
-                              <input
-                                type="text"
-                                name="middleName"
-                                placeholder="Middle Name (N/A if none)"
-                                className="personal-info-input"
-                                value={unitForm.middleName || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
-                              <input
-                                type="text"
-                                name="surname"
-                                placeholder="Surname"
-                                className="personal-info-input"
-                                value={unitForm.surname || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
 
-                              <input
-                                type="text"
-                                name="address"
-                                placeholder="Current Address"
-                                className="personal-info-input"
-                                value={unitForm.address || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
-
-                              <input
-                                type="text"
-                                name="occupation"
-                                placeholder="Occupation"
-                                className="personal-info-input"
-                                value={unitForm.occupation || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div className="contact-occupation-section">
-                            <h4>Contacts</h4>
-                            <div className="contact-occupation-fields">
-                              <input
-                                type="tel"
-                                name="contact"
-                                placeholder="Contact No."
-                                className="personal-info-input"
-                                value={unitForm.contact || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
-                              <input
-                                type="email"
-                                name="email"
-                                placeholder="Email Address"
-                                className="personal-info-input"
-                                value={unitForm.email || ""}
-                                onChange={(e) =>
-                                  handleInputChange(selectedUnitId, e)
-                                }
-                                required
-                              />
-
-                            </div>
-                          </div> */}
 
                           <div className="personal-info-section">
                             <h4>Personal Information</h4>
