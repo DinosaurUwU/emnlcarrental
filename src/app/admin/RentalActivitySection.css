@@ -1894,34 +1894,6 @@
   width: 100%;
 }
 
-/* .personal-info-input {
-  padding: 0.6rem;
-  border: 2px solid var(--accent-color);
-  border-radius: 4px;
-  font-size: 1rem;
-  text-align: left;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-  transition: border-color 0.3s ease;
-  flex: 1;
-  min-width: 200px;
-  max-width: 100%;
-}
-
-.personal-info-input:focus {
-  outline: none;
-  border-color: var(--supporting-color);
-  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-}
-
-
-
-.input-with-icon {
-  position: relative;
-  box-sizing: border-box;
-} */
-
-
 .personal-info-field,
 .contact-occupation-field {
   position: relative;
@@ -1948,7 +1920,7 @@
   padding-right: 0.6rem;
   padding-bottom: 0.6rem;
   padding-left: 0.6rem;
-    font-weight: 700;
+  font-weight: 700;
 }
 
 .personal-info-input:focus {
@@ -1993,8 +1965,6 @@
 .input-with-icon .personal-info-input {
   padding-right: 2.5rem;
 }
-
-
 
 .icon-container {
   position: absolute;
