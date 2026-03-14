@@ -254,10 +254,6 @@
   z-index: 1000;
 } */
 
-
-
-
-
 @media (max-width: 600px) {
   .glass-container {
     flex-direction: column;
