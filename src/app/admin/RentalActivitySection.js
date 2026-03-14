@@ -8499,16 +8499,7 @@ const RentalActivitySection = ({ subSection }) => {
 
                               {showMoreFor === rental.id && (
                                 <div className="more-dropdown">
-                                  {/* <button
-                                    className="action-button reserve"
-onClick={() => {
-  setReserveUnitId(rental.id);
-  setShowReserveConfirm(true);
-  setShowMoreFor(null);
-}}
-                                  >
-                                    Reserve
-                                  </button> */}
+
                                   {String(rental.status || "").toLowerCase() !==
                                     "pending" && (
                                     <button
