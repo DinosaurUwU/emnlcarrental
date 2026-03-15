@@ -2654,44 +2654,7 @@ const BookingPage = ({
                 </div>
               )}
 
-              {/* {uploadedID && (
-                <div className="image-preview">
-                  {(() => {
-                    if (typeof uploadedID === "string") {
-                      return (
-                        <img
-                          src={uploadedID}
-                          alt="Uploaded ID"
-                          onClick={handleImageClick}
-                          className="preview-thumbnail"
-                        />
-                      );
-                    } else if (uploadedID?.preview) {
-                      return (
-                        <img
-                          src={uploadedID.preview}
-                          alt="Uploaded ID"
-                          onClick={handleImageClick}
-                          className="preview-thumbnail"
-                        />
-                      );
-                    } else if (
-                      uploadedID instanceof File ||
-                      uploadedID instanceof Blob
-                    ) {
-                      return (
-                        <img
-                          src={URL.createObjectURL(uploadedID)}
-                          alt="Uploaded ID"
-                          onClick={handleImageClick}
-                          className="preview-thumbnail"
-                        />
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
-              )} */}
+
               {uploadedPreviewSrc && (
                 <div className="image-preview">
                   <img
