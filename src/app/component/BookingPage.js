@@ -2871,16 +2871,7 @@ const BookingPage = ({
         </button>
       </form>
 
-      {/* <div ref={galleryRef} style={{ display: "none" }}>
-        <a
-          href={previewImage}
-          data-pswp-width={2873} // Recommended width
-          data-pswp-height={1690} // Recommended height
-          data-pswp-index={0}
-        >
-          <img src={previewImage} alt="" />
-        </a>
-      </div> */}
+
 
       <div ref={galleryRef} style={{ display: "none" }}>
         <a
