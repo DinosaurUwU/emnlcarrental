@@ -160,18 +160,18 @@
   z-index: 0;
 } */
 
-
 .booking-image-container {
   position: relative;
   width: 100%;
   height: 740px !important;
   border-radius: 5px;
   overflow: hidden;
-  transition: opacity 0.2s ease, transform 0.4s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.4s ease;
   z-index: 10;
   box-shadow: none !important;
 }
-
 
 .booking-bg {
   position: absolute;
@@ -182,7 +182,9 @@
   background-size: cover;
   background-position: center;
   z-index: 0;
-  transition: opacity 0.2s ease, transform 0.4s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.4s ease;
 }
 
 .booking-bg::before {
@@ -402,10 +404,9 @@
 }
 
 .hidden-unit {
-  color: #DC3545 !important;
-  background-color: #F8D7DA !important;
+  color: #dc3545 !important;
+  background-color: #f8d7da !important;
 }
-
 
 /* Form Fields */
 .drive-type-form-row {
@@ -507,10 +508,6 @@ select option {
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
 
-
-
-
-
 .form-row .first-name-field {
   position: relative;
   flex: 1 1 calc(50% - 10px); /* keep original 2-column look */
@@ -521,7 +518,6 @@ select option {
 .form-row .first-name-field:nth-child(5) {
   flex-basis: 100%;
 }
-
 
 .form-row .first-name-inner-label {
   position: absolute;
@@ -537,22 +533,25 @@ select option {
   z-index: 0;
   opacity: 0;
   transform: translateY(-2px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
-.form-row .first-name-field:has(.first-name-input:not(:placeholder-shown)) .first-name-inner-label {
+.form-row
+  .first-name-field:has(.first-name-input:not(:placeholder-shown))
+  .first-name-inner-label {
   opacity: 1;
   transform: translateY(0);
 }
-
 
 .form-row .first-name-input {
   width: 100%;
   font-weight: 700;
   box-sizing: border-box;
-  height: 46px;                 
+  height: 46px;
   min-height: 46px;
-  padding: 10px !important;   
+  padding: 10px !important;
   line-height: 1.2;
   transition: padding 0.2s ease;
   text-align: left;
@@ -563,12 +562,6 @@ select option {
   padding-top: 18px !important;
   padding-bottom: 6px !important;
 }
-
-
-
-
-
-
 
 .car-selection-row > div:first-child {
   flex: 0.25;
@@ -736,10 +729,9 @@ select option {
 }
 
 .booking-overlay select option.hidden-unit {
-  color: #DC3545 !important;
-  background-color: #F8D7DA !important;
+  color: #dc3545 !important;
+  background-color: #f8d7da !important;
 }
-
 
 .booking-overlay select:active,
 .booking-overlay select:focus {
@@ -1301,4 +1293,3 @@ select option {
   max-height: 90vh;
   border-radius: 8px;
 }
-
