@@ -2885,8 +2885,7 @@ const BookingPage = ({
       <div ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
-          // data-pswp-width={2873}
-          // data-pswp-height={1690}
+
           data-pswp-width={previewImageSize.width}
           data-pswp-height={previewImageSize.height}
           data-pswp-index={0}
@@ -2894,28 +2893,7 @@ const BookingPage = ({
           <img src={previewImage} alt="" />
         </a>
 
-        {/* {(() => {
-          const uploadedPreviewSrc =
-            uploadedID?.preview ||
-            (typeof uploadedID === "string" ? uploadedID : null) ||
-            (uploadedID?.file ? URL.createObjectURL(uploadedID.file) : null) ||
-            (uploadedID instanceof File || uploadedID instanceof Blob
-              ? URL.createObjectURL(uploadedID)
-              : null);
 
-          if (!uploadedPreviewSrc) return null;
-
-          return (
-            <a
-              href={uploadedPreviewSrc}
-          data-pswp-width={2873}
-          data-pswp-height={1690}
-          data-pswp-index={1}
-            >
-              <img src={uploadedPreviewSrc} alt="" />
-            </a>
-          );
-        })()} */}
         {uploadedPreviewSrc && (
           <a
             href={uploadedPreviewSrc}
