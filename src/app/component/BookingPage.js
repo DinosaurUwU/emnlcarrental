@@ -1416,12 +1416,12 @@ const BookingPage = ({
     );
 
     const previewData = {
-      // unitImage: selectedUnit?.image || "N/A",
+  
       unitImage: selectedUnit?.imageId || "N/A",
       imageId: selectedUnit?.imageId || "N/A",
       plateNo: selectedUnit?.plateNo || "N/A",
       carType: selectedUnit?.carType || "N/A",
-      // carName: selectedCar,
+ 
       carName: selectedUnit?.name || "",
 
       drivingOption: driveType,
@@ -1447,7 +1447,7 @@ const BookingPage = ({
       occupation: formData.occupation,
 
       address: formData.address,
-      // driverLicense: uploadedID,
+
       driverLicense:
         uploadedID?.file || uploadedID?.preview || uploadedID || null,
       billedDays,
