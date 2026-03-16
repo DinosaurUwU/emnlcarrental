@@ -1157,8 +1157,6 @@ const BookingPage = ({
       : null;
     const end = endDate ? new Date(`${endDate}T${endTime || "10:00"}`) : null;
 
-    // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
     const selectedUnit =
       allUnitData.find((unit) => unit.id === selectedCarId) ||
       unitData.find((unit) => unit.id === selectedCarId);
