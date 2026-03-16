@@ -1177,7 +1177,7 @@ const BookingPage = ({
       if (!isFlatRateSameDay) {
         diffDays = Math.floor(diffHours / 24);
         extraHours = Math.round(diffHours % 24);
-        // extraHourCharge = extraHours > 0 ? extraHours * 350 : 0;
+
         extraHourCharge =
           extraHours > 0 ? extraHours * (selectedUnit.extension || 0) : 0;
       } else {
@@ -1191,12 +1191,12 @@ const BookingPage = ({
     let total = finalRate * diffDays;
 
     if (driveType === "With Driver") {
-      // total += diffDays * 1000;
+
       total += diffDays * (selectedUnit.driverRate || 0);
     }
 
     if (dropOffType === "Drop-off") {
-      // total += 500;
+
       total += selectedUnit.deliveryFee || 0;
     }
 
