@@ -2271,23 +2271,7 @@ const BookingPage = ({
                   <p className="confirm-no-id">No file uploaded</p>
                 )}
 
-                {/* {uploadedID ? (
-                  <img
-                    // src={URL.createObjectURL(uploadedID)}
-                    src={
-                      uploadedID?.preview ||
-                      (typeof uploadedID === "string" ? uploadedID : null) ||
-                      (uploadedID?.file
-                        ? URL.createObjectURL(uploadedID.file)
-                        : null)
-                    }
-                    alt="Driver's License"
-                    className="confirm-id-preview"
-                    onClick={handleImageClick}
-                  />
-                ) : (
-                  <p className="confirm-no-id">No file uploaded</p>
-                )} */}
+
               </div>
 
               <h4 className="confirm-subtitle">QUOTATION SUMMARY</h4>
