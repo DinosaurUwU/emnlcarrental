@@ -783,7 +783,7 @@ const BookingPage = ({
         setSelectedCarId(unitByName.id);
       }
     }
-    // }, [allUnitData, unitData, prefillData, selectedCarId, fetchImageFromFirestore]);
+
   }, [allUnitData, unitData, prefillData, selectedCarId]);
 
   useEffect(() => {
