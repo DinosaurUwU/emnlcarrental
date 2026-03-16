@@ -1609,7 +1609,7 @@ const BookingPage = ({
       setShowConfirmOverlay(false);
       setShowBookingConfirmOverlay(false);
       closeOverlay();
-      // navigate("/admin");
+  
       router.push("/admin");
       return;
     }
@@ -1620,7 +1620,7 @@ const BookingPage = ({
       const isEditing = bookingPreviewData?.isEditing;
       const isResubmitting = bookingPreviewData?.isResubmitting;
 
-      setIsSubmitting(true); // show submitting overlay
+      setIsSubmitting(true);
 
       if (isResubmitting) {
         // Resubmitting a rejected booking
@@ -1656,14 +1656,14 @@ const BookingPage = ({
 
   const handleCloseOverlay = () => {
     if (hasChanges) {
-      setShowConfirmOverlay(true); // Show confirmation overlay
+      setShowConfirmOverlay(true);
     } else {
-      closeOverlay(); // Close immediately if no changes
+      closeOverlay();
     }
   };
 
   const handleClearForm = () => {
-    // setSelectedCar("");
+
     setSelectedCarId("");
 
     setSelectedCarType("ALL");
@@ -1703,7 +1703,6 @@ const BookingPage = ({
 
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
-      // setSelectedCar("");
       setSelectedCarId("");
 
       setSelectedCarType("ALL");
@@ -1927,35 +1926,7 @@ const BookingPage = ({
         </div>
       )}
 
-      {/* {isImageModalOpen && uploadedID && (
-        <div
-          className={`image-modal-overlay ${isImageModalOpen ? "active" : ""}`}
-          onClick={handleCloseImageModal}
-        >
-          <div className="image-modal-content">
-            <img
-              // src={
-              //   typeof uploadedID === "string"
-              //     ? uploadedID
-              //     : URL.createObjectURL(uploadedID)
-              // }
 
-              src={
-                uploadedID?.preview ||
-                (typeof uploadedID === "string" ? uploadedID : null) ||
-                (uploadedID?.file
-                  ? URL.createObjectURL(uploadedID.file)
-                  : null) ||
-                (uploadedID instanceof File || uploadedID instanceof Blob
-                  ? URL.createObjectURL(uploadedID)
-                  : "/assets/images/image1.png")
-              }
-              alt="Driver's License"
-              className="image-fullview"
-            />
-          </div>
-        </div>
-      )} */}
 
       {showClearFormOverlay && (
         <div className="overlay-delete">
