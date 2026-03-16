@@ -800,9 +800,7 @@ const BookingPage = ({
     setIsDurationInvalid(diffHours < 1);
   }, [startDate, endDate, startTime, endTime]);
 
-  // const handleImageClick = () => {
-  //   setIsImageModalOpen(true);
-  // };
+
 
   const handleImageClick = () => {
     document.querySelector(`[data-pswp-index="1"]`)?.click();
