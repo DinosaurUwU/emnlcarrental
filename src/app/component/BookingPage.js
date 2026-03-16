@@ -1364,8 +1364,7 @@ const BookingPage = ({
       return;
     }
 
-    // const selectedUnit = unitData.find((unit) => unit.name === selectedCar);
-    // const selectedUnit = unitData.find((unit) => unit.id === selectedCarId);
+
     const selectedUnit =
       allUnitData.find((unit) => unit.id === selectedCarId) ||
       unitData.find((unit) => unit.id === selectedCarId);
