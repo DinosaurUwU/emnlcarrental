@@ -73,6 +73,8 @@ const FleetDetails = () => {
   const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
 
+  const [navOpen, setNavOpen] = useState(false);
+
   useEffect(() => {
     // Defensive cleanup for login/logout redirects that can leave body locked
     document.body.classList.remove("modal-open", "no-scroll");
@@ -723,55 +725,53 @@ const FleetDetails = () => {
 
 
 
-      <div className="navbar-overlay">
-        <div className="floating-nav">
-          <button className="floating-nav-main">
-            ☰
-          </button>
-          <div className="floating-nav-menu">
-            {sedanUnits.length > 0 && (
-              <button
-                className={`floating-nav-item ${activeSection === "sedan" ? "active" : ""}`}
-                onClick={() => scrollToSection(sedanRef)}
-              >
-                🚗 SEDAN
-              </button>
-            )}
-            {suvUnits.length > 0 && (
-              <button
-                className={`floating-nav-item ${activeSection === "suv" ? "active" : ""}`}
-                onClick={() => scrollToSection(suvRef)}
-              >
-                🚙 SUV
-              </button>
-            )}
-            {mpvUnits.length > 0 && (
-              <button
-                className={`floating-nav-item ${activeSection === "mpv" ? "active" : ""}`}
-                onClick={() => scrollToSection(mpvRef)}
-              >
-                🚐 MPV
-              </button>
-            )}
-            {vanUnits.length > 0 && (
-              <button
-                className={`floating-nav-item ${activeSection === "van" ? "active" : ""}`}
-                onClick={() => scrollToSection(vanRef)}
-              >
-                🚐 VAN
-              </button>
-            )}
-            {pickupUnits.length > 0 && (
-              <button
-                className={`floating-nav-item ${activeSection === "pickup" ? "active" : ""}`}
-                onClick={() => scrollToSection(pickupRef)}
-              >
-                🛻 PICKUP
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+<div className="navbar-overlay">
+  <div className={`floating-nav ${navOpen ? "open" : ""}`}>
+
+    <button
+      className="floating-nav-main"
+      onClick={() => setNavOpen(!navOpen)}
+    >
+      ☰
+    </button>
+
+    <button
+      className={`floating-nav-item sedan ${activeSection === "sedan" ? "active" : ""}`}
+      onClick={() => scrollToSection(sedanRef)}
+    >
+      SEDAN
+    </button>
+
+    <button
+      className={`floating-nav-item suv ${activeSection === "suv" ? "active" : ""}`}
+      onClick={() => scrollToSection(suvRef)}
+    >
+      SUV
+    </button>
+
+    <button
+      className={`floating-nav-item mpv ${activeSection === "mpv" ? "active" : ""}`}
+      onClick={() => scrollToSection(mpvRef)}
+    >
+      MPV
+    </button>
+
+    <button
+      className={`floating-nav-item van ${activeSection === "van" ? "active" : ""}`}
+      onClick={() => scrollToSection(vanRef)}
+    >
+      VAN
+    </button>
+
+    <button
+      className={`floating-nav-item pickup ${activeSection === "pickup" ? "active" : ""}`}
+      onClick={() => scrollToSection(pickupRef)}
+    >
+      PICKUP
+    </button>
+
+  </div>
+</div>
 
 
 
