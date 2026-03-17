@@ -641,55 +641,6 @@ will-change: transform;
 }
 
 
-/*
-.sedan-diagonal-section::before {
-  
-}
-
- .sedan-diagonal-section::after {
-  content: "SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN SEDAN";
-  position: absolute;
-  top: 36%;
-  left: -25%;
-  width: 170%;
-  height: 200px;
-  font-size: 10rem;
-  font-weight: bold;
-  color: rgb(248, 248, 248, 0.1);
-  text-transform: uppercase;
-  white-space: nowrap;
-  text-align: center;
-  transform: rotate(5deg);
-  z-index: 2;
-  pointer-events: none;
-  overflow: hidden;
-
-  animation: move-diagonal 20s linear infinite;
-}
-
-@keyframes move-diagonal {
-  0% {
-    transform: translateX(0) rotate(5deg);
-  }
-  100% {
-    transform: translateX(50%) rotate(5deg);
-  }
-} */
-
-
-
-
-
-
-
-/* 
-.diagonal-text {
-  font-size: 10rem;
-  font-weight: bold;
-  color: rgba(248, 248, 248, 0.1);
-  text-transform: uppercase;
-  white-space: nowrap;
-} */
 
 .diagonal-text {
   font-size: 10rem;
