@@ -747,7 +747,7 @@ const BookingPage = ({
         setPreviewImage("/assets/images/image1.png");
       }
     }
-    // }, [prefillData, unitData, fetchImageFromFirestore]);
+
   }, [prefillData, unitData, allUnitData]);
 
   useEffect(() => {
