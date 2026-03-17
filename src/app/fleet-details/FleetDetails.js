@@ -1,19 +1,19 @@
 "use client";
-import React, { useEffect, useRef, useState, useLayoutEffect, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useMemo,
+} from "react";
 import { useUser } from "../lib/UserContext";
 import { useBooking } from "../component/BookingProvider";
 import { useParams } from "next/navigation";
-import PhotoSwipeLightbox from "photoswipe/lightbox";
+
 import "photoswipe/style.css";
 import Header from "../component/Header";
 import Footer from "../component/Footer";
 import "./FleetDetails.css";
-
-// Module-level carousel images (loaded once at import time)
-// const fleetCarouselImages = (() => {
-//   const importAll = (r) => r.keys().map(r);
-//   return importAll(require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/));
-// })();
 
 const normalizeImageSrc = (img) => {
   if (!img) return "";
@@ -28,21 +28,26 @@ const fleetCarouselImages = (() => {
   ).map(normalizeImageSrc);
 })();
 
-  const isValidImageSrc = (src) =>
-    typeof src === "string" &&
-    src.trim() !== "" &&
-    (src.startsWith("data:image/") || src.startsWith("http") || src.startsWith("/"));
+const isValidImageSrc = (src) =>
+  typeof src === "string" &&
+  src.trim() !== "" &&
+  (src.startsWith("data:image/") ||
+    src.startsWith("http") ||
+    src.startsWith("/"));
 
 const fleetCardImageMemory = {};
 
-
 // const FleetDetails = ({ openBooking }) => {
-  const FleetDetails = () => {
+const FleetDetails = () => {
   const { openBooking } = useBooking();
 
-  const { fleetDetailsUnits, fetchImageFromFirestore, imageCache, imageUpdateTrigger, activeBookings } = useUser();
-  const lastTriggerRef = useRef(imageUpdateTrigger);
-  // const [carouselImages, setCarouselImages] = useState([]);
+  const {
+    fleetDetailsUnits,
+    fetchImageFromFirestore,
+    imageCache,
+    imageUpdateTrigger,
+    activeBookings,
+  } = useUser();
 
   const { category } = useParams();
   const sedanRef = useRef(null);
@@ -57,8 +62,6 @@ const fleetCardImageMemory = {};
   const cardRef = useRef(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
-  const importAll = (r) => r.keys().map(r);
-
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideIntervalRef = useRef(null);
   const carouselRef = useRef(null);
@@ -70,7 +73,7 @@ const fleetCardImageMemory = {};
   const [fetchedImages, setFetchedImages] = useState({});
   const [overlayGalleryImages, setOverlayGalleryImages] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
     // Defensive cleanup for login/logout redirects that can leave body locked
     document.body.classList.remove("modal-open", "no-scroll");
     document.body.style.top = "";
@@ -81,80 +84,26 @@ const fleetCardImageMemory = {};
     };
   }, []);
 
-const buildUnitImageMap = (units, cache) => {
-  const map = {};
-  if (!units?.length) return map;
+  const buildUnitImageMap = (units, cache) => {
+    const map = {};
+    if (!units?.length) return map;
 
-  for (const unit of units) {
-    if (!unit.imageId) continue;
+    for (const unit of units) {
+      if (!unit.imageId) continue;
 
-    // Prefer latest cache first; fallback to in-memory only if cache missing.
-    if (cache[unit.imageId]) {
-      map[unit.imageId] = cache[unit.imageId];
-      continue;
+      // Prefer latest cache first; fallback to in-memory only if cache missing.
+      if (cache[unit.imageId]) {
+        map[unit.imageId] = cache[unit.imageId];
+        continue;
+      }
+
+      if (fleetCardImageMemory[unit.imageId]) {
+        map[unit.imageId] = fleetCardImageMemory[unit.imageId];
+      }
     }
 
-    if (fleetCardImageMemory[unit.imageId]) {
-      map[unit.imageId] = fleetCardImageMemory[unit.imageId];
-    }
-  }
-
-  return map;
-};
-
-
-
-  // useEffect(() => {
-  //   const fetchCarouselImages = async () => {
-  //     const maxImages = 20;
-  //     const promises = [];
-
-  //     for (let i = 0; i < maxImages; i++) {
-  //       // promises.push(fetchImageFromFirestore(`FleetPage_${i}`));
-  //       promises.push(fetchImageFromFirestore(`FleetPage_${i}`, true));
-  //     }
-
-  //     const results = await Promise.all(promises);
-  //     const fetchedImages = results
-  //       .filter((result) => result)
-  //       .map((result) => result.base64);
-
-  //     // If no images in Firestore, fallback to local images
-  //     if (fetchedImages.length === 0) {
-  //       const localImages = importAll(
-  //         require.context(
-  //           "./assets/images/carousel",
-  //           false,
-  //           /\.(png|jpe?g|svg)$/,
-  //         ),
-  //       );
-  //       setCarouselImages(localImages);
-  //     } else {
-  //       setCarouselImages(fetchedImages);
-  //     }
-  //   };
-
-  //   fetchCarouselImages();
-  // }, [fetchImageFromFirestore]);
-
-  // Load carousel images from cache (instant) or fetch if not available
-
-
-  // Derive carousel images synchronously from cache (instant)
-  // const carouselImages = useMemo(() => {
-  //   const maxImages = 20;
-  //   const cachedImages = [];
-    
-  //   for (let i = 0; i < maxImages; i++) {
-  //     const imageId = `FleetPage_${i}`;
-  //     if (imageCache[imageId]) {
-  //       cachedImages.push(imageCache[imageId].base64);
-  //     }
-  //   }
-    
-  //   // Use cached images if available, otherwise use module-level fallback (instant)
-  //   return cachedImages.length > 0 ? cachedImages : fleetCarouselImages;
-  // }, [imageCache]);
+    return map;
+  };
 
   const carouselImages = useMemo(() => {
     const maxImages = 20;
@@ -184,46 +133,11 @@ const buildUnitImageMap = (units, cache) => {
     })();
   }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
-
-
-
-  // useEffect(() => {
-  //   const fetchCarouselImages = async () => {
-  //     const maxImages = 20;
-  //     const loadedImages = [];
-
-  //     for (let i = 0; i < maxImages; i++) {
-  //       const imageId = `FleetPage_${i}`;
-        
-  //       if (imageCache[imageId]) {
-  //         loadedImages.push(imageCache[imageId].base64);
-  //       } else {
-  //         const result = await fetchImageFromFirestore(imageId, true);
-  //         if (result) loadedImages.push(result.base64);
-  //       }
-  //     }
-
-  //     if (loadedImages.length === 0) {
-  //       const localImages = importAll(
-  //         require.context("./assets/images/carousel", false, /\.(png|jpe?g|svg)$/),
-  //       );
-  //       setCarouselImages(localImages);
-  //     } else {
-  //       setCarouselImages(loadedImages);
-  //     }
-  //     lastTriggerRef.current = imageUpdateTrigger;
-  //   };
-
-  //   fetchCarouselImages();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [imageUpdateTrigger]);
-
-
   // triple images for smooth infinite loop
   const images = overlayGalleryImages;
   const extendedImages = [...images, ...images, ...images];
 
-   const [overlayImageSizes, setOverlayImageSizes] = useState({});
+  const [overlayImageSizes, setOverlayImageSizes] = useState({});
   const [fleetCarouselImageSizes, setFleetCarouselImageSizes] = useState({});
 
   useEffect(() => {
@@ -349,168 +263,46 @@ const buildUnitImageMap = (units, cache) => {
     });
   };
 
-  // useEffect(() => {
-  //   const fetchImages = async () => {
-  //     if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
+  useEffect(() => {
+    const instantMap = buildUnitImageMap(fleetDetailsUnits, imageCache);
+    setFetchedImages((prev) => ({ ...prev, ...instantMap }));
+  }, [fleetDetailsUnits, imageCache]);
 
-  //     const promises = fleetDetailsUnits.map(async (unit) => {
-  //       if (!unit.imageId) return null;
-  //       try {
-  //         // const { base64, updatedAt } = await fetchImageFromFirestore(
-  //         //   unit.imageId,
-  //         // );
-  //         const { base64, updatedAt } = await fetchImageFromFirestore(unit.imageId, true);
-  //         return { [unit.imageId]: { base64, updatedAt } };
-  //       } catch {
-  //         return {
-  //           [unit.imageId]: {
-  //             base64: "/assets/images/default.png",
-  //             updatedAt: Date.now(),
-  //           },
-  //         };
-  //       }
-  //     });
+  useEffect(() => {
+    if (!fleetDetailsUnits?.length) return;
 
-  //     const results = await Promise.all(promises);
-  //     const merged = results.reduce((acc, cur) => ({ ...acc, ...cur }), {});
-  //     setFetchedImages(merged);
-  //   };
+    let cancelled = false;
 
-  //   fetchImages();
-  // }, [fleetDetailsUnits, fetchImageFromFirestore]);
-
-
-
-
-// useEffect(() => {
-//   if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) {
-//     setFetchedImages({});
-//     return;
-//   }
-
-//   let cancelled = false;
-
-//   const baseMap = {};
-//   const missingIds = [];
-
-//   for (const unit of fleetDetailsUnits) {
-//     if (!unit.imageId) continue;
-
-//     if (imageCache[unit.imageId]) {
-//       baseMap[unit.imageId] = imageCache[unit.imageId];
-//     } else {
-//       baseMap[unit.imageId] = {
-//         base64: "/assets/images/default.png",
-//         updatedAt: 0,
-//       };
-//       missingIds.push(unit.imageId);
-//     }
-//   }
-
-//   // instant paint from cache/default
-//   setFetchedImages(baseMap);
-
-//   // fill missing images from firestore/indexeddb path
-//   if (missingIds.length > 0) {
-//     (async () => {
-//       const results = await Promise.all(
-//         missingIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null))
-//       );
-
-//       if (cancelled) return;
-
-//       setFetchedImages((prev) => {
-//         const merged = { ...prev };
-//         results.forEach((result, i) => {
-//           if (result) merged[missingIds[i]] = result;
-//         });
-//         return merged;
-//       });
-//     })();
-//   }
-
-//   return () => {
-//     cancelled = true;
-//   };
-// }, [fleetDetailsUnits, imageCache, fetchImageFromFirestore, imageUpdateTrigger]);
-
-
-
-useEffect(() => {
-  const instantMap = buildUnitImageMap(fleetDetailsUnits, imageCache);
-  setFetchedImages((prev) => ({ ...prev, ...instantMap }));
-}, [fleetDetailsUnits, imageCache]);
-
-useEffect(() => {
-  if (!fleetDetailsUnits?.length) return;
-
-  let cancelled = false;
-
-  const unitImageIds = Array.from(
-    new Set(
-      fleetDetailsUnits
-        .map((u) => u.imageId)
-        .filter(Boolean),
-    ),
-  );
-
-  (async () => {
-    const results = await Promise.all(
-      unitImageIds.map((id) => fetchImageFromFirestore(id, true).catch(() => null)),
+    const unitImageIds = Array.from(
+      new Set(fleetDetailsUnits.map((u) => u.imageId).filter(Boolean)),
     );
 
-    if (cancelled) return;
+    (async () => {
+      const results = await Promise.all(
+        unitImageIds.map((id) =>
+          fetchImageFromFirestore(id, true).catch(() => null),
+        ),
+      );
 
-    const patch = {};
-    results.forEach((img, i) => {
-      const id = unitImageIds[i];
-      if (!img) return;
-      patch[id] = img;
-      fleetCardImageMemory[id] = img;
-    });
+      if (cancelled) return;
 
-    if (Object.keys(patch).length) {
-      setFetchedImages((prev) => ({ ...prev, ...patch }));
-    }
-  })();
+      const patch = {};
+      results.forEach((img, i) => {
+        const id = unitImageIds[i];
+        if (!img) return;
+        patch[id] = img;
+        fleetCardImageMemory[id] = img;
+      });
 
-  return () => {
-    cancelled = true;
-  };
-}, [fleetDetailsUnits, fetchImageFromFirestore, imageUpdateTrigger]);
+      if (Object.keys(patch).length) {
+        setFetchedImages((prev) => ({ ...prev, ...patch }));
+      }
+    })();
 
-
-
-
-  // useEffect(() => {
-  //   const fetchImages = async () => {
-  //     if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
-
-  //     const merged = {};
-      
-  //     for (const unit of fleetDetailsUnits) {
-  //       if (!unit.imageId) continue;
-        
-  //       if (imageCache[unit.imageId]) {
-  //         merged[unit.imageId] = imageCache[unit.imageId];
-  //       } else {
-  //         try {
-  //           const result = await fetchImageFromFirestore(unit.imageId, true);
-  //           merged[unit.imageId] = result || { base64: "/assets/images/default.png", updatedAt: Date.now() };
-  //         } catch {
-  //           merged[unit.imageId] = { base64: "/assets/images/default.png", updatedAt: Date.now() };
-  //         }
-  //       }
-  //     }
-      
-  //     setFetchedImages(merged);
-  //   };
-
-  //   fetchImages();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [fleetDetailsUnits, imageUpdateTrigger]);
-
-
+    return () => {
+      cancelled = true;
+    };
+  }, [fleetDetailsUnits, fetchImageFromFirestore, imageUpdateTrigger]);
 
   useEffect(() => {
     if (expandedCard?.galleryIds?.length > 0) {
@@ -527,148 +319,97 @@ useEffect(() => {
 
   const galleryRef = useRef(null);
 
-  // useEffect(() => {
-  //   const lightbox = new PhotoSwipeLightbox({
-  //     gallery: galleryRef.current,
-  //     children: "a",
-  //     pswpModule: () => import("photoswipe"),
-  //     showHideAnimationType: "fade",
-  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-  //     maxWidth: window.innerWidth * 0.8,
-  //     maxHeight: window.innerHeight * 0.8,
-  //   });
-
-  //   lightbox.init();
-  //   return () => lightbox.destroy();
-  // }, []);
-
   useEffect(() => {
-  if (!galleryRef.current) return;
+    if (!galleryRef.current) return;
 
-  let mounted = true;
-  let idleId = null;
-  let lightbox = null;
+    let mounted = true;
+    let idleId = null;
+    let lightbox = null;
 
-  const init = async () => {
-    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
-      import("photoswipe/lightbox"),
-      import("photoswipe/style.css"),
-    ]);
+    const init = async () => {
+      const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+        import("photoswipe/lightbox"),
+        import("photoswipe/style.css"),
+      ]);
 
-    if (!mounted || !galleryRef.current) return;
+      if (!mounted || !galleryRef.current) return;
 
-    // lightbox = new PhotoSwipeLightbox({
-    //   gallery: galleryRef.current,
-    //   children: "a",
-    //   pswpModule: () => import("photoswipe"),
-    //   showHideAnimationType: "fade",
-    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-    //   maxWidth: window.innerWidth * 0.8,
-    //   maxHeight: window.innerHeight * 0.8,
-    // });
-        lightbox = new PhotoSwipeLightbox({
-      gallery: galleryRef.current,
-      children: "a",
-      pswpModule: () => import("photoswipe"),
-      showHideAnimationType: "fade",
-      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-      maxWidth: window.innerWidth * 0.8,
-      maxHeight: window.innerHeight * 0.8,
-      preloaderDelay: 0,
-    });
+      lightbox = new PhotoSwipeLightbox({
+        gallery: galleryRef.current,
+        children: "a",
+        pswpModule: () => import("photoswipe"),
+        showHideAnimationType: "fade",
+        paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+        maxWidth: window.innerWidth * 0.8,
+        maxHeight: window.innerHeight * 0.8,
+        preloaderDelay: 0,
+      });
 
-    lightbox.init();
-  };
+      lightbox.init();
+    };
 
-  if ("requestIdleCallback" in window) {
-    idleId = window.requestIdleCallback(init, { timeout: 1200 });
-  } else {
-    idleId = setTimeout(init, 0);
-  }
-
-  return () => {
-    mounted = false;
-    if (typeof idleId === "number") clearTimeout(idleId);
-    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
-      window.cancelIdleCallback(idleId);
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(init, { timeout: 1200 });
+    } else {
+      idleId = setTimeout(init, 0);
     }
-    lightbox?.destroy();
-  };
-}, []);
 
+    return () => {
+      mounted = false;
+      if (typeof idleId === "number") clearTimeout(idleId);
+      if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+        window.cancelIdleCallback(idleId);
+      }
+      lightbox?.destroy();
+    };
+  }, []);
 
   const carouselGalleryRef = useRef(null);
 
   useEffect(() => {
-  if (!carouselGalleryRef.current) return;
+    if (!carouselGalleryRef.current) return;
 
-  let mounted = true;
-  let idleId = null;
-  let carouselLightbox = null;
+    let mounted = true;
+    let idleId = null;
+    let carouselLightbox = null;
 
-  const init = async () => {
-    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
-      import("photoswipe/lightbox"),
-      import("photoswipe/style.css"),
-    ]);
+    const init = async () => {
+      const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+        import("photoswipe/lightbox"),
+        import("photoswipe/style.css"),
+      ]);
 
-    if (!mounted || !carouselGalleryRef.current) return;
+      if (!mounted || !carouselGalleryRef.current) return;
 
-    // carouselLightbox = new PhotoSwipeLightbox({
-    //   gallery: carouselGalleryRef.current,
-    //   children: "a",
-    //   pswpModule: () => import("photoswipe"),
-    //   showHideAnimationType: "fade",
-    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-    //   maxWidth: window.innerWidth * 0.8,
-    //   maxHeight: window.innerHeight * 0.8,
-    // });
+      carouselLightbox = new PhotoSwipeLightbox({
+        gallery: carouselGalleryRef.current,
+        children: "a",
+        pswpModule: () => import("photoswipe"),
+        showHideAnimationType: "fade",
+        paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+        maxWidth: window.innerWidth * 0.8,
+        maxHeight: window.innerHeight * 0.8,
+        preloaderDelay: 0,
+      });
 
-        carouselLightbox = new PhotoSwipeLightbox({
-      gallery: carouselGalleryRef.current,
-      children: "a",
-      pswpModule: () => import("photoswipe"),
-      showHideAnimationType: "fade",
-      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-      maxWidth: window.innerWidth * 0.8,
-      maxHeight: window.innerHeight * 0.8,
-      preloaderDelay: 0,
-    });
+      carouselLightbox.init();
+    };
 
-    carouselLightbox.init();
-  };
-
-  if ("requestIdleCallback" in window) {
-    idleId = window.requestIdleCallback(init, { timeout: 1200 });
-  } else {
-    idleId = setTimeout(init, 0);
-  }
-
-  return () => {
-    mounted = false;
-    if (typeof idleId === "number") clearTimeout(idleId);
-    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
-      window.cancelIdleCallback(idleId);
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(init, { timeout: 1200 });
+    } else {
+      idleId = setTimeout(init, 0);
     }
-    carouselLightbox?.destroy();
-  };
-}, []);
 
-
-  // useEffect(() => {
-  //   const carouselLightbox = new PhotoSwipeLightbox({
-  //     gallery: carouselGalleryRef.current,
-  //     children: "a",
-  //     pswpModule: () => import("photoswipe"),
-  //     showHideAnimationType: "fade",
-  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-  //     maxWidth: window.innerWidth * 0.8,
-  //     maxHeight: window.innerHeight * 0.8,
-  //   });
-
-  //   carouselLightbox.init();
-  //   return () => carouselLightbox.destroy();
-  // }, []);
+    return () => {
+      mounted = false;
+      if (typeof idleId === "number") clearTimeout(idleId);
+      if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+        window.cancelIdleCallback(idleId);
+      }
+      carouselLightbox?.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -719,22 +460,28 @@ useEffect(() => {
   );
 
   const activeBookingPlateSet = useMemo(() => {
-  return new Set(
-    (activeBookings || [])
-      .filter((booking) => {
-        const status = String(booking?.status || "").toLowerCase();
-        return status === "active" || status === "pending";
-      })
-      .map((booking) => String(booking?.plateNo || "").trim().toUpperCase())
-      .filter(Boolean),
-  );
-}, [activeBookings]);
+    return new Set(
+      (activeBookings || [])
+        .filter((booking) => {
+          const status = String(booking?.status || "").toLowerCase();
+          return status === "active" || status === "pending";
+        })
+        .map((booking) =>
+          String(booking?.plateNo || "")
+            .trim()
+            .toUpperCase(),
+        )
+        .filter(Boolean),
+    );
+  }, [activeBookings]);
 
-const isUnitBooked = (car) => {
-  const plate = String(car?.plateNo || car?.id || "").trim().toUpperCase();
-  if (plate && activeBookingPlateSet.has(plate)) return true;
-  return !!car?.hidden;
-};
+  const isUnitBooked = (car) => {
+    const plate = String(car?.plateNo || car?.id || "")
+      .trim()
+      .toUpperCase();
+    if (plate && activeBookingPlateSet.has(plate)) return true;
+    return !!car?.hidden;
+  };
 
   const specificationOrder = [
     "Type",
@@ -746,7 +493,7 @@ const isUnitBooked = (car) => {
     "Features",
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     if (carouselImages.length === 0) return;
 
     slideIntervalRef.current = setInterval(() => {
@@ -758,17 +505,6 @@ const isUnitBooked = (car) => {
 
     return () => clearInterval(slideIntervalRef.current);
   }, [carouselImages]);
-
-
-  // useEffect(() => {
-  //   slideIntervalRef.current = setInterval(() => {
-  //     setCurrentSlide((prev) =>
-  //       prev === carouselImages.length - 1 ? 0 : prev + 1,
-  //     );
-  //   }, 3000);
-
-  //   return () => clearInterval(slideIntervalRef.current);
-  // }, []);
 
   const goToSlide = (newIndex) => {
     setCurrentSlide(newIndex);
@@ -849,7 +585,10 @@ const isUnitBooked = (car) => {
         const maxTop = 58;
         const minTop = 43;
 
-        const clampedWidth = Math.min(Math.max(currentWidth, minWidth), maxWidth);
+        const clampedWidth = Math.min(
+          Math.max(currentWidth, minWidth),
+          maxWidth,
+        );
         const t = (clampedWidth - minWidth) / (maxWidth - minWidth);
         const interpolatedTop = minTop + t * (maxTop - minTop);
 
@@ -919,8 +658,8 @@ const isUnitBooked = (car) => {
       // Allow reverse animation before removing the overlay content
       setTimeout(() => {
         setExpandedCard(null);
-        cardRef.current = null; // Clear reference
-      }, 500); // Match the animation duration
+        cardRef.current = null;
+      }, 500);
     }
   };
 
@@ -930,9 +669,9 @@ const isUnitBooked = (car) => {
 
   return (
     <div className="fleet-details">
-       <Header openBooking={openBooking} />
+      <Header openBooking={openBooking} />
 
-      <div className="navbar-overlay" ref={navbarOverlayRef}>
+      {/* <div className="navbar-overlay" ref={navbarOverlayRef}>
         <div className="navbar">
           {sedanUnits.length > 0 && (
             <button
@@ -979,10 +718,66 @@ const isUnitBooked = (car) => {
             </button>
           )}
         </div>
+      </div> */}
+
+
+
+
+      <div className="navbar-overlay">
+        <div className="floating-nav">
+          <button className="floating-nav-main">
+            ☰
+          </button>
+          <div className="floating-nav-menu">
+            {sedanUnits.length > 0 && (
+              <button
+                className={`floating-nav-item ${activeSection === "sedan" ? "active" : ""}`}
+                onClick={() => scrollToSection(sedanRef)}
+              >
+                🚗 SEDAN
+              </button>
+            )}
+            {suvUnits.length > 0 && (
+              <button
+                className={`floating-nav-item ${activeSection === "suv" ? "active" : ""}`}
+                onClick={() => scrollToSection(suvRef)}
+              >
+                🚙 SUV
+              </button>
+            )}
+            {mpvUnits.length > 0 && (
+              <button
+                className={`floating-nav-item ${activeSection === "mpv" ? "active" : ""}`}
+                onClick={() => scrollToSection(mpvRef)}
+              >
+                🚐 MPV
+              </button>
+            )}
+            {vanUnits.length > 0 && (
+              <button
+                className={`floating-nav-item ${activeSection === "van" ? "active" : ""}`}
+                onClick={() => scrollToSection(vanRef)}
+              >
+                🚐 VAN
+              </button>
+            )}
+            {pickupUnits.length > 0 && (
+              <button
+                className={`floating-nav-item ${activeSection === "pickup" ? "active" : ""}`}
+                onClick={() => scrollToSection(pickupRef)}
+              >
+                🛻 PICKUP
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Carousel */}
 
+
+
+
+      {/* Carousel */}
       <div ref={carouselRef} className="fleet-carousel-container">
         {carouselImages.map((image, index) => (
           <div
@@ -1007,17 +802,6 @@ const isUnitBooked = (car) => {
               index === currentSlide ? "active" : "inactive"
             }`}
           >
-            {/* <img
-              src={image}
-              alt={`Slide ${index}`}
-              className="hero-carousel-image"
-              onClick={() => {
-                document
-                  .querySelector(`[data-pswp-index="carousel-${index}"]`)
-                  ?.click();
-              }}
-            /> */}
-
             <img
               src={image}
               alt={`Slide ${index}`}
@@ -1026,11 +810,11 @@ const isUnitBooked = (car) => {
               decoding="async"
               fetchPriority={index === currentSlide ? "high" : "auto"}
               onClick={() => {
-                document.querySelector(`[data-pswp-index="carousel-${index}"]`)?.click();
+                document
+                  .querySelector(`[data-pswp-index="carousel-${index}"]`)
+                  ?.click();
               }}
             />
-
-
           </div>
         ))}
 
@@ -1089,25 +873,16 @@ const isUnitBooked = (car) => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    {/* <img
-                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
+                    <img
+                      src={
+                        fetchedImages[car.imageId]?.base64 ||
+                        "/assets/images/default.png"
+                      }
                       alt={car.name}
                       className="car-image"
-                      onLoad={(e) => e.target.style.opacity = 1}
-                      onError={(e) => {
-                        e.target.src = "/assets/images/default.png";
-                      }}
-                    /> */}
-
-                    <img
-                    src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-                    alt={car.name}
-                    className="car-image"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
 
                   {/* Content Overlay */}
@@ -1138,8 +913,8 @@ const isUnitBooked = (car) => {
 
                       <p
                         className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
->
-  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                      >
+                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1178,22 +953,16 @@ const isUnitBooked = (car) => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    {/* <img
+                    <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    /> */}
-                    <img
-                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-                      alt={car.name}
-                      className="car-image"
                       loading="lazy"
                       decoding="async"
                     />
-
                   </div>
 
                   {/* Content Overlay */}
@@ -1224,8 +993,8 @@ const isUnitBooked = (car) => {
 
                       <p
                         className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
->
-  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                      >
+                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1264,22 +1033,16 @@ const isUnitBooked = (car) => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    {/* <img
+                    <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    /> */}
-                    <img
-                      src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-                      alt={car.name}
-                      className="car-image"
                       loading="lazy"
                       decoding="async"
                     />
-
                   </div>
 
                   {/* Content Overlay */}
@@ -1310,8 +1073,8 @@ const isUnitBooked = (car) => {
 
                       <p
                         className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
->
-  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                      >
+                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1350,22 +1113,16 @@ const isUnitBooked = (car) => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    {/* <img
+                    <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    /> */}
-                    <img
-  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-  alt={car.name}
-  className="car-image"
-  loading="lazy"
-  decoding="async"
-/>
-
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
 
                   {/* Content Overlay */}
@@ -1396,8 +1153,8 @@ const isUnitBooked = (car) => {
 
                       <p
                         className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
->
-  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                      >
+                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1437,22 +1194,16 @@ const isUnitBooked = (car) => {
                   onClick={(event) => openOverlay(car, event)}
                 >
                   <div className="car-image-container">
-                    {/* <img
+                    <img
                       src={
                         fetchedImages[car.imageId]?.base64 ||
                         "/assets/images/default.png"
                       }
                       alt={car.name}
                       className="car-image"
-                    /> */}
-                    <img
-  src={fetchedImages[car.imageId]?.base64 || "/assets/images/default.png"}
-  alt={car.name}
-  className="car-image"
-  loading="lazy"
-  decoding="async"
-/>
-
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
 
                   {/* Content Overlay */}
@@ -1482,8 +1233,8 @@ const isUnitBooked = (car) => {
                       </h3>
                       <p
                         className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
->
-  {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                      >
+                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
                       </p>
                     </div>
                     <button className="view-details">View</button>
@@ -1529,8 +1280,8 @@ const isUnitBooked = (car) => {
 
                 <p
                   className={`overlay-availability ${isUnitBooked(expandedCard) ? "rented" : "available"}`}
->
-  {isUnitBooked(expandedCard) ? "Ongoing Rent" : "Available"}
+                >
+                  {isUnitBooked(expandedCard) ? "Ongoing Rent" : "Available"}
                 </p>
 
                 {/* Scrollable Car Details */}
@@ -1541,46 +1292,31 @@ const isUnitBooked = (car) => {
 
                   <div className="details-specifications">
                     <ul>
-                      {/* {specificationOrder.map((key, index) => {
-                        const value = expandedCard.details.specifications[key];
-                        if (!value) return null; // Skip if missing
-                        const icon = specificationIcons[key] || null;
-                        return (
-                          <li key={index}>
-                            {icon && (
-                              <img
-                                src={icon}
-                                alt={key}
-                                className="specification-icon"
-                              />
-                            )}
-                            <span style={{ textAlign: "left" }}>
-                              {key}: <strong>{value}</strong>
-                            </span>
-                          </li>
-                        );
-                      })} */}
-
-
-
                       {specificationOrder.map((key, index) => {
                         const value = expandedCard.details.specifications[key];
                         if (!value) return null; // Skip if missing
                         const icon = specificationIcons[key] || null;
-                        
+
                         // Check if this is Features or Trunk and format as bullets
-                        const isBulletField = key === "Features" || key === "Trunk";
-                        
+                        const isBulletField =
+                          key === "Features" || key === "Trunk";
+
                         // Parse value into array if needed
                         let displayValue = value;
                         if (isBulletField) {
                           if (Array.isArray(value)) {
                             displayValue = value;
-                          } else if (typeof value === "string" && value.trim()) {
-                            displayValue = value.split(",").map(v => v.trim()).filter(v => v);
+                          } else if (
+                            typeof value === "string" &&
+                            value.trim()
+                          ) {
+                            displayValue = value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter((v) => v);
                           }
                         }
-                        
+
                         return (
                           <li key={index}>
                             {icon && (
@@ -1596,7 +1332,9 @@ const isUnitBooked = (car) => {
                                   {key}:
                                   <div className="bullet-list">
                                     {displayValue.map((item, i) => (
-                                      <div key={i} className="bullet-item">• {item}</div>
+                                      <div key={i} className="bullet-item">
+                                        • {item}
+                                      </div>
                                     ))}
                                   </div>
                                 </>
@@ -1609,9 +1347,6 @@ const isUnitBooked = (car) => {
                           </li>
                         );
                       })}
-
-
-
                     </ul>
                   </div>
 
@@ -1642,25 +1377,16 @@ const isUnitBooked = (car) => {
                   className="view-details"
                   onClick={(event) => {
                     openBooking(event, {
-  carId: expandedCard.id,
-  carName: expandedCard.name,
-  carType: expandedCard.carType,
-  image:
-    fetchedImages[expandedCard.imageId]?.base64 ||
-    "/assets/images/default.png",
-  drivingOption: "Self-Drive",
-  pickupOption: "Pickup",
-  isReservedRequest: isUnitBooked(expandedCard),
-});
-                    // openBooking(event, {
-                    //   carName: expandedCard.name,
-                    //   carType: expandedCard.carType,
-                    //   image:
-                    //     fetchedImages[expandedCard.imageId]?.base64 ||
-                    //     "/assets/images/default.png",
-                    //   drivingOption: "Self-Drive",
-                    //   pickupOption: "Pickup",
-                    // });
+                      carId: expandedCard.id,
+                      carName: expandedCard.name,
+                      carType: expandedCard.carType,
+                      image:
+                        fetchedImages[expandedCard.imageId]?.base64 ||
+                        "/assets/images/default.png",
+                      drivingOption: "Self-Drive",
+                      pickupOption: "Pickup",
+                      isReservedRequest: isUnitBooked(expandedCard),
+                    });
                   }}
                 >
                   Book Now
@@ -1668,7 +1394,6 @@ const isUnitBooked = (car) => {
               </div>
 
               {/* Image remains outside the gradient container */}
-
               <img
                 src={
                   currentOverlayImage ||
@@ -1735,13 +1460,10 @@ const isUnitBooked = (car) => {
           <a
             key={index}
             href={image.base64} // Use base64
-            // data-pswp-width={2873}
-            // data-pswp-height={1690}
             data-pswp-width={overlayImageSizes[image.base64]?.width || 1200}
             data-pswp-height={overlayImageSizes[image.base64]?.height || 800}
             data-pswp-index={index}
           >
-            {/* <img src={image.base64} alt="" /> */}
             <span aria-hidden="true" />
           </a>
         ))}
@@ -1752,9 +1474,7 @@ const isUnitBooked = (car) => {
           <a
             key={index}
             href={src}
-            // data-pswp-width={2873} // Recommended image WIDTH
-            // data-pswp-height={1690} // Recommended image HEIGHT
-             data-pswp-width={fleetCarouselImageSizes[src]?.width || 1200}
+            data-pswp-width={fleetCarouselImageSizes[src]?.width || 1200}
             data-pswp-height={fleetCarouselImageSizes[src]?.height || 800}
             data-pswp-index={`carousel-${index}`}
           >

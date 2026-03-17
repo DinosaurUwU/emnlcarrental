@@ -10,7 +10,6 @@ import "./BookingPage.css";
 const BookingPage = ({
   isOpen,
   closeOverlay,
-  buttonRect,
   triggerSuccessOverlay,
   prefillData,
   editingBookingData,
@@ -24,7 +23,6 @@ const BookingPage = ({
     fetchImageFromFirestore,
   } = useUser();
   const [skipImageUpdate, setSkipImageUpdate] = useState(false);
-
   const [isDurationInvalid, setIsDurationInvalid] = useState(false);
 
   const endTimeRef = useRef(null);
@@ -32,15 +30,12 @@ const BookingPage = ({
   const DEFAULT_DRIVER_RATE = 700;
   const DEFAULT_DELIVERY_FEE = 350;
 
-  // const navigate = useNavigate();
   const router = useRouter();
 
   const {
     isAdmin,
     submitUserBookingRequest,
-    editingBooking,
     resubmitUserBookingRequest,
-
     saveBookingFormData,
     loadSavedBookingFormData,
     clearSavedBookingFormData,
@@ -48,7 +43,7 @@ const BookingPage = ({
 
   const [overlayStyle, setOverlayStyle] = useState({ opacity: 0 });
   const [containerStyle, setContainerStyle] = useState({});
-  // const [selectedCar, setSelectedCar] = useState("");
+
   const [selectedCarId, setSelectedCarId] = useState("");
 
   const [driveType, setDriveType] = useState("Self-Drive");
@@ -62,7 +57,7 @@ const BookingPage = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedID, setUploadedID] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
-  // const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
   const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
   const [previewImage, setPreviewImage] = useState("/assets/images/image1.png");
   const [imageAnimation, setImageAnimation] = useState("");
@@ -70,10 +65,8 @@ const BookingPage = ({
 
   const [hasChanges, setHasChanges] = useState(false);
   const [showConfirmOverlay, setShowConfirmOverlay] = useState(false);
-  // const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const [bookingPreviewData, setBookingPreviewData] = useState(null);
-
   const [selectedCarType, setSelectedCarType] = useState("ALL");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,16 +77,11 @@ const BookingPage = ({
   const [showLoadSavedData, setShowLoadSavedData] = useState(false);
   const [discardSavedData, setDiscardSavedData] = useState(false);
   const [showDiscardSavedData, setShowDiscardSavedData] = useState(false);
-
   const [showClearFormOverlay, setShowClearFormOverlay] = useState(false);
 
   const [showLoadSavedDialog, setShowLoadSavedDialog] = useState(false);
   const [savedFormData, setSavedFormData] = useState(null);
-
-  const [showSubmittedBookingRequest, setShowSubmittedBookingRequest] =
-    useState(false);
   const [hideAnimation, setHideAnimation] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   // Save booking data to localStorage
   const saveBookingDataToStorage = () => {
@@ -279,37 +267,11 @@ const BookingPage = ({
     } else {
       setPreviewImage("/assets/images/image1.png");
     }
-    // }, [selectedCarId, allUnitData, fetchImageFromFirestore]);
   }, [selectedCarId, allUnitData]);
 
   const galleryRef = useRef(null);
 
-  // useEffect(() => {
-  //   const lightbox = new PhotoSwipeLightbox({
-  //     gallery: galleryRef.current,
-  //     children: "a",
-  //     pswpModule: () => import("photoswipe"),
-  //     showHideAnimationType: "fade",
-  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-  //     maxWidth: window.innerWidth * 0.8,
-  //     maxHeight: window.innerHeight * 0.8,
-  //   });
-
-  //   lightbox.init();
-  //   return () => lightbox.destroy();
-  // }, []);
-
   useEffect(() => {
-    // const lightbox = new PhotoSwipeLightbox({
-    //   gallery: galleryRef.current,
-    //   children: "a",
-    //   pswpModule: () => import("photoswipe"),
-    //   showHideAnimationType: "fade",
-    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-    //   maxWidth: window.innerWidth * 0.8,
-    //   maxHeight: window.innerHeight * 0.8,
-    //   preloaderDelay: 0,
-    // });
     const lightbox = new PhotoSwipeLightbox({
       gallery: galleryRef.current,
       children: "a",
@@ -474,12 +436,6 @@ const BookingPage = ({
           setUploadedID(savedFormData.driverLicense);
         }
 
-        // if (savedFormData.driverLicense) {
-        //   setUploadedID({
-        //     preview: savedFormData.driverLicense,
-        //   });
-        // }
-
         // Handle car image
         if (savedFormData.selectedCar) {
           const savedUnitById = unitData.find(
@@ -571,27 +527,6 @@ const BookingPage = ({
     }
   };
 
-  // const handleDiscardSavedData = async () => {
-  //   try {
-  //     setDiscardSavedData(true);
-
-  //     await new Promise((resolve) => setTimeout(resolve, 1200));
-
-  //     await clearSavedBookingFormData();
-
-  //     setDiscardSavedData(false);
-
-  //     setShowDiscardSavedData(true);
-
-  //     setTimeout(() => setShowDiscardSavedData(false), 4000);
-  //   } catch (error) {
-  //     console.error("❌ Error discarding saved data:", error);
-  //     setDiscardSavedData(false);
-  //   } finally {
-  //     setShowLoadSavedDialog(false);
-  //   }
-  // };
-
   //AUTOFILL DATA
   const [formData, setFormData] = useState({
     firstName: derivedPrefill.firstName || "",
@@ -651,23 +586,6 @@ const BookingPage = ({
       // Car selection
       setSelectedCarType(prefillData.carType || "ALL");
 
-      // if (prefillData.carId) {
-      //   const unitById = unitData.find((u) => u.id === prefillData.carId);
-      //   if (unitById) {
-      //     setSelectedCarId(unitById.id);
-      //   } else {
-      //     setSelectedCarId(prefillData.carId);
-      //   }
-      // }
-
-      // // Fallback: also look for carName if provided
-      // if (prefillData.carName) {
-      //   const unitByName = unitData.find((u) => u.name === prefillData.carName);
-      //   if (unitByName) {
-      //     setSelectedCarId(unitByName.id);
-      //   }
-      // }
-
       if (prefillData.carId) {
         const unitById =
           allUnitData.find((u) => u.id === prefillData.carId) ||
@@ -721,15 +639,6 @@ const BookingPage = ({
         setUploadedID(prefillData.driverLicense);
       }
 
-      // if (prefillData.driverLicense) {
-      //   setUploadedID({
-      //     preview: prefillData.driverLicense,
-      //   });
-      // }
-
-      // Image handling
-      // const selectedUnit = unitData.find((u) => u.id === prefillData.carId) ||
-      //                      unitData.find((u) => u.name === prefillData.carName);
       const selectedUnit =
         allUnitData.find((u) => u.id === prefillData.carId) ||
         allUnitData.find((u) => u.name === prefillData.carName) ||
@@ -747,7 +656,6 @@ const BookingPage = ({
         setPreviewImage("/assets/images/image1.png");
       }
     }
-
   }, [prefillData, unitData, allUnitData]);
 
   useEffect(() => {
@@ -783,7 +691,6 @@ const BookingPage = ({
         setSelectedCarId(unitByName.id);
       }
     }
-
   }, [allUnitData, unitData, prefillData, selectedCarId]);
 
   useEffect(() => {
@@ -799,8 +706,6 @@ const BookingPage = ({
 
     setIsDurationInvalid(diffHours < 1);
   }, [startDate, endDate, startTime, endTime]);
-
-
 
   const handleImageClick = () => {
     document.querySelector(`[data-pswp-index="1"]`)?.click();
@@ -840,7 +745,6 @@ const BookingPage = ({
     return value ? "green-label" : "red-label";
   };
 
- 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 900) {
@@ -994,12 +898,10 @@ const BookingPage = ({
     let total = finalRate * diffDays;
 
     if (driveType === "With Driver") {
-
       total += diffDays * (selectedUnit.driverRate || 0);
     }
 
     if (dropOffType === "Drop-off") {
-
       total += selectedUnit.deliveryFee || 0;
     }
 
@@ -1051,7 +953,6 @@ const BookingPage = ({
 
   const getCarRate = () => {
     if (!selectedCarId) return "";
-
 
     const selectedUnit =
       allUnitData.find((unit) => unit.id === selectedCarId) ||
@@ -1117,7 +1018,6 @@ const BookingPage = ({
     const diffDays = Math.floor(diffHours / 24);
     const extraHours = Math.round(diffHours % 24);
 
- 
     const selectedUnit =
       allUnitData.find((unit) => unit.id === selectedCarId) ||
       unitData.find((unit) => unit.id === selectedCarId);
@@ -1164,7 +1064,6 @@ const BookingPage = ({
       setFileError(true);
       return;
     }
-
 
     const selectedUnit =
       allUnitData.find((unit) => unit.id === selectedCarId) ||
@@ -1216,12 +1115,11 @@ const BookingPage = ({
     );
 
     const previewData = {
-  
       unitImage: selectedUnit?.imageId || "N/A",
       imageId: selectedUnit?.imageId || "N/A",
       plateNo: selectedUnit?.plateNo || "N/A",
       carType: selectedUnit?.carType || "N/A",
- 
+
       carName: selectedUnit?.name || "",
 
       drivingOption: driveType,
@@ -1349,8 +1247,6 @@ const BookingPage = ({
     return `${formattedDate} | ${formattedTime}`;
   };
 
-
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -1402,7 +1298,7 @@ const BookingPage = ({
       setShowConfirmOverlay(false);
       setShowBookingConfirmOverlay(false);
       closeOverlay();
-  
+
       router.push("/admin");
       return;
     }
@@ -1456,7 +1352,6 @@ const BookingPage = ({
   };
 
   const handleClearForm = () => {
-
     setSelectedCarId("");
 
     setSelectedCarType("ALL");
@@ -1718,8 +1613,6 @@ const BookingPage = ({
           </div>
         </div>
       )}
-
-
 
       {showClearFormOverlay && (
         <div className="overlay-delete">
@@ -2034,8 +1927,6 @@ const BookingPage = ({
                 ) : (
                   <p className="confirm-no-id">No file uploaded</p>
                 )}
-
-
               </div>
 
               <h4 className="confirm-subtitle">QUOTATION SUMMARY</h4>
@@ -2402,7 +2293,6 @@ const BookingPage = ({
                 </div>
               )}
 
-
               {uploadedPreviewSrc && (
                 <div className="image-preview">
                   <img
@@ -2582,19 +2472,15 @@ const BookingPage = ({
         </button>
       </form>
 
-
-
       <div ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
-
           data-pswp-width={previewImageSize.width}
           data-pswp-height={previewImageSize.height}
           data-pswp-index={0}
         >
           <img src={previewImage} alt="" />
         </a>
-
 
         {uploadedPreviewSrc && (
           <a

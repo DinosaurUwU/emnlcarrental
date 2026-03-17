@@ -179,7 +179,7 @@ const Login = () => {
                 className="car-gif"
               />
             </div>
-            <p className="submitting-text">Signing you in with Google...</p>
+            <p className="submitting-text" style={{marginTop: "10px"}}>Signing you in with Google...</p>
           </div>
         </div>
       )}
