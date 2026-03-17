@@ -926,13 +926,33 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                      <p
-                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
-                      >
-                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-                      </p>
+                     <div style={{ display: "flex", justifyContent: "center" }}>
+  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
+    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+  </span>
+</div>
+
+
                     </div>
-                    <button className="view-details">View</button>
+                                          <div className="car-specs-grid">
+                        <div className="spec-item">
+                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
+                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
+                          <span>{car.details?.specifications?.Transmission || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Color"]} alt="Color" />
+                          <span>{car.details?.specifications?.Color || "-"}</span>
+                        </div>
+                      </div>
+
                   </div>
                 </div>
               ))}
@@ -1006,13 +1026,33 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                      <p
-                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
-                      >
-                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-                      </p>
+
+                     <div style={{ display: "flex", justifyContent: "center" }}>
+  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
+    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+  </span>
+</div>
+
+
                     </div>
-                    <button className="view-details">View</button>
+                                          <div className="car-specs-grid">
+                        <div className="spec-item">
+                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
+                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
+                          <span>{car.details?.specifications?.Transmission || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Color"]} alt="Color" />
+                          <span>{car.details?.specifications?.Color || "-"}</span>
+                        </div>
+                      </div>
                   </div>
                 </div>
               ))}
@@ -1086,13 +1126,33 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                      <p
-                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
-                      >
-                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-                      </p>
+
+                     <div style={{ display: "flex", justifyContent: "center" }}>
+  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
+    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+  </span>
+</div>
+
+
                     </div>
-                    <button className="view-details">View</button>
+                                          <div className="car-specs-grid">
+                        <div className="spec-item">
+                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
+                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
+                          <span>{car.details?.specifications?.Transmission || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Color"]} alt="Color" />
+                          <span>{car.details?.specifications?.Color || "-"}</span>
+                        </div>
+                      </div>
                   </div>
                 </div>
               ))}
@@ -1166,13 +1226,33 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                      <p
-                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
-                      >
-                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-                      </p>
+
+                     <div style={{ display: "flex", justifyContent: "center" }}>
+  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
+    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+  </span>
+</div>
+
+
                     </div>
-                    <button className="view-details">View</button>
+                                          <div className="car-specs-grid">
+                        <div className="spec-item">
+                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
+                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
+                          <span>{car.details?.specifications?.Transmission || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Color"]} alt="Color" />
+                          <span>{car.details?.specifications?.Color || "-"}</span>
+                        </div>
+                      </div>
                   </div>
                 </div>
               ))}
@@ -1246,13 +1326,33 @@ const FleetDetails = () => {
                         </span>
                         {car.name}
                       </h3>
-                      <p
-                        className={`availability ${isUnitBooked(car) ? "rented" : "available"}`}
-                      >
-                        {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-                      </p>
+
+                     <div style={{ display: "flex", justifyContent: "center" }}>
+  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
+    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+  </span>
+</div>
+
+
                     </div>
-                    <button className="view-details">View</button>
+                                          <div className="car-specs-grid">
+                        <div className="spec-item">
+                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
+                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
+                          <span>{car.details?.specifications?.Transmission || "-"}</span>
+                        </div>
+                        <div className="spec-item">
+                          <img src={specificationIcons["Color"]} alt="Color" />
+                          <span>{car.details?.specifications?.Color || "-"}</span>
+                        </div>
+                      </div>
                   </div>
                 </div>
               ))}

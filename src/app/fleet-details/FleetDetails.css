@@ -1154,6 +1154,27 @@ will-change: transform;
   margin-bottom: 15px;
 }
 
+.car-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--accent-color);
+}
+
+.spec-item img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+
 /* Ensure the button is always aligned at the bottom */
 .car-card .view-details {
   font-weight: bold;
@@ -1364,9 +1385,35 @@ will-change: transform;
 
 .car-card .availability {
   font-weight: bold;
-  margin: 20px 0px 30px;
   text-align: center;
 }
+
+.availability-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  margin: 5px 0 15px 0;
+  text-align: center;
+}
+
+.availability-badge.available {
+  background: rgba(34, 197, 94, 0.2);
+  color: rgb(34, 197, 94) !important;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.availability-badge.ongoing {
+  background: rgba(239, 68, 68, 0.2);
+  color: rgb(239, 68, 68);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+
 
 .car-card .available {
   color: var(--supporting-color);
@@ -1377,18 +1424,29 @@ will-change: transform;
 }
 
 .overlay-availability {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 10px 0px 10px 10px;
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  margin: 10px;
 }
 
 .overlay-availability.available {
-  color: var(--supporting-color);
+  background: rgba(34, 197, 94, 0.2);
+  color: rgb(34, 197, 94);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 
 .overlay-availability.rented {
-  color: red;
+  background: rgba(239, 68, 68, 0.2);
+  color: rgb(239, 68, 68);
+  border-color: rgba(239, 68, 68, 0.2);
 }
+
 
 
 
