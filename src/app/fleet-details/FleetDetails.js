@@ -772,7 +772,18 @@ const FleetDetails = () => {
     >
       PICKUP
     </button>
-    <div className="gauge-needle"></div>
+<div 
+  className="gauge-needle"
+  style={{
+    transform: activeSection === 'sedan' ? 'translate(-50%, -100%) rotate(0deg)' :
+               activeSection === 'suv' ? 'translate(-50%, -100%) rotate(23deg)' :
+               activeSection === 'mpv' ? 'translate(-50%, -100%) rotate(45deg)' :
+               activeSection === 'van' ? 'translate(-50%, -100%) rotate(67deg)' :
+               activeSection === 'pickup' ? 'translate(-50%, -100%) rotate(90deg)' :
+               'translate(-50%, -100%) rotate(0deg)'
+  }}
+></div>
+
 
   </div>
 </div>

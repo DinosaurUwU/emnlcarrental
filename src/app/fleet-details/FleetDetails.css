@@ -96,7 +96,7 @@ padding-top: clamp(
   );
 
   width: 100%;
-  height: 71%;
+  height: 84%;
 object-fit: contain;
 }
 
@@ -462,23 +462,23 @@ justify-content: center;
 
 /* Needle rotations for each item */
 .floating-nav:hover .sedan:hover ~ .gauge-needle {
-  transform: translate(-50%, -100%) rotate(0deg);
+  transform: translate(-50%, -100%) rotate(0deg) !important;
 }
 
 .floating-nav:hover .suv:hover ~ .gauge-needle {
-  transform: translate(-50%, -100%) rotate(23deg);
+  transform: translate(-50%, -100%) rotate(23deg) !important;
 }
 
 .floating-nav:hover .mpv:hover ~ .gauge-needle {
-  transform: translate(-50%, -100%) rotate(45deg);
+  transform: translate(-50%, -100%) rotate(45deg) !important;
 }
 
 .floating-nav:hover .van:hover ~ .gauge-needle {
-  transform: translate(-50%, -100%) rotate(67deg);
+  transform: translate(-50%, -100%) rotate(67deg) !important;
 }
 
 .floating-nav:hover .pickup:hover ~ .gauge-needle {
-  transform: translate(-50%, -100%) rotate(90deg);
+  transform: translate(-50%, -100%) rotate(90deg) !important;
 }
 
 
@@ -2159,12 +2159,12 @@ body.no-scroll {
 
 .carousel-prev {
   left: 60px;
-  transform: translateY(220%) !important;
+  transform: translateY(310%) !important;
 }
 
 .carousel-next {
   right: 60px;
-  transform: translateY(220%) !important;
+  transform: translateY(310%) !important;
 }
 
 .pswp__button--arrow--next {
@@ -2210,11 +2210,11 @@ transform: translateY(280%) !important;
 }
 
 .carousel-prev {
-  transform: translateY(200%) !important;
+  transform: translateY(300%) !important;
 }
 
 .carousel-next {
-  transform: translateY(200%) !important;
+  transform: translateY(300%) !important;
 }
 
   .additional-carousel-container .carousel-prev {
@@ -2265,11 +2265,11 @@ transform: translateY(280%) !important;
 }
 
 .carousel-prev {
-  transform: translateY(180%) !important;
+  transform: translateY(280%) !important;
 }
 
 .carousel-next {
-  transform: translateY(180%) !important;
+  transform: translateY(280%) !important;
 }
 
 /* .additional-carousel-container {
@@ -2303,11 +2303,11 @@ transform: translateY(280%) !important;
 }
 
 .carousel-prev {
-  transform: translateY(160%) !important;
+  transform: translateY(250%) !important;
 }
 
 .carousel-next {
-  transform: translateY(160%) !important;
+  transform: translateY(250%) !important;
 }
 
 /* .additional-carousel-container {
