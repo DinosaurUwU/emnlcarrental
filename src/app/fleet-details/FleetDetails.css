@@ -262,97 +262,153 @@ object-fit: contain;
 
 
 
-.navbar-overlay{
+/* Background circle that scales on hover */
+.navbar-overlay {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
-  z-index: 1000;
-
-  position: fixed;
-  top: 30%;
-  left: 60%;
-  transform: translateX(-135%);
-  z-index: 1000;
-  pointer-events: auto;
-  background-color: #fffafab3;
-  width: 23%;
-  padding: 10px 140px;
+  bottom: 20px;
+  left: 10px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  transition: top 0.5s ease;
-  backdrop-filter: blur(10px);
+  z-index: 998;
+  transition: all 0.4s ease;
+  pointer-events: none; /* Let clicks pass through */
 }
 
-/* container */
-.floating-nav{
+/* Use ::before as the scalable background */
+.floating-nav {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 100px;
+  height: 100px;
+  pointer-events: auto;
+  z-index: 1000;
 }
 
-/* center button */
-.floating-nav-main{
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: none;
-  background: #111;
-  color: white;
-  font-size: 26px;
-  cursor: pointer;
-  z-index: 2;
-    transform: translateY(100%);
-}
-
-/* items */
-.floating-nav-item{
+.floating-nav::before {
+  content: '';
   position: absolute;
-  width: 80px;
-  height: 80px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
+  background: #28a745;
+  backdrop-filter: blur(5px);
+  z-index: -1;
+  transition: transform 0.4s ease;
+}
+
+.floating-nav:hover::before {
+  transform: translate(-50%, -50%) scale(3.3);
+}
+
+
+/* Main button doesn't scale */
+.floating-nav-main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* No scale transition */
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--accent-color);
   border: none;
-  background: linear-gradient(135deg,#6a5cff,#8c6cff);
-  color: white;
-  font-size: 20px;
+  color: #fff;
+  font-size: 28px;
   cursor: pointer;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  transform: scale(0);
-  transition: all .35s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
-/* when menu opens */
-.floating-nav.open .floating-nav-item{
-  transform: scale(1);
+
+/* All items collapse to center */
+.floating-nav-menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: all 0.3s ease;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
 }
 
-/* positions in circular arc */
-
-.floating-nav.open .sedan{
-  transform: rotate(-90deg) translate(120px) rotate(90deg);
+.floating-nav:hover .floating-nav-menu {
+  width: 220px;
+  height: 220px;
+  opacity: 1;
 }
 
-.floating-nav.open .suv{
-  transform: rotate(-45deg) translate(120px) rotate(45deg);
+/* Items stack in center */
+.floating-nav-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1;
+  z-index: 5;
 }
 
-.floating-nav.open .mpv{
-  transform: rotate(0deg) translate(120px) rotate(0deg);
+/* On hover, spread items out with specific positions */
+.floating-nav:hover .floating-nav-item {
+  z-index: 20;
 }
 
-.floating-nav.open .van{
-  transform: rotate(45deg) translate(120px) rotate(-45deg);
+.floating-nav:hover .sedan {
+  transform: translate(-50%, -50%) rotate(-90deg) translate(150px) rotate(90deg);
 }
 
-.floating-nav.open .pickup{
-  transform: rotate(90deg) translate(120px) rotate(-90deg);
+.floating-nav:hover .suv {
+  transform: translate(-50%, -50%) rotate(-67deg) translate(150px) rotate(67deg);
 }
+
+.floating-nav:hover .mpv {
+  transform: translate(-50%, -50%) rotate(-45deg) translate(150px) rotate(45deg);
+}
+
+.floating-nav:hover .van {
+  transform: translate(-50%, -50%) rotate(-23deg) translate(150px) rotate(23deg);
+}
+
+.floating-nav:hover .pickup {
+  transform: translate(-50%, -50%) rotate(0deg) translate(150px) rotate(0deg);
+}
+
+
+
+
+
 
 /* active section highlight */
 .floating-nav-item.active{
-  background: #000;
+  background: white;
+  color: black;
 }
 
 
