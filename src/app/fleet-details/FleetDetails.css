@@ -1601,25 +1601,7 @@ will-change: transform;
   opacity: 1;
 }
 
-/* .additional-carousel-container .arrow-icon {
-  width: 40px; 
-  height: 60px; 
-  background-color: rgb(255, 255, 255); 
-  border-radius: 5px;
-  border: 2px solid rgba(255, 0, 0, 1);
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  cursor: pointer; 
-  transition: all 0.5s ease;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0); 
-}
 
-.additional-carousel-container .arrow-icon:hover {
-  background-color: rgba(255, 255, 255, 1);
-  border-color: rgba(255, 0, 0, 1);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5); 
-} */
 
 
 
