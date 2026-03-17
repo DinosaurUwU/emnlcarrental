@@ -57,8 +57,8 @@ const CompanyMap = () => {
               Email:
             </strong>{" "}
             <br />
-            <a href="mailto:emnl@gmail.com" className="contact-link">
-              emnl@gmail.com
+            <a href="mailto:rentalinquiries.emnl@gmail.com" className="contact-link">
+              rentalinquiries.emnl@gmail.com
             </a>
           </p>
           <p>

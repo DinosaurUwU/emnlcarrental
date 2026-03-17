@@ -9,6 +9,8 @@ import React, {
 import { useUser } from "../lib/UserContext";
 import { useBooking } from "../component/BookingProvider";
 import { useParams } from "next/navigation";
+import { FiMenu } from "react-icons/fi";
+
 
 import "photoswipe/style.css";
 import Header from "../component/Header";
@@ -732,8 +734,9 @@ const FleetDetails = () => {
       className="floating-nav-main"
       onClick={() => setNavOpen(!navOpen)}
     >
-      ☰
+      <FiMenu />
     </button>
+
 
     <button
       className={`floating-nav-item sedan ${activeSection === "sedan" ? "active" : ""}`}
@@ -769,6 +772,7 @@ const FleetDetails = () => {
     >
       PICKUP
     </button>
+    <div className="gauge-needle"></div>
 
   </div>
 </div>

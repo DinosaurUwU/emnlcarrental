@@ -265,7 +265,7 @@ object-fit: contain;
 /* Background circle that scales on hover */
 .navbar-overlay {
   position: fixed;
-  bottom: 20px;
+  bottom: 10px;
   left: 10px;
   width: 100px;
   height: 100px;
@@ -322,6 +322,10 @@ object-fit: contain;
 
 /* Main button doesn't scale */
 .floating-nav-main {
+  display: flex;
+align-items: center;
+justify-content: center;
+
   position: absolute;
   top: 50%;
   left: 50%;
@@ -336,7 +340,15 @@ object-fit: contain;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 10;
+  transition: all 0.5s ease;;
 }
+
+
+.floating-nav.open .floating-nav-main,
+.floating-nav:hover .floating-nav-main {
+  background: #28a745;
+}
+
 
 
 /* All items collapse to center */
@@ -351,7 +363,7 @@ object-fit: contain;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
   flex-direction: column;
   gap: 8px;
   align-items: center;
@@ -375,17 +387,18 @@ object-fit: contain;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   background: var(--accent-color);
   border: none;
   color: #fff;
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 12px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
   text-align: center;
   line-height: 1;
   z-index: 5;
@@ -413,15 +426,59 @@ object-fit: contain;
   transform: translate(-50%, -50%) rotate(0deg) translate(150px) rotate(0deg);
 }
 
-
-
-
-
+/* active section highlight */
+.floating-nav-item:hover{
+  background: #28a745;
+}
 
 /* active section highlight */
 .floating-nav-item.active{
   background: white;
-  color: black;
+  color: var(--accent-color);
+}
+
+
+
+/* Gauge Needle */
+.gauge-needle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 30px;
+  background: linear-gradient(to top, #dc3545, #ff6b6b);
+  border-radius: 2px;
+  transform-origin: bottom center;
+  transform: translate(-50%, -100%) rotate(0deg);
+  z-index: 6;
+  transition: transform 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.floating-nav:hover .gauge-needle {
+  height: 110px;
+}
+
+/* Needle rotations for each item */
+.floating-nav:hover .sedan:hover ~ .gauge-needle {
+  transform: translate(-50%, -100%) rotate(0deg);
+}
+
+.floating-nav:hover .suv:hover ~ .gauge-needle {
+  transform: translate(-50%, -100%) rotate(23deg);
+}
+
+.floating-nav:hover .mpv:hover ~ .gauge-needle {
+  transform: translate(-50%, -100%) rotate(45deg);
+}
+
+.floating-nav:hover .van:hover ~ .gauge-needle {
+  transform: translate(-50%, -100%) rotate(67deg);
+}
+
+.floating-nav:hover .pickup:hover ~ .gauge-needle {
+  transform: translate(-50%, -100%) rotate(90deg);
 }
 
 
@@ -436,12 +493,8 @@ object-fit: contain;
 
 
 
-
 @media (max-width: 768px) {
-  .navbar-overlay {
-    width: 90%;
-    padding: 10px 10px;
-  }
+
 
   .navbar {
     display: grid;

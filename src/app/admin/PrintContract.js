@@ -21,7 +21,7 @@ const PrintContract = ({ booking }) => {
       </h2>
       <p style={{ textAlign: "center", marginBottom: "30px" }}>
         WASHINGTON ST., NEW YORK CITY, USA <br />
-        emnl@gmail.com | +63 975 4778 178
+        rentalinquiries.emnl@gmail.com | +63 975 4778 178
       </p>
 
       <h3 style={{ textAlign: "center" }}>
