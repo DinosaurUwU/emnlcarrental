@@ -2470,7 +2470,9 @@ const BookingPage = ({
       </div>
 
 
-         <button className="confirm-btn" type="submit">
+ <div className="booking-buttons">
+
+        <button className="confirm-btn" type="submit">
           Confirm Booking
         </button>
 
@@ -2481,12 +2483,17 @@ const BookingPage = ({
         >
           Clear All
         </button>
-      
 
-      </div>
+</div>
+
+</div>
 
 
-</form>
+
+
+
+      </form>
+
 
 
       <div ref={galleryRef} style={{ display: "none" }}>
