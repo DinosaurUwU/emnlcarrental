@@ -1629,9 +1629,9 @@ will-change: transform;
   border-radius: 8px;
   width: 80%;
   max-height: 350px;
-  overflow-y: auto; /* Enable vertical scroll */
+  overflow-y: auto;
   z-index: 30;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
 .car-details::-webkit-scrollbar {
