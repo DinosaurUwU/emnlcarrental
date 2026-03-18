@@ -1627,15 +1627,15 @@ will-change: transform;
   top: 0px;
   padding: 15px 10px;
   border-radius: 8px;
-  width: 80% ; /* Limit height for scrolling */
-  max-height: 350px; /* Limit height for scrolling */
+  width: 80%;
+  max-height: 350px;
   overflow-y: auto; /* Enable vertical scroll */
   z-index: 30;
   scrollbar-width: none; /* Firefox */
 }
 
 .car-details::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, and Opera */
+  display: none;
 }
 
 .car-introduction{
