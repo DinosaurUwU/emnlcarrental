@@ -261,8 +261,8 @@
   position: absolute;
   z-index: 2;
   margin-right: 10px;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px);
   max-width: 810px;
   width: 45%;
   margin-right: 30px;
@@ -821,6 +821,23 @@ select option {
     width: 100%;
   }
 
+
+  .quotation-summary {
+    position: absolute;
+    top: 271px;
+    left: 30px;
+    right: 30px;
+    margin-right: 0;
+    width: calc(100% - 65px);
+    z-index: 2;
+  }
+
+    .fill-up-form {
+    max-height: 100vh;
+    position: relative;
+    padding-top: 140px;
+  }
+
   .fixed-header {
     position: fixed;
     flex: 1;
@@ -835,21 +852,7 @@ select option {
     width: calc(100% - 85px);
   }
 
-  .fill-up-form {
-    max-height: 100vh;
-    position: relative;
-    padding-top: 140px;
-  }
 
-  .quotation-summary {
-    position: absolute;
-    top: 271px;
-    left: 30px;
-    right: 30px;
-    margin-right: 0;
-    width: calc(100% - 65px);
-    z-index: 2;
-  }
 
   .car-selection-row {
     flex-direction: row !important;

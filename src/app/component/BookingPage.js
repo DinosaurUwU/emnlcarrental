@@ -2062,6 +2062,9 @@ const BookingPage = ({
               : "BOOKING FORM"}
         </h2>
 
+
+
+
         <div className="booking-image-container">
           <div
             className={`booking-bg ${imageAnimation}`}
@@ -2077,6 +2080,9 @@ const BookingPage = ({
             onAnimationEnd={() => setImageAnimation("")}
           />
         </div>
+
+
+        
 
         <div className="booking-content">
           <div className="booking-column">
@@ -2458,6 +2464,10 @@ const BookingPage = ({
             {renderQuotationSummary()}
           </div>
         </div>
+
+ 
+
+      
 
         <button className="confirm-btn" type="submit">
           Confirm Booking
