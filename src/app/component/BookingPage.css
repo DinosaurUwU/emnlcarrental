@@ -881,19 +881,25 @@ select option {
 
 
 @media (max-width: 900px) {
-  /* .booking-image-container {
-    height: 503px !important;
-  } */
-
-  .booking-content {
+  .booking-section {
+    display: flex;
     flex-direction: column;
   }
 
-    .booking-columns {
+  .booking-columns {
+    display: flex;
     flex-direction: column;
-    /* stacked vertically */
+    width: 100%;
   }
-  
+
+  .booking-column.left {
+    order: 2; /* Form comes after summary */
+  }
+
+  .booking-column.right {
+    order: 1; /* Summary comes first */
+  }
+
   .booking-column.left,
   .booking-column.right {
     width: 100%;
@@ -903,38 +909,42 @@ select option {
     width: 100%;
   }
 
-
   .quotation-summary {
-    position: absolute;
-    top: 271px;
-    left: 30px;
-    right: 30px;
-    /* margin-right: 0; */
-    width: calc(100% - 65px);
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
     z-index: 2;
   }
 
-    .fill-up-form {
-    max-height: 100vh;
+  /* Make form scrollable */
+  .fill-up-form {
+    max-height: 40vh;
+    overflow-y: auto;
     position: relative;
-    padding-top: 140px;
+    padding-top: 10px;
+    padding-right: 0;
   }
 
+  /* Sticky header within left column */
   .fixed-header {
-    position: fixed;
-    flex: 1;
-    min-width: 300px;
-    margin-right: 10px;
-    max-width: 810px;
-    width: 45%;
-    top: 369px;
-    left: 30px;
-    right: 30px;
-    margin-right: 0px;
-    width: calc(100% - 85px);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 10;
   }
 
-
+  .booking-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    order: 3; /* Buttons at bottom */
+  }
 
   .car-selection-row {
     flex-direction: row !important;
@@ -950,6 +960,8 @@ select option {
     box-sizing: border-box;
   }
 }
+
+
 
 @media (max-width: 407px) {
   .fixed-header {
