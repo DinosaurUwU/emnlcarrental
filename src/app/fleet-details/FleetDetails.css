@@ -2014,29 +2014,13 @@ body.no-scroll {
     height: 70%;
   }
   .car-details {
-    max-height: 250px;
+    max-height: 300px;
   }
 
     .additional-carousel-container {
 
-  top: 140px;
-
-}
-}
-
-
-@media (max-width: 630px) {
-  .overlay-details {
-    height: 75%;
-  }
-  .car-details {
-    max-height: 250px;
-  }
-
-    .additional-carousel-container {
-
-  top: 160px;
-
+  top: 120px;
+ width: 70%;
 }
 }
 
