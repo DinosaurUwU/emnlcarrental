@@ -338,11 +338,23 @@ height: 90vh !important;
 
 .fill-up-form {
   padding: 0px 20px 0px 0px; 
-
   max-height: 35vh;
   overflow-y: auto;
   position: relative;
   z-index: 1;
+}
+
+.fill-up-form::-webkit-scrollbar {
+  width: 5px;
+}
+
+.fill-up-form::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 10px;
+}
+
+.fill-up-form::-webkit-scrollbar-hover {
+  background: var(--supporting-color);
 }
 
 .collapsible-header {
@@ -884,6 +896,8 @@ select option {
   .booking-section {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 90%;
   }
 
   .booking-columns {
@@ -897,7 +911,7 @@ select option {
   }
 
   .booking-column.right {
-    order: 1;
+    order: 1; 
   }
 
   .booking-column.left,
@@ -908,12 +922,6 @@ select option {
   .booking-column {
     width: 100%;
   }
-
-.booking-image-container {
-  position: relative;
-  z-index: 1;
-  width: 100px !important;
-}
   
   .quotation-summary {
     position: absolute;
@@ -967,8 +975,18 @@ select option {
   }
 }
 
+@media (max-width: 600px) {
+  .booking-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+  }
+}
 
 
+
+/* 
 @media (max-width: 407px) {
   .fixed-header {
     min-width: 200px;
@@ -1006,7 +1024,7 @@ select option {
     padding: 10px !important;
     margin: 10px !important;
   }
-}
+} */
 
 .confirmation-overlay {
   position: fixed;

@@ -2062,9 +2062,6 @@ const BookingPage = ({
               : "BOOKING FORM"}
         </h2>
 
-
-<div className="booking-section">
-
         <div className="booking-image-container">
           <div
             className={`booking-bg ${imageAnimation}`}
@@ -2080,6 +2077,9 @@ const BookingPage = ({
             onAnimationEnd={() => setImageAnimation("")}
           />
         </div>
+<div className="booking-section">
+
+
 
 
         
