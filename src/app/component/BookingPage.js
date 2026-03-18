@@ -2088,8 +2088,12 @@ const BookingPage = ({
           <div className="booking-column"> */}
       <div className="booking-columns">
           <div className="booking-column left">     
-            <div className="fill-up-form">
-              <h3 className="fixed-header">FILL-UP FORM</h3>
+            {/* <div className="fill-up-form">
+              <h3 className="fixed-header">FILL-UP FORM</h3> */}
+
+                <div className="fixed-header">FILL-UP FORM</div>
+  <div className="fill-up-form">
+
 
               <div className="form-row car-selection-row">
                 <div>
