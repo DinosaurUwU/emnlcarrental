@@ -893,11 +893,11 @@ select option {
   }
 
   .booking-column.left {
-    order: 2; /* Form comes after summary */
+    order: 2;
   }
 
   .booking-column.right {
-    order: 1; /* Summary comes first */
+    order: 1;
   }
 
   .booking-column.left,
@@ -909,41 +909,47 @@ select option {
     width: 100%;
   }
 
+.booking-image-container {
+  position: relative;
+  z-index: 1;
+  width: 100px !important;
+}
+  
   .quotation-summary {
-    position: relative;
+    position: absolute;
     top: auto;
     left: auto;
     right: auto;
     width: 100%;
     margin: 0;
-    padding: 10px;
+  
     z-index: 2;
   }
 
-  /* Make form scrollable */
   .fill-up-form {
-    max-height: 40vh;
+    max-height: 25vh;
+    margin-top: 0;
     overflow-y: auto;
     position: relative;
-    padding-top: 10px;
     padding-right: 0;
   }
 
-  /* Sticky header within left column */
   .fixed-header {
+        margin-top: 90px;
     position: sticky;
     top: 0;
     width: 100%;
     z-index: 10;
+    box-sizing: border-box;
+    margin-right: 0;
   }
 
   .booking-buttons {
     display: flex;
     justify-content: center;
     gap: 20px;
-    padding: 20px;
     width: 100%;
-    order: 3; /* Buttons at bottom */
+    order: 3;
   }
 
   .car-selection-row {
