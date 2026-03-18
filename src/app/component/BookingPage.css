@@ -137,7 +137,8 @@
 .booking-image-container {
   position: relative;
   width: 100%;
-  height: 740px !important;
+  /* height: 740px !important; */
+  height: 250px;
   border-radius: 5px;
   overflow: hidden;
   transition:
@@ -244,6 +245,30 @@
   width: 48%;
 }
 
+/* 901px+ */
+.booking-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.booking-columns {
+  display: flex;
+  flex-direction: row;
+  /* fill-up-form left, quotation-summary right */
+}
+
+.booking-column.left {
+  overflow-y: auto;
+  width: 55%;
+}
+
+.booking-column.right {
+  width: 45%;
+}
+
+
+
+
 .fixed-header {
   position: sticky;
   top: 0;
@@ -260,18 +285,19 @@
   min-width: 300px;
   position: absolute;
   z-index: 2;
-  margin-right: 10px;
+  /* margin-right: 10px; */
   background-color: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(5px);
   max-width: 810px;
   width: 45%;
   margin-right: 30px;
 
-  top: 348px;
+  /* top: 348px; */
 }
 
 .fill-up-form {
-  padding: 0px 15px 0px 15px;
+  /* padding: 0px 15px 0px 15px; */
+  padding: 0px 20px 0px 0px; 
   max-height: 100vh;
   position: relative;
   z-index: 1;
@@ -808,13 +834,25 @@ select option {
   color: white;
 }
 
+
+
 @media (max-width: 900px) {
-  .booking-image-container {
+  /* .booking-image-container {
     height: 503px !important;
-  }
+  } */
 
   .booking-content {
     flex-direction: column;
+  }
+
+    .booking-columns {
+    flex-direction: column;
+    /* stacked vertically */
+  }
+  
+  .booking-column.left,
+  .booking-column.right {
+    width: 100%;
   }
 
   .booking-column {
@@ -827,7 +865,7 @@ select option {
     top: 271px;
     left: 30px;
     right: 30px;
-    margin-right: 0;
+    /* margin-right: 0; */
     width: calc(100% - 65px);
     z-index: 2;
   }

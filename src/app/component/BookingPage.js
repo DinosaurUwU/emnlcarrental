@@ -2063,7 +2063,7 @@ const BookingPage = ({
         </h2>
 
 
-
+<div className="booking-section">
 
         <div className="booking-image-container">
           <div
@@ -2084,8 +2084,10 @@ const BookingPage = ({
 
         
 
-        <div className="booking-content">
-          <div className="booking-column">
+        {/* <div className="booking-content">
+          <div className="booking-column"> */}
+      <div className="booking-columns">
+          <div className="booking-column left">     
             <div className="fill-up-form">
               <h3 className="fixed-header">FILL-UP FORM</h3>
 
@@ -2459,17 +2461,16 @@ const BookingPage = ({
             </div>
           </div>
 
-          <div className="booking-column">
-            {/* <QuotationSummary /> */}
-            {renderQuotationSummary()}
+          <div className="booking-column right">
+            <div className="booking-column">
+              {/* <QuotationSummary /> */}
+              {renderQuotationSummary()}
+            </div>
           </div>
-        </div>
+      </div>
 
- 
 
-      
-
-        <button className="confirm-btn" type="submit">
+         <button className="confirm-btn" type="submit">
           Confirm Booking
         </button>
 
@@ -2480,7 +2481,13 @@ const BookingPage = ({
         >
           Clear All
         </button>
-      </form>
+      
+
+      </div>
+
+
+</form>
+
 
       <div ref={galleryRef} style={{ display: "none" }}>
         <a
