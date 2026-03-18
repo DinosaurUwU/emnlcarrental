@@ -1375,6 +1375,7 @@ will-change: transform;
 
 
 .overlay-name {
+  margin-top: 10px;
   margin-bottom: 5px;
   margin-left: 10px;
   font-size: 1.7rem;
@@ -2008,6 +2009,7 @@ body.no-scroll {
     transform: translate(-50%, 83%);
     width: 90%;
     max-height: 135px;
+
   }
 
 .additional-carousel-container {
