@@ -5,7 +5,7 @@
   right: 50px;
   height: 70px;
   box-sizing: content-box; /* keeps expand behavior stable even if another page sets border-box globally */
-  background: rgba(255, 255, 255, 0.7);
+  background-color: rgba(var(--gradient-base), 0.7);
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
@@ -77,7 +77,7 @@
    width: 130px;
   height: auto;
   cursor: pointer;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .Header__nav {
@@ -121,57 +121,9 @@
 
 
 
-/* .Header__nav-link {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-
-.Header__nav li {
-  position: relative;
-}
-
-.Header__nav a {
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  transition: 0.3s ease;
-}
-
-.Header__nav a:hover,
-.Header__nav a.active {
-  color: var(--accent-color);
-}
-
-.Header__nav a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -3px;
-  width: 100%;
-  height: 2px;
-  background-color: transparent;
-  transform: scaleX(0);
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
-}
-
-
-.Header__nav a:hover::after,
-.Header__nav a.active::after {
-  border-radius: 5px;
-  background-color: var(--accent-color);
-  transform: scaleX(1);
-} */
-
-
 
 .Header__nav-link {
-  background: none;
+  background-color: none;
   border: 0;
   margin: 0;
   padding: 0;
@@ -189,15 +141,15 @@
   font-weight: 600;
   font-family: inherit;
   line-height: normal;
-  color: #333;
-  transition: color 0.3s ease;
+  color: var(--page-bg);
+  transition: all 0.5s ease;
 }
 
 .Header__nav a:hover,
 .Header__nav a.active,
 .Header__nav .Header__nav-link:hover,
 .Header__nav .Header__nav-link.active {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .Header__nav a::after,
@@ -210,7 +162,7 @@
   height: 2px;
   background-color: transparent;
   transform: scaleX(0);
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  transition: all 0.5s ease;
 }
 
 .Header__nav a:hover::after,
@@ -218,7 +170,7 @@
 .Header__nav .Header__nav-link:hover::after,
 .Header__nav .Header__nav-link.active::after {
   border-radius: 5px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-bg);
   transform: scaleX(1);
 }
 
@@ -228,8 +180,8 @@
 
 
 .Header__button {
-  background: var(--accent-color);
-  color: white;
+  background-color: var(--accent-bg);
+  color: var(--txt-comp);
   font-size: 16px;
   font-weight: bold;
   border: none;
@@ -240,7 +192,7 @@
 }
 
 .Header__button:hover {
-  background: #28a745;
+  background-color: #28a745;
   box-shadow: 0 0 10px #28a745;
   transform: scale(1.05);
 }
@@ -264,7 +216,7 @@
   height: 28px;
   width: 28px;
   cursor: pointer;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   transition: all 0.5s ease;
   display: inline-flex;
   align-items: center;
@@ -285,8 +237,8 @@
 .hamburger-line {
   width: 24px;
   height: 3px;
-  background-color: var(--accent-color);
-  transition: all 0.3s ease;
+  background-color: var(--accent-bg);
+  transition: all 0.5s ease;
   border-radius: 2px;
 }
 
@@ -311,7 +263,7 @@
     height: 28px;
   width: 28px;
   cursor: pointer;
-    color: var(--accent-color);
+    color: var(--accent-txt);
   transition: all 0.5s ease;
 }
 
@@ -319,7 +271,7 @@
   height: 28px;
   width: 28px;
   cursor: pointer;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 
   transition: all 0.5s ease;
 }
@@ -329,7 +281,7 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
 }
 
 
@@ -342,7 +294,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   backdrop-filter: blur(10px);
   visibility: hidden;
@@ -358,7 +310,7 @@
 }
 
 .OverlayMenu__container {
-  background: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   width: 50%;
   max-width: 200px;
   padding: 40px 0px 0px 0px;
@@ -385,38 +337,27 @@
 .OverlayMenu__nav li {
   padding: 5px 40px;
   margin-bottom: 30px;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 
 .OverlayMenu__nav li:hover{
-  background: rgba(34, 197, 94, 0.2);
+  background-color: rgba(34, 197, 94, 0.2);
 }
 
 .OverlayMenu__nav a {
   position: relative;
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--page-bg);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.5s ease;
     display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
 }
 
-/* .OverlayMenu__nav li a {
-  display: flex;
-  align-items: center;
-  padding: 10px 30px;
-  text-decoration: none;
-  color: #333;
-  transition: background 0.5s ease;
-}
 
-.OverlayMenu__nav li a:hover {
-  background: rgba(34, 197, 94, 0.2);
-} */
 
 .menu-icon {
   display: none;
@@ -427,7 +368,7 @@ margin-top: 3px;
 }
 
 .OverlayMenu__nav a.active {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 /* Underline effect in mobile menu */
@@ -440,19 +381,19 @@ margin-top: 3px;
   height: 2px;
   background-color: transparent;
   transform: scaleX(0);
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  transition: all 0.5s ease;
 }
 
 /* Show underline on hover or when active */
 .OverlayMenu__nav a:hover::after,
 .OverlayMenu__nav a.active::after {
   border-radius: 5px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-bg);
   transform: scaleX(1);
 }
 
 .OverlayMenu__nav a:hover {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .OverlayAccount {
@@ -461,7 +402,7 @@ margin-top: 3px;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   backdrop-filter: blur(10px);
   visibility: hidden;
@@ -477,7 +418,7 @@ margin-top: 3px;
 }
 
 .OverlayAccount__container {
-  background: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   width: 50%;
   max-width: 200px;
   padding: 40px 0px 0px 0px;
@@ -507,14 +448,14 @@ margin-top: 3px;
 
 .OverlayAccount__nav a {
   font-size: 18px;
-  color: #333;
+  color: var(--page-bg);
   text-decoration: none;
   font-weight: bold;
-  transition: color 0.3s ease;
+  transition: color 0.5s ease;
 }
 
 .OverlayAccount__nav a:hover {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .OverlayAccount__nav li a {
@@ -522,13 +463,65 @@ margin-top: 3px;
   align-items: center;
   padding: 10px 30px;
   text-decoration: none;
-  color: #333;
-  transition: background 0.5s ease;
+  color: var(--page-bg);
+  transition: all 0.5s ease;
 }
 
 .OverlayAccount__nav li a:hover {
-  background: rgba(34, 197, 94, 0.2);
+  background-color: rgba(34, 197, 94, 0.2);
 }
+
+.user-theme-toggle {
+  display: flex;
+  flex-direction: row;  /* Changed from column to row */
+
+  padding-bottom: 30px;
+  justify-content: center;
+}
+
+
+.user-theme-toggle button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 36px;
+  border: 1px solid var(--accent-txt);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* First button - left side rounded */
+.user-theme-toggle button:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+/* Middle button - no border radius */
+.user-theme-toggle button:not(:first-child):not(:last-child) {
+  border-radius: 0;
+  border-left: none;
+}
+
+/* Last button - right side rounded */
+.user-theme-toggle button:last-child {
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+}
+
+
+.user-theme-toggle button:hover {
+  background-color: var(--accent-bg);
+  color: white;
+}
+
+.user-theme-toggle button.active {
+  background-color: var(--accent-bg);
+  color: white;
+  border-color: var(--accent-bg);
+}
+
+
 
 
 @media screen and (max-width: 750px) {
@@ -554,7 +547,7 @@ margin-top: 3px;
 
 .Header__main .Header__search input {
   font-family: "Poppins", sans-serif !important;
-  border: 2px solid var(--accent-color) !important;
+  border: 2px solid var(--accent-txt) !important;
   outline: none !important;
   margin: 10px !important;
   transition: all 0.5s ease;
@@ -590,13 +583,13 @@ margin-top: 3px;
   top: 150px;
   left: 50%; /* ✨ Center horizontally */
   transform: translateX(-50%); /* ✨ Center correction */
-  background: white;
-  border: 2px solid var(--accent-color);
+  background-color: var(--txt-comp);
+  border: 2px solid var(--accent-txt);
   border-radius: 0px 0px 5px 5px;
     width: 80%;
   max-width: 800px;
   z-index: 9999;
-  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 2px 8px 0px rgba(var(--shadow-base), 0.2);
 }
 
 /* Remove bullet points and spacing */
@@ -608,34 +601,34 @@ margin-top: 3px;
 
 
 .SearchDropdown li a {
-  color: #333;
+  color: var(--page-bg);
   text-decoration: none;
   display: block;
   width: 100%;
 }
 
 .SearchDropdown li a:hover {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .SearchDropdown li {
   padding: 10px 12px;
   margin: 5px 0px 5px 0px;
   cursor: pointer;
-  color: #333 !important;
+  color: var(--page-bg) !important;
   text-decoration: none !important;
 }
 
 /* ✨ Hover effect */
 .SearchDropdown li:hover {
-  background-color: #f0f0f0;
-  color: var(--accent-color);
+  background-color: var(--txt-comp);
+  color: var(--accent-txt);
 }
 
 .highlight {
   font-weight: bold;
-  color: var(--accent-color);
-  background-color: #e8f5e9;
+  color: var(--accent-txt);
+  background-color: var(--txt-comp);
   border-radius: 3px;
   padding: 0 2px;
 }

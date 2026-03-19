@@ -28,6 +28,12 @@ body {
   /* Background colors */
   --accent-bg: #074609;
   --supporting-bg: #133c09;
+
+  /* Gradient */
+  --gradient-base: 255, 255, 255;
+
+  /* Box Shadow */
+  --shadow-base: 26, 26, 26;
   
   /* Page background - light mode */
   --page-bg: #f1f1f1;
@@ -47,6 +53,12 @@ body {
   /* Background colors - lighter for dark backgrounds */
   --accent-bg: #28a745;
   --supporting-bg: #218838;
+
+  /* Gradient */
+  --gradient-base: 26, 26, 26;
+
+    /* Gradient */
+  --shadow-base: 255, 255, 255;
   
   /* Page background - dark mode */
   --page-bg: #1a1a1a;

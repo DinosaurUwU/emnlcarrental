@@ -35,6 +35,8 @@
   width: 400px;
   text-align: left;
 
+  box-shadow: 0 4px 8px rgba(var(--shadow-base), 0.21);
+
   display: flex;
   flex-direction: column;
   transition: all 0.5s ease;
@@ -75,14 +77,24 @@
 
 .fleet-card .content-overlay {
   position: relative;
-  background: linear-gradient(
+  /* background: linear-gradient(
     to top,
     rgba(255, 255, 255, 1) 0%,
     rgba(255, 255, 255, 1) 75%,
     rgba(255, 255, 255, 0.4) 85%,
     rgba(255, 255, 255, 0.2) 95%,
     rgba(255, 255, 255, 0) 100%
+  ); */
+
+background: linear-gradient(
+    to top,
+    rgba(var(--gradient-base), 1) 0%,
+    rgba(var(--gradient-base), 1) 75%,
+    rgba(var(--gradient-base), 0.4) 85%,
+    rgba(var(--gradient-base), 0.2) 95%,
+    rgba(var(--gradient-base), 0) 100%
   );
+
   padding: 20px;
   border-radius: 0 0 5px 5px;
   z-index: 2;
@@ -113,7 +125,7 @@
 .fleet-card .view-details {
   font-weight: bold;
   padding: 10px 20px;
-  background-color: white;
+  background-color: var(--page-bg);
   color: var(--accent-txt);
   border: 2px solid var(--accent-txt);
   border-radius: 5px;
@@ -126,6 +138,6 @@
 .fleet-card:hover .view-details {
   background-color: var(--accent-bg);
   border-color: var(--accent-txt);
-  color: white;
+  color: var(--txt-comp);
   transform: scale(1.05);
 }

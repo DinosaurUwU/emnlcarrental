@@ -257,41 +257,84 @@ useEffect(() => {
   };
 
   const getLogoForTheme = () => {
-    switch (theme) {
-      case "november":
-        return (
-          <img
-            src="/assets/november-logo.png"
-            alt="EMNL Logo"
-            className="Header__logo"
-          />
-        );
-      case "december":
-        return (
-          <img
-            src="/assets/december-logo.png"
-            alt="EMNL Logo"
-            className="Header__logo"
-          />
-        );
-      case "clover":
-        return (
-          <img
-            src="/assets/clover-logo.png"
-            alt="EMNL Logo"
-            className="Header__logo"
-          />
-        );
-      default:
-        return (
-          <img
-            src="/assets/logo.png"
-            alt="EMNL Logo"
-            className="Header__logo"
-          />
-        );
-    }
-  };
+  // Get user's dark/light preference
+  const isDark = userTheme === "dark" || 
+    (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const darkSuffix = isDark ? "-dark" : "";
+  
+  switch (theme) {
+    case "november":
+      return (
+        <img
+          src={`/assets/november-logo${darkSuffix}.png`}
+          alt="EMNL Logo"
+          className="Header__logo"
+        />
+      );
+    case "december":
+      return (
+        <img
+          src={`/assets/december-logo${darkSuffix}.png`}
+          alt="EMNL Logo"
+          className="Header__logo"
+        />
+      );
+    case "clover":
+      return (
+        <img
+          src={`/assets/clover-logo${darkSuffix}.png`}
+          alt="EMNL Logo"
+          className="Header__logo"
+        />
+      );
+    default:
+      return (
+        <img
+          src={`/assets/logo${darkSuffix}.png`}
+          alt="EMNL Logo"
+          className="Header__logo"
+        />
+      );
+  }
+};
+
+
+  // const getLogoForTheme = () => {
+  //   switch (theme) {
+  //     case "november":
+  //       return (
+  //         <img
+  //           src="/assets/november-logo.png"
+  //           alt="EMNL Logo"
+  //           className="Header__logo"
+  //         />
+  //       );
+  //     case "december":
+  //       return (
+  //         <img
+  //           src="/assets/december-logo.png"
+  //           alt="EMNL Logo"
+  //           className="Header__logo"
+  //         />
+  //       );
+  //     case "clover":
+  //       return (
+  //         <img
+  //           src="/assets/clover-logo.png"
+  //           alt="EMNL Logo"
+  //           className="Header__logo"
+  //         />
+  //       );
+  //     default:
+  //       return (
+  //         <img
+  //           src="/assets/logo.png"
+  //           alt="EMNL Logo"
+  //           className="Header__logo"
+  //         />
+  //       );
+  //   }
+  // };
 
   return (
     <div className={`Header ${menuOpen ? "open" : ""}`}>
@@ -386,11 +429,27 @@ useEffect(() => {
               </Link>
             </li>
 
-            <div className="theme-toggle">
-  <button onClick={() => toggleUserTheme("light")}><FiSun /></button>
-  <button onClick={() => toggleUserTheme("system")}><FiMonitor /></button>
-  <button onClick={() => toggleUserTheme("dark")}><FiMoon /></button>
+<div className="user-theme-toggle">
+  <button 
+    className={userTheme === "light" ? "active" : ""} 
+    onClick={() => toggleUserTheme("light")}
+  >
+    <FiSun />
+  </button>
+  <button 
+    className={userTheme === "system" ? "active" : ""} 
+    onClick={() => toggleUserTheme("system")}
+  >
+    <FiMonitor />
+  </button>
+  <button 
+    className={userTheme === "dark" ? "active" : ""} 
+    onClick={() => toggleUserTheme("dark")}
+  >
+    <FiMoon />
+  </button>
 </div>
+
 
             <li>
               <Link
@@ -400,9 +459,10 @@ useEffect(() => {
                   setAccountOpen(false);
                   setShowLogoutOverlay(true);
                 }}
+                style={{ color:"#dc3545"}}
               >
                 <FiLogOut
-                  style={{ marginRight: "10px", verticalAlign: "middle" }}
+                  style={{ marginRight: "10px", verticalAlign: "middle", color:"#dc3545"}}
                 />
                 Log out
               </Link>
