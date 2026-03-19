@@ -1,7 +1,7 @@
 .our-fleet {
   padding: 50px 20px 100px;
   text-align: center;
-  background-color: #fff;
+  background-color: var(--bg-primary, white);
 }
 
 .our-fleet h2 {

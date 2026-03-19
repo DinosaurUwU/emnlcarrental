@@ -64,22 +64,24 @@ const toggleUserTheme = (newTheme) => {
 };
 
 
-// Check for saved theme on load
 useEffect(() => {
   const savedTheme = localStorage.getItem("userTheme");
   if (savedTheme) setUserTheme(savedTheme);
 }, []);
 
-// Apply theme to body
 useEffect(() => {
   const root = document.documentElement;
-  if (theme === "system") {
+  
+  // Apply user's dark/light preference
+  if (userTheme === "system") {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
   } else {
-    root.setAttribute("data-theme", theme);
+    root.setAttribute("data-color-mode", userTheme);
   }
-}, [theme]);
+}, [userTheme]);
+
+
 
 
 

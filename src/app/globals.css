@@ -20,6 +20,16 @@ body {
   --light-color: #ffffff;
 }
 
+/* Add to globals.css */
+[data-color-mode="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-bg: #333333;
+}
+
+
 /* Lime */
 :root[data-theme="clover"] {
   --accent-color: #28a745;

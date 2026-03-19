@@ -1,7 +1,7 @@
 .why-choose-us {
   padding: 50px 20px 0px;
   text-align: center;
-  background-color: #fff;
+  background-color: var(--bg-primary, white);
 }
 
 .why-choose-us h2 {
