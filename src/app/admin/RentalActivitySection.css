@@ -1,4 +1,5 @@
 .rental-activity-section {
+  background-color: var(--page-bg);
   padding: 2rem;
   padding-top: 4rem;
   transition: all 0.5s ease;
@@ -47,7 +48,7 @@
 
 .ongoing-rent-column {
   flex: 0.7;
-  background-color: var(--page-bg);
+  background-color: rgba(40, 167, 70, 0.2);
   padding: 10px 0px 10px 0px;
   border-radius: 8px;
   display: flex;
@@ -126,7 +127,7 @@
 .filter-menu {
   display: none;
   position: absolute;
-  background-color: var(--page-bg);
+  background-color: rgba(40, 167, 70, 0.2) !important;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 4px;
   width: 100%;
@@ -144,7 +145,7 @@
   padding: 6px 10px;
   cursor: pointer;
   text-transform: capitalize;
-  color: #000;
+  color: var(--txt-comp);
 }
 
 .filter-option:hover,
@@ -310,11 +311,11 @@
   height: 60%;
   background: linear-gradient(
     to right,
-    rgba(255, 255, 255, 255) 0%,
-    rgba(255, 255, 255, 255) 75%,
-    rgba(255, 255, 255, 0.4) 85%,
-    rgba(255, 255, 255, 0.2) 95%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(var(--gradient-base), 255) 0%,
+    rgba(var(--gradient-base), 255) 75%,
+    rgba(var(--gradient-base), 0.4) 85%,
+    rgba(var(--gradient-base), 0.2) 95%,
+    rgba(var(--gradient-base), 0) 100%
   );
   z-index: 1;
   padding: 40px 10px 30px 20px;
@@ -355,7 +356,7 @@
 .ongoing-unit-info .label {
   font-weight: 600;
   font-size: 0.85rem;
-  color: #343a40;
+  color: var(--txt-comp);
 }
 
 .ongoing-unit-info .value {
@@ -412,10 +413,10 @@
   border-radius: 10px;
   background: linear-gradient(
     to top,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.9) 60%,
-    rgba(255, 255, 255, 0.4) 85%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(var(--gradient-base), 1) 0%,
+    rgba(var(--gradient-base), 0.9) 60%,
+    rgba(var(--gradient-base), 0.4) 85%,
+    rgba(var(--gradient-base), 0) 100%
   );
   display: flex;
   align-items: center;
@@ -429,7 +430,7 @@
 .ongoing-unit-progress-bar-outer {
   width: 100%;
   height: 30%;
-  background-color: #77f194;
+  background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -624,37 +625,37 @@
 }
 
 .ongoing-unit-action-buttons .action-button.extend {
-  background-color: transparent;
+  background-color: rgba(0, 123, 255, 0.15);
   border: 2px solid #007bff;
   color: #007bff;
 }
 
 .ongoing-unit-action-buttons .action-button.cancel {
-  background-color: transparent;
+  background-color: rgba(220, 53, 70, 0.15);
   border: 2px solid #dc3545;
   color: #dc3545;
 }
 
 .ongoing-unit-action-buttons .action-button.finish {
-  background-color: transparent;
+  background-color: rgba(40, 167, 69, 0.15);
   border: 2px solid var(--accent-txt);
   color: var(--accent-txt);
 }
 
 .ongoing-unit-action-buttons .action-button.reserve {
-  background-color: transparent;
+  background-color: rgba(110, 66, 193, 0.15);
   border: 2px solid #6f42c1;
   color: #6f42c1;
 }
 
 .ongoing-unit-action-buttons .action-button.more {
-  background-color: transparent;
+  background-color: rgba(218, 83, 52, 0.15);
   border: 2px solid #da5234;
   color: #da5234;
 }
 
 .ongoing-unit-action-buttons .action-button.edit {
-  background-color: transparent;
+  background-color: rgba(255, 178, 71, 0.15);
   border: 2px solid #ffb347;
   color: #ffb347;
 }
@@ -721,7 +722,7 @@
 
 .available-units-column {
   flex: 0.75;
-  background-color: #f0f0f0;
+  background-color: rgba(40, 167, 70, 0.2);
   padding: 10px 0px 10px 0px;
   border-radius: 10px;
 }
@@ -772,7 +773,7 @@
 .filter-menu {
   display: none;
   position: absolute;
-  background-color: var(--page-bg);
+  background-color: rgba(40, 167, 70, 0.2) !important;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 4px;
   width: 100%;
@@ -807,7 +808,7 @@
   max-width: 600px;
   width: 100%;
   margin: 1.5rem auto 0 auto;
-  background-color: #f5f5f5;
+  background-color: rgba(40, 167, 70, 0.2);
   padding: 10px;
   border-radius: 8px;
 
@@ -1114,7 +1115,7 @@
 }
 
 .quotation-total-banner {
-  background-color: var(--page-bg);
+  background-color: rgba(255, 255, 255, 0.7);
   color: var(--supporting-bg);
   padding: 10px;
   margin: 5px 0px 5px 0px;

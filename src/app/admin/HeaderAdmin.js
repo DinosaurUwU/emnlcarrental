@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu, FiUser } from "react-icons/fi";
+import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
 
 const Header = ({
@@ -648,6 +648,41 @@ const Header = ({
     setPendingTheme(theme);
     setShowSettingsOverlay(false);
   };
+
+  const [adminUserTheme, setAdminUserTheme] = useState("system");
+
+useEffect(() => {
+  const saved = localStorage.getItem("userTheme");
+  if (saved) setAdminUserTheme(saved);
+}, []);
+
+const toggleAdminTheme = (newTheme) => {
+  setAdminUserTheme(newTheme);
+  localStorage.setItem("userTheme", newTheme);
+  
+  // Apply to document
+  const root = document.documentElement;
+  if (newTheme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+  } else {
+    root.setAttribute("data-color-mode", newTheme);
+  }
+};
+
+
+  useEffect(() => {
+  const root = document.documentElement;
+  
+  // Apply user's dark/light preference
+  if (userTheme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+  } else {
+    root.setAttribute("data-color-mode", userTheme);
+  }
+}, [userTheme]);
+
 
 const getLogoForTheme = () => {
   // Get user's dark/light preference
@@ -1553,6 +1588,31 @@ const getLogoForTheme = () => {
             >
               Settings
             </div>
+
+{/* Theme Toggle */}
+<div className="theme-toggle-container">
+  <button
+    className={`theme-btn ${adminUserTheme === "light" ? "active" : ""}`}
+    onClick={() => toggleAdminTheme("light")}
+  >
+    <FiSun />
+  </button>
+  <button
+    className={`theme-btn ${adminUserTheme === "system" ? "active" : ""}`}
+    onClick={() => toggleAdminTheme("system")}
+  >
+    <FiMonitor />
+  </button>
+  <button
+    className={`theme-btn ${adminUserTheme === "dark" ? "active" : ""}`}
+    onClick={() => toggleAdminTheme("dark")}
+  >
+    <FiMoon />
+  </button>
+</div>
+
+
+
             <div
               className="dropdown-item"
               onClick={() => {
