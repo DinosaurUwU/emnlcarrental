@@ -1088,7 +1088,7 @@ select option {
 
 /* Confirmation container */
 .booking-confirm-container {
-  background: #fff;
+  background: var(--page-bg);
   width: 500px;
   max-width: 100%;
   padding: 20px;
@@ -1114,7 +1114,7 @@ select option {
   margin-bottom: 10px;
   margin-top: 0px;
   font-size: 14px;
-  color: black;
+  color: var(--txt-comp);
 }
 
 .confirm-reserved-badge {
@@ -1139,7 +1139,7 @@ select option {
 
 /* Subtitles */
 .confirm-subtitle {
-  color: black;
+  color: var(--txt-comp);
   font-size: 16px;
   font-weight: bold;
   margin-top: 10px;
@@ -1209,6 +1209,7 @@ select option {
   font-size: 14px;
   text-align: left;
   font-weight: bold;
+  color: var(--txt-comp);
 }
 
 /* Right side (values) */
@@ -1256,6 +1257,7 @@ select option {
 
 /* Right side (labels) */
 .summary-label {
+  color: var(--txt-comp);
   text-align: left;
   flex: 1;
 }

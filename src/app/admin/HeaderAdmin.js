@@ -154,6 +154,7 @@ const Header = ({
     logout,
     theme,
     updateTheme,
+    userTheme,
     setShowVerifyOverlay,
     sendVerificationEmail,
     adminAccounts,
@@ -648,24 +649,45 @@ const Header = ({
     setShowSettingsOverlay(false);
   };
 
-  const getLogoForTheme = () => {
-    switch (theme) {
-      case "december":
-        return (
-          <img src="/assets/december-logo.png" className="header-admin-logo" />
-        );
-      case "november":
-        return (
-          <img src="/assets/november-logo.png" className="header-admin-logo" />
-        );
-      case "clover":
-        return (
-          <img src="/assets/clover-logo.png" className="header-admin-logo" />
-        );
-      default:
-        return <img src="/assets/logo.png" className="header-admin-logo" />;
-    }
-  };
+const getLogoForTheme = () => {
+  // Get user's dark/light preference
+  const isDark = userTheme === "dark" || 
+    (userTheme === "system" && typeof window !== "undefined" && 
+     window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const darkSuffix = isDark ? "-dark" : "";
+
+  switch (theme) {
+    case "december":
+      return (
+        <img 
+          src={`/assets/december-logo${darkSuffix}.png`} 
+          className="header-admin-logo" 
+        />
+      );
+    case "november":
+      return (
+        <img 
+          src={`/assets/november-logo${darkSuffix}.png`} 
+          className="header-admin-logo" 
+        />
+      );
+    case "clover":
+      return (
+        <img 
+          src={`/assets/clover-logo${darkSuffix}.png`} 
+          className="header-admin-logo" 
+        />
+      );
+    default:
+      return (
+        <img 
+          src={`/assets/logo${darkSuffix}.png`} 
+          className="header-admin-logo" 
+        />
+      );
+  }
+};
+
 
   const formatDate = (date) => {
     const options = { month: "short", day: "numeric", year: "numeric" };
