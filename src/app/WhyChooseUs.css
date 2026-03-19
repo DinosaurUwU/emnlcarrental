@@ -1,7 +1,7 @@
 .why-choose-us {
   padding: 50px 20px 0px;
   text-align: center;
-  background-color: var(--bg-primary, white);
+  background-color: var(--page-bg);
 }
 
 .why-choose-us h2 {
@@ -11,13 +11,13 @@
   font-size: 2.5em;
   margin-bottom: 20px;
   margin-top: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .why-choose-us p {
   font-size: 1.2em;
   margin-bottom: 40px;
-  color: var(--accent-color);
+  color: var(--supporting-txt);
 }
 
 .first-letter {
@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 8rem;
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
@@ -52,7 +52,7 @@
 .reason-overlay span {
   font-size: 35rem;
   font-weight: bolder;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: absolute;
   top: 50%;
   line-height: 1;
@@ -118,12 +118,12 @@
   text-align: center;
   backdrop-filter: blur(5px);
   z-index: 2;
-  background: linear-gradient(
+  background-color: linear-gradient(
     to top,
-    color-mix(in srgb, var(--accent-color) 100%, transparent) 0%,
-    color-mix(in srgb, var(--accent-color) 100%, transparent) 45%,
-    color-mix(in srgb, var(--accent-color) 80%, transparent) 75%,
-    color-mix(in srgb, var(--accent-color) 60%, transparent) 80%,
+    color-mix(in srgb, var(--accent-txt) 100%, transparent) 0%,
+    color-mix(in srgb, var(--accent-txt) 100%, transparent) 45%,
+    color-mix(in srgb, var(--accent-txt) 80%, transparent) 75%,
+    color-mix(in srgb, var(--accent-txt) 60%, transparent) 80%,
     transparent 100%
   );
 
@@ -143,12 +143,12 @@
 .reason-content h3 {
   margin: 0;
   font-size: 1.5em;
-  color: #fff;
+  color: #f1f1f1;
 }
 
 .reason-content p {
   font-size: 1em;
-  color: #fff;
+  color: #f1f1f1;
   opacity: 0;
   max-height: 0;
   visibility: hidden;

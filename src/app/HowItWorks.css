@@ -1,7 +1,7 @@
 .how-it-works {
   padding: 50px 20px 100px;
   text-align: center;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
 }
 
 .how-it-works h2 {
@@ -11,13 +11,13 @@
   font-size: 2.5em;
   margin-bottom: 20px;
   margin-top: 0;
-  color: #fff;
+  color: var(--page-bg);
 }
 
 .how-it-works p {
   font-size: 1.2em;
   margin-bottom: 40px;
-  color: #fff;
+  color: var(--page-bg);
 }
 
 .steps {
@@ -30,10 +30,10 @@
 .step-container {
   width: 300px;
   height: 350px;
-  background: #fff;
+  background-color: var(--page-bg);
   border-radius: 10px;
   text-align: left;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(var(--gradient-base), 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -61,18 +61,26 @@
   top: 0;
   width: 70%;
   height: 100%;
-  background: linear-gradient(
+      background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--page-bg) 90%, transparent) 0%,
+      color-mix(in srgb, var(--page-bg) 80%, transparent) 25%,
+      color-mix(in srgb, var(--page-bg) 70%, transparent) 50%,
+      color-mix(in srgb, var(--page-bg) 60%, transparent) 90%,
+      transparent 100%
+    );
+  /* background-color: linear-gradient(
     to right,
     rgba(255, 255, 255, 1) 0%,
     rgba(255, 255, 255, 1) 25%,
     rgba(255, 255, 255, 0.4) 50%,
     rgba(255, 255, 255, 0.2) 75%,
     rgba(255, 255, 255, 0) 100%
-  );
+  ); */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 5rem;
   font-weight: bolder;
   text-align: center;
@@ -81,7 +89,7 @@
 .step-overlay span {
   font-size: 20rem;
   font-weight: bolder;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: absolute;
   top: 50%;
   transform: translate(-25%, -50%);
@@ -115,13 +123,13 @@
   font-weight: 900;
   margin: 0;
   font-size: 1.5em;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .step-content p {
   text-align: right;
   font-size: 1em;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 0px;
 }
 
@@ -139,10 +147,10 @@
   .step-container {
     width: calc(33.33% - 20px);
     height: 350px;
-    background: #fff;
+    background-color: var(--txt-comp);
     border-radius: 10px;
     text-align: left;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(var(--gradient-base), 0.1);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -167,7 +175,7 @@
   .step-container {
     width: calc(33.33% - 20px);
     height: 350px;
-    background: #fff;
+    background-color: var(--txt-comp);
     border-radius: 10px;
     text-align: right;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

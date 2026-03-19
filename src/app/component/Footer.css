@@ -1,8 +1,8 @@
 /* Footer.css */
 
 .footer {
-  background-color: var(--accent-color);
-  color: #f8f8f8;
+  background-color: var(--accent-txt);
+  color: #f1f1f1;
   padding: 50px 20px;
   z-index: 100;
 }
@@ -32,7 +32,7 @@
 .footer-logo {
   max-width: 250px; /* Adjust the size as needed */
   margin-top: 30px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .footer-section-h3 {
@@ -44,7 +44,7 @@
 .footer-section li,
 .footer-section a {
   font-size: 1.1em;
-  color: #f8f8f8;
+  color: var(--txt-comp);
 }
 
 .footer-content-p {
@@ -76,7 +76,7 @@
   display: block !important;
   margin-bottom: 10px !important;
   font-size: 1.1em !important;
-  color: #f8f8f8 !important;
+  color: #f1f1f1 !important;
   line-height: 1.3 !important;
 }
 
@@ -90,7 +90,7 @@
 }
 
 .footer-section.links a {
-  color: #f8f8f8;
+  color: #f1f1f1;
   text-decoration: none;
 }
 
@@ -123,7 +123,7 @@
 .social-svg {
   width: 40px;
   height: 40px;
-  color: var(--supporting-color); /* This makes currentColor work */
+  color: var(--supporting-txt); /* This makes currentColor work */
   transition: color 0.3s ease;
 }
 
@@ -141,7 +141,7 @@
   text-align: center;
   margin-top: 20px;
   padding-top: 10px;
-  border-top: 2px solid #f8f8f8;
+  border-top: 2px solid #f1f1f1;
 }
 
 .footer-bottom p {

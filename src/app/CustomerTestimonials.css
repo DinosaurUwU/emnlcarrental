@@ -3,8 +3,8 @@
   text-align: center;
   background: linear-gradient(
     to bottom,
-    rgba(252, 223, 90, 0) 0%,
-    var(--accent-color) 40%
+    var(--page-bg) 0%,
+    var(--accent-txt) 40%
   );
 }
 
@@ -61,11 +61,11 @@
   flex-direction: column;
   justify-content: space-between;
   width: 300px;
-  background: white;
+  background-color: var(--page-bg);
   border-radius: 20px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(var(--shadow-base) 0.1);
   position: relative;
   min-height: 250px;
 }
@@ -76,7 +76,7 @@
   overflow: hidden;
   border-radius: 50%;
   margin: -50px auto 10px auto;
-  border: 5px solid var(--accent-color);
+  border: 5px solid var(--accent-txt);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.5s ease;
 }
@@ -96,11 +96,11 @@
 .customer-testimonials h3 {
   font-size: 1.3em;
   margin-bottom: 5px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .customer-testimonials .date {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 0.9em;
   margin: 0px 0px 10px 0px;
 }
@@ -108,7 +108,7 @@
 .review-wrapper .review {
   flex-grow: 1;
   font-size: 1em;
-  color: #666;
+  color: var(--txt-comp);
   margin-bottom: 15px;
   line-height: 1.5;
   position: relative;
@@ -124,12 +124,12 @@
 }
 
 .customer-testimonials .review::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 4px;
 }
 
 .customer-testimonials .review::-webkit-scrollbar-track {
-  background: transparent;
+  background-color: transparent;
 }
 
 .review-wrapper {
@@ -138,7 +138,7 @@
 
 .review-wrapper .quote-icon {
   font-size: 7em;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   opacity: 0.3;
   position: absolute;
   top: -10px;
@@ -153,7 +153,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 14px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   opacity: 0.8;
   z-index: 5;
   pointer-events: none;
@@ -197,9 +197,9 @@
   top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background-color: #f1f1f1;
   border: none;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   padding: 10px 20px;
   font-size: 1em;
   border-radius: 30px;

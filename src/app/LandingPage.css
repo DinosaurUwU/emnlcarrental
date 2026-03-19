@@ -1,9 +1,9 @@
 .LandingPage {
-  background-color: var(--bg-primary, white);
+  background-color: var(--page-bg);
   height: 100vh;
   margin: 0;
   padding: 0;
-  color: #ffffff;
+  color: var(--txt-comp);
   font-family: "Open Sans", sans-serif;
 }
 
@@ -89,8 +89,8 @@
   transition: 0.3s;
   text-decoration: none;
   display: inline-block;
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-txt);
+  color: #f1f1f1;
   transition: all 0.5s ease;
 }
 
@@ -113,7 +113,7 @@
   text-decoration: none;
   display: inline-block;
   background-color: #cc821b;
-  color: white;
+  color: var(--txt-comp);
   transition: all 0.5s ease;
 }
 
