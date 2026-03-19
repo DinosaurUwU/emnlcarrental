@@ -91,6 +91,14 @@
   height: 100%;
 }
 
+/* Hide icons by default (desktop) */
+.nav-icon {
+  display: none;
+}
+
+
+
+
 /* .Header__nav-link {
   background: none;
   border: 0;
@@ -223,7 +231,88 @@
 
 .Header__icon {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
+
+.header-account-icon,
+.header-icon {
+  height: 28px;
+  width: 28px;
+  cursor: pointer;
+  color: var(--accent-color);
+  transition: all 0.5s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+
+.hamburger-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 3px;
+  background-color: var(--accent-color);
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.hamburger-line.open:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-line.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+
+/* .menu-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  position: relative;
+}
+
+.menu-toggle svg {
+  transition: all 0.3s ease;
+}
+
+.menu-toggle .hamburger {
+  display: block;
+}
+
+.menu-toggle .close-icon {
+  display: none;
+  position: absolute;
+}
+
+.menu-toggle.active .hamburger {
+  display: none;
+}
+
+.menu-toggle.active .close-icon {
+  display: block;
+} */
+
+
 
 .header-account-icon{
     height: 28px;
@@ -250,9 +339,9 @@
   border: 2px solid var(--accent-color);
 }
 
-.menu-icon {
-  display: none;
-}
+
+
+
 
 .OverlayMenu {
   position: fixed;
@@ -279,7 +368,7 @@
   background: rgba(255, 255, 255, 0.9);
   width: 50%;
   max-width: 250px;
-  padding: 40px 20px 20px 20px;
+  padding: 40px 20px 0px 20px;
   border-radius: 0px 0px 10px 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   position: absolute;
@@ -312,6 +401,19 @@
   text-decoration: none;
   transition: color 0.3s ease;
   padding-bottom: 5px;
+
+    display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.menu-icon {
+  display: none;
+margin-top: 3px;
+  vertical-align: middle;
+    display: inline-flex;
+  align-items: center;
 }
 
 .OverlayMenu__nav a.active {
@@ -367,8 +469,8 @@
 .OverlayAccount__container {
   background: rgba(255, 255, 255, 0.9);
   width: 50%;
-  max-width: 250px;
-  padding: 40px 20px 20px 20px;
+  max-width: 200px;
+  padding: 40px 0px 0px 0px;
   border-radius: 0px 0px 10px 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   position: absolute;
@@ -405,6 +507,20 @@
   color: var(--accent-color);
 }
 
+.OverlayAccount__nav li a {
+  display: flex;
+  align-items: center;
+  padding: 10px 30px;
+  text-decoration: none;
+  color: #333;
+  transition: background 0.5s ease;
+}
+
+.OverlayAccount__nav li a:hover {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+
 @media screen and (max-width: 750px) {
   .Header__main {
     left: 10px;
@@ -418,6 +534,11 @@
 
   .OverlayAccount__container {
     right: 10px;
+  }
+
+    .nav-icon {
+    display: inline-block;
+    margin-right: 5px;
   }
 }
 

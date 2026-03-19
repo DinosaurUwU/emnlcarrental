@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { FiHome, FiTruck, FiCalendar, FiInfo, FiPhone, FiUser, FiBell, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+
 import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import { useBooking } from "./BookingProvider";
@@ -257,35 +259,28 @@ function Header() {
             className="OverlayMenu__container"
             onClick={(e) => e.stopPropagation()}
           >
-            <ul className="OverlayMenu__nav">
-              {["/", "/fleet-details", "/about", "/contact"].map(
-                (path, index) => {
-                  const labels = ["Home", "Fleet", "About", "Contact"];
-                  return (
-                    <li key={index}>
-                      {/* <Link
-                        href={path}
-                        className={pathname === path ? "active" : ""}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {labels[index]}
-                      </Link> */}
+<ul className="OverlayMenu__nav">
+  {[
+    { path: "/", name: "Home", icon: <FiHome /> },
+    { path: "/fleet-details", name: "Fleet", icon: <FiTruck /> },
+    { path: "/about", name: "About", icon: <FiInfo /> },
+    { path: "/contact", name: "Contact", icon: <FiPhone /> }
+  ].map((item, index) => (
+    <li key={index}>
+      <Link
+        href={item.path}
+        prefetch
+        onMouseEnter={() => router.prefetch(item.path)}
+        className={pathname === item.path ? "active" : ""}
+        onClick={() => setMenuOpen(false)}
+      >
+        <span className="menu-icon">{item.icon}</span>
+        {item.name}
+      </Link>
+    </li>
+  ))}
+</ul>
 
-                      <Link
-                        href={path}
-                        prefetch
-                        onMouseEnter={() => router.prefetch(path)}
-                        className={pathname === path ? "active" : ""}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {labels[index]}
-                      </Link>
-
-                    </li>
-                  );
-                },
-              )}
-            </ul>
           </div>
         </div>
       )}
@@ -300,7 +295,7 @@ function Header() {
           className="OverlayAccount__container"
           onClick={(e) => e.stopPropagation()}
         >
-          <ul className="OverlayAccount__nav">
+          {/* <ul className="OverlayAccount__nav">
             <li>
               <Link href="/account" onClick={() => setAccountOpen(false)}>
                 Account
@@ -325,7 +320,41 @@ function Header() {
                 Log out
               </Link>
             </li>
-          </ul>
+          </ul> */}
+
+
+<ul className="OverlayAccount__nav">
+  <li>
+    <Link href="/account" onClick={() => setAccountOpen(false)}>
+      <FiUser style={{ marginRight: "10px", verticalAlign: "middle" }} />
+      Account
+    </Link>
+  </li>
+
+  <li>
+    <Link href="/account" onClick={() => setAccountOpen(false)}>
+      <FiBell style={{ marginRight: "10px", verticalAlign: "middle" }} />
+      Notifications
+    </Link>
+  </li>
+
+  <li>
+    <Link
+      href="/auth/login"
+      onClick={(e) => {
+        e.preventDefault();
+        setAccountOpen(false);
+        setShowLogoutOverlay(true);
+      }}
+    >
+      <FiLogOut style={{ marginRight: "10px", verticalAlign: "middle" }} />
+      Log out
+    </Link>
+  </li>
+</ul>
+
+
+
         </div>
       </div>
 
@@ -339,27 +368,131 @@ function Header() {
         <div className="Header__left">{getLogoForTheme()}</div>
 
         {!isMobile && (
-          <div className="Header__center">
-            <ul className="Header__nav">
 
-              <button
-  type="button"
-  className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
-  onMouseDown={() => go("/")}
->
-  Home
-</button>
+<div className="Header__center">
+  <ul className="Header__nav">
+    <li>
+      <button
+        type="button"
+        className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
+        onMouseDown={() => go("/")}
+      >
+        <FiHome className="nav-icon" style={{ marginRight: "5px" }} />
+        Home
+      </button>
+    </li>
 
-<button
-  type="button"
-  className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
-  onMouseDown={() => go("/fleet-details")}
->
-  Fleet
-</button>
+    <li>
+      <button
+        type="button"
+        className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
+        onMouseDown={() => go("/fleet-details")}
+      >
+        <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
+        Fleet
+      </button>
+    </li>
+
+    <li>
+      <button
+        className="Header__button"
+        onClick={(e) => {
+          e.stopPropagation();
+          openBooking(e);
+        }}
+      >
+
+        Book Now
+      </button>
+    </li>
+
+    <li>
+      <Link href="/about" className={pathname === "/about" ? "active" : ""}>
+        <FiInfo className="nav-icon" style={{ marginRight: "5px" }} />
+        About
+      </Link>
+    </li>
+    <li>
+      <Link href="/contact" className={pathname === "/contact" ? "active" : ""}>
+        <FiPhone className="nav-icon" style={{ marginRight: "5px" }} />
+        Contact
+      </Link>
+    </li>
+  </ul>
+</div>
+
+
+
+//           <div className="Header__center">
+//             <ul className="Header__nav">
+
+//               <button
+//   type="button"
+//   className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
+//   onMouseDown={() => go("/")}
+// >
+//   Home
+// </button>
+
+// <button
+//   type="button"
+//   className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
+//   onMouseDown={() => go("/fleet-details")}
+// >
+//   Fleet
+// </button>
 
               
-              {/* <li>
+
+
+//               <li>
+//                 <button
+//                   className="Header__button"
+//                   onClick={(e) => {
+//                     e.stopPropagation();
+//                     openBooking(e);
+//                   }}
+//                 >
+//                   Book Now
+//                 </button>
+//               </li>
+
+//               <li>
+//                 <Link
+//                   href="/about"
+//                   className={pathname === "/about" ? "active" : ""}
+//                 >
+//                   About
+//                 </Link>
+//               </li>
+//               <li>
+//                 <Link
+//                   href="/contact"
+//                   className={pathname === "/contact" ? "active" : ""}
+//                 >
+//                   Contact
+//                 </Link>
+//               </li>
+//             </ul>
+//           </div>
+        )}
+
+        {isMobile && (
+          <div className="Header__bookNow">
+            <button
+              className="Header__button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openBooking(e);
+              }}
+            >
+              Book Now
+            </button>
+          </div>
+        )}
+
+
+                      {/* <li>
                 <Link href="/" 
                 prefetch
                 onMouseEnter={() => router.prefetch("/")} 
@@ -384,52 +517,6 @@ function Header() {
 
 
               </li> */}
-
-              <li>
-                <button
-                  className="Header__button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openBooking(e);
-                  }}
-                >
-                  Book Now
-                </button>
-              </li>
-
-              <li>
-                <Link
-                  href="/about"
-                  className={pathname === "/about" ? "active" : ""}
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className={pathname === "/contact" ? "active" : ""}
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-        )}
-
-        {isMobile && (
-          <div className="Header__bookNow">
-            <button
-              className="Header__button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openBooking(e);
-              }}
-            >
-              Book Now
-            </button>
-          </div>
-        )}
 
         {/* <div className="Header__right">
           <span
@@ -717,15 +804,16 @@ function Header() {
             )}
           </span>
 
-          {isMobile && (
-            <span className="Header__icon menu-icon" onClick={toggleMenu}>
-              {menuOpen ? (
-                <img src="/assets/close.svg" alt="" className="header-icon" />
-              ) : (
-                <img src="/assets/menu.svg" alt="" className="header-icon" />
-              )}
-            </span>
-          )}
+{isMobile && (
+<span className="Header__icon hamburger-toggle" onClick={toggleMenu}>
+  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+</span>
+
+
+)}
+
 
            {interactionReady && searchOpen && (
             <div className="Header__search open">
