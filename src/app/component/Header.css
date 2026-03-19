@@ -281,36 +281,7 @@
 }
 
 
-/* .menu-toggle {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  position: relative;
-}
 
-.menu-toggle svg {
-  transition: all 0.3s ease;
-}
-
-.menu-toggle .hamburger {
-  display: block;
-}
-
-.menu-toggle .close-icon {
-  display: none;
-  position: absolute;
-}
-
-.menu-toggle.active .hamburger {
-  display: none;
-}
-
-.menu-toggle.active .close-icon {
-  display: block;
-} */
 
 
 
