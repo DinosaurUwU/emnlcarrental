@@ -400,7 +400,7 @@ height: 90vh !important;
   border-bottom: 2px solid var(--supporting-txt);
   position: sticky;
   top: 50px;
-  background-color: rgba(var(--shadow-base), 0.7) !important;
+  background-color: rgba(var(--accent-txt), 0.7) !important;
   backdrop-filter: blur(10px) !important;
   z-index: 2;
 }
