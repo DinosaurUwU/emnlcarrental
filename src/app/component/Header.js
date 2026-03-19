@@ -1,6 +1,17 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { FiHome, FiTruck, FiCalendar, FiInfo, FiPhone, FiUser, FiBell, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import {
+  FiHome,
+  FiTruck,
+  FiCalendar,
+  FiInfo,
+  FiPhone,
+  FiUser,
+  FiBell,
+  FiLogOut,
+  FiMenu,
+  FiX,
+} from "react-icons/fi";
 
 import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "../lib/UserContext";
@@ -9,6 +20,7 @@ import Link from "next/link";
 import "./Header.css";
 
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
+import { FiSun, FiMoon, FiMonitor } from "react-icons/fi";
 
 function Header() {
   const { openBooking } = useBooking();
@@ -28,22 +40,49 @@ function Header() {
   const router = useRouter();
 
   const go = (path) => {
-  router.prefetch(path);
-  router.push(path);
-};
-
+    router.prefetch(path);
+    router.push(path);
+  };
 
   useEffect(() => {
-  router.prefetch("/");
-  router.prefetch("/fleet-details");
-}, [router]);
-
+    router.prefetch("/");
+    router.prefetch("/fleet-details");
+  }, [router]);
 
   const profilePic = user?.profilePic || "/assets/profile.png";
 
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
+const [userTheme, setUserTheme] = useState("system");
+
+
+
+const toggleUserTheme = (newTheme) => {
+  setUserTheme(newTheme);
+  localStorage.setItem("userTheme", newTheme);
+};
+
+
+// Check for saved theme on load
+useEffect(() => {
+  const savedTheme = localStorage.getItem("userTheme");
+  if (savedTheme) setUserTheme(savedTheme);
+}, []);
+
+// Apply theme to body
+useEffect(() => {
+  const root = document.documentElement;
+  if (theme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+  } else {
+    root.setAttribute("data-theme", theme);
+  }
+}, [theme]);
+
+
+
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
   const scrollYRef = useRef(0);
@@ -93,6 +132,9 @@ function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+
+
 
   const searchInputRef = useRef(null);
 
@@ -163,7 +205,9 @@ function Header() {
   };
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 750);
+    // Line 166
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+
     handleResize(); // run once on mount so state is correct after login redirect
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -182,7 +226,7 @@ function Header() {
     setSearchResults([]);
   }, [pathname]);
 
-    useEffect(() => {
+  useEffect(() => {
     // Prevent post-login ghost click from instantly toggling search/account/menu
     setInteractionReady(false);
     const timer = setTimeout(() => setInteractionReady(true), 350);
@@ -259,28 +303,27 @@ function Header() {
             className="OverlayMenu__container"
             onClick={(e) => e.stopPropagation()}
           >
-<ul className="OverlayMenu__nav">
-  {[
-    { path: "/", name: "Home", icon: <FiHome /> },
-    { path: "/fleet-details", name: "Fleet", icon: <FiTruck /> },
-    { path: "/about", name: "About", icon: <FiInfo /> },
-    { path: "/contact", name: "Contact", icon: <FiPhone /> }
-  ].map((item, index) => (
-    <li key={index}>
-      <Link
-        href={item.path}
-        prefetch
-        onMouseEnter={() => router.prefetch(item.path)}
-        className={pathname === item.path ? "active" : ""}
-        onClick={() => setMenuOpen(false)}
-      >
-        <span className="menu-icon">{item.icon}</span>
-        {item.name}
-      </Link>
-    </li>
-  ))}
-</ul>
-
+            <ul className="OverlayMenu__nav">
+              {[
+                { path: "/", name: "Home", icon: <FiHome /> },
+                { path: "/fleet-details", name: "Fleet", icon: <FiTruck /> },
+                { path: "/about", name: "About", icon: <FiInfo /> },
+                { path: "/contact", name: "Contact", icon: <FiPhone /> },
+              ].map((item, index) => (
+                <li key={index}>
+                  <Link
+                    href={item.path}
+                    prefetch
+                    onMouseEnter={() => router.prefetch(item.path)}
+                    className={pathname === item.path ? "active" : ""}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span className="menu-icon">{item.icon}</span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
@@ -322,39 +365,47 @@ function Header() {
             </li>
           </ul> */}
 
+          <ul className="OverlayAccount__nav">
+            <li>
+              <Link href="/account" onClick={() => setAccountOpen(false)}>
+                <FiUser
+                  style={{ marginRight: "10px", verticalAlign: "middle" }}
+                />
+                Account
+              </Link>
+            </li>
 
-<ul className="OverlayAccount__nav">
-  <li>
-    <Link href="/account" onClick={() => setAccountOpen(false)}>
-      <FiUser style={{ marginRight: "10px", verticalAlign: "middle" }} />
-      Account
-    </Link>
-  </li>
+            <li>
+              <Link href="/account" onClick={() => setAccountOpen(false)}>
+                <FiBell
+                  style={{ marginRight: "10px", verticalAlign: "middle" }}
+                />
+                Notifications
+              </Link>
+            </li>
 
-  <li>
-    <Link href="/account" onClick={() => setAccountOpen(false)}>
-      <FiBell style={{ marginRight: "10px", verticalAlign: "middle" }} />
-      Notifications
-    </Link>
-  </li>
+            <div className="theme-toggle">
+  <button onClick={() => toggleUserTheme("light")}><FiSun /></button>
+  <button onClick={() => toggleUserTheme("system")}><FiMonitor /></button>
+  <button onClick={() => toggleUserTheme("dark")}><FiMoon /></button>
+</div>
 
-  <li>
-    <Link
-      href="/auth/login"
-      onClick={(e) => {
-        e.preventDefault();
-        setAccountOpen(false);
-        setShowLogoutOverlay(true);
-      }}
-    >
-      <FiLogOut style={{ marginRight: "10px", verticalAlign: "middle" }} />
-      Log out
-    </Link>
-  </li>
-</ul>
-
-
-
+            <li>
+              <Link
+                href="/auth/login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setAccountOpen(false);
+                  setShowLogoutOverlay(true);
+                }}
+              >
+                <FiLogOut
+                  style={{ marginRight: "10px", verticalAlign: "middle" }}
+                />
+                Log out
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -367,235 +418,74 @@ function Header() {
       >
         <div className="Header__left">{getLogoForTheme()}</div>
 
-        {!isMobile && (
+        <div className="Header__center">
+          <ul className="Header__nav">
+            <li>
+              <button
+                type="button"
+                className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
+                onMouseDown={() => go("/")}
+              >
+                <FiHome className="nav-icon" style={{ marginRight: "5px" }} />
+                Home
+              </button>
+            </li>
 
-<div className="Header__center">
-  <ul className="Header__nav">
-    <li>
-      <button
-        type="button"
-        className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
-        onMouseDown={() => go("/")}
-      >
-        <FiHome className="nav-icon" style={{ marginRight: "5px" }} />
-        Home
-      </button>
-    </li>
+            <li>
+              <button
+                type="button"
+                className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
+                onMouseDown={() => go("/fleet-details")}
+              >
+                <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
+                Fleet
+              </button>
+            </li>
 
-    <li>
-      <button
-        type="button"
-        className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
-        onMouseDown={() => go("/fleet-details")}
-      >
-        <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
-        Fleet
-      </button>
-    </li>
-
-    <li>
-      <button
-        className="Header__button"
-        onClick={(e) => {
-          e.stopPropagation();
-          openBooking(e);
-        }}
-      >
-
-        Book Now
-      </button>
-    </li>
-
-    <li>
-      <Link href="/about" className={pathname === "/about" ? "active" : ""}>
-        <FiInfo className="nav-icon" style={{ marginRight: "5px" }} />
-        About
-      </Link>
-    </li>
-    <li>
-      <Link href="/contact" className={pathname === "/contact" ? "active" : ""}>
-        <FiPhone className="nav-icon" style={{ marginRight: "5px" }} />
-        Contact
-      </Link>
-    </li>
-  </ul>
-</div>
-
-
-
-//           <div className="Header__center">
-//             <ul className="Header__nav">
-
-//               <button
-//   type="button"
-//   className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
-//   onMouseDown={() => go("/")}
-// >
-//   Home
-// </button>
-
-// <button
-//   type="button"
-//   className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
-//   onMouseDown={() => go("/fleet-details")}
-// >
-//   Fleet
-// </button>
-
-              
-
-
-//               <li>
-//                 <button
-//                   className="Header__button"
-//                   onClick={(e) => {
-//                     e.stopPropagation();
-//                     openBooking(e);
-//                   }}
-//                 >
-//                   Book Now
-//                 </button>
-//               </li>
-
-//               <li>
-//                 <Link
-//                   href="/about"
-//                   className={pathname === "/about" ? "active" : ""}
-//                 >
-//                   About
-//                 </Link>
-//               </li>
-//               <li>
-//                 <Link
-//                   href="/contact"
-//                   className={pathname === "/contact" ? "active" : ""}
-//                 >
-//                   Contact
-//                 </Link>
-//               </li>
-//             </ul>
-//           </div>
-        )}
-
-        {isMobile && (
-          <div className="Header__bookNow">
-            <button
-              className="Header__button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openBooking(e);
-              }}
-            >
-              Book Now
-            </button>
-          </div>
-        )}
-
-
-                      {/* <li>
-                <Link href="/" 
-                prefetch
-                onMouseEnter={() => router.prefetch("/")} 
-                className={pathname === "/" ? "active" : ""}>
-                  Home
-                </Link>
-
-                
-              </li>
-
-              <li>
-                <Link
-                  href="/fleet-details"
-                  prefetch
-                  onMouseEnter={() => router.prefetch("/fleet-details")}
-                  className={
-                    pathname.startsWith("/fleet-details") ? "active" : ""
-                  }
-                >
-                  Fleet
-                </Link>
-
-
-              </li> */}
-
-        {/* <div className="Header__right">
-          <span
-            className="Header__icon"
-            onMouseEnter={() => setSearchHovered(true)}
-            onMouseLeave={() => setSearchHovered(false)}
-            onClick={() => {
-              toggleSearch();
-              setSearchHovered(true);
-            }}
-          >
-{searchHovered || searchOpen ? (
-  <BiSearchAlt className="header-icon" />
-) : (
-  <BiSearch className="header-icon" />
-)}
-          </span>
-
-          <span
-            className="Header__icon"
-            onMouseEnter={() => setAccountHovered(true)}
-            onMouseLeave={() => setAccountHovered(false)}
-            onClick={() => {
-              toggleAccount();
-              setAccountHovered(true);
-            }}
-          >
-            {user && user.profilePic ? (
-              <img
-                src={profilePic}
-                alt="User Profile"
-                className="Header__icon account-icon"
-                onError={(e) => {
-                  e.currentTarget.src = "/assets/profile.png";
+            <li>
+              <button
+                className="Header__button Header__bookNow-desktop"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openBooking(e);
                 }}
-              />
-            ) : accountHovered || accountOpen ? (
-              <img
-                src="/assets/account-filled.svg"
-                alt=""
-                className="header-account-icon"
-              />
-            ) : (
-              <img
-                src="/assets/account.svg"
-                alt=""
-                className="header-account-icon"
-              />
-            )}
-          </span>
+              >
+                Book Now
+              </button>
+            </li>
 
-          {isMobile && (
-            <span className="Header__icon menu-icon" onClick={toggleMenu}>
-              {menuOpen ? (
-                <img src="/assets/close.svg" alt="" className="header-icon" />
-              ) : (
-                <img src="/assets/menu.svg" alt="" className="header-icon" />
-              )}
-            </span>
-          )}
+            <li>
+              <Link
+                href="/about"
+                className={pathname === "/about" ? "active" : ""}
+              >
+                <FiInfo className="nav-icon" style={{ marginRight: "5px" }} />
+                About
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/contact"
+                className={pathname === "/contact" ? "active" : ""}
+              >
+                <FiPhone className="nav-icon" style={{ marginRight: "5px" }} />
+                Contact
+              </Link>
+            </li>
+          </ul>
+        </div>
 
-          <div className={`Header__search ${searchOpen ? "open" : ""}`}>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search..."
-              value={searchText}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchText(value); // Keep user's original case
-
-                const matches = searchIndex.filter(
-                  (entry) => entry.keyword.includes(value.toLowerCase()), // Still match in lowercase
-                );
-                setSearchResults(value ? matches : []);
-              }}
-            />
-          </div>
-        </div> */}
+        <div className="Header__bookNow Header__bookNow-mobile">
+          <button
+            className="Header__button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openBooking(e);
+            }}
+          >
+            Book Now
+          </button>
+        </div>
 
         <div className="Header__right">
           <span
@@ -804,18 +694,24 @@ function Header() {
             )}
           </span>
 
-{isMobile && (
-<span className="Header__icon hamburger-toggle" onClick={toggleMenu}>
-  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-  <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-</span>
+          {isMobile && (
+            <span
+              className="Header__icon hamburger-toggle"
+              onClick={toggleMenu}
+            >
+              <span
+                className={`hamburger-line ${menuOpen ? "open" : ""}`}
+              ></span>
+              <span
+                className={`hamburger-line ${menuOpen ? "open" : ""}`}
+              ></span>
+              <span
+                className={`hamburger-line ${menuOpen ? "open" : ""}`}
+              ></span>
+            </span>
+          )}
 
-
-)}
-
-
-           {interactionReady && searchOpen && (
+          {interactionReady && searchOpen && (
             <div className="Header__search open">
               <input
                 ref={searchInputRef}
