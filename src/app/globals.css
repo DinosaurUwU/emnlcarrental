@@ -13,42 +13,117 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
-/* Default */
+
+
+
+
+/* ==============================
+   DEFAULT THEME - LIGHT MODE
+   ============================== */
 :root {
-  --accent-color: #074609;
-  --supporting-color: #133c09;
-  --light-color: #ffffff;
+  /* Text colors (on light backgrounds) */
+  --accent-txt: #074609;
+  --supporting-txt: #133c09;
+  
+  /* Background colors */
+  --accent-bg: #074609;
+  --supporting-bg: #133c09;
+  
+  /* Page background - light mode */
+  --page-bg: #f1f1f1;
+
+    /* Text Complement */
+  --txt-comp: #1a1a1a;
 }
 
+/* ==============================
+   DEFAULT THEME - DARK MODE  
+   ============================== */
+:root[data-color-mode="dark"] {
+  /* Text colors - lighter for dark backgrounds */
+  --accent-txt: #28a745;
+  --supporting-txt: #218838;
+  
+  /* Background colors - lighter for dark backgrounds */
+  --accent-bg: #28a745;
+  --supporting-bg: #218838;
+  
+  /* Page background - dark mode */
+  --page-bg: #1a1a1a;
+
+  /* Text Complement */
+  --txt-comp: #f1f1f1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Default */
+/* :root {
+  --accent-txt: #074609;
+  --supporting-txt: #133c09;
+
+  --accent-bg: #074609;
+  --supporting-bg: #133c09;
+
+  --light-mode: #f1f1f1;
+} */
+
 /* Add to globals.css */
-[data-color-mode="dark"] {
+/* [data-color-mode="dark"] {
   --bg-primary: #1a1a1a;
   --bg-secondary: #2d2d2d;
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
   --card-bg: #333333;
-}
+} */
 
 
 /* Lime */
 :root[data-theme="clover"] {
   --accent-color: #28a745;
   --supporting-color: #218838;
-  --light-color: #f1f1f1;
+  --light-mode: #f1f1f1;
+  --dark-mode: #1a1a1a;
 }
+
 
 /* November */
 :root[data-theme="november"] {
   --accent-color: #b3541e;
   --supporting-color: #8c3a13;
-  --light-color: #fff8f0;
+    --light-mode: #f1f1f1;
+  --dark-mode: #1a1a1a;
 }
 
 /* December*/
 :root[data-theme="december"] {
   --accent-color: #b3001b;
   --supporting-color: #0d4d1a;
-  --light-color: #f9f9f9;
+  --light-mode: #f1f1f1;
+  --dark-mode: #1a1a1a;
+}
+
+/* December*/
+:root[data-theme="december"] {
+  --accent-txt: #b3001b;
+  --supporting-txt: #750012;
+
+  --accent-bg: #0d4d1a;
+  --supporting-bg: #083110;
+
+  --light-mode: #f1f1f1;
+  --dark-mode: #1a1a1a;
 }
 
 

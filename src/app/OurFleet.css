@@ -1,7 +1,7 @@
 .our-fleet {
   padding: 50px 20px 100px;
   text-align: center;
-  background-color: var(--bg-primary, white);
+  background: var(--page-bg);
 }
 
 .our-fleet h2 {
@@ -11,12 +11,12 @@
   font-size: 2.5em;
   margin-bottom: 20px;
   margin-top: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .fleet-description {
   font-size: 1.2em;
-  color: var(--accent-color);
+  color: var(--supporting-txt);
   margin-bottom: 40px;
 }
 
@@ -25,16 +25,16 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .fleet-card {
-  background: #fff;
+  background: var(--page-bg);
   border: 2px solid transparent;
   border-radius: 10px;
   width: 400px;
   text-align: left;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
   display: flex;
   flex-direction: column;
   transition: all 0.5s ease;
@@ -45,8 +45,9 @@
 }
 
 .fleet-card:hover {
-  border-color: var(--accent-color);
+  border-color: var(--accent-txt);
   transform: scale(1.05);
+    box-shadow: 0 0 10px var(--accent-txt);
 }
 
 .fleet-card .img-container {
@@ -112,9 +113,9 @@
 .fleet-card .view-details {
   font-weight: bold;
   padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: #fff;
-  border: 2px solid transparent;
+  background-color: white;
+  color: var(--accent-txt);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.5s ease;
@@ -123,8 +124,8 @@
 }
 
 .fleet-card:hover .view-details {
-  background-color: #fff;
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  background-color: var(--accent-bg);
+  border-color: var(--accent-txt);
+  color: white;
   transform: scale(1.05);
 }
