@@ -104,25 +104,41 @@ height: 90vh !important;
 }
 
 .booking-overlay .close-btn {
-  background-color: none;
+  background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0px;
   position: absolute;
-  top: 20px;
-  right: 52px;
+  right: 16px;
+  top: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.booking-overlay .close-btn:hover {
+  background: rgba(239, 68, 68, 0.75);
 }
 
 .booking-overlay .close-icon {
-  width: 32px;
-  height: auto;
-  position: absolute;
-  transition: opacity 0.3s ease;
-    border-radius: 6px;
-
+  font-size: 24px;
+  color: #dc3545;
+  transition: all 0.3s ease;
 }
 
-.booking-overlay .close-icon-1 {
+.booking-overlay .close-btn:hover .close-icon {
+  color: #f1f1f1 !important;
+}
+
+
+
+
+
+/* .booking-overlay .close-icon-1 {
   background-color: #ccc;
   opacity: 0;
 }
@@ -133,7 +149,7 @@ height: 90vh !important;
 
 .booking-overlay .close-btn:hover .close-icon-1 {
   opacity: 1;
-}
+} */
 
 
 
@@ -296,7 +312,7 @@ height: 90vh !important;
   background-color: var(--accent-txt);
   color: white;
   z-index: 10;
-  margin-right: 20px;
+  margin-right: 25px;
   padding: 10px;
   border-radius: 0px 0px 5px 5px;
 }
@@ -309,7 +325,7 @@ height: 90vh !important;
   min-width: 300px;
   position: absolute;
   z-index: 2;
-  background-color: rgba(var(--shadow-base), 0.5);
+  background-color: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(5px);
   max-width: 810px;
   width: 45%;
@@ -345,7 +361,7 @@ height: 90vh !important;
   font-weight: 700;
   font-size: 18px;
   padding: 10px;
-  color: white;
+  color: #f1f1f1;
   background-color: var(--accent-txt);
   margin: 0;
   transition: all 0.5s ease-in-out;
@@ -400,7 +416,7 @@ height: 90vh !important;
   border-bottom: 2px solid var(--supporting-txt);
   position: sticky;
   top: 50px;
-  background-color: rgba(var(--accent-txt), 0.7) !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(10px) !important;
   z-index: 2;
 }
@@ -646,7 +662,7 @@ select option {
 }
 
 .green-label {
-  color: var(--accent-txt);
+  color: var(--supporting-txt);
   font-weight: bold;
   font-family: 14px;
 }
@@ -857,7 +873,7 @@ select option {
 .clear-btn {
   width: 200px;
   padding: 10px;
-  background-color: transparent;
+  background-color: #ef444433;
   border: 2px solid #dc3545;
   color: #dc3545;
   border-radius: 5px;
@@ -914,11 +930,11 @@ select option {
     width: 100%;
     margin: 0;
   
-    z-index: 2;
+    z-index: 12;
   }
 
   .fill-up-form {
-    max-height: 25vh;
+    max-height: 30vh;
     margin-top: 0;
     overflow-y: auto;
     position: relative;
@@ -926,7 +942,7 @@ select option {
   }
 
   .fixed-header {
-        margin-top: 90px;
+        margin-top: 100px;
     position: sticky;
     top: 0;
     width: 100%;
@@ -1039,12 +1055,20 @@ select option {
 }
 
 .confirmation-overlay .close-btn {
-  position: absolute;
-  top: 10px;
-  right: 50px;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
+  padding: 0px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
 }
 
 /* Main overlay background */

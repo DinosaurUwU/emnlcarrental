@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { FiX } from "react-icons/fi";
 import { useUser } from "../lib/UserContext";
 import { useRouter } from "next/navigation";
 import { Timestamp } from "firebase/firestore";
@@ -1643,22 +1644,13 @@ const BookingPage = ({
       {showConfirmOverlay && (
         <div className="overlay-revert">
           <div className="confirm-modal">
-            <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowConfirmOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button>
+<button
+  className="close-btn"
+  type="button"
+  onClick={() => setShowConfirmOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
             <h3>Unsaved Changes</h3>
             <p>What would you like to do?</p>
@@ -1768,7 +1760,7 @@ const BookingPage = ({
       {showBookingConfirmOverlay && (
         <div className="booking-confirm-overlay">
           <div className="booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingConfirmOverlay(false)}
@@ -1783,7 +1775,15 @@ const BookingPage = ({
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+            <button
+  className="close-btn"
+  type="button"
+onClick={() => setShowBookingConfirmOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
             <h3 className="confirm-header">CONFIRM CHANGES?</h3>
             <p className="confirm-text">
@@ -2024,7 +2024,7 @@ const BookingPage = ({
         style={containerStyle}
         onSubmit={handleSubmit}
       >
-        <button
+        {/* <button
           className="close-btn"
           type="button"
           onClick={handleCloseOverlay}
@@ -2039,7 +2039,15 @@ const BookingPage = ({
             alt="Close"
             className="close-icon close-icon-1"
           />
-        </button>
+        </button> */}
+
+       <button
+  className="close-btn"
+  type="button"
+  onClick={handleCloseOverlay}
+>
+  <FiX className="close-icon" />
+</button>
 
         <h2
           style={{
