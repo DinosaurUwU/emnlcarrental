@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 101vh;
-  background: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   transition: all 0.5s ease-in-out;
   z-index: 2000;
   display: flex;
@@ -14,7 +14,7 @@
 }
 
 .booking-overlay h2 {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 10px 0px 20px 0px;
 }
 
@@ -23,16 +23,16 @@
 }
 
 .booking-content::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
 .booking-content::-webkit-scrollbar-thumb:hover {
-  background: var(--supporting-color);
+  background-color: var(--supporting-txt);
 }
 
 .booking-overlay .booking-container {
-  background: rgb(255, 255, 255);
+  background-color: var(--page-bg);
   padding: 20px;
   border-radius: 5px;
   margin: 10px !important;
@@ -48,7 +48,7 @@ height: 90vh !important;
   position: fixed;
   inset: 0;
   z-index: 9000;
-  background: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
@@ -65,7 +65,7 @@ height: 90vh !important;
 .loading-bar-road {
   position: relative;
   height: 10px;
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 30px;
   overflow: visible;
   margin-bottom: 2rem;
@@ -104,7 +104,7 @@ height: 90vh !important;
 }
 
 .booking-overlay .close-btn {
-  background: none;
+  background-color: none;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -118,9 +118,12 @@ height: 90vh !important;
   height: auto;
   position: absolute;
   transition: opacity 0.3s ease;
+    border-radius: 6px;
+
 }
 
 .booking-overlay .close-icon-1 {
+  background-color: #ccc;
   opacity: 0;
 }
 
@@ -290,7 +293,7 @@ height: 90vh !important;
   position: sticky;
   top: 0;
   flex-shrink: 0;
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   z-index: 10;
   margin-right: 20px;
@@ -299,38 +302,26 @@ height: 90vh !important;
 }
 
 
-/* 
-.fixed-header {
-  position: sticky;
-  top: 0;
-  background: var(--accent-color);
-  color: white;
-  z-index: 1;
-  margin: 0px;
-  padding: 10px;
-  border-radius: 0px 0px 5px 5px;
-} */
+
 
 .quotation-summary {
   flex: 1;
   min-width: 300px;
   position: absolute;
   z-index: 2;
-  /* margin-right: 10px; */
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(var(--shadow-base), 0.5);
   backdrop-filter: blur(5px);
   max-width: 810px;
   width: 45%;
   margin-right: 30px;
 
-  /* top: 348px; */
 }
 
 
 
 .fill-up-form {
   padding: 0px 20px 0px 0px; 
-  max-height: 35vh;
+  max-height: 40vh;
   overflow-y: auto;
   position: relative;
   z-index: 1;
@@ -341,12 +332,12 @@ height: 90vh !important;
 }
 
 .fill-up-form::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
 .fill-up-form::-webkit-scrollbar-hover {
-  background: var(--supporting-color);
+  background-color: var(--supporting-txt);
 }
 
 .collapsible-header {
@@ -355,7 +346,7 @@ height: 90vh !important;
   font-size: 18px;
   padding: 10px;
   color: white;
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   margin: 0;
   transition: all 0.5s ease-in-out;
   border-radius: 0px 0px 5px 5px;
@@ -395,7 +386,7 @@ height: 90vh !important;
 }
 
 .checkout-item:last-child {
-  border-bottom: 2px solid var(--supporting-color);
+  border-bottom: 2px solid var(--supporting-txt);
   margin-bottom: 5px;
 }
 
@@ -405,11 +396,11 @@ height: 90vh !important;
   font-size: 1.2em;
   margin: 5px 0px 5px 0px;
   padding: 10px 10px 10px 10px;
-  border-top: 2px solid var(--supporting-color);
-  border-bottom: 2px solid var(--supporting-color);
+  border-top: 2px solid var(--supporting-txt);
+  border-bottom: 2px solid var(--supporting-txt);
   position: sticky;
   top: 50px;
-  background-color: rgba(255, 255, 255, 0.7) !important;
+  background-color: rgba(var(--shadow-base), 0.7) !important;
   backdrop-filter: blur(10px) !important;
   z-index: 2;
 }
@@ -418,7 +409,7 @@ height: 90vh !important;
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
   font-size: 20px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .sticky-details {
@@ -439,7 +430,7 @@ height: 90vh !important;
 }
 
 .label {
-  color: #000;
+  color: var(--accent-txt);
   text-align: left;
 }
 
@@ -491,7 +482,7 @@ height: 90vh !important;
 }
 
 .date-form-row input:focus {
-  color: var(--supporting-color);
+  color: var(--supporting-txt);
 }
 
 .form-row {
@@ -509,7 +500,7 @@ height: 90vh !important;
 
 .fill-up-form label {
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 14px;
   margin: 5px 0px 5px 0px;
   padding-top: 10px;
@@ -517,7 +508,7 @@ height: 90vh !important;
 }
 
 .pickacar {
-  border-top: 2px solid var(--accent-color);
+  border-top: 2px solid var(--accent-txt);
 }
 
 .reserved-unit-inline-badge {
@@ -525,7 +516,7 @@ height: 90vh !important;
   margin: 0;
   padding: 0px 6px;
   border-radius: 999px;
-  background: #6c757d;
+  background-color: #6c757d;
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -542,7 +533,7 @@ select option {
 .form-row select {
   flex: 1;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   font-size: 14px;
   outline: none;
@@ -552,8 +543,8 @@ select option {
 
 .form-row input:focus,
 .form-row select:focus {
-  color: var(--supporting-color);
-  border-color: var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--supporting-txt);
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
 
@@ -633,7 +624,7 @@ select option {
 .message-input textarea {
   width: 100%;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   font-size: 14px;
   background-color: white;
@@ -645,17 +636,17 @@ select option {
 }
 
 .message-input textarea:focus {
-  border-color: var(--supporting-color);
+  border-color: var(--supporting-txt);
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
 
 .red-label {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
 }
 
 .green-label {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-weight: bold;
   font-family: 14px;
 }
@@ -665,7 +656,7 @@ select option {
 }
 
 .id-error-message {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
   text-align: center;
   font-size: 14px;
@@ -673,7 +664,7 @@ select option {
 }
 
 .date-error-message {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
   text-align: center;
   font-size: 14px;
@@ -681,14 +672,14 @@ select option {
 }
 
 .id-error-input {
-  border-color: red;
-  color: red;
+  border-color: #dc3545;
+  color: #dc3545;
 }
 
 .location-input input {
   flex: 1;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   font-size: 14px;
   outline: none;
@@ -699,14 +690,14 @@ select option {
 }
 
 .location-input input:focus {
-  border-color: var(--supporting-color);
+  border-color: var(--supporting-txt);
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
 
 .purpose-input input {
   flex: 1;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   font-size: 14px;
   outline: none;
@@ -728,7 +719,7 @@ select option {
   font-family: "Poppins", sans-serif;
   width: 100%;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   font-size: 14px;
   background-color: white;
@@ -753,7 +744,7 @@ select option {
 .booking-overlay select::after {
   content: "▼";
   font-size: 16px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: absolute;
   right: 10px;
   top: 50%;
@@ -763,17 +754,17 @@ select option {
 
 .booking-overlay select option {
   background-color: white !important;
-  color: var(--accent-color) !important;
+  color: var(--accent-txt) !important;
 }
 
 .booking-overlay select option:hover {
-  background-color: var(--accent-color) !important;
+  background-color: var(--accent-txt) !important;
   color: white !important;
 }
 
 /* Selected option */
 .booking-overlay select option:checked {
-  background-color: var(--accent-color) !important;
+  background-color: var(--accent-txt) !important;
   color: white !important;
 }
 
@@ -785,8 +776,8 @@ select option {
 .booking-overlay select:active,
 .booking-overlay select:focus {
   background-color: white !important;
-  color: var(--accent-color) !important;
-  border-color: var(--accent-color) !important;
+  color: var(--accent-txt) !important;
+  border-color: var(--accent-txt) !important;
 }
 
 /* Hover & Focus Effects */
@@ -798,7 +789,7 @@ select option {
   input[type="date"]:focus
   .booking-overlay
   input[type="time"]:focus {
-  border-color: var(--supporting-color);
+  border-color: var(--supporting-txt);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
 }
 
@@ -813,7 +804,7 @@ select option {
   width: 99%;
   box-sizing: border-box;
   padding: 10px 15px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   font-size: 14px;
   font-weight: bold;
@@ -839,7 +830,7 @@ select option {
 .image-preview img {
   max-width: 150px;
   max-height: 150px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   object-fit: cover;
 }
@@ -978,46 +969,6 @@ select option {
 
 
 
-/* 
-@media (max-width: 407px) {
-  .fixed-header {
-    min-width: 200px;
-  }
-}
-
-@media (max-width: 400px) {
-  .booking-image-container {
-    border-radius: 0;
-  }
-
-  .price {
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--supporting-color);
-    text-align: right;
-  }
-
-  .quotation-summary {
-    top: 261px;
-    left: 22px;
-    right: 22px;
-    width: calc(105% - 65px);
-  }
-
-  .fixed-header {
-    top: 360px;
-
-    left: 22px;
-    right: 22px;
-    width: calc(105% - 85px);
-  }
-
-  .booking-overlay .booking-container {
-    padding: 10px !important;
-    margin: 10px !important;
-  }
-} */
-
 .confirmation-overlay {
   position: fixed;
   top: 0;
@@ -1043,7 +994,7 @@ select option {
 }
 
 .confirmation-overlay h3 {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin-top: 20px;
 }
 
@@ -1059,7 +1010,7 @@ select option {
 
 .confirmation-overlay .discard-btn {
   font-family: "Poppins", sans-serif;
-  background: red;
+  background: #dc3545;
   color: white;
   padding: 8px 15px;
   border: none;
@@ -1131,7 +1082,7 @@ select option {
   font-size: 20px;
   font-weight: 900;
   margin-bottom: 10px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 /* Text */
@@ -1183,7 +1134,7 @@ select option {
   max-width: 100%;
   max-height: 70px;
   border-radius: 5px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -1211,12 +1162,12 @@ select option {
 }
 
 .confirm-scroll-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
 .confirm-scroll-container::-webkit-scrollbar-hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 /* Row container */
@@ -1240,7 +1191,7 @@ select option {
 .confirm-value {
   font-weight: bold;
   font-size: 14px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   flex: 1;
   text-align: right;
 }
@@ -1274,7 +1225,7 @@ select option {
   font-family: "Montserrat", sans-serif;
 
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: right;
   flex: 1;
 }
@@ -1288,7 +1239,7 @@ select option {
 /* Total price */
 .confirm-total-price {
   font-size: 1.5rem !important;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   padding-top: 10px;
   border-top: 2px solid #000;
   text-align: center;
@@ -1306,7 +1257,7 @@ select option {
 .confirm-proceed-btn {
   width: 150px;
   font-family: "Poppins", sans-serif;
-  background: var(--accent-color);
+  background: var(--accent-txt);
   color: white;
   border: none;
   padding: 8px 15px;

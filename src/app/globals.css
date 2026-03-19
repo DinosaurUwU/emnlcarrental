@@ -30,7 +30,7 @@ body {
   --supporting-bg: #133c09;
 
   /* Gradient */
-  --gradient-base: 255, 255, 255;
+  --gradient-base: 241, 241, 241;
 
   /* Box Shadow */
   --shadow-base: 26, 26, 26;
@@ -58,7 +58,7 @@ body {
   --gradient-base: 26, 26, 26;
 
     /* Gradient */
-  --shadow-base: 255, 255, 255;
+  --shadow-base: 241, 241, 241;
   
   /* Page background - dark mode */
   --page-bg: #1a1a1a;

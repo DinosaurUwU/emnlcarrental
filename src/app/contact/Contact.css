@@ -1,6 +1,6 @@
 .contactPage-container {
   width: 100%;
-  background-color: #fffafa;
+  background-color: var(--page-bg);
 }
 
 .contactPage-container .image-section {
@@ -29,7 +29,7 @@
   position: absolute;
   z-index: 2;
   text-align: center;
-  color: white;
+  color: #f1f1f1;
   padding: 40px 60px;
   border-radius: 10px;
   bottom: 30px;
@@ -96,7 +96,7 @@
 
 .contactPage-container .form-section {
   padding: 20px;
-  background-color: #fffafa;
+  background-color: var(--page-bg);
 }
 
 .contactPage-container .title {
@@ -105,7 +105,7 @@
   text-transform: uppercase;
   margin: 0 0 30px 0;
   font-size: 2.5em;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: center;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .contactPage-container .contact-form label {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   display: block;
   margin: 10px 0 5px;
 }
@@ -124,19 +124,21 @@
 .contactPage-container .contact-form input,
 .contactPage-container .contact-form textarea,
 .contactPage-container .contact-form select {
+  background-color: #f1f1f1;
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   outline: none;
+  transition: all 0.5s ease;
 }
 
 .contactPage-container .contact-form input:focus,
 .contactPage-container .contact-form textarea:focus,
 .contactPage-container .contact-form select:focus {
-  border-color: var(--supporting-color) !important;
-  box-shadow: 0 0 10px var(--accent-color);
+  border-color: var(--supporting-txt) !important;
+  box-shadow: 0 0 10px var(--accent-txt);
 }
 
 .contactPage-container .phone-number-container {
@@ -168,8 +170,8 @@
   max-height: 150px;
   overflow-y: auto;
   overflow-x: hidden;
-  background: white;
-  border: 1px solid #ccc;
+  background-color: var(--page-bg);
+  border: 1px solid var(--accent-txt);
   z-index: 999;
   list-style: none;
   padding: 0;
@@ -181,7 +183,7 @@
 }
 
 .country-dropdown::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -189,12 +191,12 @@
   padding: 6px 8px;
   cursor: pointer;
   list-style: none;
-  color: #333;
+  color: var(--accent-txt);
 }
 
 .country-dropdown li:hover {
   background-color: #f0f0f0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .contact-or-separator {
@@ -203,7 +205,7 @@
   justify-content: center;
   gap: 10px;
   margin: 14px 0 10px;
-  color: #6c757d;
+  color: var(--accent-txt);
   font-weight: 600;
   font-size: 14px;
   text-transform: uppercase;
@@ -216,7 +218,7 @@
   flex: 1;
   max-width: 120px;
   height: 1px;
-  background: #cfd8dc;
+  background-color: #cfd8dc;
 }
 
 .call-us-btn {
@@ -226,25 +228,21 @@
   text-align: center;
   padding: 11px 14px;
   border-radius: 10px;
-  border: 1px solid #198754;
-  background: #ffffff;
-  color: #198754;
+  border: 1px solid #ff9100;
+  background-color: #ffffff;
+  color: #ff9100;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.5s ease;
 }
 
 .call-us-btn:hover {
-  background: #198754;
-  box-shadow: 0 0 10px #198754;
+  background-color: #ff9100;
+  box-shadow: 0 0 10px #ff9100;
   color: #ffffff;
 }
 
-@media (max-width: 780px) {
-  .phone-number-container {
-    flex-direction: column;
-  }
-}
+
 
 .contactPage-container .flag-dropdown {
   display: flex;
@@ -266,10 +264,10 @@
   display: block;
   width: 100%;
   padding: 12px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   border: 2px solid transparent;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
   transition: all 0.5s ease;
@@ -285,14 +283,14 @@
   border-radius: 5px;
   resize: vertical;
   box-sizing: border-box;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   outline: none;
   font-family: "Open Sans", sans-serif;
 }
 
 #message:focus {
-  border-color: var(--supporting-color);
+  border-color: var(--supporting-txt);
 }
 
 .contact-form textarea::placeholder {
