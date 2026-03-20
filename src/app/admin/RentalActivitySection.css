@@ -112,7 +112,7 @@
   position: relative;
 }
 
-.filter-button {
+/* .filter-button {
   background-color: var(--accent-txt);
   color: white;
   border: none;
@@ -122,7 +122,7 @@
   cursor: pointer;
   outline: none;
   text-transform: capitalize;
-}
+} 
 
 .filter-menu {
   display: none;
@@ -141,6 +141,8 @@
   display: block;
 }
 
+
+
 .filter-option {
   padding: 6px 10px;
   cursor: pointer;
@@ -152,6 +154,8 @@
 .filter-option.selected {
   background-color: var(--page-bg);
 }
+
+*/
 
 .ongoing-rent-column .extend-input-group {
   display: flex;
@@ -773,7 +777,8 @@
 .filter-menu {
   display: none;
   position: absolute;
-  background-color: rgba(40, 167, 70, 0.2) !important;
+  /* background-color: rgba(40, 167, 70, 0.75) !important; */
+   background-color: var(--txt-comp) !important;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 4px;
   width: 100%;
@@ -789,13 +794,16 @@
 }
 
 .filter-option {
+  color: var(--page-bg);
   padding: 6px 10px;
   cursor: pointer;
   font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .filter-option:hover {
   background-color: #e2f7e3;
+  color: var(--txt-comp);
 }
 
 .filter-option.selected {
