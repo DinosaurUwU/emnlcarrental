@@ -60,8 +60,6 @@
 }
 
 .fleet-carousel-slide img {
-
-
   padding-top: clamp(
     50px,
     /* min at 390px */ calc(15.06vw - 10.73px),
@@ -125,8 +123,6 @@
   padding-top: 50px;
   margin-bottom: 30px;
 }
-
-
 
 .category-section h2 {
   text-align: center;
@@ -447,15 +443,10 @@
   top: 35%;
   left: -25%;
   width: 170%;
-  background: linear-gradient(
-    to left,
-    var(--accent-txt),
-    #00b341,
-    #f9ff5a
-  );
+  background: linear-gradient(to left, var(--accent-txt), #00b341, #f9ff5a);
   filter: drop-shadow(0 0 8px var(--accent-txt))
-        drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
-        drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
+    drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
+    drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
 
   transform: rotate(5deg);
 
@@ -514,8 +505,6 @@
   }
 }
 
-
-
 .suv-section::before {
   font-family: "Montserrat", sans-serif;
   content: "SUV";
@@ -542,8 +531,8 @@
 
   background: linear-gradient(to left, #ff7a18, #fcba03, #fcdf5a);
   filter: drop-shadow(0 0 8px rgba(255, 122, 24, 0.6))
-          drop-shadow(0 0 15px rgba(252, 186, 3, 0.4))
-          drop-shadow(0 0 20px rgba(252, 223, 90, 0.3));
+    drop-shadow(0 0 15px rgba(252, 186, 3, 0.4))
+    drop-shadow(0 0 20px rgba(252, 223, 90, 0.3));
   transform: rotate(-5deg);
 
   background-size: contain;
@@ -573,8 +562,6 @@
   will-change: transform;
 }
 
-
-
 .mpv-section::before {
   font-family: "Montserrat", sans-serif;
   content: "MPV";
@@ -598,15 +585,10 @@
   top: 35%;
   left: -25%;
   width: 170%;
-  background: linear-gradient(
-    to left,
-    var(--accent-txt),
-    #00b341,
-    #f9ff5a
-  );
+  background: linear-gradient(to left, var(--accent-txt), #00b341, #f9ff5a);
   filter: drop-shadow(0 0 8px var(--accent-txt))
-        drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
-        drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
+    drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
+    drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
 
   transform: rotate(5deg);
   background-size: contain;
@@ -636,8 +618,6 @@
   will-change: transform;
 }
 
-
-
 .van-section::before {
   font-family: "Montserrat", sans-serif;
   content: "VAN";
@@ -663,8 +643,8 @@
   width: 170%;
   background: linear-gradient(to left, #ff7a18, #fcba03, #fcdf5a);
   filter: drop-shadow(0 0 8px rgba(255, 122, 24, 0.6))
-          drop-shadow(0 0 15px rgba(252, 186, 3, 0.4))
-          drop-shadow(0 0 20px rgba(252, 223, 90, 0.3));
+    drop-shadow(0 0 15px rgba(252, 186, 3, 0.4))
+    drop-shadow(0 0 20px rgba(252, 223, 90, 0.3));
   transform: rotate(-5deg);
   background-size: contain;
 }
@@ -693,8 +673,6 @@
   will-change: transform;
 }
 
-
-
 .pickup-section::before {
   font-family: "Montserrat", sans-serif;
   content: "PICKUP";
@@ -718,15 +696,10 @@
   top: 35%;
   left: -25%;
   width: 170%;
-  background: linear-gradient(
-    to left,
-    var(--accent-txt),
-    #00b341,
-    #f9ff5a
-  );
+  background: linear-gradient(to left, var(--accent-txt), #00b341, #f9ff5a);
   filter: drop-shadow(0 0 8px var(--accent-txt))
-        drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
-        drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
+    drop-shadow(0 0 15px rgba(0, 179, 65, 0.4))
+    drop-shadow(0 0 20px rgba(249, 255, 90, 0.3));
 
   transform: rotate(5deg);
   background-size: contain;
