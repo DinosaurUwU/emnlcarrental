@@ -256,11 +256,6 @@
   flex-direction: row;
 }
 
-/* .booking-column.left {
-  overflow-y: auto;
-  width: 55%;
-} */
-
 .booking-column.left {
   width: 55%;
   display: flex;
