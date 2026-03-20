@@ -112,50 +112,7 @@
   position: relative;
 }
 
-/* .filter-button {
-  background-color: var(--accent-txt);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  outline: none;
-  text-transform: capitalize;
-} 
 
-.filter-menu {
-  display: none;
-  position: absolute;
-  background-color: rgba(40, 167, 70, 0.2) !important;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 4px;
-  width: 100%;
-  box-sizing: border-box;
-  right: 0;
-  z-index: 1000;
-  border-radius: 4px;
-}
-
-.filter-dropdown:hover .filter-menu {
-  display: block;
-}
-
-
-
-.filter-option {
-  padding: 6px 10px;
-  cursor: pointer;
-  text-transform: capitalize;
-  color: var(--txt-comp);
-}
-
-.filter-option:hover,
-.filter-option.selected {
-  background-color: var(--page-bg);
-}
-
-*/
 
 .ongoing-rent-column .extend-input-group {
   display: flex;
