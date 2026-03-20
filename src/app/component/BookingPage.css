@@ -138,25 +138,14 @@ height: 90vh !important;
 
 
 
-/* .booking-overlay .close-icon-1 {
-  background-color: #ccc;
-  opacity: 0;
-}
 
-.booking-overlay .close-btn:hover .close-icon-0 {
-  opacity: 0;
-}
-
-.booking-overlay .close-btn:hover .close-icon-1 {
-  opacity: 1;
-} */
 
 
 
 .booking-image-container {
   position: relative;
   width: 100%;
-  /* height: 740px !important; */
+
   height: 250px;
   border-radius: 5px;
   overflow: hidden;
