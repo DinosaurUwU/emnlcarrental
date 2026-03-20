@@ -674,54 +674,7 @@ const FleetDetails = () => {
     <div className="fleet-details">
       <Header openBooking={openBooking} />
 
-      {/* <div className="navbar-overlay" ref={navbarOverlayRef}>
-        <div className="navbar">
-          {sedanUnits.length > 0 && (
-            <button
-              className={activeSection === "sedan" ? "active" : ""}
-              onClick={() => scrollToSection(sedanRef)}
-            >
-              SEDAN
-            </button>
-          )}
 
-          {suvUnits.length > 0 && (
-            <button
-              className={activeSection === "suv" ? "active" : ""}
-              onClick={() => scrollToSection(suvRef)}
-            >
-              SUV
-            </button>
-          )}
-
-          {mpvUnits.length > 0 && (
-            <button
-              className={activeSection === "mpv" ? "active" : ""}
-              onClick={() => scrollToSection(mpvRef)}
-            >
-              MPV
-            </button>
-          )}
-
-          {vanUnits.length > 0 && (
-            <button
-              className={activeSection === "van" ? "active" : ""}
-              onClick={() => scrollToSection(vanRef)}
-            >
-              VAN
-            </button>
-          )}
-
-          {pickupUnits.length > 0 && (
-            <button
-              className={activeSection === "pickup" ? "active" : ""}
-              onClick={() => scrollToSection(pickupRef)}
-            >
-              PICKUP
-            </button>
-          )}
-        </div>
-      </div> */}
 
       <div className="navbar-overlay">
         <div className={`floating-nav ${navOpen ? "open" : ""}`}>
