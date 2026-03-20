@@ -60,14 +60,7 @@
 }
 
 .fleet-carousel-slide img {
-  /* padding-top: 100px; */
-  /*
-padding-top: clamp(
-    50px,                    
-    calc(15.06vw - 8.73px),   
-    100px             
-  );
-        */
+
 
   padding-top: clamp(
     50px,
