@@ -109,7 +109,7 @@
 }
 
 .carousel-background.active {
-  opacity: 1; /* Visible when active */
+  opacity: 1;
 }
 
 .fleet-details {
@@ -134,7 +134,7 @@
   font-weight: 900;
 }
 
-/* Background circle that scales on hover */
+/* Background circle*/
 .navbar-overlay {
   position: fixed;
   bottom: 10px;
@@ -144,7 +144,7 @@
   border-radius: 50%;
   z-index: 998;
   transition: all 0.4s ease;
-  pointer-events: none; /* Let clicks pass through */
+  pointer-events: none;
 }
 
 /* Use ::before as the scalable background */
