@@ -799,14 +799,11 @@
   border-radius: 0 0 5px 5px;
   z-index: 2;
   margin-top: 140px;
-
-  /* Make it take up all available space */
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-/* Ensures text grows naturally while pushing the button down */
 .car-card .car-content-wrapper {
   flex-grow: 1;
 }
@@ -852,7 +849,7 @@
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.5s ease;
-  margin-top: auto; /* Pushes button to the bottom */
+  margin-top: auto;
   align-self: center;
 }
 
