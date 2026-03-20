@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor } from "react-icons/fi";
+import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor, FiHome, FiSettings, FiLogOut } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
 
 const Header = ({
@@ -1554,40 +1554,40 @@ const getLogoForTheme = () => {
             })}
           </div>
 
-          {/* Account dropdown */}
-          <div
-            className={`account-dropdown ${
-              accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
-            }`}
-          >
-            <div
-              className="dropdown-item"
-              onClick={() => {
-                setAccountDropdownOpen(false);
-                router.push("/");
-              }}
-            >
-              Home
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => {
-                setAccountDropdownOpen(false);
-                setShowProfileOverlay(true);
-                setOverlayActiveSection("");
-              }}
-            >
-              Profile
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => {
-                setAccountDropdownOpen(false);
-                setShowSettingsOverlay(true);
-              }}
-            >
-              Settings
-            </div>
+{/* Account dropdown */}
+<div
+  className={`account-dropdown ${
+    accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
+  }`}
+>
+  <div
+    className="dropdown-item"
+    onClick={() => {
+      setAccountDropdownOpen(false);
+      router.push("/");
+    }}
+  >
+    <FiHome style={{ marginRight: "10px" }} /> Home
+  </div>
+  <div
+    className="dropdown-item"
+    onClick={() => {
+      setAccountDropdownOpen(false);
+      setShowProfileOverlay(true);
+      setOverlayActiveSection("");
+    }}
+  >
+    <FiUser style={{ marginRight: "10px" }} /> Profile
+  </div>
+  <div
+    className="dropdown-item"
+    onClick={() => {
+      setAccountDropdownOpen(false);
+      setShowSettingsOverlay(true);
+    }}
+  >
+    <FiSettings style={{ marginRight: "10px" }} /> Settings
+  </div>
 
 {/* Theme Toggle */}
 <div className="theme-toggle-container">
@@ -1613,16 +1613,17 @@ const getLogoForTheme = () => {
 
 
 
-            <div
-              className="dropdown-item"
-              onClick={() => {
-                setAccountDropdownOpen(false);
-                setShowLogoutOverlay(true);
-              }}
-            >
-              Logout
-            </div>
-          </div>
+<div
+    className="dropdown-item"
+    onClick={() => {
+      setAccountDropdownOpen(false);
+      setShowLogoutOverlay(true);
+    }}
+    style={{color:"#dc3545"}}
+  >
+    <FiLogOut style={{ marginRight: "10px" }} /> Logout
+  </div>
+</div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ html {
   margin: 0;
   padding: 0;
   width: 100%;
+  background-color: var(--page-bg);
 }
 
 .admin-dashboard {

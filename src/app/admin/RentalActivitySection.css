@@ -733,7 +733,7 @@
   display: none;
   position: absolute;
   /* background-color: rgba(40, 167, 70, 0.75) !important; */
-  background-color: var(--txt-comp) !important;
+  background-color: #f1f1f1 !important;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 4px;
   width: 100%;
@@ -749,7 +749,6 @@
 }
 
 .filter-option {
-  color: var(--page-bg);
   padding: 6px 10px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -757,13 +756,13 @@
 }
 
 .filter-option:hover {
-  background-color: #e2f7e3;
-  color: var(--txt-comp);
+  background-color: rgb(166, 231, 181);
+  color: #1a1a1a;
 }
 
 .filter-option.selected {
   font-weight: bolder;
-  color: var(--accent-txt);
+  color: #074609;
   background-color: #77f194;
 }
 

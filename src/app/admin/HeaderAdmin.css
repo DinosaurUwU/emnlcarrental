@@ -301,17 +301,16 @@
   display: block;
   padding: 12px 15px;
   font-size: 14px;
-  color: #333;
+  color: var(--txt-comp);
   cursor: pointer;
   text-decoration: none;
   text-align: center;
   font-weight: bold;
   transition: all 0.5s ease;
-  color: #333;
 }
 
 .dropdown-item:hover {
-  background: #f2f2f2;
+  background: rgba(40, 167, 69, 0.15);
   color: var(--accent-txt);
 }
 
@@ -941,6 +940,7 @@
 
 .sidebar-header {
   background-color: var(--page-bg);
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1216,7 +1216,7 @@
   border: 1px solid rgba(255, 0, 0, 1);
   border-radius: 3px;
 
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0);
+
   transition: all 0.5s ease;
   width: 20px;
   height: 30px;
@@ -1279,8 +1279,7 @@
   top: 60px;
   right: 20px;
   width: 200px;
-  background: #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    background-color: rgba(var(--gradient-base), 0.95);
   border-radius: 10px;
   overflow: hidden;
   z-index: 1100;
@@ -1318,6 +1317,7 @@
   width: 36px;
   height: 32px;
   border: 1px solid var(--accent-bg);
+    color: var(--txt-comp);
   background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1342,12 +1342,12 @@
 
 .theme-btn:hover {
   background: var(--accent-bg);
-  color: white;
+  color: var(--page-bg);
 }
 
 .theme-btn.active {
   background: var(--accent-bg);
-  color: white;
+  color: var(--page-bg);
   border-color: var(--accent-bg);
 }
 
