@@ -11,7 +11,6 @@ import { useBooking } from "../component/BookingProvider";
 import { useParams } from "next/navigation";
 import { FiMenu } from "react-icons/fi";
 
-
 import "photoswipe/style.css";
 import Header from "../component/Header";
 import Footer from "../component/Footer";
@@ -724,73 +723,68 @@ const FleetDetails = () => {
         </div>
       </div> */}
 
+      <div className="navbar-overlay">
+        <div className={`floating-nav ${navOpen ? "open" : ""}`}>
+          <button
+            className="floating-nav-main"
+            onClick={() => setNavOpen(!navOpen)}
+          >
+            <FiMenu />
+          </button>
 
+          <button
+            className={`floating-nav-item sedan ${activeSection === "sedan" ? "active" : ""}`}
+            onClick={() => scrollToSection(sedanRef)}
+          >
+            SEDAN
+          </button>
 
+          <button
+            className={`floating-nav-item suv ${activeSection === "suv" ? "active" : ""}`}
+            onClick={() => scrollToSection(suvRef)}
+          >
+            SUV
+          </button>
 
-<div className="navbar-overlay">
-  <div className={`floating-nav ${navOpen ? "open" : ""}`}>
+          <button
+            className={`floating-nav-item mpv ${activeSection === "mpv" ? "active" : ""}`}
+            onClick={() => scrollToSection(mpvRef)}
+          >
+            MPV
+          </button>
 
-    <button
-      className="floating-nav-main"
-      onClick={() => setNavOpen(!navOpen)}
-    >
-      <FiMenu />
-    </button>
+          <button
+            className={`floating-nav-item van ${activeSection === "van" ? "active" : ""}`}
+            onClick={() => scrollToSection(vanRef)}
+          >
+            VAN
+          </button>
 
-
-    <button
-      className={`floating-nav-item sedan ${activeSection === "sedan" ? "active" : ""}`}
-      onClick={() => scrollToSection(sedanRef)}
-    >
-      SEDAN
-    </button>
-
-    <button
-      className={`floating-nav-item suv ${activeSection === "suv" ? "active" : ""}`}
-      onClick={() => scrollToSection(suvRef)}
-    >
-      SUV
-    </button>
-
-    <button
-      className={`floating-nav-item mpv ${activeSection === "mpv" ? "active" : ""}`}
-      onClick={() => scrollToSection(mpvRef)}
-    >
-      MPV
-    </button>
-
-    <button
-      className={`floating-nav-item van ${activeSection === "van" ? "active" : ""}`}
-      onClick={() => scrollToSection(vanRef)}
-    >
-      VAN
-    </button>
-
-    <button
-      className={`floating-nav-item pickup ${activeSection === "pickup" ? "active" : ""}`}
-      onClick={() => scrollToSection(pickupRef)}
-    >
-      PICKUP
-    </button>
-<div 
-  className="gauge-needle"
-  style={{
-    transform: activeSection === 'sedan' ? 'translate(-50%, -100%) rotate(0deg)' :
-               activeSection === 'suv' ? 'translate(-50%, -100%) rotate(23deg)' :
-               activeSection === 'mpv' ? 'translate(-50%, -100%) rotate(45deg)' :
-               activeSection === 'van' ? 'translate(-50%, -100%) rotate(67deg)' :
-               activeSection === 'pickup' ? 'translate(-50%, -100%) rotate(90deg)' :
-               'translate(-50%, -100%) rotate(0deg)'
-  }}
-></div>
-
-
-  </div>
-</div>
-
-
-
-
+          <button
+            className={`floating-nav-item pickup ${activeSection === "pickup" ? "active" : ""}`}
+            onClick={() => scrollToSection(pickupRef)}
+          >
+            PICKUP
+          </button>
+          <div
+            className="gauge-needle"
+            style={{
+              transform:
+                activeSection === "sedan"
+                  ? "translate(-50%, -100%) rotate(0deg)"
+                  : activeSection === "suv"
+                    ? "translate(-50%, -100%) rotate(23deg)"
+                    : activeSection === "mpv"
+                      ? "translate(-50%, -100%) rotate(45deg)"
+                      : activeSection === "van"
+                        ? "translate(-50%, -100%) rotate(67deg)"
+                        : activeSection === "pickup"
+                          ? "translate(-50%, -100%) rotate(90deg)"
+                          : "translate(-50%, -100%) rotate(0deg)",
+            }}
+          ></div>
+        </div>
+      </div>
 
       {/* Carousel */}
       <div ref={carouselRef} className="fleet-carousel-container">
@@ -926,33 +920,47 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                     <div style={{ display: "flex", justifyContent: "center" }}>
-  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
-    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-  </span>
-</div>
-
-
-                    </div>
-                                          <div className="car-specs-grid">
-                        <div className="spec-item">
-                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
-                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
-                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
-                          <span>{car.details?.specifications?.Transmission || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Color"]} alt="Color" />
-                          <span>{car.details?.specifications?.Color || "-"}</span>
-                        </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <span
+                          className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}
+                        >
+                          {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                        </span>
                       </div>
-
+                    </div>
+                    <div className="car-specs-grid">
+                      <div className="spec-item">
+                        <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {car.details?.specifications?.Fuel || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Capacity"]}
+                          alt="Capacity"
+                        />
+                        <span>
+                          {car.details?.specifications?.Capacity || "-"}{" "}
+                          Capacity
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Transmission"]}
+                          alt="Transmission"
+                        />
+                        <span>
+                          {car.details?.specifications?.Transmission || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img src={specificationIcons["Color"]} alt="Color" />
+                        <span>{car.details?.specifications?.Color || "-"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1026,33 +1034,47 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-
-                     <div style={{ display: "flex", justifyContent: "center" }}>
-  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
-    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-  </span>
-</div>
-
-
-                    </div>
-                                          <div className="car-specs-grid">
-                        <div className="spec-item">
-                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
-                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
-                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
-                          <span>{car.details?.specifications?.Transmission || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Color"]} alt="Color" />
-                          <span>{car.details?.specifications?.Color || "-"}</span>
-                        </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <span
+                          className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}
+                        >
+                          {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                        </span>
                       </div>
+                    </div>
+                    <div className="car-specs-grid">
+                      <div className="spec-item">
+                        <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {car.details?.specifications?.Fuel || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Capacity"]}
+                          alt="Capacity"
+                        />
+                        <span>
+                          {car.details?.specifications?.Capacity || "-"}{" "}
+                          Capacity
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Transmission"]}
+                          alt="Transmission"
+                        />
+                        <span>
+                          {car.details?.specifications?.Transmission || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img src={specificationIcons["Color"]} alt="Color" />
+                        <span>{car.details?.specifications?.Color || "-"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1126,33 +1148,47 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-
-                     <div style={{ display: "flex", justifyContent: "center" }}>
-  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
-    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-  </span>
-</div>
-
-
-                    </div>
-                                          <div className="car-specs-grid">
-                        <div className="spec-item">
-                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
-                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
-                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
-                          <span>{car.details?.specifications?.Transmission || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Color"]} alt="Color" />
-                          <span>{car.details?.specifications?.Color || "-"}</span>
-                        </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <span
+                          className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}
+                        >
+                          {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                        </span>
                       </div>
+                    </div>
+                    <div className="car-specs-grid">
+                      <div className="spec-item">
+                        <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {car.details?.specifications?.Fuel || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Capacity"]}
+                          alt="Capacity"
+                        />
+                        <span>
+                          {car.details?.specifications?.Capacity || "-"}{" "}
+                          Capacity
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Transmission"]}
+                          alt="Transmission"
+                        />
+                        <span>
+                          {car.details?.specifications?.Transmission || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img src={specificationIcons["Color"]} alt="Color" />
+                        <span>{car.details?.specifications?.Color || "-"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1226,33 +1262,47 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-
-                     <div style={{ display: "flex", justifyContent: "center" }}>
-  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
-    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-  </span>
-</div>
-
-
-                    </div>
-                                          <div className="car-specs-grid">
-                        <div className="spec-item">
-                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
-                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
-                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
-                          <span>{car.details?.specifications?.Transmission || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Color"]} alt="Color" />
-                          <span>{car.details?.specifications?.Color || "-"}</span>
-                        </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <span
+                          className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}
+                        >
+                          {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                        </span>
                       </div>
+                    </div>
+                    <div className="car-specs-grid">
+                      <div className="spec-item">
+                        <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {car.details?.specifications?.Fuel || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Capacity"]}
+                          alt="Capacity"
+                        />
+                        <span>
+                          {car.details?.specifications?.Capacity || "-"}{" "}
+                          Capacity
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Transmission"]}
+                          alt="Transmission"
+                        />
+                        <span>
+                          {car.details?.specifications?.Transmission || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img src={specificationIcons["Color"]} alt="Color" />
+                        <span>{car.details?.specifications?.Color || "-"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1327,32 +1377,47 @@ const FleetDetails = () => {
                         {car.name}
                       </h3>
 
-                     <div style={{ display: "flex", justifyContent: "center" }}>
-  <span className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}>
-    {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
-  </span>
-</div>
-
-
-                    </div>
-                                          <div className="car-specs-grid">
-                        <div className="spec-item">
-                          <img src={specificationIcons["Fuel"]} alt="Fuel" />
-                          <span style={{textTransform:"capitalize"}}>{car.details?.specifications?.Fuel || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Capacity"]} alt="Capacity" />
-                          <span>{car.details?.specifications?.Capacity || "-"} Capacity</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Transmission"]} alt="Transmission" />
-                          <span>{car.details?.specifications?.Transmission || "-"}</span>
-                        </div>
-                        <div className="spec-item">
-                          <img src={specificationIcons["Color"]} alt="Color" />
-                          <span>{car.details?.specifications?.Color || "-"}</span>
-                        </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <span
+                          className={`availability-badge ${isUnitBooked(car) ? "ongoing" : "available"}`}
+                        >
+                          {isUnitBooked(car) ? "Ongoing Rent" : "Available"}
+                        </span>
                       </div>
+                    </div>
+                    <div className="car-specs-grid">
+                      <div className="spec-item">
+                        <img src={specificationIcons["Fuel"]} alt="Fuel" />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {car.details?.specifications?.Fuel || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Capacity"]}
+                          alt="Capacity"
+                        />
+                        <span>
+                          {car.details?.specifications?.Capacity || "-"}{" "}
+                          Capacity
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img
+                          src={specificationIcons["Transmission"]}
+                          alt="Transmission"
+                        />
+                        <span>
+                          {car.details?.specifications?.Transmission || "-"}
+                        </span>
+                      </div>
+                      <div className="spec-item">
+                        <img src={specificationIcons["Color"]} alt="Color" />
+                        <span>{car.details?.specifications?.Color || "-"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
