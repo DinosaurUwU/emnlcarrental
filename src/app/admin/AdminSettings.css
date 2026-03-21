@@ -12,7 +12,7 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 900;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: center;
 }
 
@@ -23,7 +23,7 @@
   margin-top: 0rem;
   text-align: left;
   padding: 10px;
-  background: #dcfada;
+    background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -35,7 +35,7 @@
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   display: flex;
   justify-content: space-between;
 }
@@ -124,7 +124,7 @@
 .admin-settings-search-input {
   box-sizing: border-box;
   padding: 6px 10px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-txt);
   border-radius: 6px;
   font-size: 0.9rem;
   transition: 0.2s ease;
@@ -132,8 +132,8 @@
 
 .admin-settings-search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 4px var(--supporting-color);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 4px var(--supporting-txt);
 }
 
 .search-and-add {
@@ -146,7 +146,7 @@
   padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: bold;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   border: none;
   border-radius: 5px;
@@ -173,7 +173,7 @@
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -236,7 +236,7 @@
   text-align: center;
   border-bottom: 1px solid #ddd;
   background-color: white;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -455,7 +455,7 @@
   width: min(90vw, 1600px);
   width: 90vw;
   max-height: 80vh;
-  background: white;
+  background: var(--page-bg);
   border-radius: 6px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -482,7 +482,7 @@
 }
 
 .unit-details-scrollable::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -609,7 +609,7 @@
 }
 
 .unit-gallery-row::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -670,7 +670,7 @@
   text-transform: uppercase;
   font-weight: 700;
   text-align: left;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .unit-name-column,
@@ -685,20 +685,20 @@
   text-transform: uppercase;
   font-weight: 900;
   font-size: 1.5rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .unit-additional-container {
   margin-top: 20px;
   padding: 20px;
-  border-top: 1px solid var(--accent-color);
+  border-top: 1px solid var(--accent-txt);
   min-width: 1220px;
   overflow-y: auto;
   max-height: 320px;
 }
 
 .unit-additional-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -713,7 +713,7 @@
 .description-row label {
   font-size: 1rem;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin-bottom: 10px;
   display: block;
   font-family: "Montserrat", sans-serif;
@@ -856,7 +856,7 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-size: 1.5rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-weight: 900;
 }
 
@@ -868,7 +868,7 @@
   text-transform: uppercase;
   font-weight: 900;
   font-size: 1.5rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   border: none;
   background: transparent;
   outline: none;
@@ -907,7 +907,7 @@
 }
 
 .spec-item select.spec-input option {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   background: #ffffff;
   font-size: 14px;
   font-weight: 500;
@@ -958,7 +958,7 @@
 
 .edit-btn {
   align-self: center;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
 }
 
@@ -1006,7 +1006,7 @@
 .pop-column {
   flex: 1;
   padding: 10px;
-  background-color: #dcfada;
+    background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
@@ -1020,14 +1020,14 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 0;
 }
 
 .confirm-input {
   box-sizing: border-box;
   padding: 6px 10px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-txt);
   border-radius: 6px;
   font-size: 0.9rem;
   transition: 0.2s ease;
@@ -1035,8 +1035,8 @@
 
 .confirm-input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 4px var(--supporting-color);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 4px var(--supporting-txt);
 }
 
 /* Header with select and button */
@@ -1055,9 +1055,9 @@
   font-size: 1rem;
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   background-color: #fff;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   cursor: pointer;
   text-transform: uppercase;
@@ -1077,7 +1077,7 @@
   padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: bold;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   border: none;
   border-radius: 5px;
@@ -1115,7 +1115,7 @@
 }
 
 .mop-table-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -1206,7 +1206,7 @@
   margin-top: 1.6rem;
   text-align: left;
   padding: 10px;
-  background-color: #dcfada;
+    background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1224,7 +1224,7 @@
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .clients-table {
@@ -1264,7 +1264,7 @@
   text-align: center;
   border-bottom: 1px solid #ddd;
   background-color: white;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -1388,7 +1388,7 @@
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 1.5rem;
   margin: 0;
   text-align: left;
@@ -1413,7 +1413,7 @@
 .client-profile-column h3 {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 10px 0 20px 0;
   font-size: 1.8rem;
 }
@@ -1443,7 +1443,7 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--accent-color);
+  border: 4px solid var(--accent-txt);
   margin: 0px 20px 0px 20px;
 }
 
@@ -1468,7 +1468,7 @@
 .client-info-column h3 {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 0 0 20px 0;
   font-size: 1.8rem;
 }
@@ -1482,7 +1482,7 @@
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   margin: 0 0 10px 0;
   font-size: 1.5rem;
 }
@@ -1520,7 +1520,7 @@
   margin: 0 0 5px 0 !important;
   font-size: 0.85rem !important;
   letter-spacing: 0.5px;
-  color: var(--supporting-color);
+  color: var(--supporting-txt);
 }
 
 .client-analytics-value {
@@ -1529,7 +1529,7 @@
   font-weight: 800 !important;
   margin: 0 0 5px 0;
   font-size: 2rem !important;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .box-icon {
@@ -1628,7 +1628,7 @@
 }
 
 .client-bookings-table-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -1661,7 +1661,7 @@
   text-align: center;
   border-bottom: 1px solid #ddd;
   background-color: white;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -1826,7 +1826,7 @@
   margin-top: 1.6rem;
   text-align: left;
   padding: 10px;
-  background: #dcfada;
+    background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1846,7 +1846,7 @@
   font-weight: 900;
   text-transform: uppercase;
   margin: 0px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .content-subsections {
@@ -1865,7 +1865,7 @@
 
 .content-page h3 {
   margin: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .content-page-header {
@@ -1920,7 +1920,7 @@
 }
 
 .image-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2079,7 +2079,7 @@
 }
 
 .testimonials-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 4px;
 }
 
@@ -2144,7 +2144,7 @@
 }
 
 .testimonial-textarea::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 4px;
 }
 
@@ -2153,7 +2153,7 @@
   width: 100px;
   object-fit: cover;
   border-radius: 50%;
-  border: 4px solid var(--accent-color);
+  border: 4px solid var(--accent-txt);
 }
 
 .testimonial-card h3 {
@@ -2165,7 +2165,7 @@
 
 .date {
   font-size: 0.9em;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -2230,7 +2230,7 @@
 }
 
 .review::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 4px;
 }
 
@@ -2239,7 +2239,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 14px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   opacity: 0.8;
   z-index: 5;
   pointer-events: none;

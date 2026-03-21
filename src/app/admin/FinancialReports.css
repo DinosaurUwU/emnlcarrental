@@ -1,6 +1,6 @@
 .financial-reports {
   padding: 20px;
-  background: #f8f9fa;
+  background-color: var(--page-bg);
   padding: 20px;
   padding-top: 4rem;
 }
@@ -11,7 +11,7 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 900;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: center;
 }
 
@@ -25,25 +25,25 @@
 :root {
   --revenue: #28a745;
   --expense: #dc3545;
-  --revenue-tint: #28a74514;
-  --revenue-hover: rgba(4, 248, 61, 0.2);
-  --expense-tint: #dc354514;
-  --expense-hover: rgba(248, 5, 34, 0.2);
-  --transaction-tint: #ff8c0014;
+  --revenue-tint: rgba(40, 167, 69, 0.25);
+  --revenue-hover: rgba(4, 248, 61, 0.75);
+  --expense-tint: rgba(220, 53, 69, 0.25);
+  --expense-hover: rgba(248, 5, 34, 0.75);
+  --transaction-tint: rgba(255, 140, 0, 0.25);
 }
 
 /* tab container tinted on activeTab */
 .tab-container.revenue {
-  background: var(--revenue-tint);
+  background-color: var(--revenue-tint);
   border-radius: 100px !important;
 }
 .tab-container.expense {
-  background: var(--expense-tint);
+  background-color: var(--expense-tint);
   border-radius: 100px !important;
 }
 
 .tab-container.transaction {
-  background: var(--transaction-tint);
+  background-color: var(--transaction-tint);
   border-radius: 100px !important;
 }
 
@@ -51,11 +51,11 @@
 .tab-button {
   padding: 10px 20px;
   border: none;
-  background: transparent;
+  background-color: transparent;
   cursor: pointer;
   border-radius: 100px !important;
   font-weight: 700;
-  color: #495057;
+  color: var(--txt-comp);
   margin: 0 4px;
   min-width: 88px;
   text-align: center;
@@ -64,46 +64,46 @@
 
 /* hover styles per data-type */
 .tab-button[data-type="revenue"]:hover {
-  background: var(--revenue-hover);
-  color: #000;
+  background-color: var(--revenue-hover);
+  color: var(--txt-comp);
 }
 .tab-button[data-type="expense"]:hover {
-  background: var(--expense-hover);
-  color: #000;
+  background-color: var(--expense-hover);
+  color: var(--txt-comp);
 }
 
 .tab-button[data-type="transaction"]:hover {
-  background: rgba(255, 140, 0, 0.2);
-  color: #000;
+  background-color: rgba(255, 140, 0, 0.2);
+  color: var(--txt-comp);
 }
 
 /* active tab */
 .tab-button.active[data-type="revenue"] {
-  background: var(--revenue);
+  background-color: var(--revenue);
   color: #fff;
   box-shadow: 0 4px 10px rgba(40, 167, 69, 0.12);
 }
 .tab-button.active[data-type="expense"] {
-  background: var(--expense);
+  background-color: var(--expense);
   color: #fff;
   box-shadow: 0 4px 10px rgba(220, 53, 69, 0.12);
 }
 
 .tab-button.active[data-type="transaction"] {
-  background: #ff8c00;
+  background-color: #ff8c00;
   color: #fff;
   box-shadow: 0 4px 10px rgba(255, 140, 0, 0.12);
 }
 
 .tab-button.active[data-type="revenue"]:hover {
-  background: #228d3b;
+  background-color: #228d3b;
 }
 .tab-button.active[data-type="expense"]:hover {
-  background: #b93340;
+  background-color: #b93340;
 }
 
 .tab-button.active[data-type="transaction"]:hover {
-  background: #e67300;
+  background-color: #e67300;
 }
 
 .tab-container {
@@ -122,7 +122,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background-color: #fff;
   padding: 12px;
   margin-bottom: 20px;
   border-radius: 10px;
@@ -148,6 +148,7 @@
 
 .g1-item-ml button:hover {
   background-color: #ffb347 !important;
+    box-shadow: 0 0 10px #ffb347;
   color: white;
 }
 
@@ -168,6 +169,7 @@
 
 .g1-item-sync button:hover {
   background-color: #28a745 !important;
+  box-shadow: 0 0 10px #28a745;
   color: white;
 }
 
@@ -204,6 +206,7 @@
 
 .g1-item-sm button:hover {
   background-color: #008ffc !important;
+  box-shadow: 0 0 10px #008ffc;;
   color: white;
 }
 
@@ -224,6 +227,7 @@
 
 .g1-item-sort button:hover {
   background-color: #6f00ff !important;
+  box-shadow: 0 0 10px #6f00ff;
   color: white;
 }
 
@@ -266,12 +270,13 @@
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.5s ease;
   width: 100%;
 }
 
 .export-btn:hover {
   background-color: #ff6600 !important;
+  box-shadow: 0 0 10px #ff6600;
   color: white;
 }
 
@@ -282,12 +287,13 @@
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.5s ease;
   width: 100%;
 }
 
 .reset-btn:hover {
   background-color: #d8182b !important;
+  box-shadow: 0 0 10px #d8182b;
   color: white;
 }
 
@@ -338,6 +344,7 @@
 }
 
 .zoom-label {
+  color: var(--txt-comp);
   margin-top: 2px;
   font-weight: 500;
 }
@@ -345,15 +352,14 @@
 .toolbar button {
   padding: 7px 12px;
   border: 1px solid #ddd;
-  background: #f8f9fa;
   cursor: pointer;
   border-radius: 6px;
   font-weight: 500;
-  transition: 0.25s;
+  transition: all 0.3s ease;
 }
 
 .toolbar button:hover {
-  background: #e9ecef;
+  background-color: #e9ecef;
 }
 
 /* Auto Save Toggle Layout */
@@ -386,7 +392,7 @@
   inset: 0;
   background-color: #d1d1d6;
   border-radius: 30px;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
 .ios-switch .slider:before {
@@ -398,7 +404,7 @@
   bottom: 2px;
   background-color: white;
   border-radius: 50%;
-  transition: 0.3s;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
@@ -411,6 +417,7 @@
 }
 
 .auto-label {
+  color: var(--txt-comp);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -425,7 +432,7 @@
   align-content: center;
   border: 1px solid rgba(255, 0, 0, 1);
   border-radius: 3px;
-  background: white;
+  background-color: white;
   box-shadow: 0 0 8px rgba(255, 255, 255, 0);
   transition: all 0.5s ease;
   width: 20px;
@@ -450,7 +457,7 @@
 }
 
 .month-section {
-  background: #fff;
+  background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
@@ -470,7 +477,7 @@
   width: auto;
   padding: 0 10px 10px 10px;
   z-index: 10;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -491,7 +498,7 @@
   display: flex;
   align-items: center;
   gap: 1px;
-  background: #ffffff;
+  background-color: #ffffff;
   padding: 1px 3px;
   border-radius: 10px;
   cursor: pointer;
@@ -500,7 +507,7 @@
 }
 
 .save-pill:hover {
-  background: #f2f2f2;
+  background-color: #f2f2f2;
   opacity: 1 !important;
 }
 
@@ -529,6 +536,7 @@
 }
 
 .grid-container {
+    background-color: rgba(var(--gradient-base), 0.8);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -545,7 +553,7 @@
   height: 5px;
 }
 .grid-wrapper::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -555,19 +563,26 @@
   gap: 5px;
   position: sticky;
   top: 0;
-  background: #f8f9fa;
+    background-color: rgba(var(--gradient-base), 0.25);
   padding: 10px;
   border-bottom: 2px solid #28a745;
   z-index: 10;
   min-width: 1220px;
 }
 
+.grid-header-cell.row-number-header{
+  color: var(--txt-comp);
+  background-color: var(--page-bg);
+  border: 1px solid #ccc;
+}
+
 .grid-header-cell {
   padding: 8px;
   text-align: center;
   font-weight: bold;
-  background: #e9ecef;
-  border: 1px solid #ddd;
+  color: var(--txt-comp);
+  background-color: var(--page-bg);
+  border: 1px solid #ccc;
   border-radius: 4px;
 }
 
@@ -584,11 +599,12 @@
   height: 5px;
 }
 .grid-scrollable::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
 .grid-row {
+  
   display: grid;
   grid-template-columns: 50px repeat(5, 1fr); /* Row # + 5 columns */
   gap: 5px;
@@ -623,7 +639,9 @@
 
 .grid-cell {
   padding: 8px;
-  border: 1px solid #ddd;
+  background-color: rgba(var(--gradient-base), 0.7);
+  color: var(--txt-comp);
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 0.9rem;
   text-align: center;
@@ -631,7 +649,7 @@
 
 .grid-cell:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-txt);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
 }
 
@@ -640,14 +658,14 @@
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  background: #fff;
+  background-color: #fff;
   font-size: 0.9rem;
   text-align: center;
 }
 
 .grid-cell select:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-txt);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
 }
 
@@ -664,7 +682,7 @@
 .grid-controls select {
   padding: 5px 8px;
   border: 1px solid #ddd;
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   cursor: pointer;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -675,7 +693,7 @@
 }
 
 .grid-controls button:hover {
-  background: #e9ecef;
+  background-color: #e9ecef;
 }
 
 @media (max-width: 768px) {
@@ -686,7 +704,7 @@
 }
 
 .transaction-report {
-  background: var(--transaction-tint);
+  background-color: var(--transaction-tint);
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding: 10px 20px 20px 20px;
@@ -697,7 +715,7 @@
   font-size: 1.5rem;
   margin: 0;
   text-align: center;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .transaction-scroll-container {
@@ -712,7 +730,7 @@
 }
 
 .transaction-scroll-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -726,7 +744,7 @@
 .transaction-table thead {
   position: sticky;
   top: 0;
-  background: #fff;
+  background-color: #fff;
   z-index: 1;
 }
 
@@ -739,11 +757,12 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 700;
-  background: var(--accent-color);
-  transition: all 0.2s ease;
+  background-color: var(--accent-txt);
+  transition: all 0.3s ease;
 }
 
 .transaction-table td {
+  color: var(--txt-comp);
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 700;
@@ -754,33 +773,33 @@
 }
 
 .transaction-table th:hover {
-  background: #28a745;
+  background-color: #28a745;
 }
 
 .transaction-table th.active {
-  background: #28a745;
+  background-color: #28a745;
 }
 
 .transaction-table th.active:hover {
-  background: #1e7e34;
+  background-color: #1e7e34;
 }
 
 .transaction-table tr.revenue {
-  background: rgba(40, 167, 69, 0.2) !important;
-  transition: all 0.2s ease;
+  background-color: rgba(40, 167, 69, 0.2) !important;
+  transition: all 0.3s ease;
 }
 
 .transaction-table tr.expense {
-  background: rgba(220, 53, 69, 0.2) !important;
-  transition: all 0.2s ease;
+  background-color: rgba(220, 53, 69, 0.2) !important;
+  transition: all 0.3s ease;
 }
 
 .transaction-table tr.revenue:hover {
-  background: rgba(49, 221, 69, 0.8) !important;
+  background-color: rgba(49, 221, 69, 0.8) !important;
   cursor: pointer;
 }
 
 .transaction-table tr.expense:hover {
-  background: rgba(220, 53, 69, 0.8) !important;
+  background-color: rgba(220, 53, 69, 0.8) !important;
   cursor: pointer;
 }

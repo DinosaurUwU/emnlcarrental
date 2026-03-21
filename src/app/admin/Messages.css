@@ -8,7 +8,7 @@ body.modal-open {
   display: flex;
   justify-content: center;
   width: 100%;
-  padding-top: 4rem;
+  padding-top: 5rem;
 }
 
 .messages-container {
@@ -16,6 +16,8 @@ body.modal-open {
   max-width: 800px;
   margin: 0px 10px 0px 10px;
   padding-bottom: 50px;
+    background-color: rgba(40, 167, 70, 0.2);
+    border-radius: 10px;
 }
 
 .messages-container h2 {
@@ -24,7 +26,7 @@ body.modal-open {
   text-transform: uppercase;
   font-weight: 900;
   font-size: 1.8rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .messages-container::-webkit-scrollbar {
@@ -32,7 +34,7 @@ body.modal-open {
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -44,7 +46,7 @@ body.modal-open {
   margin: 0 0px 0 10px;
   padding: 10px 0px;
   padding-right: 0px;
-  border-bottom: 2px solid var(--supporting-color);
+  border-bottom: 2px solid var(--supporting-txt);
 }
 
 .tabs-left {
@@ -60,7 +62,7 @@ body.modal-open {
 }
 
 .tab {
-  background: #e0e0e0;
+  background: white;
   border: none;
   padding: 10px 20px;
   margin: 0;
@@ -70,16 +72,16 @@ body.modal-open {
 }
 
 .tab.active {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   color: white;
 }
 
 .tab.active:hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 .tab:hover {
-  background: #c8e6c9;
+  background: #8aca8b;
 }
 
 .message-list {
@@ -95,7 +97,7 @@ body.modal-open {
 }
 
 .message-list::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -124,7 +126,7 @@ body.modal-open {
   width: 18px;
   height: 18px;
   appearance: none;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   cursor: pointer;
   position: relative;
@@ -147,7 +149,7 @@ body.modal-open {
 }
 
 .admin-message-checkbox:hover {
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
 }
 
 .admin-message-checkbox:hover::after {
@@ -155,7 +157,7 @@ body.modal-open {
 }
 
 .admin-message-checkbox:checked {
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
 }
 
 .admin-message-checkbox:checked::after {
@@ -170,14 +172,14 @@ body.modal-open {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s;
-  border-left: 5px solid var(--accent-color);
-  box-shadow: 0 0 5px var(--accent-color);
+  border-left: 5px solid var(--accent-txt);
+  box-shadow: 0 0 5px var(--accent-txt);
   transition: all 0.5s ease;
 }
 
 .message-item:hover {
   background: #c2f8c3;
-  box-shadow: 0 0 10px var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-txt);
   border-left: 5px solid #28a745;
 }
 
@@ -187,7 +189,7 @@ body.modal-open {
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   background: white;
 }
 
@@ -197,11 +199,11 @@ body.modal-open {
   align-items: center;
   gap: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-txt);
 }
 
 .message-name {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 /* Header Section */
@@ -222,13 +224,13 @@ body.modal-open {
 .admin-message-name {
   font-size: 18px;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 /* Meta Info (Date, Time, Contact) */
 .message-meta {
   font-size: 14px;
-  color: #333;
+  color: var(--txt-comp);
   font-weight: bold;
   line-height: 1.4;
   margin: 0px;
@@ -253,7 +255,7 @@ body.modal-open {
   display: block;
   margin: 20px auto;
   padding: 10px 20px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
   border: none;
   border-radius: 5px;
@@ -285,9 +287,13 @@ body.modal-open {
 
 .message-timestamp {
   font-size: 14px;
-  color: #333;
+  color: var(--txt-comp);
   margin: 0px;
   font-weight: bold;
+}
+
+.full-message{
+  color: var(--txt-comp) !important;
 }
 
 .message-preview {
@@ -309,7 +315,7 @@ body.modal-open {
 }
 
 .message-meta .phone a {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-decoration: none;
   font-weight: bold;
 }
@@ -351,7 +357,7 @@ body.modal-open {
 /* Message Content */
 .admin-message-content {
   position: relative;
-  background: white;
+  background: var(--page-bg);
   padding: 10px;
   border-radius: 8px;
   margin: 0;
@@ -382,7 +388,7 @@ body.modal-open {
   min-height: 60px;
   padding: 8px;
   margin-bottom: 10px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   border-radius: 5px;
   resize: none;
   outline: none;
@@ -392,8 +398,8 @@ body.modal-open {
 }
 
 .admin-reply-textarea:focus {
-  box-shadow: 0 0 10px var(--accent-color);
-  border-color: var(--supporting-color);
+  box-shadow: 0 0 10px var(--accent-txt);
+  border-color: var(--supporting-txt);
 }
 
 .message-actions {
@@ -431,12 +437,12 @@ body.modal-open {
 }
 
 .forward-btn {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   color: white;
 }
 
 .forward-btn:hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 /* Notifications */
@@ -460,6 +466,7 @@ body.modal-open {
   grid-template-columns: 300px 1fr;
   gap: 12px;
   height: 600px;
+  padding: 0 10px 0 10px;
 }
 
 .conversation-thread-list {
@@ -474,7 +481,7 @@ body.modal-open {
 }
 
 .conversation-thread-list::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -554,7 +561,7 @@ body.modal-open {
 
 .thread-name {
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   min-width: 0;
   flex: 1;
   white-space: nowrap;
@@ -651,7 +658,7 @@ body.modal-open {
 
 .conversation-chat-title {
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .conversation-chat-email {
@@ -739,13 +746,13 @@ body.modal-open {
   border-radius: 5px;
   cursor: pointer;
   font-size: 13px;
-  background: var(--accent-color);
+  background: var(--accent-txt);
   color: #fff;
   transition: background 0.3s ease;
 }
 
 .fleet-link-btn:hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 .conversation-chat-input {
@@ -761,7 +768,7 @@ body.modal-open {
 }
 
 .conversation-chat-input:focus {
-  border-color: var(--accent-color);
+  border-color: var(--accent-txt);
   box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.15);
 }
 
@@ -772,7 +779,7 @@ body.modal-open {
   }
 
   .conversation-thread-list {
-    max-height: 240px;
+    max-height: 150px;
   }
 
   .conversation-chat-panel {

@@ -671,23 +671,12 @@ const toggleAdminTheme = (newTheme) => {
 };
 
 
-  useEffect(() => {
-  const root = document.documentElement;
-  
-  // Apply user's dark/light preference
-  if (userTheme === "system") {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
-  } else {
-    root.setAttribute("data-color-mode", userTheme);
-  }
-}, [userTheme]);
+
 
 
 const getLogoForTheme = () => {
-  // Get user's dark/light preference
-  const isDark = userTheme === "dark" || 
-    (userTheme === "system" && typeof window !== "undefined" && 
+  const isDark = adminUserTheme === "dark" || 
+    (adminUserTheme === "system" && typeof window !== "undefined" && 
      window.matchMedia("(prefers-color-scheme: dark)").matches);
   const darkSuffix = isDark ? "-dark" : "";
 

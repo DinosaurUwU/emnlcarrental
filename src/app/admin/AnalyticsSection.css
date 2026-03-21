@@ -301,6 +301,33 @@ body.analytics-no-scroll {
     display: flex;
     flex-direction: column !important;
   }
+
+  .analytics-linechart-container {
+  overflow-x: auto;
+  overflow-y: hidden;  /* Add this */
+  min-width: 100%;
+}
+
+.analytics-linechart-container > canvas {
+  display: block;
+  min-width: 600px;
+  max-width: none;
+  height: 300px;
+}
+
+.analytics-graph {
+  overflow-x: auto;
+  overflow-y: hidden;  /* Add this */
+  min-width: 100%;
+}
+
+.analytics-graph > canvas {
+  display: block;
+  min-width: 600px;
+  max-width: none;
+  height: 300px;
+}
+
 }
 
 .analytics-summary-values {
@@ -2095,9 +2122,11 @@ border-collapse: collapse;
   padding: 2px !important;
   }
 
-  .analytics-linechart-container{
-padding: 5px 5px 95px;
+    .analytics-linechart-container {
+    padding: 5px 5px 95px;
   }
+
+ 
 
 
   .date-range-display {
