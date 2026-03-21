@@ -2674,6 +2674,7 @@ body.analytics-no-scroll {
 }
 
 .calendar-title {
+    color: var(--accent-txt);
   font-size: 1.5rem;
   margin-top: 0;
   margin-bottom: 10px;
@@ -2775,6 +2776,7 @@ body.analytics-no-scroll {
 
 /* Left chunk: prev, today, next */
 .fc .fc-toolbar-chunk:first-child {
+  color: var(--accent-txt);
   justify-content: flex-start !important;
   display: flex !important;
   flex: 1;
@@ -2782,6 +2784,7 @@ body.analytics-no-scroll {
 
 /* Center chunk: title */
 .fc .fc-toolbar-chunk:nth-child(2) {
+  color: var(--accent-txt);
   justify-content: center !important;
   display: flex !important;
   flex: 1;

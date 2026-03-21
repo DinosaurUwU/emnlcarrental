@@ -2185,7 +2185,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       const text = getCenterText(summaryTimeRange);
 
       ctx.font = "bold 16px Arial";
-      ctx.fillStyle = "#333";
+      ctx.fillStyle = "#28a745";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -2255,7 +2255,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                 }
 
                 let fillStyle = "#ccc";
-                let strokeStyle = "#000";
+                let strokeStyle = "var(--txt-comp)";
 
                 if (dataset.label === "Profit") {
                   fillStyle = "rgba(40,167,69,0.2)";
