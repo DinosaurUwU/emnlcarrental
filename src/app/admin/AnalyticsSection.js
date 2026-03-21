@@ -2182,10 +2182,13 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       } = chart;
       ctx.save();
 
+          const styles = getComputedStyle(document.documentElement);
+    const accentColor = styles.getPropertyValue('--accent-txt').trim() || "#28a745";
+
       const text = getCenterText(summaryTimeRange);
 
       ctx.font = "bold 16px Arial";
-      ctx.fillStyle = "#28a745";
+      ctx.fillStyle = accentColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -2255,7 +2258,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                 }
 
                 let fillStyle = "#ccc";
-                let strokeStyle = "var(--txt-comp)";
+                let strokeStyle = "#ccc";
 
                 if (dataset.label === "Profit") {
                   fillStyle = "rgba(40,167,69,0.2)";
@@ -2383,7 +2386,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
         datalabels: {
           display: showDataLabels,
-          color: "#333",
+          color: "#ccc",
           font: { weight: "bold" },
           formatter(value, context) {
             if (!value) return "";
@@ -2416,7 +2419,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       legend: {
         display: true,
         position: "bottom",
-        labels: { color: "#333", boxWidth: 15 },
+        labels: { color: "var(--txt-comp)", boxWidth: 15 },
       },
       tooltip: {
         mode: "nearest",
