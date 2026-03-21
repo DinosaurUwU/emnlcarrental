@@ -767,6 +767,7 @@
 }
 
 .balance-due-column {
+  box-sizing: border-box;
   max-width: 600px;
   width: 100%;
   margin: 1.5rem auto 0 auto;

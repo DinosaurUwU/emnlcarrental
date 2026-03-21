@@ -147,6 +147,7 @@ body.analytics-no-scroll {
   gap: 30px;
   width: 100%;
   align-items: start;
+  
 }
 
 .analytics-summary-values {
@@ -548,9 +549,9 @@ body.analytics-no-scroll {
 }
 
 .table-scrollable-container {
-overflow-x: visible;
+overflow-x: visible !important;
   overflow-y: auto;
-  max-height: 450px;
+  max-height: 500px;
 }
 
 .table-left-panel {
@@ -846,7 +847,7 @@ overflow-x: visible;
 
 .car-status-table {
   width: 100%;
-  border-collapse: collapse;
+border-collapse: collapse;
   min-width: 1300px;
 }
 
@@ -1215,8 +1216,9 @@ overflow-x: visible;
     AFFILIATION TABLE MAIN WRAPPER
 =============================== */
 .affiliation-table-wrapper {
+  overflow-x: auto;
   flex: 2;
-  min-width: 0;
+  min-width: 1500px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -1230,7 +1232,8 @@ overflow-x: visible;
     SCROLLABLE CONTAINER
 =============================== */
 .affiliation-table-scrollable-container {
-  overflow-x: auto;
+  width: 100%;;
+  overflow-x: visible !important;
   overflow-y: auto;
   max-height: 500px;
 }
@@ -1260,6 +1263,9 @@ overflow-x: visible;
   display: flex;
   gap: 10px;
   align-items: center;
+    align-items: center;
+    min-width: 1500px;  /* Force minimum width */
+  flex-shrink: 0;     /* Don't allow shrinking */
 }
 
 .affiliation-summary-box {
@@ -1434,7 +1440,7 @@ overflow-x: visible;
 .affiliation-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1300px;
+  min-width: 1500px !important;
 }
 
 .affiliation-table thead th {
