@@ -1441,6 +1441,7 @@ const getLogoForTheme = () => {
         {/* Icons in main content area */}
         <div className="main-icons">
           <FiMenu
+          style={{color:"var(--accent-txt)"}}
             className="hamburger-icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           />

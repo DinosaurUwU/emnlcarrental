@@ -108,7 +108,7 @@
 .review-wrapper .review {
   flex-grow: 1;
   font-size: 1em;
-  color: var(--txt-comp);
+  color: var(--accent-txt);
   margin-bottom: 15px;
   line-height: 1.5;
   position: relative;

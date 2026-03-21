@@ -1856,11 +1856,11 @@
 }
 
 .content-page {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--shadow-base), 0.1);
   border: none;
   padding: 15px;
   border-radius: 8px;
-  background: #f9f9f9;
+  background: var(--page-bg);
 }
 
 .content-page h3 {
@@ -1884,7 +1884,7 @@
 
 .dimension-notice {
   font-size: 0.75rem;
-  color: #666;
+  color: var(--txt-comp);
   font-style: italic;
   font-weight: 400;
 }
@@ -2159,7 +2159,7 @@
 .testimonial-card h3 {
   margin: 0 0 10px;
   font-size: 1.5em;
-  color: #024001;
+  color: var(--accent-txt);
   text-align: center;
 }
 
@@ -2224,6 +2224,12 @@
   overflow-y: auto;
   padding-left: 20px;
 }
+
+
+.review-wrapper .review p{
+  color: var(--txt-comp) !important;
+}
+
 
 .review::-webkit-scrollbar {
   width: 5px;

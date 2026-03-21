@@ -958,7 +958,7 @@
 .sidebar-header .logo {
   pointer-events: none;
   position: absolute;
-  left: 50px;
+  left: 70px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -1173,7 +1173,7 @@
   display: block;
 }
 
-.main-icons {
+/* .main-icons {
   position: fixed;
   top: 0;
   left: 0;
@@ -1186,7 +1186,31 @@
   padding: 0 20px;
   z-index: 999;
   transition: left 0.3s ease;
+} */
+
+.main-icons {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(40, 167, 70, 0.2);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* Add this - centers content horizontally */
+  padding: 0 20px;
+  z-index: 999;
+  transition: left 0.3s ease;
 }
+
+.main-icons .logo {
+  position: static;
+  transform: none;
+  margin: 0;
+}
+
+
 
 .right-icons {
   position: absolute;
@@ -1454,8 +1478,8 @@
     display: block;
   }
 
-  .main-icons {
-    justify-content: space-between;
+  .main-icons .logo{
+    margin-right: 40px;
   }
 }
 
