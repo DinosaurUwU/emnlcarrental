@@ -12,7 +12,7 @@
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 900;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: center;
 }
 
@@ -30,7 +30,7 @@ body.analytics-no-scroll {
   width: 30%;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
@@ -40,9 +40,9 @@ body.analytics-no-scroll {
 
 .time-category-select:focus {
   outline: none;
-  color: var(--supporting-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }
 
 .time-category-select {
@@ -74,7 +74,7 @@ body.analytics-no-scroll {
   font-weight: 600;
   margin-bottom: 5px;
   font-size: 0.8rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -83,7 +83,7 @@ body.analytics-no-scroll {
   width: 150px;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
@@ -112,7 +112,7 @@ body.analytics-no-scroll {
   width: 100%;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
@@ -125,9 +125,9 @@ body.analytics-no-scroll {
 
 .analytics-summary-select:focus {
   outline: none;
-  color: var(--supporting-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }
 
 .analytics-summary-row {
@@ -161,9 +161,9 @@ body.analytics-no-scroll {
   justify-content: center;
   flex-direction: column;
   padding: 10px;
-  background: #dcfada;
+  background: rgba(40, 167, 70, 0.2);
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(var(--shadow-base), 0.1);
 }
 
 .analytics-piechart-container select {
@@ -171,7 +171,7 @@ body.analytics-no-scroll {
   margin-bottom: 0;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
@@ -181,9 +181,9 @@ body.analytics-no-scroll {
 
 .analytics-piechart-container select:focus {
   outline: none;
-  color: var(--supporting-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }
 
 .analytics-piechart-container select {
@@ -197,13 +197,14 @@ body.analytics-no-scroll {
   height: auto !important;
   max-width: 280px;
   max-height: 280px;
+  color: var(--accent-txt) !important;
 }
 
 .analytics-linechart-container {
   width: 100%;
   height: 500px;
   margin: 20px 0 20px 0;
-  background: #dcfada;
+  background: rgba(40, 167, 70, 0.2);
   box-sizing: border-box;
   border-radius: 12px;
   padding: 20px 20px 80px 20px;
@@ -265,12 +266,13 @@ body.analytics-no-scroll {
 .summary-box {
   padding: 25px;
   border-radius: 16px;
-  background: linear-gradient(
+  /* background: linear-gradient(
     135deg,
     rgba(220, 250, 218, 0.75) 0%,
     rgb(200, 230, 201, 0.75) 100%
-  );
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  ); */
+  background-color: rgba(40, 167, 70, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--shadow-base), 0.1);
   transition: all 0.5s ease;
   text-align: left;
   position: relative;
@@ -298,7 +300,7 @@ body.analytics-no-scroll {
   margin: 0 0 5px 0;
   font-size: 0.85rem;
   letter-spacing: 0.5px;
-  color: var(--supporting-color);
+  color: var(--supporting-txt);
 }
 
 .analytics-value {
@@ -307,14 +309,14 @@ body.analytics-no-scroll {
   font-weight: 900;
   margin: 0 0 5px 0;
   font-size: 2.5rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .analytics-subtitle {
   font-family: "Poppins", sans-serif;
   font-size: 0.75rem;
   margin: 0;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--txt-comp);
   font-weight: 500;
 }
 
@@ -373,10 +375,10 @@ body.analytics-no-scroll {
 
 /* COLORS PER CATEGORY  */
 .summary-box.profit .analytics-label {
-  color: var(--supporting-color);
+  color: var(--supporting-txt);
 }
 .summary-box.profit .analytics-value {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .summary-box.revenue .analytics-label {
@@ -504,7 +506,7 @@ body.analytics-no-scroll {
   width: 30%;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
@@ -517,9 +519,9 @@ body.analytics-no-scroll {
 
 .combo-box-select:focus {
   outline: none;
-  color: var(--supporting-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }
 
 .car-status-table-wrapper {
@@ -531,7 +533,7 @@ body.analytics-no-scroll {
   gap: 0px;
   border-radius: 10px;
   padding: 10px;
-  background: #dcfada;
+  background: rgba(40, 167, 70, 0.2);
 }
 
 .car-status-table-container {
@@ -694,10 +696,10 @@ body.analytics-no-scroll {
   );
 }
 .profit-table .analytics-label-table {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 .profit-table .analytics-value-table {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 .profit-table .box-icon-table {
   background: rgba(40, 167, 69, 0.25);
@@ -779,7 +781,7 @@ body.analytics-no-scroll {
   font-weight: 900;
   text-align: center;
   margin: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .scroll-mode-toggle .toggle-button {
@@ -796,18 +798,19 @@ body.analytics-no-scroll {
   font-weight: 600;
   border: none;
   background: white;
+  color: var(--accent-txt);
   transition: 0.2s ease;
 }
 
 .scroll-mode-toggle .active {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   color: white;
 }
 
 .scroll-search-input {
   box-sizing: border-box;
   padding: 6px 10px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-txt);
   border-radius: 6px;
   font-size: 0.9rem;
   width: 100%;
@@ -816,8 +819,8 @@ body.analytics-no-scroll {
 
 .scroll-search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 4px var(--supporting-color);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 4px var(--supporting-txt);
 }
 
 .table-scrollable-container::-webkit-scrollbar {
@@ -826,12 +829,12 @@ body.analytics-no-scroll {
 }
 
 .table-scrollable-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
 .table-scrollable-container::-webkit-scrollbar-hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 .car-status-table {
@@ -866,7 +869,7 @@ body.analytics-no-scroll {
 .car-status-table th {
   background-color: white;
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -1167,7 +1170,7 @@ body.analytics-no-scroll {
   width: 150px;
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .table-cell.bookings-cell {
@@ -1213,7 +1216,7 @@ body.analytics-no-scroll {
   gap: 0px;
   border-radius: 10px;
   padding: 10px;
-  background: #dcfada;
+  background: rgba(40, 167, 70, 0.2);
 }
 
 /* ================================
@@ -1231,7 +1234,7 @@ body.analytics-no-scroll {
 }
 
 .affiliation-table-scrollable-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -1331,11 +1334,11 @@ body.analytics-no-scroll {
 }
 
 .company-share-aff .analytics-label-table {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .company-share-aff .analytics-value-table {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .company-share-aff .box-icon-table {
@@ -1363,7 +1366,7 @@ body.analytics-no-scroll {
   font-weight: 900;
   text-align: center;
   margin: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .button-row {
@@ -1389,13 +1392,13 @@ body.analytics-no-scroll {
   border-radius: 6px;
   border: none;
   background-color: white;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 .affiliation-toggle button.active {
-  background-color: var(--accent-color);
+  background-color: var(--accent-txt);
   color: white;
 }
 
@@ -1406,7 +1409,7 @@ body.analytics-no-scroll {
 .aff-search-input {
   box-sizing: border-box;
   padding: 6px 10px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-txt);
   border-radius: 6px;
   font-size: 0.9rem;
   transition: 0.2s ease;
@@ -1414,8 +1417,8 @@ body.analytics-no-scroll {
 
 .aff-search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 4px var(--supporting-color);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 4px var(--supporting-txt);
 }
 
 /* ================================
@@ -1433,7 +1436,7 @@ body.analytics-no-scroll {
   text-align: center;
   padding: 10px;
   background-color: white;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   font-size: 0.9rem;
   text-transform: uppercase;
   position: sticky;
@@ -1897,7 +1900,7 @@ body.analytics-no-scroll {
   background-color: #ffffff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 5px var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-txt);
   transition: all 0.5s ease;
 }
 
@@ -1966,7 +1969,7 @@ body.analytics-no-scroll {
 .scroll-item-overlay-carname {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: left;
 }
 
@@ -1994,7 +1997,7 @@ body.analytics-no-scroll {
   font-size: 2.5rem;
   font-weight: bold;
   margin: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .date-range-display {
@@ -2004,7 +2007,7 @@ body.analytics-no-scroll {
   line-height: 1;
   font-size: 1rem;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .date-separator {
@@ -2037,7 +2040,7 @@ body.analytics-no-scroll {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .scroll-item-overlay-content.overlay-right {
@@ -2116,7 +2119,7 @@ body.analytics-no-scroll {
   .scroll-item-overlay-carname {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--accent-color);
+    color: var(--accent-txt);
     text-align: center;
   }
 
@@ -2152,7 +2155,7 @@ body.analytics-no-scroll {
 }
 
 .scrollable-content::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2161,7 +2164,7 @@ body.analytics-no-scroll {
 }
 
 .unit-details-scrollable-content::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2199,7 +2202,7 @@ body.analytics-no-scroll {
 
 .unit-overlay-content .scroll-item-overlay-carname {
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-align: left;
 }
 
@@ -2373,11 +2376,11 @@ body.analytics-no-scroll {
   font-weight: 900;
   margin: 0;
   font-size: 2rem;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .unit-header p {
-  color: var(--accent-color) !important;
+  color: var(--accent-txt) !important;
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   margin: 5px 0 0 0;
@@ -2428,7 +2431,7 @@ body.analytics-no-scroll {
   font-weight: 900;
   text-transform: uppercase;
   background: #f8f9fa;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .unit-details-table td:nth-child(2) {
@@ -2453,7 +2456,7 @@ body.analytics-no-scroll {
 }
 
 .unit-table-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -2520,7 +2523,7 @@ body.analytics-no-scroll {
 .details-search-input {
   box-sizing: border-box;
   padding: 6px 10px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-txt);
   border-radius: 6px;
   font-size: 0.9rem;
   transition: 0.2s ease;
@@ -2528,8 +2531,8 @@ body.analytics-no-scroll {
 
 .details-search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 4px var(--supporting-color);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 4px var(--supporting-txt);
 }
 
 .unit-details-table th.active-sort .arrow {
@@ -2662,7 +2665,7 @@ body.analytics-no-scroll {
 .calendar-container {
   margin-top: 40px;
   padding: 20px;
-  background: #dcfada;
+  background-color: rgba(40, 167, 70, 0.2);
   border-radius: 10px;
 }
 
@@ -2677,21 +2680,25 @@ body.analytics-no-scroll {
   font-weight: bold;
 }
 
+.fc-view-harness.fc-view-harness-active{
+  border: 1px solid var(--txt-comp);
+}
+
 .fc-scroller::-webkit-scrollbar {
   width: 5px;
 }
 
 .fc-scroller::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 10px;
 }
 
 .fc-scroller::-webkit-scrollbar-hover {
-  background: var(--supporting-color);
+  background: var(--supporting-txt);
 }
 
 .fc-col-header-cell-cushion {
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .fc-daygrid-day.fc-day-today {
@@ -2704,7 +2711,7 @@ body.analytics-no-scroll {
 
 .fc-scrollgrid td,
 .fc-scrollgrid th {
-  border-color: var(--supporting-color) !important;
+  border-color: var(--supporting-txt) !important;
 }
 
 /* Force square day cells */
@@ -2730,24 +2737,24 @@ body.analytics-no-scroll {
 }
 
 .fc .fc-button.fc-today-button:disabled {
-  background-color: var(--accent-color) !important;
+  background-color: var(--accent-txt) !important;
   color: #fff !important;
   opacity: 1 !important;
   cursor: default !important;
 }
 
 .fc .fc-button.fc-today-button:hover {
-  background-color: var(--supporting-color) !important;
+  background-color: var(--supporting-txt) !important;
 }
 
 .fc .fc-button:hover {
-  background-color: var(--supporting-color) !important;
+  background-color: var(--supporting-txt) !important;
   color: #fff !important;
 }
 
 .fc .fc-button.fc-today-button,
 .fc .fc-button-primary:not(:disabled).fc-button-active {
-  background-color: var(--accent-color) !important;
+  background-color: var(--accent-txt) !important;
   color: #fff !important;
 }
 
@@ -2806,7 +2813,7 @@ body.analytics-no-scroll {
 }
 
 .fc-view-harness.fc-view-harness-active::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2913,8 +2920,8 @@ body.analytics-no-scroll {
   font-weight: bold;
   transition: all 0.5s ease;
   border-radius: 5px;
-  background-color: var(--accent-color);
-  border: 2px solid var(--accent-color);
+  background-color: var(--accent-txt);
+  border: 2px solid var(--accent-txt);
 }
 
 .datalabel-toggle-button:hover {
@@ -2943,8 +2950,8 @@ body.analytics-no-scroll {
   font-weight: bold;
   transition: all 0.5s ease;
   border-radius: 5px;
-  background-color: var(--accent-color);
-  border: 2px solid var(--accent-color);
+  background-color: var(--accent-txt);
+  border: 2px solid var(--accent-txt);
 }
 
 .chart-toggle-btn:hover {
@@ -2965,7 +2972,7 @@ body.analytics-no-scroll {
 
 .print-calendar-btn {
   padding: 8px 16px;
-  background: var(--accent-color);
+  background: var(--accent-txt);
   border: none;
   color: white;
   border-radius: 4px;
@@ -2990,7 +2997,7 @@ body.analytics-no-scroll {
   width: 200px;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   text-align: left;
   box-sizing: border-box;
   font-weight: bold;
@@ -3003,7 +3010,7 @@ body.analytics-no-scroll {
 
 .calendar-tab-select:focus {
   outline: none;
-  color: var(--supporting-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--supporting-color);
+  color: var(--supporting-txt);
+  border-color: var(--accent-txt);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }

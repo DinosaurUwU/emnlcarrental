@@ -2812,7 +2812,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
             {summaryTimeRange === "custom" && (
               <>
                 <span
-                  style={{ fontSize: "50px", color: "var(--accent-color)" }}
+                  style={{ fontSize: "50px", color: "var(--accent-txt)" }}
                 >
                   |
                 </span>
@@ -2903,7 +2903,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
               </div>
               <p
                 style={{
-                  color: "var(--accent-color)",
+                  color: "var(--accent-txt)",
                   textAlign: "center",
                   margin: "20px 0",
                   fontWeight: "900",
@@ -3054,7 +3054,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
             </div>
             <p
               style={{
-                color: "var(--accent-color)",
+                color: "var(--accent-txt)",
                 textAlign: "center",
                 margin: "20px 0 20px 0",
                 fontWeight: "900",

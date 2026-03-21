@@ -298,7 +298,9 @@
 }
 
 .dropdown-item {
-  display: block;
+    display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 15px;
   font-size: 14px;
   color: var(--txt-comp);

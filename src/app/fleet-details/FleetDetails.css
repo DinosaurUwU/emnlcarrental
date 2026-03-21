@@ -1029,7 +1029,7 @@
   background-color: #fff;
   border-color: var(--accent-txt);
   color: var(--accent-txt);
-  transform: translate(-35%, 90%) scale(1.05); /* Preserve translation */
+  transform: translate(-35%, 90%) scale(1.05);
 }
 
 .overlay-background {
@@ -1038,7 +1038,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8); /* Background dim effect */
+  background-color: rgba(0, 0, 0, 0.8);
   transition: opacity 0.3s ease;
 }
 
