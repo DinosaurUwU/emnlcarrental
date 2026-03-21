@@ -2215,13 +2215,21 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           position: "bottom",
           labels: {
             boxWidth: 14,
-            padding: 10,
+            padding: 10,       
+            
+
+
             generateLabels: (chart) => {
+const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--txt-comp').trim() || '#333';
+
+
               if (pieChartCategory === "referral") {
                 return chart.data.labels.map((label, i) => {
                   const bgColor = chart.data.datasets[0].backgroundColor[i];
                   return {
                     text: label,
+                    fontColor: textColor,
                     fillStyle: bgColor.replace(
                       /hsl\(([^)]+)\)/,
                       "hsla($1,0.2)",
@@ -2246,6 +2254,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                   return {
                     text: dataset.label, // "Revenue MOP", "Revenue POP", "Expense MOP", "Expense POE"
+                    fontColor: textColor,
                     fillStyle: bgColor.replace(
                       /hsl\(([^)]+)\)/,
                       "hsla($1,0.2)",
@@ -2257,8 +2266,8 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
                   };
                 }
 
-                let fillStyle = "#ccc";
-                let strokeStyle = "#ccc";
+                let fillStyle = "#000";
+                let strokeStyle = "#000";
 
                 if (dataset.label === "Profit") {
                   fillStyle = "rgba(40,167,69,0.2)";
@@ -2282,6 +2291,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
                 return {
                   text: dataset.label,
+                  fontColor: textColor,
                   fillStyle,
                   strokeStyle,
                   lineWidth: 2,
@@ -2386,7 +2396,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
 
         datalabels: {
           display: showDataLabels,
-          color: "#ccc",
+          color: "#333",
           font: { weight: "bold" },
           formatter(value, context) {
             if (!value) return "";
@@ -2404,6 +2414,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     [showDataLabels, pieChartCategory],
   );
 
+  const getTxtCompColor = () => {
+  if (typeof document === 'undefined') return '#555';
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue('--txt-comp').trim() || '#555';
+};
+
   const lineChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -2419,7 +2435,12 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       legend: {
         display: true,
         position: "bottom",
-        labels: { color: "var(--txt-comp)", boxWidth: 15 },
+        
+         labels: { 
+    color: () => getComputedStyle(document.documentElement).getPropertyValue('--txt-comp').trim() || '#333',
+    boxWidth: 15,
+    padding: 10,
+  },
       },
       tooltip: {
         mode: "nearest",
@@ -2501,11 +2522,17 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
         },
       },
     },
+
+    
     scales: {
-      x: { grid: { display: false }, ticks: { color: "#555" } },
+      x: { grid: { display: false, }, ticks: { color: getTxtCompColor } },
       y: {
         beginAtZero: true,
-        ticks: { color: "#555", callback: (value) => formatPeso(value) },
+        grid: {
+      color: () => getComputedStyle(document.documentElement)
+        .getPropertyValue('--txt-comp').trim() || '#eee',
+    },
+        ticks: { color: getTxtCompColor, callback: (value) => formatPeso(value) },
       },
     },
     elements: {
@@ -2536,6 +2563,9 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
           padding: 10,
           color: "#333",
           generateLabels: (chart) => {
+             const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--txt-comp').trim() || '#333';
+
             return chart.data.datasets.map((dataset, i) => {
               let fillStyle, strokeStyle;
               if (dataset.label === "Profit") {
@@ -2562,6 +2592,7 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
               }
               return {
                 text: dataset.label,
+                fontColor: textColor, 
                 fillStyle,
                 strokeStyle,
                 lineWidth: 2,
@@ -2662,10 +2693,14 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       },
     },
     scales: {
-      x: { grid: { display: false }, ticks: { color: "#555" } },
+      x: { grid: { display: false }, ticks: { color: getTxtCompColor } },
       y: {
         beginAtZero: true,
-        ticks: { color: "#555", callback: (value) => formatPeso(value) },
+        grid: {
+      color: () => getComputedStyle(document.documentElement)
+        .getPropertyValue('--txt-comp').trim() || '#eee',
+    },
+        ticks: { color: getTxtCompColor, callback: (value) => formatPeso(value) },
       },
     },
     elements: {
