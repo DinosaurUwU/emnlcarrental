@@ -2432,16 +2432,65 @@ const textColor = getComputedStyle(document.documentElement)
       },
     },
     plugins: {
-      legend: {
-        display: true,
-        position: "bottom",
-        
-         labels: { 
-    color: () => getComputedStyle(document.documentElement).getPropertyValue('--txt-comp').trim() || '#333',
-    boxWidth: 15,
+legend: {
+  display: true,
+  position: "bottom",
+  labels: { 
+    boxWidth: 14,
     padding: 10,
+    color: () => getComputedStyle(document.documentElement)
+      .getPropertyValue('--txt-comp').trim() || '#333',
+    generateLabels: (chart) => {
+      const textColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--txt-comp').trim() || '#333';
+
+      return chart.data.datasets.map((dataset, i) => {
+        let fillStyle, strokeStyle;
+        if (dataset.label === "Profit") {
+          fillStyle = "rgba(40, 167, 69, 0.2)";
+          strokeStyle = "#28a745";
+        } else if (dataset.label === "Revenue") {
+          fillStyle = "rgba(255, 193, 7, 0.2)";
+          strokeStyle = "#ffc107";
+        } else if (dataset.label === "Expenses") {
+          fillStyle = "rgba(220, 53, 69, 0.2)";
+          strokeStyle = "#dc3545";
+        } else if (dataset.label === "Bookings") {
+          fillStyle = "rgba(13, 110, 253, 0.2)";
+          strokeStyle = "#0d6efd";
+        } else if (dataset.label === "Unpaid Bookings") {
+          fillStyle = "rgba(234, 88, 12, 0.2)";
+          strokeStyle = "#ea580c";
+        } else if (dataset.label === "Due Balances") {
+                fillStyle = "rgba(220, 53, 69, 0.2)";
+                strokeStyle = "#dc3545";
+              }
+        
+        else {
+          fillStyle = "#ccc";
+          strokeStyle = "#000";
+        }
+        return {
+          text: dataset.label,
+          fontColor: textColor,
+          fillStyle,
+          strokeStyle,
+          lineWidth: 2,
+          hidden: chart.getDatasetMeta(i).hidden,
+          index: i,
+        };
+      });
+    },
   },
-      },
+  onClick: (e, legendItem, legend) => {
+    const index = legendItem.index;
+    const chart = legend.chart;
+    const meta = chart.getDatasetMeta(index);
+    meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+    chart.update();
+  },
+},
+
       tooltip: {
         mode: "nearest",
         intersect: true,
