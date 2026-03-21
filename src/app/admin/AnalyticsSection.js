@@ -1089,6 +1089,23 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     affSearchQuery,
   ]);
 
+  // Calculate summary totals from scrollableData
+const summaryData = useMemo(() => {
+  if (!scrollableData || scrollableData.length === 0) {
+    return { revenue: 0, expenses: 0, profit: 0 };
+  }
+  
+  return scrollableData.reduce(
+    (acc, car) => ({
+      revenue: acc.revenue + (car.revenue || 0),
+      expenses: acc.expenses + (car.expenses || 0),
+      profit: acc.profit + (car.profit || 0),
+    }),
+    { revenue: 0, expenses: 0, profit: 0 }
+  );
+}, [scrollableData]);
+
+
   const affiliationSummaryData = useMemo(() => {
     const totalRevenue = affiliationPartnersData.partners.reduce(
       (sum, p) => sum + p.totalRevenue,

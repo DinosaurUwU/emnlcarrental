@@ -100,7 +100,7 @@ body.analytics-no-scroll {
   top: 0px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -161,7 +161,7 @@ body.analytics-no-scroll {
   justify-content: center;
   flex-direction: column;
   padding: 10px;
-  background: rgba(40, 167, 70, 0.2);
+  background-color: rgba(40, 167, 70, 0.2);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(var(--shadow-base), 0.1);
 }
@@ -204,7 +204,7 @@ body.analytics-no-scroll {
   width: 100%;
   height: 500px;
   margin: 20px 0 20px 0;
-  background: rgba(40, 167, 70, 0.2);
+  background-color: rgba(40, 167, 70, 0.2);
   box-sizing: border-box;
   border-radius: 12px;
   padding: 20px 20px 80px 20px;
@@ -212,6 +212,7 @@ body.analytics-no-scroll {
 }
 
 @media (max-width: 1700px) {
+
   .analytics-summary-content {
     display: flex;
     flex-direction: column-reverse;
@@ -241,6 +242,11 @@ body.analytics-no-scroll {
     font-size: 1.5rem !important;
   }
 }
+
+
+
+
+
 
 @media (max-width: 960px) {
   .summary-row-top,
@@ -334,27 +340,27 @@ body.analytics-no-scroll {
 }
 
 .summary-box.profit .box-icon {
-  background: rgba(7, 70, 9, 0.25);
+  background-color: rgba(7, 70, 9, 0.25);
 }
 
 .summary-box.revenue .box-icon {
-  background: rgba(255, 170, 0, 0.25);
+  background-color: rgba(255, 170, 0, 0.25);
 }
 
 .summary-box.expenses .box-icon {
-  background: rgba(220, 53, 69, 0.25);
+  background-color: rgba(220, 53, 69, 0.25);
 }
 
 .summary-box.bookings .box-icon {
-  background: rgba(0, 123, 255, 0.25);
+  background-color: rgba(0, 123, 255, 0.25);
 }
 
 .summary-box.unpaid .box-icon {
-  background: rgba(234, 88, 12, 0.25);
+  background-color: rgba(234, 88, 12, 0.25);
 }
 
 .summary-box.due .box-icon {
-  background: rgba(220, 53, 69, 0.25);
+  background-color: rgba(220, 53, 69, 0.25);
 }
 
 .box-icon img {
@@ -466,7 +472,7 @@ body.analytics-no-scroll {
   font-size: 18px;
   font-weight: bold;
   color: #721c24;
-  background: #f8d7da;
+  background-color: #f8d7da;
   padding: 10px 15px;
   border-radius: 5px;
 }
@@ -476,7 +482,7 @@ body.analytics-no-scroll {
   font-size: 24px !important;
   font-weight: bold;
   color: #721c24;
-  background: #fff0f1 !important;
+  background-color: #fff0f1 !important;
   border-radius: 5px;
   justify-content: space-between;
 }
@@ -525,15 +531,16 @@ body.analytics-no-scroll {
 }
 
 .car-status-table-wrapper {
+  overflow-x: auto;
   flex: 2;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   gap: 0px;
   border-radius: 10px;
   padding: 10px;
-  background: rgba(40, 167, 70, 0.2);
+  background-color: rgba(40, 167, 70, 0.2);
+
 }
 
 .car-status-table-container {
@@ -541,7 +548,7 @@ body.analytics-no-scroll {
 }
 
 .table-scrollable-container {
-  overflow-x: auto;
+overflow-x: auto;
   overflow-y: auto;
   max-height: 450px;
 }
@@ -563,7 +570,7 @@ body.analytics-no-scroll {
 .summary-box-table {
   padding: 25px;
   border-radius: 16px;
-  background: white;
+  background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.5s ease;
   text-align: left;
@@ -635,7 +642,7 @@ body.analytics-no-scroll {
   color: #007bff;
 }
 .bookings-table .box-icon-table {
-  background: rgba(0, 123, 255, 0.25);
+  background-color: rgba(0, 123, 255, 0.25);
 }
 .bookings-table:hover {
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
@@ -656,7 +663,7 @@ body.analytics-no-scroll {
   color: #ea580c;
 }
 .unpaid-table .box-icon-table {
-  background: rgba(234, 88, 12, 0.25);
+  background-color: rgba(234, 88, 12, 0.25);
 }
 .unpaid-table:hover {
   box-shadow: 0 0 10px rgba(234, 88, 12, 0.6);
@@ -677,7 +684,7 @@ body.analytics-no-scroll {
   color: #dc3545;
 }
 .due-table .box-icon-table {
-  background: rgba(220, 53, 69, 0.25);
+  background-color: rgba(220, 53, 69, 0.25);
 }
 .due-table:hover {
   box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
@@ -702,7 +709,7 @@ body.analytics-no-scroll {
   color: var(--accent-txt);
 }
 .profit-table .box-icon-table {
-  background: rgba(40, 167, 69, 0.25);
+  background-color: rgba(40, 167, 69, 0.25);
 }
 .profit-table:hover {
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
@@ -723,7 +730,7 @@ body.analytics-no-scroll {
   color: #ffc107;
 }
 .revenue-table .box-icon-table {
-  background: rgba(255, 193, 7, 0.38);
+  background-color: rgba(255, 193, 7, 0.38);
 }
 .revenue-table:hover {
   box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
@@ -744,7 +751,7 @@ body.analytics-no-scroll {
   color: #dc3545;
 }
 .expenses-table .box-icon-table {
-  background: rgba(220, 53, 69, 0.38);
+  background-color: rgba(220, 53, 69, 0.38);
 }
 .expenses-table:hover {
   box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
@@ -797,13 +804,13 @@ body.analytics-no-scroll {
   cursor: pointer;
   font-weight: 600;
   border: none;
-  background: white;
+  background-color: white;
   color: var(--accent-txt);
   transition: 0.2s ease;
 }
 
 .scroll-mode-toggle .active {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   color: white;
 }
 
@@ -829,18 +836,18 @@ body.analytics-no-scroll {
 }
 
 .table-scrollable-container::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
 .table-scrollable-container::-webkit-scrollbar-hover {
-  background: var(--supporting-txt);
+  background-color: var(--supporting-txt);
 }
 
 .car-status-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1300px;
+  min-width: 1700px;
 }
 
 .car-status-table th {
@@ -1216,7 +1223,7 @@ body.analytics-no-scroll {
   gap: 0px;
   border-radius: 10px;
   padding: 10px;
-  background: rgba(40, 167, 70, 0.2);
+  background-color: rgba(40, 167, 70, 0.2);
 }
 
 /* ================================
@@ -1234,7 +1241,7 @@ body.analytics-no-scroll {
 }
 
 .affiliation-table-scrollable-container::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -1263,7 +1270,7 @@ body.analytics-no-scroll {
   box-sizing: border-box;
   padding: 25px;
   border-radius: 16px;
-  background: white;
+  background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.5s ease;
   text-align: left;
@@ -1294,7 +1301,7 @@ body.analytics-no-scroll {
 }
 
 .total-revenue-aff .box-icon-table {
-  background: rgba(255, 193, 7, 0.38);
+  background-color: rgba(255, 193, 7, 0.38);
 }
 
 .total-revenue-aff:hover {
@@ -1318,7 +1325,7 @@ body.analytics-no-scroll {
 }
 
 .partners-share-aff .box-icon-table {
-  background: rgba(220, 53, 69, 0.38);
+  background-color: rgba(220, 53, 69, 0.38);
 }
 
 .partners-share-aff:hover {
@@ -1342,7 +1349,7 @@ body.analytics-no-scroll {
 }
 
 .company-share-aff .box-icon-table {
-  background: rgba(40, 167, 69, 0.25);
+  background-color: rgba(40, 167, 69, 0.25);
 }
 
 .company-share-aff:hover {
@@ -1381,7 +1388,7 @@ body.analytics-no-scroll {
   cursor: pointer;
   font-weight: 600;
   border: none;
-  background: white;
+  background-color: white;
   transition: 0.2s ease;
 }
 
@@ -1875,7 +1882,7 @@ body.analytics-no-scroll {
   padding: 70px !important;
   font-weight: bold;
   color: #721c24 !important;
-  background: #fff0f1 !important;
+  background-color: #fff0f1 !important;
   border-radius: 5px;
   justify-content: space-between;
 }
@@ -2155,7 +2162,7 @@ body.analytics-no-scroll {
 }
 
 .scrollable-content::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2164,7 +2171,7 @@ body.analytics-no-scroll {
 }
 
 .unit-details-scrollable-content::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2316,7 +2323,7 @@ body.analytics-no-scroll {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2329,7 +2336,7 @@ body.analytics-no-scroll {
   width: 90vw;
   max-width: 1400px;
   max-height: 90vh;
-  background: white;
+  background-color: white;
   border-radius: 6px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -2338,7 +2345,7 @@ body.analytics-no-scroll {
 }
 
 .unit-details-overlay .close-btn {
-  background: none;
+  background-color: none;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -2430,7 +2437,7 @@ body.analytics-no-scroll {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   color: var(--accent-txt);
 }
 
@@ -2456,7 +2463,7 @@ body.analytics-no-scroll {
 }
 
 .unit-table-container::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
@@ -2549,7 +2556,7 @@ body.analytics-no-scroll {
   text-align: center;
   font-weight: bold;
   color: #721c24;
-  background: #fff0f1 !important;
+  background-color: #fff0f1 !important;
   border-radius: 5px;
   padding: 10px;
 }
@@ -2690,12 +2697,12 @@ body.analytics-no-scroll {
 }
 
 .fc-scroller::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 10px;
 }
 
 .fc-scroller::-webkit-scrollbar-hover {
-  background: var(--supporting-txt);
+  background-color: var(--supporting-txt);
 }
 
 .fc-col-header-cell-cushion {
@@ -2816,7 +2823,7 @@ body.analytics-no-scroll {
 }
 
 .fc-view-harness.fc-view-harness-active::-webkit-scrollbar-thumb {
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -2975,7 +2982,7 @@ body.analytics-no-scroll {
 
 .print-calendar-btn {
   padding: 8px 16px;
-  background: var(--accent-txt);
+  background-color: var(--accent-txt);
   border: none;
   color: white;
   border-radius: 4px;
@@ -2986,13 +2993,13 @@ body.analytics-no-scroll {
 }
 
 .print-calendar-btn:hover {
-  background: #28a745;
+  background-color: #28a745;
   box-shadow: 0 0 10px #28a745;
 }
 
 .print-calendar-btn.disabled,
 .print-calendar-btn:disabled {
-  background: #9f9f9f;
+  background-color: #9f9f9f;
   cursor: not-allowed;
 }
 
