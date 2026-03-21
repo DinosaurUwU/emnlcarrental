@@ -245,6 +245,52 @@ body.analytics-no-scroll {
 }
 
 
+@media (max-width: 1000px) {
+  /* summary-row-top: Profit (full) | Revenue + Expense */
+  .summary-row-top {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "profit profit"
+      "revenue expense";
+    gap: 10px;
+    width: 100%;
+
+  }
+  
+  .summary-row-top > * { 
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+  
+  .summary-row-top > *:nth-child(1) { grid-area: profit; }
+  .summary-row-top > *:nth-child(2) { grid-area: revenue; }
+  .summary-row-top > *:nth-child(3) { grid-area: expense; }
+  
+  /* summary-row-bottom: Bookings + Unpaid | Due (full) */
+  .summary-row-bottom {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "bookings unpaid"
+      "due due";
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .summary-row-bottom > * {
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+  
+  .summary-row-bottom > *:nth-child(1) { grid-area: bookings; }
+  .summary-row-bottom > *:nth-child(2) { grid-area: unpaid; }
+  .summary-row-bottom > *:nth-child(3) { grid-area: due; }
+}
+
+
 
 
 
@@ -1218,7 +1264,7 @@ border-collapse: collapse;
 .affiliation-table-wrapper {
   overflow-x: auto;
   flex: 2;
-  min-width: 1500px;
+
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -2028,6 +2074,32 @@ border-collapse: collapse;
 }
 
 @media (max-width: 768px) {
+    /* Add to existing styles */
+  
+  .summary-row-top,
+  .summary-row-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    gap: 10px;
+  }
+  
+  .summary-row-top > *,
+  .summary-row-bottom > * {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .chart-toggle-btn{
+  font-size: 0.65rem !important;
+  padding: 2px !important;
+  }
+
+  .analytics-linechart-container{
+padding: 5px 5px 95px;
+  }
+
+
   .date-range-display {
     flex-direction: row;
     gap: 7px;
@@ -2041,6 +2113,8 @@ border-collapse: collapse;
   .date-start::after {
     content: " -";
   }
+
+
 }
 
 .scroll-item-overlay-label {
