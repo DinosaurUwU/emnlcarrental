@@ -548,7 +548,7 @@ body.analytics-no-scroll {
 }
 
 .table-scrollable-container {
-overflow-x: auto;
+overflow-x: visible;
   overflow-y: auto;
   max-height: 450px;
 }
@@ -847,7 +847,7 @@ overflow-x: auto;
 .car-status-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1700px;
+  min-width: 1300px;
 }
 
 .car-status-table th {
