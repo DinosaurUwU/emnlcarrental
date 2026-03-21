@@ -539,7 +539,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f9f9f9;
+  background-color: rgba(var(--shadow-base), 0.2);
   cursor: pointer;
   flex-direction: column;
 }
@@ -566,7 +566,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f9f9f9;
+  background-color: rgba(var(--shadow-base), 0.2);
   cursor: pointer;
   flex-direction: column;
 }
@@ -722,7 +722,7 @@
 
 .description-text {
   font-size: 0.9rem;
-  color: #333;
+  color: var(--txt-comp);
   line-height: 1.5;
 }
 
@@ -773,7 +773,7 @@
 .bullet-item {
   font-size: 0.9rem;
   margin-left: 20px;
-  color: #333;
+  color: var(--txt-comp);
   line-height: 1.5;
 }
 
@@ -1819,7 +1819,6 @@
   background-color: #e74c3c !important;
   color: #a93226 !important;
 }
-
 
 .admin-settings-content-section {
   box-sizing: border-box;
