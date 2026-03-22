@@ -1,7 +1,7 @@
 /* Footer.css */
 
 .footer {
-  background-color: var(--accent-txt);
+  background-color: #074609;
   color: #f1f1f1;
   padding: 50px 20px;
   z-index: 100;
@@ -36,6 +36,7 @@
 }
 
 .footer-section-h3 {
+  color: #f1f1f1 !important;
   font-size: 1.5em;
   margin-bottom: 10px !important;
 }
@@ -123,12 +124,12 @@
 .social-svg {
   width: 40px;
   height: 40px;
-  color: var(--supporting-txt); /* This makes currentColor work */
+  color: #133c09;
   transition: color 0.3s ease;
 }
 
 .social-icon:hover .social-svg {
-  color: #1877F2; /* or whatever color you want on hover */
+  color: #1877F2;
 }
 
 

@@ -39,6 +39,7 @@ const InfoPage = ({ openBooking }) => {
     saveTermsConditions,
     fetchPrivacyPolicy,
     fetchTermsConditions,
+    userTheme, 
   } = useUser();
 
   const [privacyLastUpdated, setPrivacyLastUpdated] = useState(null);
@@ -1519,7 +1520,7 @@ const InfoPage = ({ openBooking }) => {
     }
   };
 
-  
+
   // Overlay handling for Messenger confirm
   useEffect(() => {
     const scrollYRef = { current: 0 };
@@ -1545,13 +1546,36 @@ const InfoPage = ({ openBooking }) => {
     setInfoPageErrorMessage("");
   };
 
+const isDark = (() => {
+  const saved = localStorage.getItem("userTheme");
+  if (saved === "dark") return true;
+  if (saved === "light") return false;
+  // If system or not set, check system preference
+  if (typeof window !== 'undefined') {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  return false;
+})();
+
+
+
+
   return (
     <div className="info-page" ref={pageRef}>
       <Header openBooking={openBooking} />
 
-      <div className="info-title" ref={(el) => (infoTitleRef = el)}>
+      {/* <div className="info-title" ref={(el) => (infoTitleRef = el)}>
         <img src="/assets/dark-logo.png" alt="Logo" className="login-logo" />
-      </div>
+      </div> */}
+
+<div className="info-title" ref={(el) => (infoTitleRef = el)}>
+<img 
+  src={isDark ? "/assets/logo-dark.png" : "/assets/dark-logo.png"} 
+  alt="Logo" 
+  className="login-logo" 
+/>
+
+</div>
 
       {/* Help Center */}
       <section id="help-center" className="help-center">
