@@ -8445,14 +8445,18 @@ const RentalActivitySection = ({ subSection }) => {
                       }
 
                       const unitForm = formData[selectedUnitId] || {};
-                      const reservedActiveBooking = (activeBookings || []).find(
-                        (booking) =>
-                          String(booking?.plateNo || "").toUpperCase() ===
-                            String(selectedUnit?.plateNo || "").toUpperCase() &&
-                          booking?.reservation === true &&
-                          String(booking?.status || "").toLowerCase() ===
-                            "active",
-                      );
+const reservedActiveBooking = (activeBookings || []).find(
+  (booking) => {
+    const status = String(booking?.status || "").toLowerCase();
+    return (
+      String(booking?.plateNo || "").toUpperCase() ===
+        String(selectedUnit?.plateNo || "").toUpperCase() &&
+      booking?.reservation === true &&
+      (status === "active" || status === "pending")  // ← Now checks both "active" AND "pending"
+    );
+  }
+);
+
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
