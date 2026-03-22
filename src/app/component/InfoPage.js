@@ -39,7 +39,6 @@ const InfoPage = ({ openBooking }) => {
     saveTermsConditions,
     fetchPrivacyPolicy,
     fetchTermsConditions,
-    userTheme, 
   } = useUser();
 
   const [privacyLastUpdated, setPrivacyLastUpdated] = useState(null);
@@ -905,6 +904,20 @@ const InfoPage = ({ openBooking }) => {
 
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
 
+
+const [userTheme, setUserTheme] = useState("system");
+
+useEffect(() => {
+  const handleThemeChange = () => {
+    setUserTheme(localStorage.getItem("userTheme") || "system");
+  };
+  
+  window.addEventListener("themeChanged", handleThemeChange);
+  return () => window.removeEventListener("themeChanged", handleThemeChange);
+}, []);
+
+
+
   // At the top of InfoPage.js, after imports
   const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
 
@@ -1521,44 +1534,34 @@ const InfoPage = ({ openBooking }) => {
   };
 
 
-  // Overlay handling for Messenger confirm
-  useEffect(() => {
-    const scrollYRef = { current: 0 };
-
-    if (showMessengerConfirm) {
-      scrollYRef.current = window.scrollY;
-      document.body.classList.add("modal-open");
-      document.body.style.top = `-${scrollYRef.current}px`;
-    } else {
-      document.body.classList.remove("modal-open");
-      document.body.style.top = "";
-      window.scrollTo(0, scrollYRef.current);
+useEffect(() => {
+  // Initial load
+  const savedTheme = localStorage.getItem("userTheme");
+  if (savedTheme) setUserTheme(savedTheme);
+  
+  // Listen for changes
+  const handleStorage = (e) => {
+    if (e.key === "userTheme") {
+      setUserTheme(e.newValue || "system");
     }
-
-    return () => {
-      document.body.classList.remove("modal-open");
-      document.body.style.top = "";
-    };
-  }, [showMessengerConfirm]);
-
-  const closeInfoPageError = () => {
-    setShowInfoPageError(false);
-    setInfoPageErrorMessage("");
   };
+  
+  window.addEventListener("storage", handleStorage);
+  return () => window.removeEventListener("storage", handleStorage);
+}, []);
 
-const isDark = (() => {
-  const saved = localStorage.getItem("userTheme");
-  if (saved === "dark") return true;
-  if (saved === "light") return false;
-  // If system or not set, check system preference
-  if (typeof window !== 'undefined') {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+useEffect(() => {
+  // Apply theme when userTheme changes
+  if (userTheme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+  } else {
+    document.documentElement.setAttribute("data-color-mode", userTheme);
   }
-  return false;
-})();
+}, [userTheme]);
 
-
-
+const isDark = userTheme === "dark" || 
+  (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
     <div className="info-page" ref={pageRef}>

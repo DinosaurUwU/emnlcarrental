@@ -54,14 +54,32 @@ function Header() {
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
-const [userTheme, setUserTheme] = useState("system");
+const [userTheme, setUserTheme] = useState(() => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('userTheme') || 'system';
+  }
+  return 'system';
+});
 
 
 
 const toggleUserTheme = (newTheme) => {
   setUserTheme(newTheme);
   localStorage.setItem("userTheme", newTheme);
+   window.dispatchEvent(new Event("themeChanged"));
 };
+
+// Add this useEffect in Header.js
+useEffect(() => {
+  const handleStorageChange = (e) => {
+    if (e.key === "userTheme") {
+      setUserTheme(e.newValue || "system");
+    }
+  };
+  
+  window.addEventListener("storage", handleStorageChange);
+  return () => window.removeEventListener("storage", handleStorageChange);
+}, []);
 
 
 useEffect(() => {
@@ -125,6 +143,30 @@ useEffect(() => {
       document.body.style.top = "";
     };
   }, [showMessengerConfirm]);
+
+  // Close account overlay on scroll
+useEffect(() => {
+  const handleScroll = () => {
+    if (accountOpen) {
+      setAccountOpen(false);
+    }
+
+    if (searchOpen) {
+      setSearchOpen(false);
+    }
+  };
+
+  if (accountOpen) {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }
+  
+  if (searchOpen) {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }
+}, [accountOpen, searchOpen]);
+
 
   useEffect(() => {
     const handleScroll = () => {

@@ -632,10 +632,14 @@ const Header = ({
     }, 50);
   };
 
+
+
   // THEME LISTENER
   useEffect(() => {
     setPendingTheme(theme);
   }, [theme]);
+
+  
 
   // Save to Firestore through UserContext
   const handleSaveTheme = async () => {
@@ -649,12 +653,43 @@ const Header = ({
     setShowSettingsOverlay(false);
   };
 
-  const [adminUserTheme, setAdminUserTheme] = useState("system");
+const [adminUserTheme, setAdminUserTheme] = useState(() => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('userTheme') || 'system';
+  }
+  return 'system';
+});
 
+// Listen for storage changes from other tabs
+useEffect(() => {
+  const handleStorageChange = (e) => {
+    if (e.key === "userTheme") {
+      setAdminUserTheme(e.newValue || "system");
+    }
+  };
+  
+  window.addEventListener("storage", handleStorageChange);
+  return () => window.removeEventListener("storage", handleStorageChange);
+}, []);
+
+
+// Apply theme on mount
 useEffect(() => {
   const saved = localStorage.getItem("userTheme");
   if (saved) setAdminUserTheme(saved);
 }, []);
+
+// ADD THIS: Apply theme when adminUserTheme changes
+useEffect(() => {
+  const root = document.documentElement;
+  if (adminUserTheme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+  } else {
+    root.setAttribute("data-color-mode", adminUserTheme);
+  }
+}, [adminUserTheme]);
+
 
 const toggleAdminTheme = (newTheme) => {
   setAdminUserTheme(newTheme);
@@ -1546,6 +1581,7 @@ const getLogoForTheme = () => {
 
 {/* Account dropdown */}
 <div
+ref={accountRef}
   className={`account-dropdown ${
     accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
   }`}
@@ -4430,7 +4466,6 @@ const getLogoForTheme = () => {
                   onChange={(e) => setPendingTheme(e.target.value)}
                 >
                   <option value="pine">Pine</option>
-                  <option value="clover">Clover</option>
                   <option value="november">November</option>
                   <option value="december">December</option>
                 </select>
@@ -4441,8 +4476,6 @@ const getLogoForTheme = () => {
                     background:
                       pendingTheme === "pine"
                         ? "linear-gradient(135deg, #074609, #133c09)"
-                        : pendingTheme === "clover"
-                          ? "linear-gradient(135deg, #28a745, #218838)"
                           : pendingTheme === "november"
                             ? "linear-gradient(135deg, #b3541e, #8c3a13)"
                             : "linear-gradient(135deg, #b3001b, #0d4d1a)", // December

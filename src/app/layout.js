@@ -25,6 +25,26 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var theme = localStorage.getItem('userTheme') || 'system';
+                var root = document.documentElement;
+                if (theme === 'system') {
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  root.setAttribute('data-color-mode', prefersDark ? 'dark' : 'light');
+                } else {
+                  root.setAttribute('data-color-mode', theme);
+                }
+              })();
+            `,
+          }}
+        />
+        
+      </head>
       <body>
         <UserProvider>
           <BookingProvider>{children}</BookingProvider>

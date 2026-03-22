@@ -152,6 +152,16 @@
   overflow-y: auto;
 }
 
+.help-results-overlay::-webkit-scrollbar {
+  width: 5px;
+}
+
+.help-results-overlay::-webkit-scrollbar-thumb {
+  background-color: var(--accent-txt);
+  border-radius: 5px;
+}
+
+
 /* Results list */
 .help-results {
   max-width: 820px;
