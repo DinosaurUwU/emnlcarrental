@@ -1336,9 +1336,6 @@ border-collapse: collapse;
   display: flex;
   gap: 10px;
   align-items: center;
-    align-items: center;
-    min-width: 1500px;  /* Force minimum width */
-  flex-shrink: 0;     /* Don't allow shrinking */
 }
 
 .affiliation-summary-box {

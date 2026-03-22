@@ -341,43 +341,6 @@ useEffect(() => {
 };
 
 
-  // const getLogoForTheme = () => {
-  //   switch (theme) {
-  //     case "november":
-  //       return (
-  //         <img
-  //           src="/assets/november-logo.png"
-  //           alt="EMNL Logo"
-  //           className="Header__logo"
-  //         />
-  //       );
-  //     case "december":
-  //       return (
-  //         <img
-  //           src="/assets/december-logo.png"
-  //           alt="EMNL Logo"
-  //           className="Header__logo"
-  //         />
-  //       );
-  //     case "clover":
-  //       return (
-  //         <img
-  //           src="/assets/clover-logo.png"
-  //           alt="EMNL Logo"
-  //           className="Header__logo"
-  //         />
-  //       );
-  //     default:
-  //       return (
-  //         <img
-  //           src="/assets/logo.png"
-  //           alt="EMNL Logo"
-  //           className="Header__logo"
-  //         />
-  //       );
-  //   }
-  // };
-
   return (
     <div className={`Header ${menuOpen ? "open" : ""}`}>
       {/* Overlay Menu for mobile */}

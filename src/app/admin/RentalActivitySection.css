@@ -1636,6 +1636,10 @@
   padding-right: 5px;
 }
 
+.admin-confirm-scroll-container li{
+    border-bottom: 1px solid rgba(var(--shadow-base), 0.2) !important;
+}
+
 .confirm-details-button-group {
   display: flex;
   flex-direction: row;
