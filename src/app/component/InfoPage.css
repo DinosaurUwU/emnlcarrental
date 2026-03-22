@@ -21,7 +21,7 @@
 } */
 
 .info-page {
-  background-color: #ffffff;
+  background-color: var(--page-bg);
   color: #333;
   padding-top: 8rem;
   line-height: 1.6;
@@ -54,7 +54,7 @@
   text-transform: uppercase;
   font-size: 2rem;
   font-weight: 900;
-  color: var(--accent-color);
+  color: #28a745;
   margin-bottom: 0.5rem;
   text-align: center;
   font-size: 2rem;
@@ -68,7 +68,8 @@
 /* Help Center */
 .help-center {
   padding: 20px !important;
-  background: #f9f9f9;
+    background-color: #333;
+
   position: relative;
   z-index: 2;
 }
@@ -81,7 +82,7 @@
 .help-intro {
   max-width: 600px;
   margin: 0 auto 20px;
-  color: #555;
+  color: #f1f1f1;
   font-size: 1.1rem;
   padding: 0 !important;
 }
@@ -100,22 +101,22 @@
   font-family: "Poppins", sans-serif;
   padding: 10px 15px;
   width: 700px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid #28a745;
   border-radius: 6px;
   transition: all 0.5s ease;
   outline: none;
 }
 
 .help-search input:focus {
-  border-color: var(--supporting-color) !important;
-  box-shadow: 0 0 10px var(--accent-color);
+  border-color: #28a745 !important;
+  box-shadow: 0 0 10px #28a745;
 }
 
 .help-search button {
   font-family: "Poppins", sans-serif;
   padding: 10px 20px;
   font-weight: bold;
-  background: var(--accent-color);
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 6px;
@@ -124,7 +125,8 @@
 }
 
 .help-search button:hover {
-  background: var(--supporting-color);
+  background-color: #28a745;
+    box-shadow: 0 0 10px #28a745;
 }
 
 .help-search-container {
@@ -140,7 +142,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: #fff;
+  background-color: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
@@ -159,7 +161,7 @@
 .result-item {
   width: 100%;
   text-align: left;
-  background: #fff !important;
+  background-color: #fff !important;
   border: 1px solid #eee;
   border-radius: 10px;
   padding: 12px 16px;
@@ -170,13 +172,13 @@
 }
 
 .result-item:hover {
-  background: #c8e6c9 !important;
+  background-color: #c8e6c9 !important;
 }
 
 .result-title {
   font-weight: 700;
   margin-bottom: 6px;
-  color: var(--accent-color);
+  color: var(--accent-txt);
 }
 
 .result-snippet {
@@ -184,7 +186,7 @@
 }
 
 .search-highlight {
-  background: #fff59d;
+  background-color: #fff59d;
   padding: 0 2px;
   border-radius: 2px;
 }
@@ -202,8 +204,9 @@
   margin-top: 30px;
 }
 
+
 .help-card {
-  background: white;
+  background-color: var(--page-bg);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -238,7 +241,7 @@
 
 .help-contact-wrapper {
   margin-top: 40px;
-  background: white;
+  background-color: var(--page-bg);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 20px;
@@ -257,8 +260,9 @@
 }
 
 .help-contact a {
-  color: var(--accent-color);
+  color: var(--accent-txt);
   text-decoration: none;
+
 }
 
 .help-contact a:hover {
@@ -280,17 +284,18 @@
   justify-content: space-between;
   align-items: center;
   text-align: left;
-  background: none;
+  background-color: none;
   border: none;
   font-size: 1.1rem;
   padding: 15px;
   cursor: pointer;
   font-weight: bold;
-  color: var(--accent-color);
+  background-color: var(--page-bg);
+  color: var(--txt-comp);
 }
 
 .faq-question.active {
-  color: var(--supporting-color);
+  color: var(--accent-txt);
 }
 
 .faq-icon {
@@ -317,6 +322,7 @@
 }
 
 .info-page h3 {
+  color: var(--txt-comp);
   margin-bottom: 0;
 }
 
@@ -329,6 +335,7 @@
 }
 
 .infopage-p {
+  color: var(--txt-comp);
   padding-left: 1.5rem;
   margin-top: 0;
   margin-bottom: 1rem;
@@ -357,7 +364,7 @@
   display: block;
   margin: 0px auto;
   padding: 5px;
-  background: #28a745;
+  background-color: #28a745;
   color: #fff;
   font-size: 14px;
   border: none;
@@ -367,7 +374,7 @@
 }
 
 .infopage-edit-btn:hover {
-  background: #218838;
+  background-color: #218838;
 }
 
 .infopage-edit-controls {
@@ -389,24 +396,24 @@
 }
 
 .infopage-save-btn {
-  background: #28a745;
+  background-color: #28a745;
   color: white;
 }
 .infopage-save-btn:hover {
-  background: #218838;
+  background-color: #218838;
 }
 
 .infopage-cancel-btn {
-  background: #dc3545;
+  background-color: #dc3545;
   color: white;
 }
 .infopage-cancel-btn:hover {
-  background: #a71d2a;
+  background-color: #a71d2a;
 }
 
 .infopage-undo-btn,
 .infopage-redo-btn {
-  background: #007bff;
+  background-color: #007bff;
   border: none;
   border-radius: 5px;
   padding: 6px 10px;
@@ -420,7 +427,7 @@
 
 .infopage-undo-btn:hover,
 .infopage-redo-btn:hover {
-  background: #0056b3;
+  background-color: #0056b3;
 }
 
 .privacy-scroll-container {
@@ -435,7 +442,7 @@
 }
 
 .privacy-scroll-container::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 4px;
 }
 
@@ -443,7 +450,7 @@
   display: block;
   margin: 20px auto;
   padding: 10px;
-  background: #007bff;
+  background-color: #007bff;
   color: #fff;
   font-size: 14px;
   border: none;
@@ -453,13 +460,13 @@
 }
 
 .infopage-add-rule-btn:hover {
-  background: #0056b3;
+  background-color: #0056b3;
 }
 
 .infopage-delete-btn {
   padding: 10px;
   margin: 2.5px;
-  background: #dc3545;
+  background-color: #dc3545;
   color: #fff;
   font-size: 12px;
   border: none;
@@ -469,7 +476,7 @@
 }
 
 .infopage-delete-btn:hover {
-  background: #a71d2a;
+  background-color: #a71d2a;
 }
 
 /* Scrollable container */
@@ -480,7 +487,7 @@
 }
 
 .history-scroll::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
@@ -489,22 +496,22 @@
 }
 
 .history-scroll::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
+  background-color: var(--accent-txt);
   border-radius: 5px;
 }
 
 .history-card {
   text-align: left;
-  background: #fff;
+  background-color: #fff;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 12px;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-txt);
   transition: all 0.5s ease;
 }
 
 .history-card:hover {
-  box-shadow: 0 0 10px var(--supporting-color);
+  box-shadow: 0 0 10px var(--supporting-txt);
 }
 
 .history-card h4 {
@@ -548,7 +555,7 @@
 }
 
 .clear-history-btn {
-  background: #dc3545;
+  background-color: #dc3545;
   color: #fff;
   border: none;
   padding: 6px 12px;
@@ -559,14 +566,14 @@
 }
 
 .clear-history-btn:hover {
-  background: #a71d2a;
+  background-color: #a71d2a;
 }
 
 /* Delete Button*/
 .delete-history-btn {
   padding: 6px 8px;
   margin: 0px;
-  background: #dc3545;
+  background-color: #dc3545;
   color: #fff;
   font-size: 12px;
   border: none;
@@ -576,7 +583,7 @@
 }
 
 .delete-history-btn:hover {
-  background: #a71d2a;
+  background-color: #a71d2a;
 }
 
 /* History Card Header */
@@ -604,17 +611,17 @@
 .infopage-header-input {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--accent-txt);
   border: none;
   border-bottom: 2px solid #ccc;
-  background: transparent;
+  background-color: transparent;
   padding: 5px 0;
   width: 100%;
 }
 
 .infopage-header-input:focus {
   outline: none;
-  border-bottom-color: var(--accent-color);
+  border-bottom-color: var(--accent-txt);
 }
 
 .auto-resize {
@@ -646,7 +653,7 @@
 
 .infopage-history-btn {
   padding: 10px;
-  background: #e7ba51;
+  background-color: #e7ba51;
   color: #fff;
   font-size: 13px;
   border: none;
@@ -656,13 +663,13 @@
 }
 
 .infopage-history-btn:hover {
-  background: #bb9743;
+  background-color: #bb9743;
 }
 
 .infopage-add-bullet-btn {
   margin: 5px 0 5px 0;
   padding: 10px;
-  background: #28a745;
+  background-color: #28a745;
   color: #fff;
   font-size: 13px;
   border: none;
@@ -672,13 +679,13 @@
 }
 
 .infopage-add-bullet-btn:hover {
-  background: #1e7e34;
+  background-color: #1e7e34;
 }
 
 .infopage-add-line-btn {
   margin: 5px 0 5px 0;
   padding: 10px;
-  background: #28a745;
+  background-color: #28a745;
   color: #fff;
   font-size: 13px;
   border: none;
@@ -688,7 +695,7 @@
 }
 
 .infopage-add-line-btn:hover {
-  background: #1e7e34;
+  background-color: #1e7e34;
 }
 
 /* UL indentation */
@@ -715,7 +722,7 @@
   top: 0;
   font-size: 18px;
   line-height: 1;
-  color: #333;
+  color: var(--txt-comp);
 }
 
 .privacy-section .extra-lines-item {

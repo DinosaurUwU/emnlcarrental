@@ -1217,7 +1217,7 @@ const Profile = ({ openBooking }) => {
               />
             </button>
 
-            <h3 className="confirm-header">RENTAL DETAILS</h3>
+            <h3 style={{ color:"var(--accent-txt)"}} className="confirm-header">RENTAL DETAILS</h3>
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
@@ -3388,7 +3388,7 @@ const Profile = ({ openBooking }) => {
 
                 <h3
                   className="confirm-header"
-                  style={{ color: "var(--accent-color)", fontSize: "20px" }}
+                  style={{ color: "var(--accent-txt)", fontSize: "20px" }}
                 >
                   RENTAL DETAILS
                 </h3>

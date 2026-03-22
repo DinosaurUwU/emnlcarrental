@@ -6,13 +6,7 @@ import { useUser } from "../lib/UserContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import "./InfoPage.css";
-import {
-  MdEmail,
-  MdPhone,
-  MdChat,
-  MdClose,
-} from "react-icons/md";
-
+import { MdEmail, MdPhone, MdChat, MdClose } from "react-icons/md";
 
 import {
   FaQuestion,
@@ -21,7 +15,6 @@ import {
   FaFileAlt,
   FaCarSide,
 } from "react-icons/fa";
-
 
 // Simple parallax reference
 let infoTitleRef = null;
@@ -387,8 +380,7 @@ const InfoPage = ({ openBooking }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const [showInfoPageError, setShowInfoPageError] = useState(false);
-const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
-
+  const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
 
   // --- History stacks ---
   const [undoStack, setUndoStack] = useState([]);
@@ -1317,6 +1309,74 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
     },
   ];
 
+  const bookingsFAQs = [
+    {
+      question: "How do I make a booking?",
+      answer:
+        "You can book a vehicle through our website by clicking the 'Book Now' button in the header, selecting your preferred vehicle from our Fleet section, choosing your dates, and completing the booking form with your details.",
+    },
+    {
+      question: "What are the booking requirements?",
+      answer:
+        "To book a vehicle, you must be at least 21 years old, have a valid driver's license, and provide a government-issued ID. International drivers may need additional documentation. Guest users must call or message to book a rental or create an account in this website to be eligible in the online booking.",
+    },
+        {
+      question: "Can I modify or cancel my booking?",
+      answer:
+        "You can modify your booking up to 24 hours before pickup through your account dashboard (My Bookings section). Cancellations made 48+ hours in advance receive full refunds. Late cancellations may incur fees.",
+    },
+            {
+      question: "When do I need to pay for my booking?",
+      answer:
+        "Payment is required at the time of vehicle pickup at our office. We accept cash, bank transfers, GCash, and other approved digital payment methods. A security deposit may also be required.",
+    },
+            {
+      question: "How do I know my booking is confirmed?",
+      answer:
+        "You'll receive a booking confirmation email with your reservation details. You can also check your booking status through your account dashboard under 'My Bookings' or by logging into your profile.",
+    },
+            {
+      question: "Can I pick up my vehicle early?",
+      answer:
+        "Early pickups are subject to vehicle availability. Please contact us at least 24 hours in advance to arrange an early pickup time. You can reach us through the Contact section or by phone.",
+    },
+  ];
+
+  const accountFAQs = [
+    {
+      question: "How do I create an account?",
+      answer: "In /login page, fill out the registration form with your personal details, email, and password or you can just directly sign in with Google. For Email and Passwords, you'll need to verify your email address to complete registration. You can access the verification in /account page.",
+    },
+    {
+      question: "I'm having trouble logging in",
+      answer: "Make sure you're using the correct email and password. If you've forgotten your password, use the 'Forgot Password' link. In other cases, you may have forgotten that you logged in with your account using Google. Email / Passwords log in are different from Google direct signup Clear your browser cache and try again. Contact support if issues persist.",
+    },
+        {
+      question: "How do I reset my password?",
+      answer: "In /login page, in the bottom part of the password field, select 'Forgot Password'. You will be given an password reset email from the gmail account you used, make sure you entered your email address, before clicking on forgot password, and follow the instructions sent to your email. The reset link is valid for 24 hours.",
+    },
+        {
+      question: "How do I link my Google account?",
+      answer: "After logging in, go to your Account Dashboard or Profile settings. In the Right top most part of your Profile Picture, click the 3 vertical dotted menu, Look for the 'Link Account' option to link your email/password account with your Google account for easier login.",
+    },
+        {
+      question: "How do I update my profile information?",
+      answer: "Click the profile/account icon in the header to access your Account Dashboard. You can update your personal information, contact details, and preferences in the Profile section. Some changes may require verification.",
+    },
+        {
+      question: "How is my account information protected?",
+      answer: "We use industry-standard encryption and security measures to protect your account. NEVER SHARE your login credentials with others.",
+    },
+        {
+      question: "How do I delete my account?",
+      answer: "Go to your Account Dashboard, in the right top most corner of your profile picture, there is a 3 dotted vertical menu, click that and select 'Delete Account'. You'll need to confirm this action. Note that some data may be retained for legal compliance purposes.",
+    },
+            {
+      question: "How do I view my booking history?",
+      answer: "Click the profile/account icon in the header to access your Account Dashboard. Navigate to 'My Bookings' or 'Rental History' section to view past and current bookings.",
+    },
+  ];
+
   useEffect(() => {
     const handleScroll = () => {
       const timer = setTimeout(() => {
@@ -1480,10 +1540,9 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
   }, [showMessengerConfirm]);
 
   const closeInfoPageError = () => {
-  setShowInfoPageError(false);
-  setInfoPageErrorMessage("");
-};
-
+    setShowInfoPageError(false);
+    setInfoPageErrorMessage("");
+  };
 
   return (
     <div className="info-page" ref={pageRef}>
@@ -1557,7 +1616,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
             <div className="icon">
               <FaQuestion size={24} color="#FF9100" />
             </div>
-            <h3>FAQs</h3>
+            <h3 style={{ color: "var(--accent-txt)" }}>FAQs</h3>
             <p>Quick answers to common rental questions.</p>
           </a>
 
@@ -1565,7 +1624,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
             <div className="icon">
               <FaCar size={24} color="#FF9100" />
             </div>
-            <h3>Bookings</h3>
+            <h3 style={{ color: "var(--accent-txt)" }}>Bookings</h3>
             <p>How to reserve, modify, or cancel your car rental.</p>
           </a>
 
@@ -1573,7 +1632,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
             <div className="icon">
               <FaUser size={24} color="#FF9100" />
             </div>
-            <h3>Account Support</h3>
+            <h3 style={{ color: "var(--accent-txt)" }}>Account Support</h3>
             <p>Help with signing in, profiles, and settings.</p>
           </a>
 
@@ -1581,7 +1640,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
             <div className="icon">
               <FaFileAlt size={24} color="#FF9100" />
             </div>
-            <h3>Rental Policies</h3>
+            <h3 style={{ color: "var(--accent-txt)" }}>Rental Policies</h3>
             <p>Learn about our rules, requirements, and coverage.</p>
           </a>
 
@@ -1589,7 +1648,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
             <div className="icon">
               <FaCarSide size={24} color="#FF9100" />
             </div>
-            <h3>Vehicle Info</h3>
+            <h3 style={{ color: "var(--accent-txt)" }}>Vehicle Info</h3>
             <p>Details on our fleet, specifications, and availability.</p>
           </a>
         </div>
@@ -1606,7 +1665,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
                   color: "#FF9100",
                 }}
               />
-              <strong>Email:</strong>{" "}
+              <strong style={{ color: "var(--txt-comp)" }}>Email:</strong>{" "}
               <a href="mailto:rentalinquiries.emnl@gmail.com">
                 rentalinquiries.emnl@gmail.com
               </a>
@@ -1618,7 +1677,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
                   color: "#FF9100",
                 }}
               />
-              <strong>Phone:</strong>{" "}
+              <strong style={{ color: "var(--txt-comp)" }}>Phone:</strong>{" "}
               <a href="tel:+639754778178">+63 975 477 8178</a>
               <br />
               <MdChat
@@ -1628,7 +1687,7 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
                   color: "#FF9100",
                 }}
               />
-              <strong>Chat:</strong>{" "}
+              <strong style={{ color: "var(--txt-comp)" }}>Chat:</strong>{" "}
               <a
                 href="#chat"
                 onClick={(e) => {
@@ -1650,17 +1709,17 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
           {faqs.map((faq, index) => (
             <div key={index} className="faq-item">
               <button
-                className={`faq-question ${openFAQ === index ? "active" : ""}`}
-                onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+                className={`faq-question ${openFAQ === 'faq-' + index ? "active" : ""}`}
+                onClick={() => setOpenFAQ(openFAQ === 'faq-' + index ? null : 'faq-' + index)}
               >
                 <span>{faq.question}</span>
                 <span
-                  className={`faq-icon ${openFAQ === index ? "rotate" : ""}`}
+                  className={`faq-icon ${openFAQ === 'faq-' + index ? "rotate" : ""}`}
                 >
                   ▼
                 </span>
               </button>
-              <div className={`faq-answer ${openFAQ === index ? "show" : ""}`}>
+              <div className={`faq-answer ${openFAQ === 'faq-' + index ? "show" : ""}`}>
                 <p className="infopage-p">{faq.answer}</p>
               </div>
             </div>
@@ -1668,413 +1727,48 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
         </div>
       </section>
 
-      {/* Bookings */}
-      <section id="bookings">
-        <h2 className="section-title">Bookings</h2>
-        <div className="faq-list">
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "booking-process" ? null : "booking-process",
-                )
-              }
-            >
-              <span>How do I make a booking?</span>
-              <span
-                className={`faq-icon ${openFAQ === "booking-process" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "booking-process" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                You can book a vehicle through our website by clicking the "Book
-                Now" button in the header, selecting your preferred vehicle from
-                our Fleet section, choosing your dates, and completing the
-                booking form with your details.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "booking-requirements"
-                    ? null
-                    : "booking-requirements",
-                )
-              }
-            >
-              <span>What are the booking requirements?</span>
-              <span
-                className={`faq-icon ${openFAQ === "booking-requirements" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "booking-requirements" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                To book a vehicle, you must be at least 21 years old, have a
-                valid driver's license, and provide a government-issued ID.
-                International drivers may need additional documentation. Guest
-                users must call or message to book a rental or create an account
-                in this website to be eligible in the online booking.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "modify-booking" ? null : "modify-booking",
-                )
-              }
-            >
-              <span>Can I modify or cancel my booking?</span>
-              <span
-                className={`faq-icon ${openFAQ === "modify-booking" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "modify-booking" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                You can modify your booking up to 24 hours before pickup through
-                your account dashboard (My Bookings section). Cancellations made
-                48+ hours in advance receive full refunds. Late cancellations
-                may incur fees.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "payment-booking" ? null : "payment-booking",
-                )
-              }
-            >
-              <span>When do I need to pay for my booking?</span>
-              <span
-                className={`faq-icon ${openFAQ === "payment-booking" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "payment-booking" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Payment is required at the time of vehicle pickup at our office.
-                We accept cash, bank transfers, GCash, and other approved
-                digital payment methods. A security deposit may also be
-                required.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "booking-confirmation"
-                    ? null
-                    : "booking-confirmation",
-                )
-              }
-            >
-              <span>How do I know my booking is confirmed?</span>
-              <span
-                className={`faq-icon ${openFAQ === "booking-confirmation" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "booking-confirmation" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                You'll receive a booking confirmation email with your
-                reservation details. You can also check your booking status
-                through your account dashboard under "My Bookings" or by logging
-                into your profile.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(openFAQ === "early-pickup" ? null : "early-pickup")
-              }
-            >
-              <span>Can I pick up my vehicle early?</span>
-              <span
-                className={`faq-icon ${openFAQ === "early-pickup" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "early-pickup" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Early pickups are subject to vehicle availability. Please
-                contact us at least 24 hours in advance to arrange an early
-                pickup time. You can reach us through the Contact section or by
-                phone.
-              </p>
-            </div>
-          </div>
+{/* Bookings */}
+<section id="bookings">
+  <h2 className="section-title">Bookings</h2>
+  <div className="faq-list">
+    {bookingsFAQs.map((faq, index) => (
+      <div key={index} className="faq-item">
+        <button
+          className={`faq-question ${openFAQ === 'booking-' + index ? "active" : ""}`}
+          onClick={() => setOpenFAQ(openFAQ === 'booking-' + index ? null : 'booking-' + index)}
+        >
+          <span>{faq.question}</span>
+          <span className={`faq-icon ${openFAQ === 'booking-' + index ? "rotate" : ""}`}>▼</span>
+        </button>
+        <div className={`faq-answer ${openFAQ === 'booking-' + index ? "show" : ""}`}>
+          <p className="infopage-p">{faq.answer}</p>
         </div>
-      </section>
+      </div>
+    ))}
+  </div>
+</section>
 
-      {/* Account Support */}
-      <section id="account">
-        <h2 className="section-title">Account Support</h2>
-        <div className="faq-list">
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "create-account" ? null : "create-account",
-                )
-              }
-            >
-              <span>How do I create an account?</span>
-              <span
-                className={`faq-icon ${openFAQ === "create-account" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "create-account" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                In /login page, fill out the registration form with your
-                personal details, email, and password or you can just directly
-                sign in with Google. For Email and Passwords, you'll need to
-                verify your email address to complete registration. You can
-                access the verification in /account page.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(openFAQ === "login-issues" ? null : "login-issues")
-              }
-            >
-              <span>I'm having trouble logging in</span>
-              <span
-                className={`faq-icon ${openFAQ === "login-issues" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "login-issues" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Make sure you're using the correct email and password. If you've
-                forgotten your password, use the "Forgot Password" link. In
-                other cases, you may have forgotten that you logged in with your
-                account using Google. Email / Passwords log in are different
-                from Google direct signup Clear your browser cache and try
-                again. Contact support if issues persist.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "reset-password" ? null : "reset-password",
-                )
-              }
-            >
-              <span>How do I reset my password?</span>
-              <span
-                className={`faq-icon ${openFAQ === "reset-password" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "reset-password" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                In /login page, in the bottom part of the password field, select
-                "Forgot Password". You will be given an password reset email
-                from the gmail account you used, make sure you entered your
-                email address, before clicking on forgot password, and follow
-                the instructions sent to your email. The reset link is valid for
-                24 hours.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(openFAQ === "google-link" ? null : "google-link")
-              }
-            >
-              <span>How do I link my Google account?</span>
-              <span
-                className={`faq-icon ${openFAQ === "google-link" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "google-link" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                After logging in, go to your Account Dashboard or Profile
-                settings. In the Right top most part of your Profile Picture,
-                click the 3 vertical dotted menu, Look for the "Link Account"
-                option to link your email/password account with your Google
-                account for easier login.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "update-profile" ? null : "update-profile",
-                )
-              }
-            >
-              <span>How do I update my profile information?</span>
-              <span
-                className={`faq-icon ${openFAQ === "update-profile" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "update-profile" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Click the profile/account icon in the header to access your
-                Account Dashboard. You can update your personal information,
-                contact details, and preferences in the Profile section. Some
-                changes may require verification.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "account-security" ? null : "account-security",
-                )
-              }
-            >
-              <span>How is my account information protected?</span>
-              <span
-                className={`faq-icon ${openFAQ === "account-security" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "account-security" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                We use industry-standard encryption and security measures to
-                protect your account. NEVER SHARE your login credentials with
-                others.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "delete-account" ? null : "delete-account",
-                )
-              }
-            >
-              <span>How do I delete my account?</span>
-              <span
-                className={`faq-icon ${openFAQ === "delete-account" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "delete-account" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Go to your Account Dashboard, in the right top most corner of
-                your profile picture, there is a 3 dotted vertical menu, click
-                that and select "Delete Account". You'll need to confirm this
-                action. Note that some data may be retained for legal compliance
-                purposes.
-              </p>
-            </div>
-          </div>
-
-          <div className="faq-item">
-            <button
-              className="faq-question"
-              onClick={() =>
-                setOpenFAQ(
-                  openFAQ === "booking-history" ? null : "booking-history",
-                )
-              }
-            >
-              <span>How do I view my booking history?</span>
-              <span
-                className={`faq-icon ${openFAQ === "booking-history" ? "rotate" : ""}`}
-              >
-                ▼
-              </span>
-            </button>
-            <div
-              className={`faq-answer ${openFAQ === "booking-history" ? "show" : ""}`}
-            >
-              <p className="infopage-p">
-                Click the profile/account icon in the header to access your
-                Account Dashboard. Navigate to "My Bookings" or "Rental History"
-                section to view past and current bookings.
-              </p>
-            </div>
-          </div>
+{/* Account Support */}
+<section id="account">
+  <h2 className="section-title">Account Support</h2>
+  <div className="faq-list">
+    {accountFAQs.map((faq, index) => (
+      <div key={index} className="faq-item">
+        <button
+          className={`faq-question ${openFAQ === 'account-' + index ? "active" : ""}`}
+          onClick={() => setOpenFAQ(openFAQ === 'account-' + index ? null : 'account-' + index)}
+        >
+          <span>{faq.question}</span>
+          <span className={`faq-icon ${openFAQ === 'account-' + index ? "rotate" : ""}`}>▼</span>
+        </button>
+        <div className={`faq-answer ${openFAQ === 'account-' + index ? "show" : ""}`}>
+          <p className="infopage-p">{faq.answer}</p>
         </div>
-      </section>
+      </div>
+    ))}
+  </div>
+</section>
+
 
       {/* Privacy Policy */}
       <section id="privacy-policy">
@@ -2190,8 +1884,8 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
           )}
         </h2>
 
-        <p>
-          <strong>Last Updated:</strong>{" "}
+        <p style={{ color: "var(--accent-txt)" }}>
+          <strong >Last Updated:</strong>{" "}
           {privacyLastUpdated
             ? privacyLastUpdated.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -2471,8 +2165,8 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
           )}
         </h2>
 
-        <p>
-          <strong>Last Updated:</strong>{" "}
+        <p style={{ color: "var(--accent-txt)" }}>
+          <strong >Last Updated:</strong>{" "}
           {termsLastUpdated
             ? termsLastUpdated.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -3071,10 +2765,11 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
                     setDraftRedoStack([]);
                     setShowSaveConfirm(false);
                   } else {
-  setInfoPageErrorMessage("Failed to save Privacy Policy. Please try again.");
-  setShowInfoPageError(true);
-}
-
+                    setInfoPageErrorMessage(
+                      "Failed to save Privacy Policy. Please try again.",
+                    );
+                    setShowInfoPageError(true);
+                  }
                 }}
               >
                 Yes, Save Changes
@@ -3091,13 +2786,13 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
         </div>
       )}
 
-            {/* ================= InfoPage Error Overlay ================= */}
+      {/* ================= InfoPage Error Overlay ================= */}
       {showInfoPageError && (
         <div className="error-overlay" onClick={closeInfoPageError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
             <div className="error-icon">
-      <MdClose size={32} />
-    </div>
+              <MdClose size={32} />
+            </div>
             <h3>Error!</h3>
             <p>{infoPageErrorMessage}</p>
             <button className="error-btn" onClick={closeInfoPageError}>
@@ -3106,7 +2801,6 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
           </div>
         </div>
       )}
-
 
       {showTermsSaveConfirm && (
         <div className="overlay-delete">
@@ -3130,9 +2824,10 @@ const [infoPageErrorMessage, setInfoPageErrorMessage] = useState("");
                     setDraftTermsRedoStack([]);
                     setShowTermsSaveConfirm(false);
                   } else {
-                    setInfoPageErrorMessage("Failed to save Terms & Conditions. Please try again.");
-setShowInfoPageError(true);
-
+                    setInfoPageErrorMessage(
+                      "Failed to save Terms & Conditions. Please try again.",
+                    );
+                    setShowInfoPageError(true);
                   }
                 }}
               >
