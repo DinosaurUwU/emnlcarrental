@@ -1519,6 +1519,7 @@ const InfoPage = ({ openBooking }) => {
     }
   };
 
+  
   // Overlay handling for Messenger confirm
   useEffect(() => {
     const scrollYRef = { current: 0 };
