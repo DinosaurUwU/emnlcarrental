@@ -9,6 +9,7 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import "./RentalActivitySection.css";
 import { MdWarning, MdClose } from "react-icons/md";
+import { FiX } from "react-icons/fi";
 
 const RentalActivitySection = ({ subSection }) => {
   const [showRentalWarning, setShowRentalWarning] = useState(false);
@@ -1842,7 +1843,7 @@ const RentalActivitySection = ({ subSection }) => {
       {showBookingConfirmOverlay && confirmUnitId && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingConfirmOverlay(false)}
@@ -1857,6 +1858,14 @@ const RentalActivitySection = ({ subSection }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                        <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowBookingConfirmOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">CONFIRM CHANGES?</h3>
@@ -2457,7 +2466,7 @@ const hasReservedSource =
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -2472,6 +2481,14 @@ const hasReservedSource =
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                    <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>
@@ -2988,7 +3005,7 @@ const hasReservedSource =
       {showBalanceDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowBalanceDetailsOverlay(false)}
@@ -3003,6 +3020,14 @@ const hasReservedSource =
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                        <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowBalanceDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>
@@ -4270,7 +4295,7 @@ const hasReservedSource =
       {showEditRequest && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditRequest(false)}
@@ -4285,6 +4310,14 @@ const hasReservedSource =
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                 <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowEditRequest(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">EDIT RENTAL REQUEST</h3>
@@ -5568,7 +5601,7 @@ const hasReservedSource =
       {showEditBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditBooking(false)}
@@ -5583,6 +5616,14 @@ const hasReservedSource =
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                             <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowEditBooking(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">EDIT BOOKING</h3>
@@ -6670,7 +6711,7 @@ const hasReservedSource =
       {showEditBalanceDueBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditBalanceDueBooking(false)}
@@ -6685,6 +6726,14 @@ const hasReservedSource =
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                                         <button
+              className="close-btn"
+              type="button"
+            onClick={() => setShowEditBalanceDueBooking(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">UPDATE PAYMENT</h3>

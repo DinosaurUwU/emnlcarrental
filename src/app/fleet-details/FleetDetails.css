@@ -825,7 +825,7 @@
   gap: 4px;
 }
 
-.spec-item {
+.car-spec-item {
   display: flex;
   align-items: center;
   gap: 3px;
@@ -833,11 +833,12 @@
   color: var(--accent-txt);
 }
 
-.spec-item img {
+.car-spec-item svg {
   width: 18px;
   height: 18px;
-  object-fit: contain;
+  flex-shrink: 0;
 }
+
 
 /* Ensure the button is always aligned at the bottom */
 .car-card .view-details {
@@ -1071,6 +1072,37 @@
   background-color: red;
 }
 
+.close-overlay {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.close-overlay:hover {
+  background: rgba(239, 68, 68, 0.75);
+}
+
+.close-overlay .close-icon {
+  font-size: 24px;
+  color: #dc3545;
+  transition: all 0.3s ease;
+}
+
+.close-overlay:hover .close-icon {
+  color: #f1f1f1 !important;
+}
+
 .additional-carousel-container {
   position: absolute;
   top: 50%;
@@ -1223,10 +1255,17 @@
 }
 
 .specification-icon {
-  width: 24px; /* Icon size */
-  height: 24px;
-  margin-right: 10px; /* Spacing between icon and text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.specification-icon svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
 
 body.no-scroll {
   overflow: hidden;
@@ -1302,14 +1341,7 @@ body.no-scroll {
     order: 0;
   }
 
-  .close-overlay {
-    position: fixed;
-    top: 1px;
-    right: 1px;
-    transform: translate(0%, 0%);
-    padding: 9px 15px;
-    z-index: 100;
-  }
+
 
   .overlay-details {
     z-index: 1;
