@@ -1438,6 +1438,10 @@
   align-items: flex-start;
 }
 
+.client-profile-right p {
+  color: var(--txt-comp);
+}
+
 .client-profile-pic {
   width: 120px;
   height: 120px;
