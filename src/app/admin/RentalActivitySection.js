@@ -8445,17 +8445,18 @@ const RentalActivitySection = ({ subSection }) => {
                       }
 
                       const unitForm = formData[selectedUnitId] || {};
-const reservedActiveBooking = (activeBookings || []).find(
-  (booking) => {
-    const status = String(booking?.status || "").toLowerCase();
-    return (
-      String(booking?.plateNo || "").toUpperCase() ===
-        String(selectedUnit?.plateNo || "").toUpperCase() &&
-      booking?.reservation === true &&
-      (status === "active" || status === "pending")  // ← Now checks both "active" AND "pending"
-    );
-  }
-);
+
+                      
+const reservedActiveBooking = activeBookings?.find((booking) => {
+  const plateMatch = String(booking?.plateNo || "").toUpperCase() === 
+                     String(selectedUnit?.plateNo || "").toUpperCase();
+  const status = String(booking?.status || "").toLowerCase();
+  const isActiveOrPending = status === "active" || status === "pending" || status === "confirmed";
+  
+  return plateMatch && isActiveOrPending;
+});
+
+console.log("reservedActiveBooking:", reservedActiveBooking);
 
 
                       const mop = unitForm.mop || "Cash";
