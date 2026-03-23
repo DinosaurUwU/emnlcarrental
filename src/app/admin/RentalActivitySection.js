@@ -1839,6 +1839,7 @@ const RentalActivitySection = ({ subSection }) => {
       )}
 
 
+
       {/* BOOKING FORM RENTAL DETAILS */}
       {showBookingConfirmOverlay && confirmUnitId && (
         <div className="admin-booking-confirm-overlay">
