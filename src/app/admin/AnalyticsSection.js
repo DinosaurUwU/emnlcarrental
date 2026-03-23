@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
+import { FiX } from "react-icons/fi";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
+
 import {
   Chart as ChartJS,
   ArcElement,
@@ -3950,7 +3952,7 @@ legend: {
       {showUnitDetailsOverlay && selectedUnitId !== null && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowUnitDetailsOverlay(false)}
@@ -3965,12 +3967,28 @@ legend: {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowUnitDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <div className="unit-header">
               <h3>{selectedUnitBookings[0]?.carName || "UNIT"}</h3>
               <p>{selectedUnitBookings[0]?.plateNo}</p>
             </div>
+
+                            <input
+                  type="text"
+                  placeholder="Search renter name, location, or dates..."
+                  value={unitSearchQuery}
+                  onChange={(e) => setUnitSearchQuery(e.target.value)}
+                  className="details-search-input"
+                />
 
             <div className="unit-table-container">
               <div
@@ -3980,13 +3998,7 @@ legend: {
                   marginBottom: "10px",
                 }}
               >
-                <input
-                  type="text"
-                  placeholder="Search renter name, location, or dates..."
-                  value={unitSearchQuery}
-                  onChange={(e) => setUnitSearchQuery(e.target.value)}
-                  className="details-search-input"
-                />
+
               </div>
               <table
                 className={`unit-details-table ${
@@ -4226,7 +4238,7 @@ legend: {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -4241,6 +4253,14 @@ legend: {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                        <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>
@@ -4747,7 +4767,7 @@ legend: {
       {showCalendarEventsOverlay && selectedCalendarBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowCalendarEventsOverlay(false)}
@@ -4762,6 +4782,14 @@ legend: {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                    <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowCalendarEventsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>

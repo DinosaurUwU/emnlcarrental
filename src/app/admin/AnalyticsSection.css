@@ -2450,7 +2450,7 @@ border-collapse: collapse;
   flex-direction: column;
 }
 
-.unit-details-overlay .close-btn {
+/* .unit-details-overlay .close-btn {
   background-color: none;
   border: none;
   cursor: pointer;
@@ -2477,7 +2477,42 @@ border-collapse: collapse;
 
 .unit-details-overlay .close-btn:hover .close-icon-1 {
   opacity: 1;
+} */
+
+
+.unit-details-overlay .close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
 }
+
+.unit-details-overlay .close-btn:hover {
+  background: rgba(239, 68, 68, 0.75);
+}
+
+.unit-details-overlay .close-icon {
+  font-size: 24px;
+  color: #dc3545;
+  transition: all 0.3s ease;
+}
+
+.unit-details-overlay .close-btn:hover .close-icon {
+  color: #f1f1f1 !important;
+}
+
+
+
 
 .unit-header {
   text-align: center;
@@ -2640,6 +2675,9 @@ border-collapse: collapse;
   border-radius: 6px;
   font-size: 0.9rem;
   transition: 0.2s ease;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 300px !important;
 }
 
 .details-search-input:focus {

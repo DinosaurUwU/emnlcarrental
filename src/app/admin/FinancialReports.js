@@ -15,6 +15,7 @@ import {
   MdAnalytics,
   MdSync,
 } from "react-icons/md";
+import { FiX } from "react-icons/fi";
 
 import { createPortal } from "react-dom";
 
@@ -2548,7 +2549,7 @@ const FinancialReports = () => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -2563,6 +2564,14 @@ const FinancialReports = () => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+            <button
+              className="close-btn"
+              type="button"
+             onClick={() => setShowDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>

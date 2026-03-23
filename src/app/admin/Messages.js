@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../lib/UserContext";
 import "./Messages.css";
+import { FiX } from "react-icons/fi";
 
 const Messages = () => {
   const {
@@ -1068,9 +1069,17 @@ const Messages = () => {
         {selectedNotification && (
           <div className="admin-message-overlay fade-in">
             <div className="admin-message-content">
-              <button className="admin-close-btn" onClick={closeNotification}>
+              {/* <button className="admin-close-btn" onClick={closeNotification}>
                 ×
-              </button>
+              </button> */}
+
+<button
+  className="close-btn"
+  type="button"
+  onClick={closeNotification}
+>
+  <FiX className="close-icon" />
+</button>
 
               <div className="message-header">
                 <img

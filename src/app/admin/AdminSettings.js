@@ -6,6 +6,7 @@ import "photoswipe/style.css";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
 import { MdClose, MdEdit, MdDelete } from "react-icons/md";
+import { FiX } from "react-icons/fi";
 
 const AdminSettings = ({ subSection = "overview" }) => {
   const {
@@ -3000,7 +3001,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         (selectedUnit || isAddingUnit) && (
           <div className="unit-details-overlay">
             <div className="unit-details-content">
-              <button
+              {/* <button
                 className="close-btn"
                 type="button"
                 onClick={() => {
@@ -3018,6 +3019,17 @@ const AdminSettings = ({ subSection = "overview" }) => {
                   alt="Close"
                   className="close-icon close-icon-1"
                 />
+              </button> */}
+
+              <button
+                className="close-btn"
+                type="button"
+                                onClick={() => {
+                  setShowUnitDetailsOverlay(false);
+                  setIsAddingUnit(false);
+                }}
+              >
+                <FiX className="close-icon" />
               </button>
 
               <input
@@ -4675,7 +4687,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
       {showClientDetailsOverlay && selectedClient && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowClientDetailsOverlay(false)}
@@ -4690,7 +4702,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+                          <button
+                className="close-btn"
+                type="button"
+                onClick={() => setShowClientDetailsOverlay(false)}
+              >
+                <FiX className="close-icon" />
+              </button>
 
             <h3 className="client-details-title">Client Details</h3>
 
@@ -4974,7 +4994,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -4989,7 +5009,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+                                      <button
+                className="close-btn"
+                type="button"
+                onClick={() => setShowDetailsOverlay(false)}
+              >
+                <FiX className="close-icon" />
+              </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>
             <p className="confirm-text">
