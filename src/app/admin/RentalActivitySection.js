@@ -1873,26 +1873,28 @@ const RentalActivitySection = ({ subSection }) => {
                 .trim()
                 .toUpperCase();
 
-              const hasReservedSource =
-                !!confirmPlate &&
-                (activeBookings || []).some(
-                  (booking) =>
-                    String(booking?.plateNo || "")
-                      .trim()
-                      .toUpperCase() === confirmPlate &&
-                    booking?.reservation === true &&
-                    ["active", "pending"].includes(
-                      String(booking?.status || "").toLowerCase(),
-                    ),
-                );
+const hasReservedSource =
+    !!confirmPlate &&
+    (activeBookings || []).some((booking) => {
+      const plateMatch = String(booking?.plateNo || "")
+        .trim()
+        .toUpperCase() === confirmPlate;
+      const status = String(booking?.status || "").toLowerCase();
+      const isActiveOrPending = 
+        status === "active" || 
+        status === "pending" || 
+        status === "confirmed";
+      
+      return plateMatch && isActiveOrPending;
+    });
 
-              const isReservedDraft =
-                formData[confirmUnitId]?.reservation === true;
+  const isReservedDraft =
+    formData[confirmUnitId]?.reservation === true;
 
-              return isReservedDraft || hasReservedSource ? (
-                <div className="confirm-reserved-flag">Reserved Unit</div>
-              ) : null;
-            })()}
+  return isReservedDraft || hasReservedSource ? (
+    <div className="confirm-reserved-flag">Reserved Booking</div>
+  ) : null;
+})()}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
