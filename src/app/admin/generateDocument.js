@@ -76,8 +76,12 @@ const prepareDocumentData = (bookingData) => {
     totalHours = rentalDays * 24 + extraHours;
   }
 
-  // THIS IS THE KEY FIX - make rentalDuration a string, not an object
-  const rentalDurationDisplay = `${rentalDays} Day / ${totalHours} hrs`;
+const baseHours = rentalDays * 24;
+const extraHrWord = extraHours === 1 ? "hr" : "hrs";
+const rentalDurationDisplay = extraHours > 0 
+  ? `(${rentalDays} Day / ${baseHours} hrs) +${extraHours} ${extraHrWord}`
+  : `(${rentalDays} Day / ${baseHours} hrs)`;
+
 
   // ========== DURATION CALCULATION ==========
   const dailyRate = bookingData.discountedRate || 0;
@@ -87,10 +91,11 @@ const dayWord = rentalDays === 1 ? "Day" : "Days";
 
 let durationCalculation = "";
 if (extraHours > 0) {
-  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord} + ${extraHours} hrs) ₱${totalPrice.toLocaleString()}`;
+  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord} | +${extraHours} ${extraHrWord})     ₱${totalPrice.toLocaleString()}`;
 } else {
   durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord}) ₱${totalPrice.toLocaleString()}`;
 }
+
 
 
   // Invoice number: {S}{F}{M or 0}-{paymentCount}-{MMDDYY}
@@ -149,6 +154,7 @@ if (extraHours > 0) {
     pickupPrice: pickupPrice > 0 ? `₱${pickupPrice.toLocaleString()}` : "₱0",
     extraHoursCharge:
       extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
+      extraHours: extraHours > 0 ? `₱${extraHours.toLocaleString()}` : "₱0",
     totalPrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0",
     billedDays: rentalDays,
 
