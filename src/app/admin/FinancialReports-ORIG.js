@@ -1240,7 +1240,7 @@ const [financialWarningMessage, setFinancialWarningMessage] = useState("");
                     )}
 
                   <div className="confirm-row">
-                    <strong className="confirm-label">Drop-off Type:</strong>
+                    <strong className="confirm-label">Delivery Type:</strong>
                     <span className="confirm-value">
                       {selectedBooking.pickupOption}
                     </span>

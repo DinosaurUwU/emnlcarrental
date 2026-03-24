@@ -1954,7 +1954,7 @@ const hasReservedSource =
 
                         <div className="confirm-row">
                           <strong className="confirm-label">
-                            Drop-off Type:
+                            Delivery Type:
                           </strong>
                           <span className="confirm-value">{pickupOption}</span>
                         </div>
@@ -2550,7 +2550,7 @@ const hasReservedSource =
                     )}
 
                   <div className="confirm-row">
-                    <strong className="confirm-label">Drop-off Type:</strong>
+                    <strong className="confirm-label">Delivery Type:</strong>
                     <span className="confirm-value">
                       {selectedBooking.pickupOption}
                     </span>
@@ -3097,7 +3097,7 @@ const hasReservedSource =
                     )}
 
                   <div className="confirm-row">
-                    <strong className="confirm-label">Drop-off Type:</strong>
+                    <strong className="confirm-label">Delivery Type:</strong>
                     <span className="confirm-value">
                       {selectedBooking.pickupOption}
                     </span>

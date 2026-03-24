@@ -1311,7 +1311,7 @@ const Profile = ({ openBooking }) => {
                     )}
 
                   <div className="confirm-row">
-                    <strong className="confirm-label">Drop-off Type:</strong>
+                    <strong className="confirm-label">Delivery Type:</strong>
                     <span className="confirm-value">
                       {selectedBooking.pickupOption}
                     </span>
@@ -3504,7 +3504,7 @@ const Profile = ({ openBooking }) => {
 
                       <div className="confirm-row">
                         <strong className="confirm-label">
-                          Drop-off Type:
+                          Delivery Type:
                         </strong>
                         <span className="confirm-value">
                           {selectedHistoryRental.pickupOption}
