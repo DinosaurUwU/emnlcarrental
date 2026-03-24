@@ -1525,6 +1525,7 @@ width: 100%;
 }
 
 .editing-row {
+  color: #333;
   background-color: #fff3cd;
   border: 2px solid #ffc107;
   transition: background-color 0.3s ease;
@@ -1532,7 +1533,7 @@ width: 100%;
 
 .edit-payment-btn {
   padding: 4px 8px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid #f0f0f000;
   border-radius: 4px;
   background-color: #007bff;
   color: white;
@@ -1547,7 +1548,7 @@ width: 100%;
 
 .remove-payment-btn {
   padding: 4px 8px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid #f0f0f000;
   border-radius: 4px;
   background-color: #dc3545;
   color: white;
@@ -1557,6 +1558,13 @@ width: 100%;
 
 .remove-payment-btn:hover {
   background-color: #c82333;
+}
+
+.payment-buttons-group{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
 }
 
 .admin-booking-confirm-overlay {

@@ -1077,7 +1077,7 @@ select option {
   margin-bottom: 10px;
   margin-top: 0px;
   font-size: 14px;
-  color: var(--txt-comp);
+  color: var(--accent-txt);
 }
 
 .confirm-reserved-badge {

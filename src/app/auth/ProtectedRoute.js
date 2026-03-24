@@ -37,6 +37,7 @@ const ProtectedRoute = ({ children, onlyAdmin = false, onlyUser = false }) => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
+          backgroundColor: "var(--page-bg)",
         }}
       >
         <div

@@ -9594,9 +9594,9 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
               billedDays,
               drivingPrice,
               pickupPrice,
-              drivingOption: unitForm.drivingOption || "Self-Drive",    // ADD THIS
+              drivingOption: unitForm.drivingOption || "Self-Drive",
               pickupOption: unitForm.pickupOption || "Pickup", 
-              paymentEntries: unitForm.paymentEntries || [],
+              paymentEntries: localPaymentEntries || [],
               rentalDuration: {
                 days: rentalDays,
                 extraHours: duration?.extraHours || 0,
