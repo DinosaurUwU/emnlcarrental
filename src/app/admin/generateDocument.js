@@ -91,9 +91,9 @@ const dayWord = rentalDays === 1 ? "Day" : "Days";
 
 let durationCalculation = "";
 if (extraHours > 0) {
-  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord} | +${extraHours} ${extraHrWord})     ₱${totalPrice.toLocaleString()}`;
+  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord} | +${extraHours} ${extraHrWord})`;
 } else {
-  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord}) ₱${totalPrice.toLocaleString()}`;
+  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord})`;
 }
 
 
@@ -148,13 +148,18 @@ if (extraHours > 0) {
 
     // Pricing - INDIVIDUAL PRICES
     dailyRate: bookingData.discountedRate
-      ? `₱${bookingData.discountedRate.toLocaleString()}`
-      : "₱0",
+  ? `₱${bookingData.discountedRate.toLocaleString()}`
+  : "₱0",
+
+  // Full calculation line
+dailyRateCalc: `(${dailyRate} x ${rentalDays} ${dayWord}) ${totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0"}`,
+
+
     drivingPrice: drivingPrice > 0 ? `₱${drivingPrice.toLocaleString()}` : "₱0",
     pickupPrice: pickupPrice > 0 ? `₱${pickupPrice.toLocaleString()}` : "₱0",
     extraHoursCharge:
       extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
-      extraHours: extraHours > 0 ? `₱${extraHours.toLocaleString()}` : "₱0",
+    extraHours: extraHours > 0 ? `₱${extraHours.toLocaleString()}` : "₱0",
     totalPrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0",
     billedDays: rentalDays,
 
