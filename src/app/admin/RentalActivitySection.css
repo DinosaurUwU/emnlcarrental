@@ -627,18 +627,21 @@
 .more-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
   background-color: var(--page-bg);
   border: 1px solid var(--page-bg);
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   padding: 6px;
   z-index: 10;
+
+    width: 100px !important;
+     min-width: 150px !important;
 }
 
 .more-dropdown .action-button {
   display: block;
-  width: 100%;
+width: 100%;
   margin: 4px 0;
 }
 
@@ -2469,21 +2472,44 @@
 }
 
 .rental-actions-container .rental-actions {
+      width: 100px !important;
+     min-width: 150px !important;
   flex: 1;
   padding: 6px 10px;
+  margin: 2px 0 2px 0;
   border: none;
   border-radius: 6px;
   color: #fff;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
+  
   transition: all 0.5s ease;
 }
+
+.rental-actions.more {
+  background-color: rgba(218, 83, 52, 0.15);
+  border: 2px solid #da5234;
+  color: #da5234;
+}
+
 
 .rental-actions-container .rental-actions.print-contract {
   background-color: transparent;
   border: 2px solid #6f42c1;
   color: #6f42c1;
+}
+
+.rental-actions-container .rental-actions.dl-invoice {
+  background-color: transparent;
+  border: 2px solid #ffb347;
+  color: #ffb347;
+}
+
+.rental-actions-container .rental-actions.dl-quotation {
+  background-color: transparent;
+  border: 2px solid #007bff;
+  color: #007bff;
 }
 
 .rental-actions-container .rental-actions.start-rental {
@@ -2501,6 +2527,18 @@
 .rental-actions-container .rental-actions.print-contract:hover {
   background-color: #6f42c1;
   box-shadow: 0 0 10px #6f42c1;
+  color: white;
+}
+
+.rental-actions-container .rental-actions.dl-invoice:hover {
+  background-color: #ffb347;
+  box-shadow: 0 0 10px #ffb347;
+  color: white;
+}
+
+.rental-actions-container .rental-actions.dl-quotation:hover {
+  background-color: #007bff;
+  box-shadow: 0 0 10px #007bff;
   color: white;
 }
 

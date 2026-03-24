@@ -9531,6 +9531,43 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
 
                   {selectedUnitId && (
                     <div className="rental-actions-container">
+
+
+
+                      <button
+                        className="rental-actions start-rental"
+                        onClick={(e) => handleSubmit(e, selectedUnitId)}
+                      >
+                        Start Rental
+                      </button>
+
+                      <button
+                        type="button"
+                        className="rental-actions clear-all"
+                        onClick={() => {
+                          setClearUnitId(selectedUnitId);
+                          setShowClearConfirm(true);
+                        }}
+                      >
+                        Clear All
+                      </button>
+
+                       {/* More button with dropdown */}
+    <div className="action-more">
+      <button
+        type="button"
+        className="rental-actions more"
+        onClick={() =>
+          setShowMoreFor(
+            showMoreFor === "rental-actions" ? null : "rental-actions"
+          )
+        }
+      >
+        More ▾
+      </button>
+
+      {showMoreFor === "rental-actions" && (
+        <div className="more-dropdown">
                       <button
                         type="button"
                         className="rental-actions print-contract"
@@ -9606,22 +9643,34 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                       </button>
 
                       <button
-                        className="rental-actions start-rental"
-                        onClick={(e) => handleSubmit(e, selectedUnitId)}
-                      >
-                        Start Rental
-                      </button>
+            type="button"
+            className="rental-actions dl-invoice"
+            disabled={!formData[selectedUnitId]?.firstName}
+            onClick={() => {
+              // Add generateInvoicePDF function
+              generateInvoicePDF(enrichedBooking);
+              setShowMoreFor(null);
+            }}
+          >
+            Download Invoice
+          </button>
 
-                      <button
-                        type="button"
-                        className="rental-actions clear-all"
-                        onClick={() => {
-                          setClearUnitId(selectedUnitId);
-                          setShowClearConfirm(true);
-                        }}
-                      >
-                        Clear All
-                      </button>
+          <button
+            type="button"
+            className="rental-actions dl-quotation"
+            disabled={!formData[selectedUnitId]?.firstName}
+            onClick={() => {
+              // Add generateQuotationPDF function
+              generateQuotationPDF(enrichedBooking);
+              setShowMoreFor(null);
+            }}
+          >
+            Download Quotation
+          </button>
+        </div>
+      )}
+    </div>
+
                     </div>
                   )}
 
