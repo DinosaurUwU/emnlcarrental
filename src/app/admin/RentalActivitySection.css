@@ -2501,33 +2501,40 @@ width: 100%;
   color: #da5234;
 }
 
+.rental-actions.more:hover {
+  background-color: #da5234;
+  border: 2px solid #da5234;
+  box-shadow: 0 0 10px #da5234;
+  color: white;
+}
+
 
 .rental-actions-container .rental-actions.print-contract {
-  background-color: transparent;
+  background-color: rgba(110, 66, 193, 0.15);
   border: 2px solid #6f42c1;
   color: #6f42c1;
 }
 
 .rental-actions-container .rental-actions.dl-invoice {
-  background-color: transparent;
+  background-color: rgba(255, 178, 71, 0.15);
   border: 2px solid #ffb347;
   color: #ffb347;
 }
 
 .rental-actions-container .rental-actions.dl-quotation {
-  background-color: transparent;
+  background-color: rgba(0, 123, 255, 0.15);
   border: 2px solid #007bff;
   color: #007bff;
 }
 
 .rental-actions-container .rental-actions.start-rental {
-  background-color: transparent;
+  background-color: rgba(40, 167, 69, 0.15);
   border: 2px solid var(--supporting-bg);
   color: var(--accent-txt);
 }
 
 .rental-actions-container .rental-actions.clear-all {
-  background-color: transparent;
+  background-color: rgba(220, 53, 70, 0.15);
   border: 2px solid #dc3545;
   color: #dc3545;
 }

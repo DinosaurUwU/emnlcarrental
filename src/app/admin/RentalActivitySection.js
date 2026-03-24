@@ -5,7 +5,6 @@ import { useUser } from "../lib/UserContext";
 import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
 import { generateInvoicePDF, generateQuotationPDF } from "./generateDocument";
-import PrintContract from "./PrintContract";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import "./RentalActivitySection.css";
@@ -9530,7 +9529,12 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                       );
                     })()}
 
-                  {selectedUnitId && (
+
+
+
+                </div>
+
+                                  {selectedUnitId && (
                     <div className="rental-actions-container">
 
 
@@ -9649,15 +9653,6 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
 
                     </div>
                   )}
-
-                  {selectedUnitId && formData[selectedUnitId] && (
-                    <div style={{ display: "none" }}>
-                      <div ref={printRef}>
-                        <PrintContract booking={formData[selectedUnitId]} />
-                      </div>
-                    </div>
-                  )}
-                </div>
               </form>
             </div>
           )}

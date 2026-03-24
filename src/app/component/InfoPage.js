@@ -363,7 +363,7 @@ const InfoPage = ({ openBooking }) => {
         },
         {
           type: "bullet",
-          text: "Address: Brgy. Dona Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc City, 6541 Leyte",
+          text: "Address: Brgy. Doña Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc City, 6541 Leyte",
         },
       ],
     },
@@ -866,7 +866,7 @@ const InfoPage = ({ openBooking }) => {
         },
         {
           type: "bullet",
-          text: "Business Office: Brgy. Dona Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc City, 6541 Leyte",
+          text: "Business Office: Brgy. Doña Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc City, 6541 Leyte",
         },
         {
           type: "bullet",

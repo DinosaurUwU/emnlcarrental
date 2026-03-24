@@ -78,7 +78,7 @@ const CompanyMap = () => {
               rel="noopener noreferrer"
               className="contact-link"
             >
-              Brgy. Dona Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc
+              Brgy. Doña Feliza Z. Mejia, Corner Berlin St. and, Madrid, Ormoc
               City, 6541 Leyte
             </a>
           </p>

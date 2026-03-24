@@ -23,7 +23,7 @@ const formatDate = (dateStr) => {
 };
 
 // Common data preparation for both invoice and quotation
-const prepareDocumentData = (bookingData) => {
+const prepareDocumentData = (bookingData, documentType) => {
   // Get values from rentalDuration
   const rentalDays =
     bookingData.rentalDuration?.days || bookingData.billedDays || 1;
@@ -58,26 +58,25 @@ const prepareDocumentData = (bookingData) => {
   // Calculate balance due
   const balanceDue = Math.max(0, totalPrice - totalPaid);
 
-//   // Format payment entries for template
-//   const paymentEntriesFormatted = paymentEntries.map((entry) => ({
-//     paymentDate: formatDate(entry.date),
-//     paymentMop: entry.mop || "",
-//     paymentPop: entry.pop || "",
-//     paymentAmount: entry.amount
-//       ? `₱${Number(entry.amount).toLocaleString()}`
-//       : "₱0",
-//   }));
+  //   // Format payment entries for template
+  //   const paymentEntriesFormatted = paymentEntries.map((entry) => ({
+  //     paymentDate: formatDate(entry.date),
+  //     paymentMop: entry.mop || "",
+  //     paymentPop: entry.pop || "",
+  //     paymentAmount: entry.amount
+  //       ? `₱${Number(entry.amount).toLocaleString()}`
+  //       : "₱0",
+  //   }));
 
-
-const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
-  paymentDate: formatDate(entry.date),
-  paymentMop: entry.mop || "",
-  paymentPop: entry.pop || "",
-  paymentAmount: entry.amount ? `₱${Number(entry.amount).toLocaleString()}` : "₱0",
-  rowColor: index % 2 === 0 ? "#E2EFD9" : "#D9EBCD",
-}));
-
-
+  const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
+    paymentDate: formatDate(entry.date),
+    paymentMop: entry.mop || "",
+    paymentPop: entry.pop || "",
+    paymentAmount: entry.amount
+      ? `₱${Number(entry.amount).toLocaleString()}`
+      : "₱0",
+    rowColor: index % 2 === 0 ? "#E2EFD9" : "#D9EBCD",
+  }));
 
   // ========== DURATION DISPLAY ==========
   let totalHours = 0;
@@ -114,7 +113,12 @@ const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
   const day = String(now.getDate()).padStart(2, "0");
   const year = String(now.getFullYear()).slice(-2);
 
-  // Get initials
+  // Document number based on type
+
+  const hours24 = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const time24 = `${hours24}${minutes}`;
+
   const surnameInitial = (bookingData.surname || "").charAt(0).toUpperCase();
   const firstNameInitial = (bookingData.firstName || "")
     .charAt(0)
@@ -122,10 +126,55 @@ const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
   const middleInitial =
     (bookingData.middleName || "").charAt(0).toUpperCase() || "0";
 
-  const invoiceNo = `${surnameInitial}${firstNameInitial}${middleInitial}-${paymentCount}-${month}${day}${year}`;
+  // Invoice uses payment count, Quotation uses time
+  let docNo, docDate, docTime;
+
+  if (documentType === "invoice") {
+    docNo = `${surnameInitial}${firstNameInitial}${middleInitial}-${paymentCount}-${month}${day}${year}`;
+    docDate = now.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    docTime = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } else {
+    // Quotation uses 24hr time instead of payment count
+    docNo = `${surnameInitial}${firstNameInitial}${middleInitial}-${time24}-${month}${day}${year}`;
+    docDate = now.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    docTime = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
+  // Valid Until (default 7 days from now for quotations)
+  const validDays = 7;
+  const validUntil = new Date(now);
+  validUntil.setDate(validUntil.getDate() + validDays);
+
+  const validUntilDate = validUntil.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return {
-    invoiceNo: invoiceNo,
+    invoiceNo: docNo,
+    quotationNo: docNo,
+    invoiceDate: docDate,
+    quotationDate: docDate,
+    invoiceTime: docTime,
+    quotationTime: docTime,
+    validUntil: documentType === "quotation" ? validUntilDate : "",
 
     // Customer info
     customerName:
@@ -209,7 +258,7 @@ export const generateDocument = async (bookingData, documentType) => {
   const zip = new PizZip(arrayBuffer);
   const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-  doc.setData(prepareDocumentData(bookingData));
+  doc.setData(prepareDocumentData(bookingData, documentType));
 
   doc.render();
 
