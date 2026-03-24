@@ -58,15 +58,25 @@ const prepareDocumentData = (bookingData) => {
   // Calculate balance due
   const balanceDue = Math.max(0, totalPrice - totalPaid);
 
-  // Format payment entries for template
-  const paymentEntriesFormatted = paymentEntries.map((entry) => ({
-    paymentDate: formatDate(entry.date),
-    paymentMop: entry.mop || "",
-    paymentPop: entry.pop || "",
-    paymentAmount: entry.amount
-      ? `₱${Number(entry.amount).toLocaleString()}`
-      : "₱0",
-  }));
+//   // Format payment entries for template
+//   const paymentEntriesFormatted = paymentEntries.map((entry) => ({
+//     paymentDate: formatDate(entry.date),
+//     paymentMop: entry.mop || "",
+//     paymentPop: entry.pop || "",
+//     paymentAmount: entry.amount
+//       ? `₱${Number(entry.amount).toLocaleString()}`
+//       : "₱0",
+//   }));
+
+
+const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
+  paymentDate: formatDate(entry.date),
+  paymentMop: entry.mop || "",
+  paymentPop: entry.pop || "",
+  paymentAmount: entry.amount ? `₱${Number(entry.amount).toLocaleString()}` : "₱0",
+  rowColor: index % 2 === 0 ? "light" : "dark",
+}));
+
 
   // ========== DURATION DISPLAY ==========
   let totalHours = 0;
@@ -76,27 +86,25 @@ const prepareDocumentData = (bookingData) => {
     totalHours = rentalDays * 24 + extraHours;
   }
 
-const baseHours = rentalDays * 24;
-const extraHrWord = extraHours === 1 ? "hr" : "hrs";
-const rentalDurationDisplay = extraHours > 0 
-  ? `(${rentalDays} Day / ${baseHours} hrs) +${extraHours} ${extraHrWord}`
-  : `(${rentalDays} Day / ${baseHours} hrs)`;
-
+  const baseHours = rentalDays * 24;
+  const extraHrWord = extraHours === 1 ? "hr" : "hrs";
+  const rentalDurationDisplay =
+    extraHours > 0
+      ? `(${rentalDays} Day / ${baseHours} hrs) +${extraHours} ${extraHrWord}`
+      : `(${rentalDays} Day / ${baseHours} hrs)`;
 
   // ========== DURATION CALCULATION ==========
   const dailyRate = bookingData.discountedRate || 0;
 
-// Duration calculation with proper singular/plural
-const dayWord = rentalDays === 1 ? "Day" : "Days";
+  // Duration calculation with proper singular/plural
+  const dayWord = rentalDays === 1 ? "Day" : "Days";
 
-let durationCalculation = "";
-if (extraHours > 0) {
-  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord} | +${extraHours} ${extraHrWord})`;
-} else {
-  durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord})`;
-}
-
-
+  let durationCalculation = "";
+  if (extraHours > 0) {
+    durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord}) +${extraHours} ${extraHrWord}`;
+  } else {
+    durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} ${dayWord})`;
+  }
 
   // Invoice number: {S}{F}{M or 0}-{paymentCount}-{MMDDYY}
   const paymentCount = String(paymentEntries.length).padStart(2, "0");
@@ -133,7 +141,10 @@ if (extraHours > 0) {
     address: bookingData.address?.toUpperCase() || "",
 
     // Vehicle info
-    carName: bookingData.carName?.toUpperCase() || "",
+    carName: bookingData.carName?.toUpperCase()
+      ? `${bookingData.carName.toUpperCase()} (₱${bookingData.discountedRate?.toLocaleString() || 0} x ${rentalDays} ${dayWord})`
+      : "",
+
     plateNo: bookingData.plateNo?.toUpperCase() || "",
 
     // Dates & Times
@@ -148,18 +159,20 @@ if (extraHours > 0) {
 
     // Pricing - INDIVIDUAL PRICES
     dailyRate: bookingData.discountedRate
-  ? `₱${bookingData.discountedRate.toLocaleString()}`
-  : "₱0",
+      ? `₱${bookingData.discountedRate.toLocaleString()}`
+      : "₱0",
 
-  // Full calculation line
-dailyRateCalc: `(${dailyRate} x ${rentalDays} ${dayWord}) ${totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0"}`,
-
+    // Full calculation line
+    dailyRateCalc: `${bookingData.discountedRate * rentalDays > 0 ? `₱${(bookingData.discountedRate * rentalDays).toLocaleString()}` : "₱0"}`,
 
     drivingPrice: drivingPrice > 0 ? `₱${drivingPrice.toLocaleString()}` : "₱0",
     pickupPrice: pickupPrice > 0 ? `₱${pickupPrice.toLocaleString()}` : "₱0",
     extraHoursCharge:
       extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
-    extraHours: extraHours > 0 ? `₱${extraHours.toLocaleString()}` : "₱0",
+    extraHours:
+      extraHours > 0
+        ? `+${extraHours} ${extraHours === 1 ? "hr" : "hrs"}`
+        : "0",
     totalPrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0",
     billedDays: rentalDays,
 
