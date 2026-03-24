@@ -74,8 +74,9 @@ const paymentEntriesFormatted = paymentEntries.map((entry, index) => ({
   paymentMop: entry.mop || "",
   paymentPop: entry.pop || "",
   paymentAmount: entry.amount ? `₱${Number(entry.amount).toLocaleString()}` : "₱0",
-  rowColor: index % 2 === 0 ? "light" : "dark",
+  rowColor: index % 2 === 0 ? "#E2EFD9" : "#D9EBCD",
 }));
+
 
 
   // ========== DURATION DISPLAY ==========
