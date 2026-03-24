@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../lib/UserContext";
 import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
+import { generateInvoicePDF, generateQuotationPDF } from "./generateDocument";
 import PrintContract from "./PrintContract";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
