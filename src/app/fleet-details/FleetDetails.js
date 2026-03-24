@@ -1490,7 +1490,7 @@ onClick={closeOverlay}
                                   {key}:
                                   <div className="bullet-list">
                                     {displayValue.map((item, i) => (
-                                      <div key={i} className="bullet-item">
+                                      <div key={i} className="fleet-bullet-item">
                                         • {item}
                                       </div>
                                     ))}

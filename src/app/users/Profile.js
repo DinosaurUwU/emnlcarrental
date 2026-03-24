@@ -9,6 +9,7 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import "./Profile.css";
 import { MdMoreVert, MdClose, MdWarning, MdCheckCircle } from "react-icons/md";
+import { FiX } from "react-icons/fi";
 
 const Profile = ({ openBooking }) => {
   const pathname = usePathname();
@@ -1200,7 +1201,7 @@ const Profile = ({ openBooking }) => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -1215,28 +1216,55 @@ const Profile = ({ openBooking }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+<button
+  className="close-btn"
+  type="button"
+   onClick={() => setShowDetailsOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
             <h3 style={{ color:"var(--accent-txt)"}} className="confirm-header">RENTAL DETAILS</h3>
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
 
-            <div className="profile-overlay-badge-row">
-              {typeof selectedBooking?.status === "string" && (
-                <div
-                  className={`profile-overlay-status-badge status-${selectedBooking?.status.toLowerCase()}`}
-                >
-                  {selectedBooking?.status}
-                </div>
-              )}
 
-              {selectedBooking?.reservation === true && (
-                <div className="profile-overlay-reserved-badge">
-                  Reserved Booking
+
+                            <div className="profile-overlay-badge-row">
+                  {typeof selectedBooking?.status === "string" && (
+                    <span
+                      className={`profile-overlay-status-badge status-${selectedBooking.status.toLowerCase()}`}
+                    >
+                      {selectedBooking.status}
+                    </span>
+                  )}
+
+                  {selectedBooking?.reservation === true && (
+                    <div className="profile-overlay-reserved-badge">
+                      Reserved Booking
+                    </div>
+                  )}
+
+                  <span
+                    className={`profile-overlay-status-badge status-${
+                      selectedBooking?.paid === true
+                        ? "paid"
+                        : selectedBooking?.balanceDue === 0
+                        ? "pending"
+                        : "unpaid"
+                    }`}
+                  >
+                    {selectedBooking?.paid === true
+                      ? "Paid"
+                      : selectedBooking?.balanceDue === 0
+                      ? "Pending for Marking as Paid"
+                      : "Unpaid"}
+                  </span>
+
                 </div>
-              )}
-            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -1917,7 +1945,7 @@ const Profile = ({ openBooking }) => {
           {showEditProfileOverlay && (
             <div className="admin-booking-confirm-overlay">
               <div className="admin-booking-confirm-container">
-                <button
+                {/* <button
                   className="close-btn"
                   type="button"
                   onClick={() => setShowEditProfileOverlay(false)}
@@ -1932,7 +1960,15 @@ const Profile = ({ openBooking }) => {
                     alt="Close"
                     className="close-icon close-icon-1"
                   />
-                </button>
+                </button> */}
+
+                <button
+  className="close-btn"
+  type="button"
+   onClick={() => setShowEditProfileOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
                 <h3 className="confirm-header">EDIT PROFILE</h3>
                 <p className="confirm-text">
@@ -3369,7 +3405,7 @@ const Profile = ({ openBooking }) => {
           {showHistoryDetailsOverlay && selectedHistoryRental && (
             <div className="admin-booking-confirm-overlay">
               <div className="admin-booking-confirm-container">
-                <button
+                {/* <button
                   className="close-btn"
                   type="button"
                   onClick={() => setShowHistoryDetailsOverlay(false)}
@@ -3384,7 +3420,15 @@ const Profile = ({ openBooking }) => {
                     alt="Close"
                     className="close-icon close-icon-1"
                   />
-                </button>
+                </button> */}
+
+                                <button
+  className="close-btn"
+  type="button"
+   onClick={() => setShowHistoryDetailsOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
                 <h3
                   className="confirm-header"
@@ -3989,9 +4033,17 @@ const Profile = ({ openBooking }) => {
           className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}
         >
           <div className="message-overlay-content">
-            <button className="close-btn" onClick={closeMessageOverlay}>
+            {/* <button className="close-btn" onClick={closeMessageOverlay}>
               ×
-            </button>
+            </button> */}
+
+                                            <button
+  className="close-btn"
+  type="button"
+   onClick={closeMessageOverlay}
+>
+  <FiX className="close-icon" />
+</button>
 
             <div className="overlay-header">
               <img
@@ -4127,7 +4179,7 @@ const Profile = ({ openBooking }) => {
       {showLinkAccountOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowLinkAccountOverlay(false)}
@@ -4142,7 +4194,15 @@ const Profile = ({ openBooking }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+                                                        <button
+  className="close-btn"
+  type="button"
+    onClick={() => setShowLinkAccountOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
 
             <h3 className="confirm-header">LINK ACCOUNT</h3>
             <p className="confirm-text">
@@ -4205,7 +4265,7 @@ const Profile = ({ openBooking }) => {
       {showEmailPasswordOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => {
@@ -4224,7 +4284,19 @@ const Profile = ({ openBooking }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+             <button
+  className="close-btn"
+  type="button"
+    onClick={() => {
+                setShowEmailPasswordOverlay(false);
+                setEmailPasswordInput("");
+                setShowPassword(false); // reset on close
+              }}
+>
+  <FiX className="close-icon" />
+</button>
 
             <h3 className="confirm-header">LINK EMAIL &amp; PASSWORD</h3>
             <p className="confirm-text">
@@ -4310,7 +4382,7 @@ const Profile = ({ openBooking }) => {
       {showUnlinkBlockedOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowUnlinkBlockedOverlay(false)}
@@ -4325,7 +4397,18 @@ const Profile = ({ openBooking }) => {
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+
+             <button
+  className="close-btn"
+  type="button"
+ onClick={() => setShowUnlinkBlockedOverlay(false)}
+>
+  <FiX className="close-icon" />
+</button>
+
+
             <h3 className="confirm-header">CANNOT UNLINK</h3>
             <p
               className="confirm-text"

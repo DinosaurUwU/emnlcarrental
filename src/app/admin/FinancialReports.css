@@ -616,6 +616,30 @@
   border-color: #ec7373;
 }
 
+.grid-row:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.grid-row:hover .grid-cell {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Make autofill rows more distinct on hover */
+.grid-row[data-autofill="true"] {
+  background-color: #ffd900;
+}
+
+/* Make autofill rows more distinct on hover */
+.grid-row[data-autofill="true"]:hover {
+  background-color: rgba(7, 106, 9, 0.1);
+}
+
+.grid-row[data-autofill="true"]:hover .grid-cell {
+  background-color: rgba(7, 106, 9, 0.1);
+}
+
+
 .row-number-header {
   text-align: center;
   font-weight: bold;

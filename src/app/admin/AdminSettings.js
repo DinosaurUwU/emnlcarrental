@@ -5,7 +5,7 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
-import { MdClose, MdEdit, MdDelete } from "react-icons/md";
+import { MdClose, MdEdit, MdDelete, MdPerson, MdDirectionsWalk } from "react-icons/md";
 import { FiX } from "react-icons/fi";
 
 const AdminSettings = ({ subSection = "overview" }) => {
@@ -2464,7 +2464,15 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         style={{ cursor: "pointer" }}
                       >
                         <td>
-                          {client.isRegistered ? "👤" : "🚶"} {client.name}
+<span style={{ marginRight: "5px", color: "var(--accent-txt)" }}>
+  {client.isRegistered 
+    ? <MdPerson className="client-icon" /> 
+    : <MdDirectionsWalk className="client-icon" />
+  }
+</span>
+
+
+{client.name}
                         </td>
                         <td>{client.contact || "N/A"}</td>
                         <td>{client.email}</td>
@@ -5023,6 +5031,29 @@ const AdminSettings = ({ subSection = "overview" }) => {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
+
+
+                        <div className="confirm-flag-row">
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
+                >
+                  {selectedBooking.status}
+                </div>
+              )}
+
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
+            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">

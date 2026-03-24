@@ -7,7 +7,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import "./InfoPage.css";
 import { MdEmail, MdPhone, MdChat, MdClose } from "react-icons/md";
-
+import { FiX } from "react-icons/fi";
 import {
   FaQuestion,
   FaCar,
@@ -2390,7 +2390,7 @@ const isDark = userTheme === "dark" ||
       {showHistoryOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowHistoryOverlay(false)}
@@ -2405,7 +2405,15 @@ const isDark = userTheme === "dark" ||
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+                          <button
+                            className="close-btn"
+                            type="button"
+                                           onClick={() => setShowHistoryOverlay(false)}
+                          >
+                            <FiX className="close-icon" />
+                          </button>
 
             <div className="history-header-actions">
               <button
@@ -2512,7 +2520,7 @@ const isDark = userTheme === "dark" ||
       {showTermsHistoryOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowTermsHistoryOverlay(false)}
@@ -2527,7 +2535,15 @@ const isDark = userTheme === "dark" ||
                 alt="Close"
                 className="close-icon close-icon-1"
               />
-            </button>
+            </button> */}
+
+                          <button
+                            className="close-btn"
+                            type="button"
+                            onClick={() => setShowTermsHistoryOverlay(false)}
+                          >
+                            <FiX className="close-icon" />
+                          </button>
 
             <div className="history-header-actions">
               <button

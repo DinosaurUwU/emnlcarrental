@@ -1248,6 +1248,31 @@
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
 
+/* Disabled input styling for dark mode */
+.admin-booking-confirm-container .select-box input:disabled,
+.admin-booking-confirm-container .select-box select:disabled {
+  opacity: 0.7;
+  color: var(--txt-comp);
+  background-color: rgba(128, 128, 128, 0.2);
+  border-color: var(--accent-txt);
+  cursor: not-allowed;
+}
+
+/* For date and time inputs specifically */
+.admin-booking-confirm-container input[type="date"]:disabled,
+.admin-booking-confirm-container input[type="time"]:disabled {
+  color: var(--txt-comp);
+  -webkit-text-fill-color: var(--txt-comp);
+  opacity: 0.8;
+}
+
+/* Make sure the text is visible */
+:root[data-color-mode="dark"] .admin-booking-confirm-container input:disabled {
+  color: #f1f1f1;
+  background-color: #333;
+}
+
+
 .available-units-column .select-container {
   display: flex;
   flex-direction: column;
@@ -1454,6 +1479,7 @@
   max-height: 200px;
   overflow-y: auto;
   display: block;
+  color: var(--txt-comp);
 }
 
 .payment-table th:first-child,
@@ -2615,6 +2641,7 @@
   font-size: 1.2rem;
   margin-right: 0.8rem;
   color: #721c24;
+  background-color: #f8d7da;
   cursor: pointer;
 }
 
@@ -2624,6 +2651,7 @@
   font-size: 1.2rem;
   margin-right: 0.8rem;
   color: var(--accent-txt);
+    background-color: #c8e6c9;
   cursor: pointer;
 }
 

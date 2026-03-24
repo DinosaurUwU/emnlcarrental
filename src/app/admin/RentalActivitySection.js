@@ -2495,11 +2495,9 @@ const hasReservedSource =
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
-            <div className="confirm-flag-row">
-              {selectedBooking?.reservation === true && (
-                <div className="confirm-reserved-flag">Reserved Booking</div>
-              )}
 
+
+                        <div className="confirm-flag-row">
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -2507,6 +2505,18 @@ const hasReservedSource =
                   {selectedBooking.status}
                 </div>
               )}
+
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
             </div>
 
             <div className="admin-confirm-details">

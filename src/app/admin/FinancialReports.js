@@ -2579,6 +2579,28 @@ const FinancialReports = () => {
               Detailed information about this rental.
             </p>
 
+                        <div className="confirm-flag-row">
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
+                >
+                  {selectedBooking.status}
+                </div>
+              )}
+
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
+            </div>
+
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
@@ -3877,19 +3899,18 @@ const FinancialReports = () => {
                               const originalIndex = item.originalIndex;
 
                               return (
-                                <div
-                                  key={`${monthIndex}-${item.key}`}
-                                  className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
-                                  style={{
-                                    cursor: row._isAutoFill
-                                      ? "pointer"
-                                      : "default",
-                                  }}
+<div
+  key={`${monthIndex}-${item.key}`}
+  className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
+  data-autofill={row[5]?._isAutoFill === true ? "true" : "false"}
+  style={{
+    cursor: row[5]?._isAutoFill ? "pointer" : "default",
+  }}
                                   onClick={() => {
-                                    if (row._isAutoFill) {
+                                    if (row[5]?._isAutoFill) {
                                       // Find in activeBookings (array)
                                       let booking = activeBookings.find(
-                                        (b) => b.id === row._bookingId,
+                                        (b) => b.id === row[5]?._bookingId,
                                       );
 
                                       // If not found, search in completedBookingsAnalytics (object)
@@ -3912,7 +3933,7 @@ const FinancialReports = () => {
                                               ][key];
                                             if (dateData.bookings) {
                                               booking = dateData.bookings.find(
-                                                (b) => b.id === row._bookingId,
+                                                (b) => b.id === row[5]?._bookingId,
                                               );
                                               if (booking) {
                                                 break;
@@ -3937,9 +3958,9 @@ const FinancialReports = () => {
                                       checked={selectedRows.includes(
                                         `${monthIndex}-${item.key}`,
                                       )}
-                                      disabled={row._isAutoFill === true}
+                                      disabled={row[5]?._isAutoFill === true}
                                       style={
-                                        row._isAutoFill
+                                        row[5]?._isAutoFill
                                           ? {
                                               cursor: "not-allowed",
                                               opacity: 1,
@@ -3962,8 +3983,7 @@ const FinancialReports = () => {
                                   {Array.isArray(row) ? (
                                     row.slice(0, 5).map((cell, colIndex) => {
                                       // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
-                                      const isAutoFill =
-                                        row._isAutoFill === true;
+                                     const isAutoFill = row[5]?._isAutoFill === true;
 
                                       // UNIT column (dropdown from unitData)
                                       if (colIndex === 0) {

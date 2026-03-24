@@ -332,7 +332,7 @@
 }
 
 .info-page h3 {
-  color: var(--txt-comp);
+  color: var(--accent-txt);
   margin-bottom: 0;
 }
 
@@ -345,7 +345,7 @@
 }
 
 .infopage-p {
-  color: var(--txt-comp);
+  color: var(--supporting-txt);
   padding-left: 1.5rem;
   margin-top: 0;
   margin-bottom: 1rem;
@@ -722,6 +722,8 @@
   position: relative;
   padding-left: 1rem;
   margin-left: 2.5rem;
+    font-size: 14px !important;
+  line-height: 2;
 }
 
 /* Custom bullet marker */
@@ -730,8 +732,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-size: 18px;
-  line-height: 1;
+
   color: var(--txt-comp);
 }
 

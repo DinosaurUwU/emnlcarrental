@@ -540,54 +540,117 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     generatePerDayCalendarEvents,
   ]);
 
+  // //OVERLAY STOP BACKGROUND CLICK AND SCROLL
+  // useEffect(() => {
+  //   const handleClickOrScroll = (e) => {
+  //     if (
+  //       !showUnitDetailsOverlay &&
+  //       !showDetailsOverlay &&
+  //       !showCalendarEventsOverlay
+  //     ) {
+  //       setShowSettings(false);
+  //     }
+  //   };
+
+  //   const preventTouch = (e) => {
+  //     if (
+  //       showUnitDetailsOverlay ||
+  //       showDetailsOverlay ||
+  //       showCalendarEventsOverlay
+  //     ) {
+  //       e.preventDefault();
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOrScroll);
+  //   document.addEventListener("scroll", handleClickOrScroll);
+  //   document.addEventListener("touchmove", preventTouch, { passive: false });
+
+  //   if (
+  //     showUnitDetailsOverlay ||
+  //     showDetailsOverlay ||
+  //     showCalendarEventsOverlay
+  //   ) {
+  //     scrollYRef.current = window.scrollY;
+  //     document.body.classList.add("modal-open");
+  //     document.body.style.top = `-${scrollYRef.current}px`;
+  //   } else {
+  //     document.body.classList.remove("modal-open");
+  //     document.body.style.top = "";
+  //     window.scrollTo(0, scrollYRef.current);
+  //   }
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOrScroll);
+  //     document.removeEventListener("scroll", handleClickOrScroll);
+  //     document.removeEventListener("touchmove", preventTouch);
+  //     document.body.classList.remove("modal-open");
+  //     document.body.style.top = "";
+  //   };
+  // }, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
+
+
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
-  useEffect(() => {
-    const handleClickOrScroll = (e) => {
-      if (
-        !showUnitDetailsOverlay &&
-        !showDetailsOverlay &&
-        !showCalendarEventsOverlay
-      ) {
-        setShowSettings(false);
-      }
-    };
+useEffect(() => {
+  const handleClickOrScroll = (e) => {
+    if (
+      !showUnitDetailsOverlay &&
+      !showDetailsOverlay &&
+      !showCalendarEventsOverlay
+    ) {
+      setShowSettings(false);
+    }
+  };
 
-    const preventTouch = (e) => {
-      if (
-        showUnitDetailsOverlay ||
-        showDetailsOverlay ||
-        showCalendarEventsOverlay
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOrScroll);
-    document.addEventListener("scroll", handleClickOrScroll);
-    document.addEventListener("touchmove", preventTouch, { passive: false });
-
+  const preventTouch = (e) => {
     if (
       showUnitDetailsOverlay ||
       showDetailsOverlay ||
       showCalendarEventsOverlay
     ) {
+      e.preventDefault();
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOrScroll);
+  document.addEventListener("scroll", handleClickOrScroll);
+  document.addEventListener("touchmove", preventTouch, { passive: false });
+
+  // Check if ANY overlay is currently open
+  const anyOverlayOpen = showUnitDetailsOverlay || showDetailsOverlay || showCalendarEventsOverlay;
+
+  if (anyOverlayOpen) {
+    // Only save scroll position if not already saved
+    if (!scrollYRef.current || scrollYRef.current === 0) {
       scrollYRef.current = window.scrollY;
-      document.body.classList.add("modal-open");
-      document.body.style.top = `-${scrollYRef.current}px`;
-    } else {
+    }
+    document.body.classList.add("modal-open");
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${scrollYRef.current}px`;
+  } else {
+    // Only restore if we previously saved a scroll position
+    if (scrollYRef.current > 0) {
       document.body.classList.remove("modal-open");
+      document.body.style.position = "";
+      document.body.style.width = "";
       document.body.style.top = "";
       window.scrollTo(0, scrollYRef.current);
+      scrollYRef.current = 0; // Reset for next time
     }
+  }
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOrScroll);
-      document.removeEventListener("scroll", handleClickOrScroll);
-      document.removeEventListener("touchmove", preventTouch);
-      document.body.classList.remove("modal-open");
-      document.body.style.top = "";
-    };
-  }, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOrScroll);
+    document.removeEventListener("scroll", handleClickOrScroll);
+    document.removeEventListener("touchmove", preventTouch);
+    document.body.classList.remove("modal-open");
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+  };
+}, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
+
 
   // PRELOAD UNITS TABLE IMAGES
   useEffect(() => {
@@ -4268,6 +4331,28 @@ legend: {
               Detailed information about this rental.
             </p>
 
+                                    <div className="confirm-flag-row">
+              {typeof selectedBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
+                >
+                  {selectedBooking.status}
+                </div>
+              )}
+
+              {selectedBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
+            </div>
+
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
                 <div className="admin-confirm-details">
@@ -4796,6 +4881,28 @@ legend: {
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
+
+                        <div className="confirm-flag-row">
+              {typeof selectedCalendarBooking?.status === "string" && (
+                <div
+                  className={`confirm-status-flag status-${selectedCalendarBooking.status.toLowerCase()}`}
+                >
+                  {selectedCalendarBooking.status}
+                </div>
+              )}
+
+              {selectedCalendarBooking?.reservation === true && (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              )}
+
+              <div
+                className={`confirm-status-flag status-${
+                  selectedCalendarBooking?.paid === true ? "paid" : "unpaid"
+                }`}
+              >
+                {selectedCalendarBooking?.paid === true ? "Paid" : "Unpaid"}
+              </div>
+            </div>
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
