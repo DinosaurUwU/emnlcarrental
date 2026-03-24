@@ -16,31 +16,55 @@ const prepareDocumentData = (bookingData) => {
   // Extra hours charge
   const extraHoursCharge = bookingData.extraHourCharge || (extraHours * extension);
 
-  // ========== RENTAL DURATION DISPLAY ==========
-  // If 1 day: "1 Day / 24 hrs"
-  // If more than 1 day: "X Days / Y hrs" (Y = total hours minus full days * 24)
-  let durationDisplay = "";
-  if (rentalDays === 1) {
-    durationDisplay = "1 Day / 24 hrs";
+  // Driving price calculation
+  const drivingPrice = bookingData.drivingPrice || 0;
+  
+  // Pickup price calculation  
+  const pickupPrice = bookingData.pickupPrice || 0;
+
+  // Total price (from booking)
+  const totalPrice = bookingData.totalPrice || 0;
+
+  // ========== PAYMENT ENTRIES ==========
+  const paymentEntries = bookingData.paymentEntries || [];
+  
+  // Calculate total paid from entries
+  const totalPaid = paymentEntries.reduce((sum, entry) => {
+    return sum + Number(entry.amount || 0);
+  }, 0);
+  
+  // Calculate balance due
+  const balanceDue = Math.max(0, totalPrice - totalPaid);
+
+  // Format payment entries for template
+  const paymentEntriesFormatted = paymentEntries.map((entry) => ({
+    paymentDate: entry.date || "",
+    paymentMop: entry.mop || "",
+    paymentPop: entry.pop || "",
+    paymentAmount: entry.amount ? `₱${Number(entry.amount).toLocaleString()}` : "₱0",
+  }));
+
+  // ========== DURATION DISPLAY ==========
+  let totalHours = 0;
+  if (bookingData.rentalDuration?.actualSeconds) {
+    totalHours = Math.floor(bookingData.rentalDuration.actualSeconds / 3600);
   } else {
-    // For multi-day, calculate remaining hours
-    const totalHours = Math.floor((bookingData.rentalDuration?.actualSeconds || 0) / 3600);
-    const remainingHours = totalHours - ((rentalDays - 1) * 24);
-    durationDisplay = `${rentalDays} Days / ${remainingHours} hrs`;
+    totalHours = rentalDays * 24 + extraHours;
   }
-
-  // Add extra hours if present
+  
+  // THIS IS THE KEY FIX - make rentalDuration a string, not an object
+  const rentalDurationDisplay = `${rentalDays} Day / ${totalHours} hrs`;
+  
+  // ========== DURATION CALCULATION ==========
+  const dailyRate = bookingData.discountedRate || 0;
+  
+  let durationCalculation = "";
   if (extraHours > 0) {
-    durationDisplay += `\n(+${extraHours} hrs)`;
+    durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} Days + ${extraHours} hrs) ₱${totalPrice.toLocaleString()}`;
+  } else {
+    durationCalculation = `(${dailyRate.toLocaleString()} x ${rentalDays} Days) ₱${totalPrice.toLocaleString()}`;
   }
 
-  // ========== PRICE DISPLAY ==========
-  // If no extra hours: "₱1500"
-  // If has extra hours: "₱1500 | +2hrs"
-  let priceDisplay = bookingData.discountedRate ? `₱${bookingData.discountedRate.toLocaleString()}` : "₱0";
-  if (extraHours > 0 && extraHoursCharge > 0) {
-    priceDisplay += ` | +${extraHours}hrs`;
-  }
 
   return {
     // Customer info
@@ -67,22 +91,25 @@ const prepareDocumentData = (bookingData) => {
     location: bookingData.location?.toUpperCase() || "",
     purpose: bookingData.purpose?.toUpperCase() || "",
 
-    // Pricing
+    // Pricing - INDIVIDUAL PRICES
     dailyRate: bookingData.discountedRate ? `₱${bookingData.discountedRate.toLocaleString()}` : "₱0",
-    totalPrice: bookingData.totalPrice ? `₱${bookingData.totalPrice.toLocaleString()}` : "₱0",
-    extraHours: extraHours,
-    extraHourCharge: extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
+    drivingPrice: drivingPrice > 0 ? `₱${drivingPrice.toLocaleString()}` : "₱0",
+    pickupPrice: pickupPrice > 0 ? `₱${pickupPrice.toLocaleString()}` : "₱0",
+    extraHoursCharge: extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
+    totalPrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0",
     billedDays: rentalDays,
 
-    // Duration & Price Display - for template
-    durationDisplay: durationDisplay,
-    priceDisplay: priceDisplay,
-    rentalDuration: {
-      days: rentalDays,
-      extraHours: extraHours,
-      isFlatRateSameDay: isFlatRateSameDay,
-      actualSeconds: bookingData.rentalDuration?.actualSeconds || 0,
-    },
+    // Payment Entries
+    hasPaymentEntries: paymentEntries.length > 0,
+    paymentEntries: paymentEntriesFormatted,
+    totalPaid: totalPaid > 0 ? `₱${totalPaid.toLocaleString()}` : "₱0",
+    balanceDue: balanceDue > 0 ? `₱${balanceDue.toLocaleString()}` : "₱0",
+
+    // Duration - as STRING for template
+    rentalDuration: rentalDurationDisplay,
+    durationDisplay: rentalDurationDisplay,
+    durationCalculation: durationCalculation,
+
 
     // Driving option
     drivingOption: bookingData.drivingOption || "",
@@ -91,7 +118,6 @@ const prepareDocumentData = (bookingData) => {
 };
 
 export const generateDocument = async (bookingData, documentType) => {
-  // documentType: "invoice" or "quotation"
   const templateName = documentType === "invoice" ? "invoice-template.docx" : "quotation-template.docx";
   const fileSuffix = documentType === "invoice" ? "Invoice" : "Quotation";
 
@@ -102,7 +128,6 @@ export const generateDocument = async (bookingData, documentType) => {
   const zip = new PizZip(arrayBuffer);
   const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-  // Set the data - docxtemplater ignores unused variables, so no problem!
   doc.setData(prepareDocumentData(bookingData));
 
   doc.render();
@@ -116,6 +141,5 @@ export const generateDocument = async (bookingData, documentType) => {
   saveAs(out, fileName);
 };
 
-// Convenience functions
 export const generateInvoicePDF = (bookingData) => generateDocument(bookingData, "invoice");
 export const generateQuotationPDF = (bookingData) => generateDocument(bookingData, "quotation");

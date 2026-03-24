@@ -9569,107 +9569,82 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
 
       {showMoreFor === "rental-actions" && (
         <div className="more-dropdown">
-                      <button
-                        type="button"
-                        className="rental-actions print-contract"
-                        disabled={!formData[selectedUnitId]?.firstName}
-                        onClick={() => {
-                          const unitForm = formData[selectedUnitId];
+          {(() => {
+            const unitForm = formData[selectedUnitId];
+            const selectedUnit = unitData.find((u) => u.id === selectedUnitId) || null;
+            if (!selectedUnit) return null;
 
-                          const selectedUnit =
-                            unitData.find((u) => u.id === selectedUnitId) ||
-                            null;
+            const duration = getRentalDuration(unitForm);
+            const rentalDays = unitForm.startDate === unitForm.endDate && duration?.diffHours < 24 ? 0 : duration?.diffDays || 0;
+            const billedDays = duration?.isFlatRateSameDay ? 1 : rentalDays;
+            const discountedRate = getDiscountedRate(selectedUnit, rentalDays);
+            const drivingPrice = getDrivingPrice(selectedUnit, unitForm.drivingOption);
+            const pickupPrice = getPickupPrice(selectedUnit, unitForm.pickupOption);
+            const extraHourCharge = duration?.isFlatRateSameDay || !duration?.extraHours ? 0 : duration.extraHours * selectedUnit.extension;
+            const total = billedDays * discountedRate + billedDays * drivingPrice + pickupPrice + extraHourCharge;
 
-                          if (!selectedUnit) {
-                            return null;
-                          }
+            const enrichedBooking = {
+              ...unitForm,
+              carName: selectedUnit.name,
+              plateNo: selectedUnit.plateNo,
+              totalPrice: total,
+              discountedRate,
+              extraHourCharge,
+              extension: selectedUnit.extension,
+              billedDays,
+              drivingPrice,
+              pickupPrice,
+              drivingOption: unitForm.drivingOption || "Self-Drive",    // ADD THIS
+              pickupOption: unitForm.pickupOption || "Pickup", 
+              paymentEntries: unitForm.paymentEntries || [],
+              rentalDuration: {
+                days: rentalDays,
+                extraHours: duration?.extraHours || 0,
+                isFlatRateSameDay: duration?.isFlatRateSameDay || false,
+                actualSeconds: duration?.actualSeconds || 0,
+              },
+            };
 
-                          const duration = getRentalDuration(unitForm);
+            return (
+              <>
+                <button
+                  type="button"
+                  className="rental-actions print-contract"
+                  disabled={!unitForm.firstName}
+                  onClick={() => generateFilledContract(enrichedBooking)}
+                >
+                  Print Contract
+                </button>
 
-                          const rentalDays =
-                            unitForm.startDate === unitForm.endDate &&
-                            duration?.diffHours < 24
-                              ? 0
-                              : duration?.diffDays || 0;
+                <button
+                  type="button"
+                  className="rental-actions dl-invoice"
+                  disabled={!unitForm.firstName}
+                  onClick={() => {
+                    generateInvoicePDF(enrichedBooking);
+                    setShowMoreFor(null);
+                  }}
+                >
+                  Download Invoice
+                </button>
 
-                          const billedDays = duration?.isFlatRateSameDay
-                            ? 1
-                            : rentalDays;
-
-                          const discountedRate = getDiscountedRate(
-                            selectedUnit,
-                            rentalDays,
-                          );
-                          const drivingPrice = getDrivingPrice(
-                            selectedUnit,
-                            unitForm.drivingOption,
-                          );
-                          const pickupPrice = getPickupPrice(
-                            selectedUnit,
-                            unitForm.pickupOption,
-                          );
-
-                          const extraHourCharge =
-                            duration?.isFlatRateSameDay || !duration?.extraHours
-                              ? 0
-                              : duration.extraHours * selectedUnit.extension;
-
-                          const total =
-                            billedDays * discountedRate +
-                            billedDays * drivingPrice +
-                            pickupPrice +
-                            extraHourCharge;
-
-                          const enrichedBooking = {
-                            ...unitForm,
-                            carName: selectedUnit.name,
-                            plateNo: selectedUnit.plateNo,
-                            totalPrice: total,
-                            discountedRate,
-                            extraHourCharge,
-                            billedDays,
-                            rentalDuration: {
-                              days: rentalDays,
-                              extraHours: duration?.extraHours || 0,
-                              isFlatRateSameDay:
-                                duration?.isFlatRateSameDay || false,
-                              actualSeconds: duration?.actualSeconds || 0,
-                            },
-                          };
-
-                          generateFilledContract(enrichedBooking);
-                        }}
-                      >
-                        Print Contract
-                      </button>
-
-                      <button
-            type="button"
-            className="rental-actions dl-invoice"
-            disabled={!formData[selectedUnitId]?.firstName}
-            onClick={() => {
-              // Add generateInvoicePDF function
-              generateInvoicePDF(enrichedBooking);
-              setShowMoreFor(null);
-            }}
-          >
-            Download Invoice
-          </button>
-
-          <button
-            type="button"
-            className="rental-actions dl-quotation"
-            disabled={!formData[selectedUnitId]?.firstName}
-            onClick={() => {
-              // Add generateQuotationPDF function
-              generateQuotationPDF(enrichedBooking);
-              setShowMoreFor(null);
-            }}
-          >
-            Download Quotation
-          </button>
+                <button
+                  type="button"
+                  className="rental-actions dl-quotation"
+                  disabled={!unitForm.firstName}
+                  onClick={() => {
+                    generateQuotationPDF(enrichedBooking);
+                    setShowMoreFor(null);
+                  }}
+                >
+                  Download Quotation
+                </button>
+              </>
+            );
+          })()}
         </div>
       )}
+
     </div>
 
                     </div>

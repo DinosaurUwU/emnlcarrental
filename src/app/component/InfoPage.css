@@ -724,6 +724,7 @@
   margin-left: 2.5rem;
     font-size: 14px !important;
   line-height: 2;
+    color: var(--txt-comp);
 }
 
 /* Custom bullet marker */
@@ -732,8 +733,6 @@
   position: absolute;
   left: 0;
   top: 0;
-
-  color: var(--txt-comp);
 }
 
 .privacy-section .extra-lines-item {

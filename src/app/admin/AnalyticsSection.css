@@ -2442,7 +2442,7 @@ border-collapse: collapse;
   width: 90vw;
   max-width: 1400px;
   max-height: 90vh;
-  background-color: white;
+  background-color: var(--page-bg);
   border-radius: 6px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
