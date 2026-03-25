@@ -11,13 +11,13 @@
   font-size: 2.5em;
   margin-bottom: 20px;
   margin-top: 0;
-  color: var(--page-bg);
+  color: var(--txt-comp);
 }
 
 .how-it-works p {
   font-size: 1.2em;
   margin-bottom: 40px;
-  color: var(--page-bg);
+  color: var(--txt-comp);
 }
 
 .steps {
@@ -63,10 +63,10 @@
   height: 100%;
       background: linear-gradient(
       to right,
-      color-mix(in srgb, var(--page-bg) 90%, transparent) 0%,
-      color-mix(in srgb, var(--page-bg) 80%, transparent) 25%,
-      color-mix(in srgb, var(--page-bg) 70%, transparent) 50%,
-      color-mix(in srgb, var(--page-bg) 60%, transparent) 90%,
+      color-mix(in srgb, var(--page-bg) 100%, transparent) 50%,
+      color-mix(in srgb, var(--page-bg) 80%, transparent) 70%,
+      color-mix(in srgb, var(--page-bg) 75%, transparent) 75%,
+      color-mix(in srgb, var(--page-bg) 70%, transparent) 80%,
       transparent 100%
     );
   /* background-color: linear-gradient(

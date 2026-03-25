@@ -118,7 +118,7 @@
   text-align: center;
   backdrop-filter: blur(5px);
   z-index: 2;
-  background-color: linear-gradient(
+  background: linear-gradient(
     to top,
     color-mix(in srgb, var(--accent-txt) 100%, transparent) 0%,
     color-mix(in srgb, var(--accent-txt) 100%, transparent) 45%,

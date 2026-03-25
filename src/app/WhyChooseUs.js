@@ -5,7 +5,7 @@ import "./WhyChooseUs.css";
 function WhyChooseUs() {
   const reasons = [
     {
-      img: "/assets/images/image1.png",
+      img: "/assets/images/exceptional.png",
       icon: "/assets/service.png",
       title: (
         <span className="title-span">
@@ -15,7 +15,7 @@ function WhyChooseUs() {
       desc: "At EMNL, we go the extra mile to ensure you have a seamless and enjoyable experience in Leyte, providing dedicated assistance every step of the way.",
     },
     {
-      img: "/assets/images/image2.jpg",
+      img: "/assets/images/fleet.png",
       icon: "/assets/quality.png",
       title: (
         <span className="title-span">
@@ -25,7 +25,7 @@ function WhyChooseUs() {
       desc: "Our Leyte fleet features the latest models, offering top-tier safety, comfort, and performance for travelers seeking reliability and style on the road.",
     },
     {
-      img: "/assets/images/image3.jpg",
+      img: "/assets/images/support.png",
       icon: "/assets/support.png",
       title: (
         <span className="title-span">
@@ -35,7 +35,7 @@ function WhyChooseUs() {
       desc: "Here at EMNL, our dedicated team provides 24/7 assistance for all your rental needs, ensuring help is always available whenever you need it most.",
     },
     {
-      img: "/assets/images/image3.jpg",
+      img: "/assets/images/local-expertise.png",
       icon: "/assets/location.png",
       title: (
         <span className="title-span">

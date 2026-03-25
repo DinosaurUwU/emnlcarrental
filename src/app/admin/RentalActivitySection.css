@@ -640,14 +640,17 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   padding: 6px;
   z-index: 10;
-
-    width: 100px !important;
-     min-width: 150px !important;
+  width: 100%;
+  width: 150px !important;
 }
 
 .more-dropdown .action-button {
-  display: block;
-width: 100%;
+  width: 100%;
+  margin: 4px 0 !important;
+}
+
+.more-dropdown .rental-actions{
+  width: 100%;
   margin: 4px 0;
 }
 
@@ -2496,8 +2499,7 @@ width: 100%;
 }
 
 .rental-actions-container .rental-actions {
-      width: 100px !important;
-     min-width: 150px !important;
+  
   flex: 1;
   padding: 6px 10px;
   margin: 2px 0 2px 0;
@@ -2522,6 +2524,55 @@ width: 100%;
   border: 2px solid #da5234;
   box-shadow: 0 0 10px #da5234;
   color: white;
+}
+
+/* Disabled button styles */
+.rental-actions-container .rental-actions:disabled {
+  background-color: #cccccc !important;
+    border: 2px solid #888888;
+  color: #888888 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  box-shadow: none !important;
+}
+
+.rental-actions-container .rental-actions.print-contract:disabled {
+  background-color: #cccccc !important;
+  border: 2px solid #888888;
+  color: #888888 !important;
+}
+
+.rental-actions-container .rental-actions.dl-invoice:disabled {
+  background-color: #cccccc !important;
+  border: 2px solid #888888;
+  color: #888888 !important;
+}
+
+.rental-actions-container .rental-actions.dl-quotation:disabled {
+  background-color: #cccccc !important;
+  border: 2px solid #888888;
+  color: #888888 !important;
+}
+
+.rental-actions-container .rental-actions.start-rental:disabled {
+  background-color: #cccccc !important;
+  border: 2px solid #888888;
+  color: #888888 !important;
+}
+
+.rental-actions-container .rental-actions.clear-all:disabled {
+  background-color: #cccccc !important;
+  border: 2px solid #888888;
+  color: #888888 !important;
+}
+
+/* More dropdown - Invoice button in ongoing rentals */
+.ongoing-unit-action-buttons .action-button.dl-invoice {
+  background-color: rgba(255, 178, 71, 0.15);
+}
+
+.ongoing-unit-action-buttons .action-button.dl-invoice:hover {
+  background-color: #ffb347;
 }
 
 

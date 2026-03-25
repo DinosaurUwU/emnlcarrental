@@ -8371,6 +8371,25 @@ const hasReservedSource =
                                   >
                                     Edit
                                   </button>
+                                  <button
+  className="action-button dl-invoice"
+  onClick={() => {
+    const bookingData = {
+      ...rental,
+      rentalDuration: {
+        days: rental.billedDays || 1,
+        extraHours: 0,
+        isFlatRateSameDay: false,
+        actualSeconds: 0,
+      },
+    };
+    generateInvoicePDF(bookingData);
+    setShowMoreFor(null);
+  }}
+>
+  Download Invoice
+</button>
+
                                 </div>
                               )}
                             </div>
