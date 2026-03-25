@@ -2568,11 +2568,15 @@
 
 /* More dropdown - Invoice button in ongoing rentals */
 .ongoing-unit-action-buttons .action-button.dl-invoice {
-  background-color: rgba(255, 178, 71, 0.15);
+  background-color: rgba(218, 83, 52, 0.15);
+  border: 2px solid #da5234;
+  color: #da5234;
 }
 
 .ongoing-unit-action-buttons .action-button.dl-invoice:hover {
-  background-color: #ffb347;
+  background-color: #da5234;
+  box-shadow: 0 0 10px #da5234;
+  color: white;
 }
 
 

@@ -9886,6 +9886,25 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                         >
                           Call
                         </button>
+
+                        <button
+  className="action-button dl-invoice"
+  onClick={() => {
+    const bookingData = {
+      ...booking,
+      rentalDuration: {
+        days: booking.billedDays || 1,
+        extraHours: 0,
+        isFlatRateSameDay: false,
+        actualSeconds: 0,
+      },
+    };
+    generateInvoicePDF(bookingData);
+  }}
+>
+  Download Invoice
+</button>
+
                       </div>
                     </div>
                   </div>
