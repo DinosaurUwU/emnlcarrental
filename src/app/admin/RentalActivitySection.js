@@ -9609,8 +9609,16 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
               },
             };
 
-            // Check if any field has data
-const hasAnyData = Object.values(unitForm).some(val => val && val !== "");
+
+            // Check if ALL required fields are filled
+const requiredFields = [
+  'firstName', 'surname', 'email', 'contact', 'address',
+  'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
+];
+
+const hasAnyData = requiredFields.every(field => unitForm[field]);
+
+
 
 
             return (
