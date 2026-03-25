@@ -87,7 +87,7 @@ const CompanyMap = () => {
           <div className="social-links">
             {/* Facebook */}
             <a
-              href="https://www.facebook.com/EMNLOrmoc"
+              href="https://www.facebook.com/EMNLCarRentalOrmoc"
               target="_blank"
               rel="noopener noreferrer"
             >

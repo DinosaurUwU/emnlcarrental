@@ -9574,7 +9574,7 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
       {showMoreFor === "rental-actions" && (
         <div className="more-dropdown">
           {(() => {
-            const unitForm = formData[selectedUnitId];
+            const unitForm = formData[selectedUnitId] || {};;
             const selectedUnit = unitData.find((u) => u.id === selectedUnitId) || null;
             if (!selectedUnit) return null;
 
@@ -9609,12 +9609,16 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
               },
             };
 
+            // Check if any field has data
+const hasAnyData = Object.values(unitForm).some(val => val && val !== "");
+
+
             return (
               <>
                 <button
                   type="button"
                   className="rental-actions print-contract"
-                  disabled={!unitForm.firstName}
+                  disabled={!hasAnyData}
                   onClick={() => generateFilledContract(enrichedBooking)}
                 >
                   Print Contract
@@ -9623,7 +9627,7 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                 <button
                   type="button"
                   className="rental-actions dl-invoice"
-                  disabled={!unitForm.firstName}
+                  disabled={!hasAnyData}
                   onClick={() => {
                     generateInvoicePDF(enrichedBooking);
                     setShowMoreFor(null);
@@ -9635,7 +9639,7 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                 <button
                   type="button"
                   className="rental-actions dl-quotation"
-                  disabled={!unitForm.firstName}
+                  disabled={!hasAnyData}
                   onClick={() => {
                     generateQuotationPDF(enrichedBooking);
                     setShowMoreFor(null);

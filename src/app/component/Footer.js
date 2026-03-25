@@ -83,7 +83,7 @@ const Footer = () => {
   <h3 className="footer-section-h3">Follow Us</h3>
   <div className="social-icons">
     <a
-      href="https://www.facebook.com/EMNLOrmoc"
+      href="https://www.facebook.com/EMNLCarRentalOrmoc"
       target="_blank"
       rel="noopener noreferrer"
       className="social-icon"
