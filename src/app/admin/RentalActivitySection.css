@@ -35,15 +35,21 @@
 .rental-columns.single-ongoing,
 .rental-columns.single-available {
   gap: 0;
+  align-items: center !important;
+  flex-direction: column !important
 }
 
 .rental-columns.single-ongoing .ongoing-rent-column,
 .rental-columns.single-available .available-units-column {
-  flex: 1;
+      max-width: 800px !important;
+    width: 100% !important;
 }
 
 .balance-due-column.single-balance {
   margin-top: 0 !important;
+  min-height: 450px !important;
+
+    height: 100% !important;
 }
 
 .ongoing-rent-column {
@@ -771,7 +777,9 @@ width: 100%;
 
 .balance-due-column {
   box-sizing: border-box;
-  max-width: 600px;
+  max-width: 800px;
+
+
   width: 100%;
   margin: 1.5rem auto 0 auto;
   background-color: rgba(40, 167, 70, 0.2);
@@ -796,7 +804,7 @@ width: 100%;
   flex-direction: column;
   gap: 1rem;
   padding: 0px 10px 10px 10px;
-  max-height: 500px;
+  max-height: 650px;
   overflow-y: auto;
   min-height: 0;
 }
@@ -888,10 +896,18 @@ width: 100%;
 
   .rental-columns {
     flex-direction: column;
+    align-items: center;
   }
 
   .ongoing-rent-column {
     min-height: 450px !important;
+    max-width: 800px !important;
+    width: 100% !important;
+  }
+
+  .available-units-column{
+        max-width: 800px !important;
+    width: 100% !important;
   }
 }
 
