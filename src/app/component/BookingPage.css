@@ -273,6 +273,43 @@
   padding-top: 20px;
 }
 
+.download-quotation-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 123, 255, 0.1);
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #007bff;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.download-quotation-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+.download-quotation-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+.download-quotation-btn:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+
+
 .fixed-header {
   font-family: "Montserrat", sans-serif;
   font-weight: 700;

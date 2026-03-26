@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FiX } from "react-icons/fi";
+import { TbFileDownload } from "react-icons/tb";
+import { generateQuotationPDF } from "../admin/generateDocument";
 import { useUser } from "../lib/UserContext";
 import { useRouter } from "next/navigation";
 import { Timestamp } from "firebase/firestore";
@@ -2048,6 +2050,40 @@ onClick={() => setShowBookingConfirmOverlay(false)}
 >
   <FiX className="close-icon" />
 </button>
+
+{(() => {
+  const requiredFields = [
+    'firstName', 'surname', 'email', 'contact', 'address',
+    'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
+  ];
+  
+  const formData = editingBookingData || formData;
+
+  // Check if field exists AND has a value (not empty string)
+  const hasAnyData = formData ? requiredFields.every(field => formData[field] && formData[field] !== "") : false;
+  
+  console.log("formData:", formData);
+  console.log("hasAnyData:", hasAnyData);
+  
+  return (
+    <button
+      className="download-quotation-btn"
+      type="button"
+      title="Download Quotation"
+      onClick={() => {
+        if (hasAnyData) {
+          generateQuotationPDF(formData);
+        }
+      }}
+      disabled={!hasAnyData}
+    >
+      <TbFileDownload />
+    </button>
+  );
+})()}
+
+
+
 
         <h2
           style={{
