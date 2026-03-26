@@ -2052,19 +2052,23 @@ onClick={() => setShowBookingConfirmOverlay(false)}
 </button>
 
 {(() => {
-const requiredFields = [
-  'firstName', 'surname', 'email', 'contact', 'address',
-  'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
-];
-
-
- const formData = bookingPreviewData; 
-
-  // Check if field exists AND has a value (not empty string)
-  const hasAnyData = formData ? requiredFields.every(field => formData[field] && formData[field] !== "") : false;
+  const formData = editingBookingData || formData;
   
-  console.log("formData:", formData);
-  console.log("hasAnyData:", hasAnyData);
+  // Map formData field names to what the PDF expects
+  const mappedData = {
+    ...formData,
+    contact: formData.contactNo,  // Map contactNo to contact for PDF
+    drivingOption: formData.driveType || formData.drivingOption,
+    pickupOption: formData.dropOffType || formData.pickupOption,
+  };
+  
+  // Check fields using formData field names (not PDF field names)
+  const requiredFields = [
+    'firstName', 'surname', 'email', 'contactNo', 'address',
+    'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
+  ];
+  
+  const hasAnyData = requiredFields.every(field => formData[field] && formData[field] !== "");
   
   return (
     <button
@@ -2073,7 +2077,7 @@ const requiredFields = [
       title="Download Quotation"
       onClick={() => {
         if (hasAnyData) {
-          generateQuotationPDF(formData);
+          generateQuotationPDF(mappedData);  // Use mapped data for PDF
         }
       }}
       disabled={!hasAnyData}
@@ -2082,6 +2086,7 @@ const requiredFields = [
     </button>
   );
 })()}
+
 
 
 
