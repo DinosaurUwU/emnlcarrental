@@ -2068,6 +2068,7 @@ onClick={() => setShowBookingConfirmOverlay(false)}
     'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
   ];
   
+  
   const hasAnyData = requiredFields.every(field => formData[field] && formData[field] !== "");
   
   return (
