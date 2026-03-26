@@ -2051,25 +2051,55 @@ onClick={() => setShowBookingConfirmOverlay(false)}
   <FiX className="close-icon" />
 </button>
 
+
+
+
+
+
 {(() => {
   const formData = editingBookingData || formData;
   
-  // Map formData field names to what the PDF expects
+  // Debug: check what's actually in formData
+  console.log("formData check:", {
+    firstName: formData?.firstName,
+    surname: formData?.surname,
+    email: formData?.email,
+    contact: formData?.contact,
+    address: formData?.address,
+    location: formData?.location,
+    purpose: formData?.purpose,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    driveType,
+    dropOffType,
+  });
+  
+  // Simple check - just check formData plus date/time
+  const hasCustomerInfo = formData?.firstName && formData?.surname && formData?.email;
+  const hasDates = startDate && endDate;
+  const hasTimes = startTime && endTime;
+  const hasLocation = formData?.location && formData?.purpose;
+  
+  const hasAnyData = hasCustomerInfo && hasDates && hasTimes && hasLocation;
+  
+  console.log("hasAnyData:", hasAnyData);
+  
   const mappedData = {
     ...formData,
-    contact: formData.contactNo,  // Map contactNo to contact for PDF
-    drivingOption: formData.driveType || formData.drivingOption,
-    pickupOption: formData.dropOffType || formData.pickupOption,
+    contact: formData?.contact,
+    drivingOption: driveType,
+    pickupOption: dropOffType,
+    startDate, endDate, startTime, endTime,
+    // Add these for PDF
+    billedDays: 1,
+    discountedRate: 3500,
+    drivingPrice: 0,
+    pickupPrice: 0,
+    totalPrice: 3500,
+    rentalDuration: { days: 1, extraHours: 0, isFlatRateSameDay: false, actualSeconds: 86400 },
   };
-  
-  // Check fields using formData field names (not PDF field names)
-  const requiredFields = [
-    'firstName', 'surname', 'email', 'contactNo', 'address',
-    'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
-  ];
-  
-  
-  const hasAnyData = requiredFields.every(field => formData[field] && formData[field] !== "");
   
   return (
     <button
@@ -2077,8 +2107,9 @@ onClick={() => setShowBookingConfirmOverlay(false)}
       type="button"
       title="Download Quotation"
       onClick={() => {
+        console.log("Button clicked, hasAnyData:", hasAnyData);
         if (hasAnyData) {
-          generateQuotationPDF(mappedData);  // Use mapped data for PDF
+          generateQuotationPDF(mappedData);
         }
       }}
       disabled={!hasAnyData}
@@ -2087,6 +2118,8 @@ onClick={() => setShowBookingConfirmOverlay(false)}
     </button>
   );
 })()}
+
+
 
 
 
