@@ -2052,12 +2052,13 @@ onClick={() => setShowBookingConfirmOverlay(false)}
 </button>
 
 {(() => {
-  const requiredFields = [
-    'firstName', 'surname', 'email', 'contact', 'address',
-    'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
-  ];
-  
-  const formData = editingBookingData || formData;
+const requiredFields = [
+  'firstName', 'surname', 'email', 'contact', 'address',
+  'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
+];
+
+
+ const formData = bookingPreviewData; 
 
   // Check if field exists AND has a value (not empty string)
   const hasAnyData = formData ? requiredFields.every(field => formData[field] && formData[field] !== "") : false;
