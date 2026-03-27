@@ -743,6 +743,16 @@ body.modal-open {
   background-color: #f7f7f7;
 }
 
+.conversation-chat-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.conversation-chat-body::-webkit-scrollbar-thumb {
+  background-color: var(--accent-txt);
+  border-radius: 5px;
+}
+
+
 .conversation-chat-row {
   display: flex;
   margin-bottom: 8px;
