@@ -5631,10 +5631,22 @@ Please review this request in the admin panel and proceed with approval or rejec
       if (!adminDocSnap.exists()) throw new Error("Admin UID not found");
 
       const adminUid = adminDocSnap.data().adminUid;
-      const userId = booking.createdBy;
+      // const userId = booking.createdBy;
 
-      const originalBookingId = booking.bookingUid;
-      const newBookingId = booking.bookingUid;
+      // const originalBookingId = booking.bookingUid;
+      // const newBookingId = booking.bookingUid;
+
+      const userId = booking.createdBy || booking.userId || booking.uid;
+      const originalBookingId = booking.bookingUid || booking.id;
+      const newBookingId = booking.bookingUid || booking.id;
+
+      if (!userId) {
+        throw new Error("Missing user ID in booking request.");
+      }
+
+      if (!originalBookingId || !newBookingId) {
+        throw new Error("Missing booking ID in booking request.");
+      }
 
       const userActiveRef = doc(
         db,

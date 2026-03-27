@@ -2683,16 +2683,33 @@ const Profile = ({ openBooking }) => {
                         rental.totalDurationInSeconds * 1000,
                     );
 
-                    const isActive = rental.status === "Active";
-                    // const hasStarted = isActive && now >= startTimestamp;
-                    // const currentTimeLeftInSeconds = isActive
-                    //   ? Math.floor((endTimestamp - now) / 1000)
-                    //   : rental.totalDurationInSeconds;
+                                        const rentalStatus = String(
+                      rental.status || "",
+                    ).toLowerCase();
+                    const isLockedRental =
+                      rentalStatus === "active" || rentalStatus === "pending";
+                    const isActive = rentalStatus === "active";
 
                     const hasStarted = now >= startTimestamp;
                     const currentTimeLeftInSeconds = hasStarted
                       ? Math.max(Math.floor((endTimestamp - now) / 1000), 0)
                       : rental.totalDurationInSeconds;
+
+                                          const displayStatus =
+                      rentalStatus === "pending" && hasStarted
+                        ? "Active"
+                        : rental.status;
+
+                    // const isActive = rental.status === "Active";
+                    // // const hasStarted = isActive && now >= startTimestamp;
+                    // // const currentTimeLeftInSeconds = isActive
+                    // //   ? Math.floor((endTimestamp - now) / 1000)
+                    // //   : rental.totalDurationInSeconds;
+
+                    // const hasStarted = now >= startTimestamp;
+                    // const currentTimeLeftInSeconds = hasStarted
+                    //   ? Math.max(Math.floor((endTimestamp - now) / 1000), 0)
+                    //   : rental.totalDurationInSeconds;
 
                     return (
                       <div key={rental.id} className="ongoing-unit-card">
@@ -2798,12 +2815,18 @@ const Profile = ({ openBooking }) => {
                             );
                           })()}
                         </div>
-
+{/* 
                         <div className="profile-status-row">
                           <span
                             className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
                           >
                             {rental.status}
+                          </span> */}
+                           <div className="profile-status-row">
+                          <span
+                            className={`ongoing-unit-status-badge ${String(displayStatus || "").toLowerCase()}`}
+                          >
+                            {displayStatus}
                           </span>
 
                           {rental.reservation === true && (
@@ -2847,7 +2870,31 @@ const Profile = ({ openBooking }) => {
                             {formatTime(currentTimeLeftInSeconds)}
                           </span>
 
-                          {!isActive && (
+                          {/* {!isActive && (
+                            <div className="ongoing-unit-action-buttons">
+                              <button
+                                className="action-button finish"
+                                onClick={() => {
+                                  setBookingToEdit(rental);
+                                  setShowEditBookingConfirm(true);
+                                  console.log("Edit request:", rental);
+                                }}
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                className="action-button reserve"
+                                onClick={() => {
+                                  setBookingToCancel(rental);
+                                  setShowCancelBookingConfirm(true);
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )} */}
+                                                    {!isLockedRental && (
                             <div className="ongoing-unit-action-buttons">
                               <button
                                 className="action-button finish"
