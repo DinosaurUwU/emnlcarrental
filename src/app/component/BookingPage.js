@@ -2057,17 +2057,17 @@ onClick={() => setShowBookingConfirmOverlay(false)}
 
 
 {(() => {
-  const formData = editingBookingData || formData;
+  const actualFormData = editingBookingData || formData;
   
   // Debug: check what's actually in formData
   console.log("formData check:", {
-    firstName: formData?.firstName,
-    surname: formData?.surname,
-    email: formData?.email,
-    contact: formData?.contact,
-    address: formData?.address,
-    location: formData?.location,
-    purpose: formData?.purpose,
+    firstName: actualFormData?.firstName,
+    surname: actualFormData?.surname,
+    email: actualFormData?.email,
+    contact: actualFormData?.contact,
+    address: actualFormData?.address,
+    location: actualFormData?.location,
+    purpose: actualFormData?.purpose,
     startDate,
     endDate,
     startTime,
@@ -2076,20 +2076,20 @@ onClick={() => setShowBookingConfirmOverlay(false)}
     dropOffType,
   });
   
-  
+
   // Simple check - just check formData plus date/time
-  const hasCustomerInfo = formData?.firstName && formData?.surname && formData?.email;
+  const hasCustomerInfo = actualFormData?.firstName && actualFormData?.surname && actualFormData?.email;
   const hasDates = startDate && endDate;
   const hasTimes = startTime && endTime;
-  const hasLocation = formData?.location && formData?.purpose;
+  const hasLocation = actualFormData?.location && actualFormData?.purpose;
   
   const hasAnyData = hasCustomerInfo && hasDates && hasTimes && hasLocation;
   
   console.log("hasAnyData:", hasAnyData);
   
   const mappedData = {
-    ...formData,
-    contact: formData?.contact,
+    ...actualFormData,
+    contact: actualFormData?.contact,
     drivingOption: driveType,
     pickupOption: dropOffType,
     startDate, endDate, startTime, endTime,
