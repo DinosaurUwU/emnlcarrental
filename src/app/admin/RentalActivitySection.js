@@ -9964,8 +9964,9 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                         style={
                           booking.paid !== true && booking.balanceDue === 0
                             ? {
-                                backgroundColor: "#ffc107",
-                                color: "#1f1f1f",
+                                backgroundColor: "rgba(255, 193, 7, 0.25)",
+                                color: "#ffc107",
+                                border: "1px solid #ffc107",
                               }
                             : undefined
                         }

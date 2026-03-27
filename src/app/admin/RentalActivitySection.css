@@ -214,7 +214,7 @@
   background-color: var(--page-bg);
   border-radius: 10px;
   margin-top: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0px 10px rgba(var(--shadow-base), 0.08);
   flex-shrink: 0;
   transition: all 0.5s ease;
 }
@@ -510,33 +510,47 @@
 }
 
 .ongoing-unit-status-badge.pending {
-  background-color: #ffc107;
+  color: #ffc107;
+  border: 2px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.25);
 }
 
 .ongoing-unit-status-badge.active {
-  background-color: var(--accent-bg);
+  color: #28a745;
+  border: 2px solid #28a745;
+  background-color: rgba(40, 167, 70, 0.25);
 }
 
 .ongoing-unit-status-badge.rejected {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .ongoing-unit-status-badge.paid {
-  background-color: #28a745;
+  color: #24c97c;
+  border: 2px solid #24c97c;
+  background-color: rgba(36, 201, 124, 0.25);
 }
 
 .ongoing-unit-status-badge.unpaid {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .ongoing-unit-status-badge.reserved-booking {
   left: 90px;
-  background-color: #6c757d;
+    color: #6f42c1;
+  border: 2px solid #6f42c1;
+  background-color: rgba(110, 66, 193, 0.25);
 }
 
 .ongoing-unit-status-badge.reservation-conflict {
   left: 243px;
-  background-color: #dc3545;
+    color: #dc3545;
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .edit-unit-status-badge {
@@ -563,7 +577,9 @@
 
 .request-reserved-badge {
   left: 65px;
-  background-color: #6c757d;
+      color: #6f42c1;
+  border: 1px solid #6f42c1;
+  background-color: rgba(110, 66, 193, 0.25);
   pointer-events: none;
 }
 
@@ -1037,8 +1053,9 @@
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--txt-comp);
-  background-color: #6c757d;
+      color: #6f42c1;
+  border: 1px solid #6f42c1;
+  background-color: rgba(110, 66, 193, 0.25);
   border-radius: 5px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -1636,8 +1653,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  color: #fff;
-  background-color: #6c757d;
+      color: #6f42c1;
+  border: 1px solid #6f42c1;
+  background-color: rgba(110, 66, 193, 0.25);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -1653,38 +1671,48 @@
   display: inline-block;
   margin: 0 0 10px;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .confirm-status-flag.status-pending {
-  background-color: #ffc107;
-  color: #1f1f1f;
+color: #ffc107;
+border: 1px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.25);
 }
 
 .confirm-status-flag.status-active {
-  background-color: #198754;
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: rgba(40, 167, 70, 0.25);
 }
 
 .confirm-status-flag.status-rejected {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .confirm-status-flag.status-completed {
-  background-color: #28a745;
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: rgba(40, 167, 70, 0.25);
 }
 
 .confirm-status-flag.status-paid {
-  background-color: #28a745;
+  color: #24c97c;
+  border: 1px solid #24c97c;
+  background-color: rgba(36, 201, 124, 0.25);
 }
 
 .confirm-status-flag.status-unpaid {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .admin-confirm-scroll-container {

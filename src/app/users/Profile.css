@@ -1680,24 +1680,26 @@ margin-bottom: 6px;
   position: absolute;
   top: 8px;
   left: 8px;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 14px;
   font-weight: bold;
   color: white;
-  border-radius: 3px;
+  border-radius: 5px;
   z-index: 10;
 }
 
 .history-payment-badge.paid {
-  background-color: #198754;
+  background-color: #24c97c;
 }
 
 .history-payment-badge.pending {
+
+
   background-color: #ffc107;
-  color: #000;
 }
 
 .history-payment-badge.unpaid {
+
   background-color: #dc3545;
 }
 
@@ -1776,8 +1778,7 @@ margin-bottom: 6px;
 .profile-overlay-status-badge {
   display: inline-block;
   padding: 5px 12px;
-  border-radius: 999px;
-  color: #fff;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -1785,28 +1786,39 @@ margin-bottom: 6px;
 }
 
 .profile-overlay-status-badge.status-pending {
-  background-color: #ffc107;
-  color: #1f1f1f;
+  color: #ffc107;
+  border: 1px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.25);
 }
 
 .profile-overlay-status-badge.status-active {
-  background-color: #198754;
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: rgba(40, 167, 70, 0.25);
 }
 
 .profile-overlay-status-badge.status-completed {
-  background-color: #28a745;
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: rgba(40, 167, 70, 0.25);
 }
 
 .profile-overlay-status-badge.status-rejected {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 .profile-overlay-status-badge.status-paid {
-  background-color: #198754;
+  color: #24c97c;
+  border: 1px solid #24c97c;
+  background-color: rgba(36, 201, 124, 0.25);
 }
 
 .profile-overlay-status-badge.status-unpaid {
-  background-color: #dc3545;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: rgba(220, 53, 70, 0.25);
 }
 
 @media (max-width: 1100px) {
