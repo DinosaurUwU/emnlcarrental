@@ -1536,46 +1536,65 @@ const Profile = ({ openBooking }) => {
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-                      <span className="summary-value">
-                        ({selectedBooking.billedDays} Day /{" "}
-                        {selectedBooking.rentalDuration.isFlatRateSameDay ? (
-                          <>
-                            for{" "}
-                            <span style={{ color: "#dc3545" }}>
-                              {Math.floor(
-                                selectedBooking.rentalDuration.actualSeconds /
-                                  3600,
+<span className="summary-value">
+                        {(() => {
+                          const actualSeconds =
+                            selectedBooking.rentalDuration?.actualSeconds || 0;
+                          const displayExtraHours =
+                            actualSeconds > 0
+                              ? Math.max(
+                                  0,
+                                  Math.round(actualSeconds / 3600) -
+                                    selectedBooking.billedDays * 24,
+                                )
+                              : (selectedBooking.rentalDuration?.extraHours ??
+                                  selectedBooking.rentalDuration?.extraHour ??
+                                  0);
+
+                          const displayExtraHourCharge =
+                            selectedBooking.extraHourCharge ??
+                            displayExtraHours *
+                              (selectedBooking.extension ?? 0);
+
+                          return (
+                            <>
+                              ({selectedBooking.billedDays} Day /{" "}
+                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                                <>
+                                  for{" "}
+                                  <span style={{ color: "#dc3545" }}>
+                                    {Math.floor(
+                                      selectedBooking.rentalDuration.actualSeconds /
+                                        3600,
+                                    )}
+                                    {Math.floor(
+                                      selectedBooking.rentalDuration.actualSeconds /
+                                        3600,
+                                    ) === 1
+                                      ? "hr"
+                                      : "hrs"}
+                                  </span>{" "}
+                                  only
+                                </>
+                              ) : (
+                                `${24 * selectedBooking.billedDays} hrs`
                               )}
-                              {Math.floor(
-                                selectedBooking.rentalDuration.actualSeconds /
-                                  3600,
-                              ) === 1
-                                ? "hr"
-                                : "hrs"}
-                            </span>{" "}
-                            only
-                          </>
-                        ) : (
-                          `${24 * selectedBooking.billedDays} hrs`
-                        )}
-                        )
-                        <br />
-                        {selectedBooking.rentalDuration.extraHours > 0 && (
-                          <>
-                            (
-                            <span style={{ color: "#dc3545" }}>
-                              +{selectedBooking.rentalDuration.extraHours}{" "}
-                              {selectedBooking.rentalDuration.extraHours === 1
-                                ? "hr"
-                                : "hrs"}{" "}
-                              | ₱
-                              {(
-                                selectedBooking.extraHourCharge || 0
-                              ).toLocaleString()}
-                            </span>
-                            )
-                          </>
-                        )}
+                              )
+                              <br />
+                              {displayExtraHours > 0 && (
+                                <>
+                                  (
+                                  <span style={{ color: "#dc3545" }}>
+                                    +{displayExtraHours}{" "}
+                                    {displayExtraHours === 1 ? "hr" : "hrs"} | ₱
+                                    {displayExtraHourCharge.toLocaleString()}
+                                  </span>
+                                  )
+                                </>
+                              )}
+                            </>
+                          );
+                        })()}
                       </span>
                     </li>
 
@@ -3744,53 +3763,72 @@ const Profile = ({ openBooking }) => {
                           <strong className="summary-label">
                             Rental Duration:
                           </strong>
-                          <span className="summary-value">
-                            ({selectedHistoryRental.billedDays} Day /{" "}
-                            {selectedHistoryRental.rentalDuration
-                              .isFlatRateSameDay ? (
-                              <>
-                                for{" "}
-                                <span style={{ color: "#dc3545" }}>
-                                  {Math.floor(
-                                    selectedHistoryRental.rentalDuration
-                                      .actualSeconds / 3600,
-                                  )}
-                                  {Math.floor(
-                                    selectedHistoryRental.rentalDuration
-                                      .actualSeconds / 3600,
-                                  ) === 1
-                                    ? "hr"
-                                    : "hrs"}
-                                </span>{" "}
-                                only
-                              </>
-                            ) : (
-                              `${24 * selectedHistoryRental.billedDays} hrs`
-                            )}
-                            )
-                            <br />
-                            {selectedHistoryRental.rentalDuration.extraHours >
-                              0 && (
-                              <>
-                                (
-                                <span style={{ color: "#dc3545" }}>
-                                  +
-                                  {
-                                    selectedHistoryRental.rentalDuration
-                                      .extraHours
-                                  }{" "}
+<span className="summary-value">
+                            {(() => {
+                              const actualSeconds =
+                                selectedHistoryRental.rentalDuration
+                                  ?.actualSeconds || 0;
+                              const displayExtraHours =
+                                actualSeconds > 0
+                                  ? Math.max(
+                                      0,
+                                      Math.round(actualSeconds / 3600) -
+                                        selectedHistoryRental.billedDays * 24,
+                                    )
+                                  : (selectedHistoryRental.rentalDuration
+                                      ?.extraHours ??
+                                      selectedHistoryRental.rentalDuration
+                                        ?.extraHour ??
+                                      0);
+
+                              const displayExtraHourCharge =
+                                selectedHistoryRental.extraHourCharge ??
+                                displayExtraHours *
+                                  (selectedHistoryRental.extension ?? 0);
+
+                              return (
+                                <>
+                                  ({selectedHistoryRental.billedDays} Day /{" "}
                                   {selectedHistoryRental.rentalDuration
-                                    .extraHours === 1
-                                    ? "hr"
-                                    : "hrs"}{" "}
-                                  | ₱
-                                  {(
-                                    selectedHistoryRental.extraHourCharge || 0
-                                  ).toLocaleString()}
-                                </span>
-                                )
-                              </>
-                            )}
+                                    .isFlatRateSameDay ? (
+                                    <>
+                                      for{" "}
+                                      <span style={{ color: "#dc3545" }}>
+                                        {Math.floor(
+                                          selectedHistoryRental.rentalDuration
+                                            .actualSeconds / 3600,
+                                        )}
+                                        {Math.floor(
+                                          selectedHistoryRental.rentalDuration
+                                            .actualSeconds / 3600,
+                                        ) === 1
+                                          ? "hr"
+                                          : "hrs"}
+                                      </span>{" "}
+                                      only
+                                    </>
+                                  ) : (
+                                    `${24 * selectedHistoryRental.billedDays} hrs`
+                                  )}
+                                  )
+                                  <br />
+                                  {displayExtraHours > 0 && (
+                                    <>
+                                      (
+                                      <span style={{ color: "#dc3545" }}>
+                                        +{displayExtraHours}{" "}
+                                        {displayExtraHours === 1
+                                          ? "hr"
+                                          : "hrs"}{" "}
+                                        | ₱
+                                        {displayExtraHourCharge.toLocaleString()}
+                                      </span>
+                                      )
+                                    </>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </span>
                         </li>
 

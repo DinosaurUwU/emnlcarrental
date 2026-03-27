@@ -8450,23 +8450,73 @@ const hasReservedSource =
                                     Edit
                                   </button>
                                   <button
-  className="action-button dl-invoice"
-  onClick={() => {
-    const bookingData = {
-      ...rental,
-      rentalDuration: {
-        days: rental.billedDays || 1,
-        extraHours: 0,
-        isFlatRateSameDay: false,
-        actualSeconds: 0,
-      },
-    };
-    generateInvoicePDF(bookingData);
-    setShowMoreFor(null);
-  }}
->
-  Download Invoice
-</button>
+                                    className="action-button dl-invoice"
+                                    onClick={() => {
+                                      const start =
+                                        rental.startDate && rental.startTime
+                                          ? new Date(
+                                              `${rental.startDate}T${rental.startTime}`,
+                                            )
+                                          : null;
+                                      const end =
+                                        rental.endDate && rental.endTime
+                                          ? new Date(
+                                              `${rental.endDate}T${rental.endTime}`,
+                                            )
+                                          : null;
+
+                                      const actualSeconds =
+                                        rental.rentalDuration?.actualSeconds ??
+                                        (start &&
+                                        end &&
+                                        !Number.isNaN(start.getTime()) &&
+                                        !Number.isNaN(end.getTime())
+                                          ? Math.max(
+                                              0,
+                                              Math.floor(
+                                                (end.getTime() -
+                                                  start.getTime()) /
+                                                  1000,
+                                              ),
+                                            )
+                                          : 0);
+
+                                      const billedDays =
+                                        rental.billedDays ??
+                                        rental.rentalDuration?.days ??
+                                        1;
+
+                                      const extraHours =
+                                        rental.rentalDuration?.extraHour ??
+                                        rental.rentalDuration?.extraHours ??
+                                        (actualSeconds > 0
+                                          ? Math.max(
+                                              0,
+                                              Math.round(actualSeconds / 3600) -
+                                                billedDays * 24,
+                                            )
+                                          : 0);
+
+                                      const bookingData = {
+                                        ...rental,
+                                        rentalDuration: {
+                                          ...rental.rentalDuration,
+                                          days: billedDays,
+                                          extraHour: extraHours,
+                                          extraHours,
+                                          isFlatRateSameDay:
+                                            rental.rentalDuration
+                                              ?.isFlatRateSameDay || false,
+                                          actualSeconds,
+                                        },
+                                      };
+
+                                      generateInvoicePDF(bookingData);
+                                      setShowMoreFor(null);
+                                    }}
+                                  >
+                                    Download Invoice
+                                  </button>
 
                                 </div>
                               )}
@@ -9965,23 +10015,71 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                           Call
                         </button>
 
-                        <button
-  className="action-button dl-invoice"
-  onClick={() => {
-    const bookingData = {
-      ...booking,
-      rentalDuration: {
-        days: booking.billedDays || 1,
-        extraHours: 0,
-        isFlatRateSameDay: false,
-        actualSeconds: 0,
-      },
-    };
-    generateInvoicePDF(bookingData);
-  }}
->
-  Download Invoice
-</button>
+<button
+                          className="action-button dl-invoice"
+                          onClick={() => {
+                            const start =
+                              booking.startDate && booking.startTime
+                                ? new Date(
+                                    `${booking.startDate}T${booking.startTime}`,
+                                  )
+                                : null;
+                            const end =
+                              booking.endDate && booking.endTime
+                                ? new Date(
+                                    `${booking.endDate}T${booking.endTime}`,
+                                  )
+                                : null;
+
+                            const actualSeconds =
+                              booking.rentalDuration?.actualSeconds ??
+                              (start &&
+                              end &&
+                              !Number.isNaN(start.getTime()) &&
+                              !Number.isNaN(end.getTime())
+                                ? Math.max(
+                                    0,
+                                    Math.floor(
+                                      (end.getTime() - start.getTime()) / 1000,
+                                    ),
+                                  )
+                                : 0);
+
+                            const billedDays =
+                              booking.billedDays ??
+                              booking.rentalDuration?.days ??
+                              1;
+
+                            const extraHours =
+                              booking.rentalDuration?.extraHour ??
+                              booking.rentalDuration?.extraHours ??
+                              (actualSeconds > 0
+                                ? Math.max(
+                                    0,
+                                    Math.round(actualSeconds / 3600) -
+                                      billedDays * 24,
+                                  )
+                                : 0);
+
+                            const bookingData = {
+                              ...booking,
+                              rentalDuration: {
+                                ...booking.rentalDuration,
+                                days: billedDays,
+                                extraHour: extraHours,
+                                extraHours,
+                                isFlatRateSameDay:
+                                  booking.rentalDuration?.isFlatRateSameDay ||
+                                  false,
+                                actualSeconds,
+                              },
+                            };
+
+                            generateInvoicePDF(bookingData);
+                          }}
+                        >
+                          Download Invoice
+                        </button>
 
                       </div>
                     </div>

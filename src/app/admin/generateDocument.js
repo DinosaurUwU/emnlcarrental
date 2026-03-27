@@ -50,8 +50,10 @@ const rentalDays =
       : 0);
 
   const extraHoursFromDuration =
-    bookingData.rentalDuration?.extraHours ??
     bookingData.rentalDuration?.extraHour ??
+    bookingData.rentalDuration?.extraHours ??
+    bookingData.extraHour ??
+    bookingData.extraHours ??
     0;
 
   const extraHoursFromActualSeconds =
@@ -94,10 +96,10 @@ const rentalDays =
       : 0;
 
   const extraHours = Math.max(
-    extraHoursFromDuration,
-    extraHoursFromActualSeconds,
-    extraHoursFromPricing,
-    extraHoursFromCharge,
+    Number(extraHoursFromDuration) || 0,
+    Number(extraHoursFromActualSeconds) || 0,
+    Number(extraHoursFromPricing) || 0,
+    Number(extraHoursFromCharge) || 0,
   );
 
   // Keep real zero values instead of falling back
@@ -289,8 +291,8 @@ const rentalDays =
     extraHoursCharge:
       extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
     extraHours:
-      extraHours > 0
-        ? `+${extraHours} ${extraHours === 1 ? "hr" : "hrs"}`
+      Number(extraHours) > 0
+        ? `+${Number(extraHours)} ${Number(extraHours) === 1 ? "hr" : "hrs"}`
         : "0",
     totalPrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "₱0",
     billedDays: rentalDays,
