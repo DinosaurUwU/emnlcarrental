@@ -2057,14 +2057,16 @@ onClick={() => setShowBookingConfirmOverlay(false)}
 
 
 {(() => {
-  const actualFormData = editingBookingData || formData;
-  
-  // Debug: check what's actually in formData
+  const actualFormData = {
+    ...(editingBookingData || {}),
+    ...formData,
+  };
+
   console.log("formData check:", {
     firstName: actualFormData?.firstName,
     surname: actualFormData?.surname,
     email: actualFormData?.email,
-    contact: actualFormData?.contact,
+    contactNo: actualFormData?.contactNo,
     address: actualFormData?.address,
     location: actualFormData?.location,
     purpose: actualFormData?.purpose,
@@ -2075,31 +2077,105 @@ onClick={() => setShowBookingConfirmOverlay(false)}
     driveType,
     dropOffType,
   });
-  
 
-  // Simple check - just check formData plus date/time
-  const hasCustomerInfo = actualFormData?.firstName && actualFormData?.surname && actualFormData?.email;
+const selectedUnit =
+    allUnitData.find((unit) => unit.id === selectedCarId) ||
+    unitData.find((unit) => unit.id === selectedCarId) ||
+    (actualFormData?.carId
+      ? allUnitData.find((unit) => unit.id === actualFormData.carId) ||
+        unitData.find((unit) => unit.id === actualFormData.carId)
+      : null) ||
+    (actualFormData?.carName
+      ? allUnitData.find((unit) => unit.name === actualFormData.carName) ||
+        unitData.find((unit) => unit.name === actualFormData.carName)
+      : null);
+
+  const hasSelectedUnit = Boolean(selectedUnit);
+  const hasCustomerInfo =
+    actualFormData?.firstName &&
+     actualFormData?.middleName &&
+    actualFormData?.surname &&
+        actualFormData?.occupation &&
+    actualFormData?.address &&
+    actualFormData?.email;
   const hasDates = startDate && endDate;
   const hasTimes = startTime && endTime;
   const hasLocation = actualFormData?.location && actualFormData?.purpose;
-  
-  const hasAnyData = hasCustomerInfo && hasDates && hasTimes && hasLocation;
-  
+  const hasAnyData =
+    hasSelectedUnit && hasCustomerInfo && hasDates && hasTimes && hasLocation;
+
   console.log("hasAnyData:", hasAnyData);
-  
+
+  const start = startDate && startTime ? new Date(`${startDate}T${startTime}`) : null;
+  const end = endDate && endTime ? new Date(`${endDate}T${endTime}`) : null;
+  const totalHours =
+    start && end ? (end.getTime() - start.getTime()) / (1000 * 60 * 60) : 0;
+  const totalDurationInSeconds =
+    start && end ? Math.floor((end.getTime() - start.getTime()) / 1000) : 0;
+
+  const isFlatRateSameDay =
+    start &&
+    end &&
+    startDate === endDate &&
+    totalHours < 24;
+
+  const rentalDays =
+    start && end && !isFlatRateSameDay ? Math.floor(totalHours / 24) : 0;
+  const extraHours =
+    start && end && !isFlatRateSameDay ? Math.round(totalHours % 24) : 0;
+
+  const discountedRate = selectedUnit
+    ? getDiscountedRate(selectedUnit, rentalDays || 1)
+    : 0;
+
+  const billedDays = isFlatRateSameDay
+    ? 1
+    : rentalDays + (extraHours >= 24 ? 1 : 0);
+
+  const drivingPrice =
+    driveType === "With Driver" ? selectedUnit?.driverRate || 0 : 0;
+  const pickupPrice =
+    dropOffType === "Drop-off" ? selectedUnit?.deliveryFee || 0 : 0;
+  const extraHourCharge =
+    isFlatRateSameDay || !selectedUnit
+      ? 0
+      : extraHours * (selectedUnit.extension || 0);
+
+  const baseRentalCharge = isFlatRateSameDay
+    ? discountedRate
+    : rentalDays * discountedRate;
+
+  const drivingCharge = drivingPrice * (rentalDays || 1);
+  const computedTotal =
+    baseRentalCharge + drivingCharge + pickupPrice + extraHourCharge;
+
   const mappedData = {
     ...actualFormData,
-    contact: actualFormData?.contact,
+    imageId: selectedUnit?.imageId || actualFormData?.imageId || "N/A",
+    plateNo: selectedUnit?.plateNo || actualFormData?.plateNo || "N/A",
+    carType: selectedUnit?.carType || actualFormData?.carType || "N/A",
+    carName: selectedUnit?.name || actualFormData?.carName || "",
+    extension: selectedUnit?.extension || actualFormData?.extension || 0,
+    contact: actualFormData?.contactNo || actualFormData?.contact,
     drivingOption: driveType,
     pickupOption: dropOffType,
-    startDate, endDate, startTime, endTime,
-    // Add these for PDF
-    billedDays: 1,
-    discountedRate: 3500,
-    drivingPrice: 0,
-    pickupPrice: 0,
-    totalPrice: 3500,
-    rentalDuration: { days: 1, extraHours: 0, isFlatRateSameDay: false, actualSeconds: 86400 },
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    billedDays,
+    discountedRate,
+    drivingPrice,
+    pickupPrice,
+    extraHourCharge,
+    totalPrice: computedTotal,
+    rentalDuration: {
+      days: rentalDays,
+      extraHour: extraHours,
+      extraHours,
+      isFlatRateSameDay,
+      actualSeconds: totalDurationInSeconds,
+    },
   };
   
   return (
