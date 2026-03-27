@@ -24,6 +24,9 @@ const Profile = ({ openBooking }) => {
     deleteUserAccount,
     userMessages,
     sentMessages,
+    messageFetchLimit,
+    loadMoreUserMessages,
+    hasMoreUserMessages,
     markMessageAsRead,
     deleteMessage,
     sendMessage,
@@ -101,6 +104,7 @@ const Profile = ({ openBooking }) => {
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
 
   useEffect(() => {
     if (!licenseGalleryRef.current) return;
@@ -925,9 +929,27 @@ const Profile = ({ openBooking }) => {
       );
   }, [userMessages]);
 
-  const processedNotifications = useMemo(() => {
-    return notificationMessages.slice(0, 50);
+  // const processedNotifications = useMemo(() => {
+  //   return notificationMessages.slice(0, 50);
+  // }, [notificationMessages]);
+
+    const processedNotifications = useMemo(() => {
+    return notificationMessages;
   }, [notificationMessages]);
+
+  const canLoadMoreNotifications = useMemo(() => {
+    return hasMoreUserMessages && !isLoadingMoreMessages;
+  }, [hasMoreUserMessages, isLoadingMoreMessages]);
+
+  useEffect(() => {
+    if (!isLoadingMoreMessages) return;
+
+    const timer = setTimeout(() => {
+      setIsLoadingMoreMessages(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [notificationMessages.length, isLoadingMoreMessages]);
 
   const chatMessages = useMemo(() => {
     const inboxChat = (userMessages || [])
@@ -2292,11 +2314,16 @@ const Profile = ({ openBooking }) => {
 
         {/* Messages Section */}
         <div className="user-messages-container">
-          <h3>
+                    <h3>
+            {activeTab === "notifications"
+              ? `Notifications (${notificationMessages.length}${canLoadMoreNotifications ? "+" : ""})`
+              : `Messages (${adminConversation?.messages?.length || 0})`}
+          </h3>
+          {/* <h3>
             {activeTab === "notifications"
               ? `Notifications (${notificationMessages.length})`
               : `Messages (${adminConversation?.messages?.length || 0})`}
-          </h3>
+          </h3> */}
 
           <div className="message-tabs-controls">
             <div className="message-tabs">
@@ -2574,6 +2601,25 @@ const Profile = ({ openBooking }) => {
                 ) : (
                   <p className="empty-message">No notifications yet.</p>
                 )}
+                {processedNotifications.length > 0 &&
+                  (isLoadingMoreMessages ? (
+                    <div className="messages-spinner-wrap">
+                      <div className="messages-spinner" />
+                    </div>
+                  ) : (
+                    canLoadMoreNotifications && (
+                      <button
+                        type="button"
+                        className="load-more-messages-btn"
+                        onClick={() => {
+                          setIsLoadingMoreMessages(true);
+                          loadMoreUserMessages();
+                        }}
+                      >
+                        Load 10 More Messages
+                      </button>
+                    )
+                  ))}
               </>
             )}
 

@@ -47,6 +47,7 @@ import {
   where,
   deleteField,
   increment,
+  limit,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { useRouter } from "next/navigation";
@@ -104,6 +105,8 @@ export const UserProvider = ({ children }) => {
   const [originalUser, setOriginalUser] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
   const [sentMessages, setSentMessages] = useState([]);
+  const [messageFetchLimit, setMessageFetchLimit] = useState(10);
+  const [hasMoreUserMessages, setHasMoreUserMessages] = useState(true);
   const [adminUid, setAdminUid] = useState(null);
   const [adminName, setAdminName] = useState(null);
   const [adminEmail, setAdminEmail] = useState(null);
@@ -3975,6 +3978,52 @@ Please review the resubmitted request and continue processing.`,
     }
   };
 
+    // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
+    useEffect(() => {
+    if (!user?.uid) return;
+
+    const inboxQuery = query(
+      collection(db, "users", user.uid, "receivedMessages"),
+      orderBy("startTimestamp", "desc"),
+      limit(messageFetchLimit),
+    );
+
+    const sentQuery = query(
+      collection(db, "users", user.uid, "sentMessages"),
+      orderBy("startTimestamp", "desc"),
+      limit(messageFetchLimit),
+    );
+
+    const unsubscribeInbox = onSnapshot(inboxQuery, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUserMessages(msgs);
+      setHasMoreUserMessages(snapshot.size >= messageFetchLimit);
+      console.log("📨 Real-time inbox:", msgs);
+    });
+
+    const unsubscribeSent = onSnapshot(sentQuery, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSentMessages(msgs);
+      console.log("📨 Real-time sentbox:", msgs);
+    });
+
+    return () => {
+      unsubscribeInbox();
+      unsubscribeSent();
+    };
+  }, [user?.uid, messageFetchLimit]);
+
+  const loadMoreUserMessages = () => {
+    if (!hasMoreUserMessages) return;
+    setMessageFetchLimit((prev) => prev + 10);
+  };
+
   // const sendGuestContactMessage = async ({
   //   name,
   //   email,
@@ -4058,38 +4107,38 @@ Please review the resubmitted request and continue processing.`,
   // };
 
   // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
-  useEffect(() => {
-    if (!user?.uid) return;
+  // useEffect(() => {
+  //   if (!user?.uid) return;
 
-    const messagesRef = collection(db, "users", user.uid, "receivedMessages");
-    const sentRef = collection(db, "users", user.uid, "sentMessages");
+  //   const messagesRef = collection(db, "users", user.uid, "receivedMessages");
+  //   const sentRef = collection(db, "users", user.uid, "sentMessages");
 
-    // Listener for inbox
-    const unsubscribeInbox = onSnapshot(messagesRef, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUserMessages(msgs);
-      console.log("📨 Real-time inbox:", msgs);
-    });
+  //   // Listener for inbox
+  //   const unsubscribeInbox = onSnapshot(messagesRef, (snapshot) => {
+  //     const msgs = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setUserMessages(msgs);
+  //     console.log("📨 Real-time inbox:", msgs);
+  //   });
 
-    // Listener for sent messages
-    const unsubscribeSent = onSnapshot(sentRef, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setSentMessages(msgs);
-      console.log("📨 Real-time sentbox:", msgs);
-    });
+  //   // Listener for sent messages
+  //   const unsubscribeSent = onSnapshot(sentRef, (snapshot) => {
+  //     const msgs = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setSentMessages(msgs);
+  //     console.log("📨 Real-time sentbox:", msgs);
+  //   });
 
-    // Cleanup when user logs out or component unmounts
-    return () => {
-      unsubscribeInbox();
-      unsubscribeSent();
-    };
-  }, [user?.uid]);
+  //   // Cleanup when user logs out or component unmounts
+  //   return () => {
+  //     unsubscribeInbox();
+  //     unsubscribeSent();
+  //   };
+  // }, [user?.uid]);
 
   // (ADMIN & USER) DELETE MESSAGE
   const deleteMessage = async (messageOrMessages, type = "inbox") => {
@@ -8927,6 +8976,9 @@ changes.forEach((change) => {
         deleteMessage,
         sentMessages,
         userMessages,
+        messageFetchLimit,
+        loadMoreUserMessages,
+        hasMoreUserMessages,
         sendGuestContactMessage,
 
         saveBookingToFirestore,

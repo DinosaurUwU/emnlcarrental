@@ -1677,6 +1677,7 @@ margin-bottom: 6px;
 }
 
 .history-payment-badge {
+  text-transform: uppercase;
   position: absolute;
   top: 8px;
   left: 8px;
@@ -1710,6 +1711,46 @@ margin-bottom: 6px;
   color: gray;
   margin: auto;
   font-style: italic;
+}
+
+.load-more-messages-btn {
+  display: block;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  border: 2px solid var(--accent-txt);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--accent-txt);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.load-more-messages-btn:hover {
+  background: var(--accent-txt);
+  color: #fff;
+}
+
+.messages-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 14px auto 0;
+}
+
+.messages-spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #28a745;
+  border-radius: 50%;
+  animation: profileMessageSpin 1s linear infinite;
+}
+
+@keyframes profileMessageSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-history {

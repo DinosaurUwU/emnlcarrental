@@ -18,6 +18,9 @@ const Messages = () => {
     hideCancelAnimation,
     setHideCancelAnimation,
     setActionOverlay,
+    messageFetchLimit,
+    loadMoreUserMessages,
+    hasMoreUserMessages,
   } = useUser();
 
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -36,7 +39,7 @@ const Messages = () => {
     useState(false);
   const [deletedMessageCount, setDeletedMessageCount] = useState(0);
 
-  const [visibleCount, setVisibleCount] = useState(50);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
 
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [chatInput, setChatInput] = useState("");
@@ -63,8 +66,22 @@ const Messages = () => {
   }, [userMessages]);
 
   const processedNotifications = useMemo(() => {
-    return notificationMessages.slice(0, visibleCount);
-  }, [notificationMessages, visibleCount]);
+    return notificationMessages;
+  }, [notificationMessages]);
+
+  const canLoadMoreNotifications = useMemo(() => {
+    return hasMoreUserMessages && !isLoadingMoreMessages;
+  }, [hasMoreUserMessages, isLoadingMoreMessages]);
+
+  useEffect(() => {
+    if (!isLoadingMoreMessages) return;
+
+    const timer = setTimeout(() => {
+      setIsLoadingMoreMessages(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [notificationMessages.length, isLoadingMoreMessages]);
 
   const chatMessages = useMemo(() => {
     const inboxChat = (userMessages || [])
@@ -598,7 +615,7 @@ const Messages = () => {
 
         <h2>
           {activeTab === "notifications"
-            ? `Notifications (${currentCount})`
+            ? `Notifications (${notificationMessages.length}${canLoadMoreNotifications ? "+" : ""})`
             : `Messages (${currentCount})`}
         </h2>
 
@@ -867,19 +884,25 @@ const Messages = () => {
                 <p className="admin-empty-message">No notifications yet.</p>
               )}
 
-              {visibleCount < notificationMessages.length &&
-                (() => {
-                  const remaining = notificationMessages.length - visibleCount;
-                  const toLoad = Math.min(50, remaining);
-                  return (
+              {processedNotifications.length > 0 &&
+                (isLoadingMoreMessages ? (
+                  <div className="admin-messages-spinner-wrap">
+                    <div className="admin-messages-spinner" />
+                  </div>
+                ) : (
+                  canLoadMoreNotifications && (
                     <button
+                      type="button"
                       className="load-more-btn"
-                      onClick={() => setVisibleCount((prev) => prev + toLoad)}
+                      onClick={() => {
+                        setIsLoadingMoreMessages(true);
+                        loadMoreUserMessages();
+                      }}
                     >
-                      Load {toLoad} more message{toLoad === 1 ? "" : "s"}
+                      Load 10 More Messages
                     </button>
-                  );
-                })()}
+                  )
+                ))}
             </div>
           )}
 
