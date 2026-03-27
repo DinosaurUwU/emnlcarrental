@@ -22,6 +22,36 @@ body.modal-open {
   transition: all 0.5s ease;
 }
 
+.profile-download-invoice-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 140, 0, 0.12);
+  color: #ff8c00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  z-index: 5;
+}
+
+.profile-download-invoice-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-download-invoice-btn:hover {
+  box-shadow: 0 0 10px #ff8c00;
+  background: #ff8c00;
+  color: white;
+}
+
 .profile-columns {
   display: flex;
   flex-direction: row;

@@ -24,19 +24,85 @@ const formatDate = (dateStr) => {
 
 // Common data preparation for both invoice and quotation
 const prepareDocumentData = (bookingData, documentType) => {
-  // Get values from rentalDuration
-  const rentalDays =
-    bookingData.rentalDuration?.days || bookingData.billedDays || 1;
-  const extraHours = bookingData.rentalDuration?.extraHours || 0;
+const rentalDays =
+    bookingData.rentalDuration?.days ?? bookingData.billedDays ?? 1;
+
+  const fallbackStart =
+    bookingData.startDate && bookingData.startTime
+      ? new Date(`${bookingData.startDate} ${bookingData.startTime}`)
+      : null;
+
+  const fallbackEnd =
+    bookingData.endDate && bookingData.endTime
+      ? new Date(`${bookingData.endDate} ${bookingData.endTime}`)
+      : null;
+
+  const totalDurationSeconds =
+    bookingData.rentalDuration?.actualSeconds ??
+    (fallbackStart &&
+    fallbackEnd &&
+    !Number.isNaN(fallbackStart.getTime()) &&
+    !Number.isNaN(fallbackEnd.getTime())
+      ? Math.max(
+          0,
+          Math.floor((fallbackEnd.getTime() - fallbackStart.getTime()) / 1000),
+        )
+      : 0);
+
+  const extraHoursFromDuration =
+    bookingData.rentalDuration?.extraHours ??
+    bookingData.rentalDuration?.extraHour ??
+    0;
+
+  const extraHoursFromActualSeconds =
+    totalDurationSeconds > 0
+      ? Math.max(0, Math.round(totalDurationSeconds / 3600) - rentalDays * 24)
+      : 0;
+
   const isFlatRateSameDay =
     bookingData.rentalDuration?.isFlatRateSameDay || false;
 
   // Extension rate (per hour)
-  const extension = bookingData.extension || 0;
+  const extension = bookingData.extension ?? 0;
 
-  // Extra hours charge
+  const rawExtraHoursCharge = bookingData.extraHourCharge ?? 0;
+
+  const baseRentalAmount =
+    (bookingData.discountedRate ?? 0) * rentalDays;
+
+  const drivingTotalAmount =
+    (bookingData.drivingPrice ?? 0) * rentalDays;
+
+  const pickupTotalAmount = bookingData.pickupPrice ?? 0;
+
+  const extraHoursFromPricing =
+    extension > 0 && bookingData.totalPrice != null
+      ? Math.max(
+          0,
+          Math.round(
+            (Number(bookingData.totalPrice) -
+              baseRentalAmount -
+              drivingTotalAmount -
+              pickupTotalAmount) / extension,
+          ),
+        )
+      : 0;
+
+  const extraHoursFromCharge =
+    rawExtraHoursCharge > 0 && extension > 0
+      ? Math.round(rawExtraHoursCharge / extension)
+      : 0;
+
+  const extraHours = Math.max(
+    extraHoursFromDuration,
+    extraHoursFromActualSeconds,
+    extraHoursFromPricing,
+    extraHoursFromCharge,
+  );
+
+  // Keep real zero values instead of falling back
   const extraHoursCharge =
-    bookingData.extraHourCharge || extraHours * extension;
+    bookingData.extraHourCharge ?? extraHours * extension;
 
   // Driving price calculation
   const drivingPrice = bookingData.drivingPrice || 0;
@@ -79,9 +145,9 @@ const prepareDocumentData = (bookingData, documentType) => {
   }));
 
   // ========== DURATION DISPLAY ==========
-  let totalHours = 0;
-  if (bookingData.rentalDuration?.actualSeconds) {
-    totalHours = Math.floor(bookingData.rentalDuration.actualSeconds / 3600);
+ let totalHours = 0;
+  if (totalDurationSeconds > 0) {
+    totalHours = Math.floor(totalDurationSeconds / 3600);
   } else {
     totalHours = rentalDays * 24 + extraHours;
   }
@@ -215,7 +281,10 @@ const prepareDocumentData = (bookingData, documentType) => {
     // Full calculation line
     dailyRateCalc: `${bookingData.discountedRate * rentalDays > 0 ? `₱${(bookingData.discountedRate * rentalDays).toLocaleString()}` : "₱0"}`,
 
-    drivingPrice: drivingPrice > 0 ? `₱${drivingPrice.toLocaleString()}` : "₱0",
+        drivingPrice:
+      drivingPrice > 0
+        ? `₱${(drivingPrice * rentalDays).toLocaleString()}`
+        : "₱0",
     pickupPrice: pickupPrice > 0 ? `₱${pickupPrice.toLocaleString()}` : "₱0",
     extraHoursCharge:
       extraHoursCharge > 0 ? `₱${extraHoursCharge.toLocaleString()}` : "₱0",
@@ -239,8 +308,14 @@ const prepareDocumentData = (bookingData, documentType) => {
     durationCalculation: durationCalculation,
 
     // Driving option
-    drivingOption: bookingData.drivingOption || "",
-    pickupOption: bookingData.pickupOption || "",
+    drivingOption:
+    bookingData.drivingOption === "With Driver"
+      ? `(₱${drivingPrice.toLocaleString()} x ${rentalDays} ${
+          rentalDays === 1 ? "Day" : "Days"
+        })`
+      : bookingData.drivingOption || "",
+
+  pickupOption: bookingData.pickupOption || "",
   };
 };
 

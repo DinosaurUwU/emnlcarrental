@@ -1035,7 +1035,7 @@ const BookingPage = ({
           <>
             <br />(
             <span style={{ color: "#dc3545" }}>
-              +{extraHours} hr{extraHours !== 1 ? "s" : ""} ₱
+              +{extraHours} hr{extraHours !== 1 ? "s" : ""} | ₱
               {extraHourCharge.toLocaleString()}
             </span>
             )

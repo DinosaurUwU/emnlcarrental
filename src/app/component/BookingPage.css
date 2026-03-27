@@ -299,6 +299,7 @@
 
 .download-quotation-btn:hover {
   background: #007bff;
+  box-shadow: 0 0 10px #007bff;
   color: white;
 }
 
