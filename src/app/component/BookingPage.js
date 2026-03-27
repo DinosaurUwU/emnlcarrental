@@ -2076,6 +2076,7 @@ onClick={() => setShowBookingConfirmOverlay(false)}
     dropOffType,
   });
   
+  
   // Simple check - just check formData plus date/time
   const hasCustomerInfo = formData?.firstName && formData?.surname && formData?.email;
   const hasDates = startDate && endDate;
