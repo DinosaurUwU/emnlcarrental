@@ -24,9 +24,9 @@ const Profile = ({ openBooking }) => {
     deleteUserAccount,
     userMessages,
     sentMessages,
-    messageFetchLimit,
-    loadMoreUserMessages,
-    hasMoreUserMessages,
+notificationMessages,
+    loadMoreNotifications,
+    hasMoreNotifications,
     markMessageAsRead,
     deleteMessage,
     sendMessage,
@@ -919,27 +919,14 @@ const Profile = ({ openBooking }) => {
     };
   }, []);
 
-  const notificationMessages = useMemo(() => {
-    return [...(userMessages || [])]
-      .filter((m) => m?.isNotification === true)
-      .sort(
-        (a, b) =>
-          (b.startTimestamp?.toDate?.().getTime() || 0) -
-          (a.startTimestamp?.toDate?.().getTime() || 0),
-      );
-  }, [userMessages]);
 
-  // const processedNotifications = useMemo(() => {
-  //   return notificationMessages.slice(0, 50);
-  // }, [notificationMessages]);
-
-    const processedNotifications = useMemo(() => {
+  const processedNotifications = useMemo(() => {
     return notificationMessages;
   }, [notificationMessages]);
 
   const canLoadMoreNotifications = useMemo(() => {
-    return hasMoreUserMessages && !isLoadingMoreMessages;
-  }, [hasMoreUserMessages, isLoadingMoreMessages]);
+    return hasMoreNotifications && !isLoadingMoreMessages;
+  }, [hasMoreNotifications, isLoadingMoreMessages]);
 
   useEffect(() => {
     if (!isLoadingMoreMessages) return;
@@ -2613,7 +2600,7 @@ const Profile = ({ openBooking }) => {
                         className="load-more-messages-btn"
                         onClick={() => {
                           setIsLoadingMoreMessages(true);
-                          loadMoreUserMessages();
+                          loadMoreNotifications();
                         }}
                       >
                         Load 10 More Messages

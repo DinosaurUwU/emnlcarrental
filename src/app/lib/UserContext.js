@@ -107,6 +107,9 @@ export const UserProvider = ({ children }) => {
   const [sentMessages, setSentMessages] = useState([]);
   const [messageFetchLimit, setMessageFetchLimit] = useState(10);
   const [hasMoreUserMessages, setHasMoreUserMessages] = useState(true);
+  const [notificationMessages, setNotificationMessages] = useState([]);
+  const [notificationFetchLimit, setNotificationFetchLimit] = useState(10);
+  const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
   const [adminUid, setAdminUid] = useState(null);
   const [adminName, setAdminName] = useState(null);
   const [adminEmail, setAdminEmail] = useState(null);
@@ -3978,6 +3981,37 @@ Please review the resubmitted request and continue processing.`,
     }
   };
 
+    // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
+  useEffect(() => {
+    if (!user?.uid) {
+      setNotificationMessages([]);
+      setHasMoreNotifications(false);
+      return;
+    }
+
+    const notificationsQuery = query(
+      collection(db, "users", user.uid, "receivedMessages"),
+      where("isNotification", "==", true),
+      orderBy("startTimestamp", "desc"),
+      limit(notificationFetchLimit),
+    );
+
+    const unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setNotificationMessages(msgs);
+      setHasMoreNotifications(snapshot.size >= notificationFetchLimit);
+      console.log("📨 Real-time notifications:", msgs);
+    });
+
+    return () => {
+      unsubscribeNotifications();
+    };
+  }, [user?.uid, notificationFetchLimit]);
+
     // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
     useEffect(() => {
     if (!user?.uid) return;
@@ -4022,6 +4056,11 @@ Please review the resubmitted request and continue processing.`,
   const loadMoreUserMessages = () => {
     if (!hasMoreUserMessages) return;
     setMessageFetchLimit((prev) => prev + 10);
+  };
+
+    const loadMoreNotifications = () => {
+    if (!hasMoreNotifications) return;
+    setNotificationFetchLimit((prev) => prev + 10);
   };
 
   // const sendGuestContactMessage = async ({
@@ -8976,9 +9015,13 @@ changes.forEach((change) => {
         deleteMessage,
         sentMessages,
         userMessages,
+notificationMessages,
         messageFetchLimit,
         loadMoreUserMessages,
         hasMoreUserMessages,
+        notificationFetchLimit,
+        loadMoreNotifications,
+        hasMoreNotifications,
         sendGuestContactMessage,
 
         saveBookingToFirestore,

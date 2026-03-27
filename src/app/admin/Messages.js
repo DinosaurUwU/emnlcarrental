@@ -10,6 +10,7 @@ const Messages = () => {
     user,
     userMessages,
     sentMessages,
+    notificationMessages,
     deleteMessage,
     markMessageAsRead,
     sendMessage,
@@ -18,9 +19,8 @@ const Messages = () => {
     hideCancelAnimation,
     setHideCancelAnimation,
     setActionOverlay,
-    messageFetchLimit,
-    loadMoreUserMessages,
-    hasMoreUserMessages,
+   loadMoreNotifications,
+    hasMoreNotifications,
   } = useUser();
 
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -55,23 +55,13 @@ const Messages = () => {
       textClass: "",
     });
 
-  const notificationMessages = useMemo(() => {
-    return [...(userMessages || [])]
-      .filter((m) => m?.isNotification === true)
-      .sort(
-        (a, b) =>
-          (b.startTimestamp?.toDate?.().getTime() || 0) -
-          (a.startTimestamp?.toDate?.().getTime() || 0),
-      );
-  }, [userMessages]);
-
   const processedNotifications = useMemo(() => {
     return notificationMessages;
   }, [notificationMessages]);
 
   const canLoadMoreNotifications = useMemo(() => {
-    return hasMoreUserMessages && !isLoadingMoreMessages;
-  }, [hasMoreUserMessages, isLoadingMoreMessages]);
+    return hasMoreNotifications && !isLoadingMoreMessages;
+  }, [hasMoreNotifications, isLoadingMoreMessages]);
 
   useEffect(() => {
     if (!isLoadingMoreMessages) return;
@@ -896,7 +886,7 @@ const Messages = () => {
                       className="load-more-btn"
                       onClick={() => {
                         setIsLoadingMoreMessages(true);
-                        loadMoreUserMessages();
+                        loadMoreNotifications();
                       }}
                     >
                       Load 10 More Messages
