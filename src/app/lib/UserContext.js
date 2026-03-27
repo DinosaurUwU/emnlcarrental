@@ -4816,6 +4816,51 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
+  const buildBookingSchedulePatch = (source = {}) => {
+    const startDate = source.startDate;
+    const startTime = source.startTime;
+    const endDate = source.endDate;
+    const endTime = source.endTime;
+
+    if (!startDate || !startTime || !endDate || !endTime) {
+      return {};
+    }
+
+    const start = new Date(`${startDate}T${startTime}`);
+    const end = new Date(`${endDate}T${endTime}`);
+
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end <= start
+    ) {
+      return {};
+    }
+
+    const totalDurationInSeconds = Math.floor(
+      (end.getTime() - start.getTime()) / 1000,
+    );
+    const totalHours = totalDurationInSeconds / 3600;
+    const isFlatRateSameDay = startDate === endDate && totalHours < 24;
+    const diffDays = Math.floor(totalHours / 24);
+    const extraHours = Math.ceil(totalHours % 24);
+    const billedDays = isFlatRateSameDay ? 1 : Math.max(1, diffDays);
+
+    return {
+      startTimestamp: Timestamp.fromDate(start),
+      endTimestamp: Timestamp.fromDate(end),
+      totalDurationInSeconds,
+      billedDays,
+      rentalDuration: {
+        days: billedDays,
+        extraHour: isFlatRateSameDay ? 0 : extraHours,
+        extraHours: isFlatRateSameDay ? 0 : extraHours,
+        isFlatRateSameDay,
+        actualSeconds: totalDurationInSeconds,
+      },
+    };
+  };
+
   // (USER) UPDATE USER BOOKING REQUEST TO FIRESTORE
   const updateUserBookingRequest = async (updatedBookingData) => {
     try {
@@ -4849,8 +4894,11 @@ Please review this request in the admin panel and proceed with approval or rejec
         driverLicenseUrl = updatedBookingData.uploadedID;
       }
 
+      const schedulePatch = buildBookingSchedulePatch(updatedBookingData.formData);
+
       const updatedData = {
         ...updatedBookingData.formData,
+        ...schedulePatch,
         driverLicense: driverLicenseUrl,
         status: "Pending",
         updatedAt: serverTimestamp(),
@@ -4888,6 +4936,11 @@ Please review this request in the admin panel and proceed with approval or rejec
 
       const bookingData = adminSnap.data() ?? {};
       const userId = bookingData.createdBy;
+
+            const schedulePatch = buildBookingSchedulePatch({
+        ...bookingData,
+        ...updatedData,
+      });
 
       // Calculate pricing components
       const billedDays = updatedData?.billedDays ?? bookingData.billedDays ?? 0;
@@ -4938,6 +4991,7 @@ Please review this request in the admin panel and proceed with approval or rejec
       const dataToUpdate = {
         ...bookingData,
         ...updatedData,
+        ...schedulePatch,
         paymentEntries,
         totalPaid,
         balanceDue,
@@ -5153,13 +5207,16 @@ Please review this request in the admin panel and proceed with approval or rejec
 
       const balanceDue = Math.max(0, discountedTotal - totalPaid);
 
+      const { unitImage, ...safeBookingData } = bookingData || {};
+      const { unitImage: updatedUnitImage, ...safeUpdatedData } = updatedData || {};
+
       const dataToUpdate = {
-        ...bookingData,
-        ...updatedData,
+        ...safeBookingData,
+        ...safeUpdatedData,
         paymentEntries,
         totalPaid,
         balanceDue,
-        totalPrice: discountedTotal, // save final price after discount
+        totalPrice: discountedTotal,
         discountValue,
         discountType,
       };

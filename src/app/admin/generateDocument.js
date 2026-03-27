@@ -86,7 +86,7 @@ const formatDisplayTime = (value) => {
 const formatRentalPeriod = (startDate, startTime, endDate, endTime) =>
   `${formatDisplayDate(startDate)} | ${formatDisplayTime(startTime)}\nto\n${formatDisplayDate(endDate)} | ${formatDisplayTime(endTime)}`;
 
-const peso = (value) => `₱ ${Number(value || 0).toLocaleString("en-PH")}`;
+const peso = (value) => `PHP ${Number(value || 0).toLocaleString("en-PH")}`;
 
 const sanitizeFilePart = (value, fallback) =>
   String(value || fallback)

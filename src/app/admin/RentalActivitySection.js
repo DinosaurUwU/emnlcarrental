@@ -528,7 +528,7 @@ const RentalActivitySection = ({ subSection }) => {
               ...booking,
               carName: carData.carName,
               carType: carData.carType,
-              unitImage: carData.unitImage,
+              imageId: booking.imageId || carData.imageId || `${booking.plateNo}_main`,
               paymentEntries: paymentList,
               balanceDue,
             });
