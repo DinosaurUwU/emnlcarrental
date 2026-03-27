@@ -1256,7 +1256,7 @@ const Profile = ({ openBooking }) => {
                 {selectedBooking?.paid === true
                   ? "Paid"
                   : selectedBooking?.balanceDue === 0
-                    ? "Pending for Marking as Paid"
+                    ? "Pending for ( Mark as Paid )"
                     : "Unpaid"}
               </span>
             </div>
@@ -3392,7 +3392,7 @@ const Profile = ({ openBooking }) => {
                       {history.paid === true
                         ? "Paid"
                         : history.balanceDue === 0
-                          ? "Pending for Marking as Paid"
+                          ? "Pending for ( Mark as Paid )"
                           : "Unpaid"}
                     </span>
 
@@ -3518,7 +3518,7 @@ const Profile = ({ openBooking }) => {
                     {selectedHistoryRental?.paid === true
                       ? "Paid"
                       : selectedHistoryRental?.balanceDue === 0
-                        ? "Pending for Marking as Paid"
+                        ? "Pending for ( Mark as Paid )"
                         : "Unpaid"}
                   </span>
                 </div>

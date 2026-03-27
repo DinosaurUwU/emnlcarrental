@@ -2833,7 +2833,7 @@ border-collapse: collapse;
 }
 
 .fc-view-harness.fc-view-harness-active{
-  border: 1px solid var(--txt-comp);
+  border: 1px solid var(--accent-txt);
 }
 
 .fc-scroller::-webkit-scrollbar {
@@ -2864,6 +2864,10 @@ border-collapse: collapse;
 .fc-scrollgrid td,
 .fc-scrollgrid th {
   border-color: var(--supporting-txt) !important;
+}
+
+.fc-scrollgrid  .fc-scrollgrid-liquid{
+border-top: none !important;
 }
 
 /* Force square day cells */
@@ -3022,6 +3026,10 @@ border-collapse: collapse;
 .calendar-container.images-only .fc-daygrid-day-bottom,
 .calendar-container.images-only .fc-daygrid-more-link {
   display: none !important;
+}
+
+.fc-daygrid-day-top{
+  color: var(--txt-comp);
 }
 
 .calendar-container.images-only .fc-daygrid-event-harness,

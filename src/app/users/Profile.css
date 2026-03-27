@@ -1864,10 +1864,10 @@ margin-bottom: 6px;
     padding: 70px 20px 20px 20px;
     background: linear-gradient(
       to top,
-      rgba(255, 255, 255, 1) 75%,
-      rgba(255, 255, 255, 0.4) 85%,
-      rgba(255, 255, 255, 0.2) 95%,
-      rgba(255, 255, 255, 0) 100%
+      rgba(var(--gradient-base), 1) 75%,
+      rgba(var(--gradient-base), 0.4) 85%,
+      rgba(var(--gradient-base), 0.2) 95%,
+      rgba(var(--gradient-base), 0) 100%
     );
     box-sizing: border-box;
   }

@@ -3076,12 +3076,20 @@ const hasReservedSource =
                 <div className="confirm-reserved-flag">Reserved Booking</div>
               )}
 
-              <div
+<div
                 className={`confirm-status-flag status-${
-                  selectedBooking?.paid === true ? "paid" : "unpaid"
+                  selectedBooking?.paid === true
+                    ? "paid"
+                    : selectedBooking?.balanceDue === 0
+                      ? "pending"
+                      : "unpaid"
                 }`}
               >
-                {selectedBooking?.paid === true ? "Paid" : "Unpaid"}
+                {selectedBooking?.paid === true
+                  ? "Paid"
+                  : selectedBooking?.balanceDue === 0
+                    ? "Pending for ( Mark as Paid )"
+                    : "Unpaid"}
               </div>
             </div>
 
@@ -9947,13 +9955,27 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                     <div className="ongoing-unit-status-row">
                       <span
                         className={`ongoing-unit-status-badge ${
-                          booking.balanceDue === 0 ? "paid" : "unpaid"
+                          booking.paid === true
+                            ? "paid"
+                            : booking.balanceDue === 0
+                              ? "pending"
+                              : "unpaid"
                         }`}
+                        style={
+                          booking.paid !== true && booking.balanceDue === 0
+                            ? {
+                                backgroundColor: "#ffc107",
+                                color: "#1f1f1f",
+                              }
+                            : undefined
+                        }
                       >
                         {booking.status === "Completed"
-                          ? booking.balanceDue === 0
-                            ? "Pending for ( Mark as Paid )"
-                            : "Unpaid"
+                          ? booking.paid === true
+                            ? "Paid"
+                            : booking.balanceDue === 0
+                              ? "Pending for ( Mark as Paid )"
+                              : "Unpaid"
                           : booking.status}
                       </span>
 

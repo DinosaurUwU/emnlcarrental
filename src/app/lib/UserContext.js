@@ -2532,6 +2532,27 @@ Call them now to check if they want to extend. If no response, call them when re
       const paid = balanceDue === 0;
 
       // Shared data updates
+      const updatedTotalHours = updatedDuration / 3600;
+      const isFlatRateSameDay =
+        rentalData.startDate === rentalData.endDate && updatedTotalHours < 24;
+      const updatedBilledDays = isFlatRateSameDay
+        ? 1
+        : Math.max(1, Math.floor(updatedTotalHours / 24));
+      const updatedExtraHours = isFlatRateSameDay
+        ? 0
+        : Math.max(0, Math.round(updatedTotalHours - updatedBilledDays * 24));
+
+      const updatedEndDate = endTimestamp.toDate().toLocaleDateString("en-CA", {
+        timeZone: "Asia/Manila",
+      });
+
+      const updatedEndTime = endTimestamp.toDate().toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Manila",
+      });
+
       const updates = {
         totalDurationInSeconds: updatedDuration,
         extraHourCharge: updatedExtraHourCharge,
@@ -2539,12 +2560,34 @@ Call them now to check if they want to extend. If no response, call them when re
         totalPaid,
         balanceDue,
         paid,
-        "rentalDuration.extraHours":
-          (rentalData.rentalDuration?.extraHours || 0) + addedHours,
+        billedDays: updatedBilledDays,
         endTimestamp,
+        endDate: updatedEndDate,
+        endTime: updatedEndTime,
+        rentalDuration: {
+          ...(rentalData.rentalDuration || {}),
+          days: updatedBilledDays,
+          extraHour: updatedExtraHours,
+          extraHours: updatedExtraHours,
+          isFlatRateSameDay,
+          actualSeconds: updatedDuration,
+        },
         manuallyExtended: true,
         updatedAt: serverTimestamp(),
       };
+      // const updates = {
+      //   totalDurationInSeconds: updatedDuration,
+      //   extraHourCharge: updatedExtraHourCharge,
+      //   totalPrice: updatedTotalPrice,
+      //   totalPaid,
+      //   balanceDue,
+      //   paid,
+      //   "rentalDuration.extraHours":
+      //     (rentalData.rentalDuration?.extraHours || 0) + addedHours,
+      //   endTimestamp,
+      //   manuallyExtended: true,
+      //   updatedAt: serverTimestamp(),
+      // };
 
       // Update admin path (always)
       await updateDoc(adminRentalRef, updates);
