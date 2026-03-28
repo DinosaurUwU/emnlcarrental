@@ -659,11 +659,15 @@ Thank you for choosing EMNL Car Rental Services.`,
         isNotification: true,
       };
 
+      // if (userId && userId !== adminUid) {
+      //   await setDoc(
+      //     doc(collection(db, "users", userId, "receivedMessages")),
+      //     userMessage,
+      //   );
+      // }
+
       if (userId && userId !== adminUid) {
-        await setDoc(
-          doc(collection(db, "users", userId, "receivedMessages")),
-          userMessage,
-        );
+        await writeNotification(userId, userMessage);
       }
 
       // (WEBSITE) ADMIN IN-APP MESSAGE
@@ -690,10 +694,12 @@ Call them now to check if they want to extend. If no response, call them when re
         isNotification: true,
       };
 
-      await setDoc(
-        doc(collection(db, "users", adminUid, "receivedMessages")),
-        adminMessage,
-      );
+      // await setDoc(
+      //   doc(collection(db, "users", adminUid, "receivedMessages")),
+      //   adminMessage,
+      // );
+
+      await writeNotification(adminUid, adminMessage);
 
       // USER EMAIL (TEMPLATE 3)
       await sendEmail({
@@ -969,9 +975,11 @@ Call them now to check if they want to extend. If no response, call them when re
 
               // Welcome message
               try {
-                const receivedMessagesRef = doc(
-                  collection(db, "users", authUser.uid, "receivedMessages"),
-                );
+                // const receivedMessagesRef = doc(
+                //   collection(db, "users", authUser.uid, "receivedMessages"),
+                // );
+                // const now = new Date();
+
                 const now = new Date();
                 const formattedDateTime = `${now.toLocaleDateString("en-US", {
                   weekday: "long",
@@ -1006,7 +1014,9 @@ Call them now to check if they want to extend. If no response, call them when re
                   isNotification: true,
                 };
 
-                await setDoc(receivedMessagesRef, welcomeMessage);
+                // await setDoc(receivedMessagesRef, welcomeMessage);
+                await writeNotification(authUser.uid, welcomeMessage);
+
               } catch (err) {
                 console.warn("Skipping welcome message:", err);
               }
@@ -1014,9 +1024,11 @@ Call them now to check if they want to extend. If no response, call them when re
               // Admin notification (WEBSITE)
               if (adminUid) {
                 try {
-                  const adminMessagesRef = doc(
-                    collection(db, "users", adminUid, "receivedMessages"),
-                  );
+                  // const adminMessagesRef = doc(
+                  //   collection(db, "users", adminUid, "receivedMessages"),
+                  // );
+                  // const now = new Date();
+
                   const now = new Date();
                   const formattedDateTime = `${now.toLocaleDateString(
                     "en-US",
@@ -1044,7 +1056,8 @@ Call them now to check if they want to extend. If no response, call them when re
                   `,
                     isNotification: true,
                   };
-                  await setDoc(adminMessagesRef, adminNotification);
+                  // await setDoc(adminMessagesRef, adminNotification);
+                  await writeNotification(adminUid, adminNotification);
                 } catch (err) {
                   console.warn(
                     "❌ Failed to send admin signup notification:",
@@ -2877,10 +2890,11 @@ Thank you for choosing EMNL Car Rental Services.`,
         isNotification: true,
       };
 
-      const userInboxRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxRef, inAppMessage);
+      // const userInboxRef = doc(
+      //   collection(db, "users", userId, "receivedMessages"),
+      // );
+      // await setDoc(userInboxRef, inAppMessage);
+      await writeNotification(userId, inAppMessage);
 
       console.log("💬 In-app extension message sent to user");
 
@@ -2906,10 +2920,12 @@ Thank you for choosing EMNL Car Rental Services.`,
         isNotification: true,
       };
 
-      await setDoc(
-        doc(collection(db, "users", adminUid, "receivedMessages")),
-        adminMessage,
-      );
+      // await setDoc(
+      //   doc(collection(db, "users", adminUid, "receivedMessages")),
+      //   adminMessage,
+      // );
+
+      await writeNotification(adminUid, adminMessage);
       console.log("💬 In-app extension message sent to admin");
 
       // EMAIL (ADMIN - TEMPLATE 7)
@@ -3184,10 +3200,12 @@ We hope you had a great experience with EMNL Car Rental Services. Thank you for 
         isNotification: true,
       };
 
-      const userInboxCompletionRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxCompletionRef, completionMessage);
+      // const userInboxCompletionRef = doc(
+      //   collection(db, "users", userId, "receivedMessages"),
+      // );
+      // await setDoc(userInboxCompletionRef, completionMessage);
+
+      await writeNotification(userId, completionMessage);
 
       console.log("💬 In-app completion message sent to user");
 
@@ -3230,10 +3248,12 @@ Completion has been recorded on both admin and user history records.`,
         isNotification: true,
       };
 
-      const adminInboxRef = doc(
-        collection(db, "users", adminUid, "receivedMessages"),
-      );
-      await setDoc(adminInboxRef, adminNotification);
+      // const adminInboxRef = doc(
+      //   collection(db, "users", adminUid, "receivedMessages"),
+      // );
+      // await setDoc(adminInboxRef, adminNotification);
+
+      await writeNotification(adminUid, adminNotification);
 
       console.log("💬 Admin in-app notification sent");
     } catch (error) {
@@ -3410,10 +3430,11 @@ If you have any questions or would like to reschedule, please don’t hesitate t
         isNotification: true,
       };
 
-      const userInboxRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxRef, inAppMessage);
+      // const userInboxRef = doc(
+      //   collection(db, "users", userId, "receivedMessages"),
+      // );
+      // await setDoc(userInboxRef, inAppMessage);
+      await writeNotification(userId, inAppMessage);
 
       console.log("💬 Rejection in-app message sent to user");
 
@@ -3436,11 +3457,29 @@ If you have any questions or would like to reschedule, please don’t hesitate t
         },
       });
 
-      // Admin WEBSITE NOTIFICATION
-      const adminInboxRef = doc(
-        collection(db, "users", adminUid, "receivedMessages"),
-      );
-      await setDoc(adminInboxRef, {
+//       // Admin WEBSITE NOTIFICATION
+//       const adminInboxRef = doc(
+//         collection(db, "users", adminUid, "receivedMessages"),
+//       );
+//       await setDoc(adminInboxRef, {
+//         name: "System Notification",
+//         profilePic: "/assets/profile.png",
+//         email: "system@emnl.com",
+//         contact: "Notification",
+//         formattedDateTime,
+//         startTimestamp: serverTimestamp(),
+//         content: `<b>Booking Request Rejected</b><br><br>
+// <b>Customer:</b> ${fullName || "Unknown"} <br>
+// <b>Car:</b> ${bookingPayload.carName} <br>
+// <b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
+// <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+// <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+// <b>Reason for Rejection:</b> ${reasonText || "No reason specified"} <br><br>
+// Please monitor for possible resubmission or customer follow-up.`,
+//         isNotification: true,
+//       });
+
+      await writeNotification(adminUid, {
         name: "System Notification",
         profilePic: "/assets/profile.png",
         email: "system@emnl.com",
@@ -3649,10 +3688,11 @@ We’ll review your Resubmission and get back to you shortly. Thank you for your
         isNotification: true,
       };
 
-      const userInboxResubmitRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxResubmitRef, resubmissionMessage);
+      // const userInboxResubmitRef = doc(
+      //   collection(db, "users", userId, "receivedMessages"),
+      // );
+      // await setDoc(userInboxResubmitRef, resubmissionMessage);
+      await writeNotification(userId, resubmissionMessage);
 
       console.log("💬 In-app resubmission message sent to user");
 
@@ -3695,10 +3735,12 @@ Please review the resubmitted request and continue processing.`,
         isNotification: true,
       };
 
-      const adminInboxResubmitRef = doc(
-        collection(db, "users", adminUid, "receivedMessages"),
-      );
-      await setDoc(adminInboxResubmitRef, adminResubmitNotification);
+      // const adminInboxResubmitRef = doc(
+      //   collection(db, "users", adminUid, "receivedMessages"),
+      // );
+      // await setDoc(adminInboxResubmitRef, adminResubmitNotification);
+
+      await writeNotification(adminUid, adminResubmitNotification);
 
       console.log("💬 Admin in-app resubmission notification sent");
 
@@ -3808,38 +3850,71 @@ Please review the resubmitted request and continue processing.`,
   // };
 
   // (ADMIN & USER) MARK MESSAGES AS READ/UNREAD
-  const markMessageAsRead = async (messageId) => {
+const markMessageAsRead = async (messageId) => {
     if (!user || !messageId) return;
 
     try {
-      const messageRef = doc(
+      const notificationRef = doc(
         db,
         "users",
         user.uid,
-        "receivedMessages",
+        "notifications",
         messageId,
       );
-      const messageSnap = await getDoc(messageRef);
+      const notificationSnap = await getDoc(notificationRef);
 
-      if (messageSnap.exists()) {
-        const currentStatus = messageSnap.data().readStatus || false;
-        const newStatus = !currentStatus;
-
-        await updateDoc(messageRef, { readStatus: newStatus });
-
-        // Update local state
-        setUserMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.id === messageId ? { ...msg, readStatus: newStatus } : msg,
-          ),
-        );
-      } else {
-        console.warn(`⚠️ Message with ID ${messageId} does not exist.`);
+      if (!notificationSnap.exists()) {
+        console.warn(`⚠️ Notification with ID ${messageId} does not exist.`);
+        return;
       }
+
+      const currentStatus = notificationSnap.data().readStatus || false;
+      const newStatus = !currentStatus;
+
+      await updateDoc(notificationRef, { readStatus: newStatus });
+
+      setNotificationMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId ? { ...msg, readStatus: newStatus } : msg,
+        ),
+      );
     } catch (err) {
-      console.error("🔥 Error toggling message read status:", err);
+      console.error("🔥 Error toggling notification read status:", err);
     }
   };
+  
+  // const markMessageAsRead = async (messageId) => {
+  //   if (!user || !messageId) return;
+
+  //   try {
+  //     const messageRef = doc(
+  //       db,
+  //       "users",
+  //       user.uid,
+  //       "receivedMessages",
+  //       messageId,
+  //     );
+  //     const messageSnap = await getDoc(messageRef);
+
+  //     if (messageSnap.exists()) {
+  //       const currentStatus = messageSnap.data().readStatus || false;
+  //       const newStatus = !currentStatus;
+
+  //       await updateDoc(messageRef, { readStatus: newStatus });
+
+  //       // Update local state
+  //       setUserMessages((prevMessages) =>
+  //         prevMessages.map((msg) =>
+  //           msg.id === messageId ? { ...msg, readStatus: newStatus } : msg,
+  //         ),
+  //       );
+  //     } else {
+  //       console.warn(`⚠️ Message with ID ${messageId} does not exist.`);
+  //     }
+  //   } catch (err) {
+  //     console.error("🔥 Error toggling message read status:", err);
+  //   }
+  // };
 
   // (ADMIN & USER) SEND MESSAGE BETWEEN USERS
   const sendMessage = async ({
@@ -4037,8 +4112,69 @@ Please review the resubmitted request and continue processing.`,
     }
   };
 
-    // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
-  useEffect(() => {
+const getNotificationTimestampMs = (msg) => {
+    const ts = msg?.startTimestamp;
+    if (ts?.toDate) return ts.toDate().getTime();
+    if (typeof ts?.seconds === "number") return ts.seconds * 1000;
+    if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
+    return 0;
+  };
+
+  const writeNotification = async (targetUid, payload) => {
+    if (!targetUid || !payload) return null;
+
+    const notificationData = {
+      readStatus: payload.readStatus ?? false,
+      isNotification: true,
+      ...payload,
+      startTimestamp: payload.startTimestamp || serverTimestamp(),
+    };
+
+    await setDoc(
+      doc(collection(db, "users", targetUid, "notifications")),
+      notificationData,
+    );
+
+    return notificationData;
+  };
+
+
+  //   // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
+  // useEffect(() => {
+  //   if (!user?.uid) {
+  //     setNotificationMessages([]);
+  //     setHasMoreNotifications(false);
+  //     return;
+  //   }
+
+  //   const notificationsQuery = query(
+  //     collection(db, "users", user.uid, "receivedMessages"),
+  //     where("isNotification", "==", true),
+  //     orderBy("startTimestamp", "desc"),
+  //     limit(notificationFetchLimit),
+  //   );
+
+  //   const unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
+  //     const msgs = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     setNotificationMessages(msgs);
+  //     setHasMoreNotifications(snapshot.size >= notificationFetchLimit);
+  //     console.log("📨 Real-time notifications:", msgs);
+  //   });
+
+  //   return () => {
+  //     unsubscribeNotifications();
+  //   };
+  // }, [user?.uid, notificationFetchLimit]);
+
+
+
+
+  // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
+useEffect(() => {
     if (!user?.uid) {
       setNotificationMessages([]);
       setHasMoreNotifications(false);
@@ -4046,22 +4182,30 @@ Please review the resubmitted request and continue processing.`,
     }
 
     const notificationsQuery = query(
-      collection(db, "users", user.uid, "receivedMessages"),
-      where("isNotification", "==", true),
+      collection(db, "users", user.uid, "notifications"),
       orderBy("startTimestamp", "desc"),
       limit(notificationFetchLimit),
     );
 
-    const unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    const unsubscribeNotifications = onSnapshot(
+      notificationsQuery,
+      (snapshot) => {
+        const msgs = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          _notificationSource: "notifications",
+        }));
 
-      setNotificationMessages(msgs);
-      setHasMoreNotifications(snapshot.size >= notificationFetchLimit);
-      console.log("📨 Real-time notifications:", msgs);
-    });
+        setNotificationMessages(msgs);
+        setHasMoreNotifications(snapshot.size >= notificationFetchLimit);
+        console.log("📨 Real-time notifications:", msgs);
+      },
+      (error) => {
+        console.error("❌ Notifications listener error:", error);
+        setNotificationMessages([]);
+        setHasMoreNotifications(false);
+      },
+    );
 
     return () => {
       unsubscribeNotifications();
@@ -4236,7 +4380,7 @@ Please review the resubmitted request and continue processing.`,
   // }, [user?.uid]);
 
   // (ADMIN & USER) DELETE MESSAGE
-  const deleteMessage = async (messageOrMessages, type = "inbox") => {
+const deleteMessage = async (messageOrMessages, type = "inbox") => {
     console.log("🔥 deleteMessage CALLED:", messageOrMessages, type, user);
 
     if (!user || !messageOrMessages || !["inbox", "sentbox"].includes(type)) {
@@ -4253,29 +4397,113 @@ Please review the resubmitted request and continue processing.`,
       : [messageOrMessages];
 
     try {
-      const collectionName =
-        type === "inbox" ? "receivedMessages" : "sentMessages";
-
-      const deletePromises = messagesArray.map((msg) => {
+      const deletePromises = messagesArray.map(async (msg) => {
         const messageId = typeof msg === "string" ? msg : msg.id;
-        const messageRef = doc(
+
+        if (type === "sentbox") {
+          const sentRef = doc(
+            db,
+            "users",
+            user.uid,
+            "sentMessages",
+            messageId,
+          );
+          console.log("🔍 Deleting:", sentRef.path);
+          await deleteDoc(sentRef);
+          return;
+        }
+
+        if (typeof msg !== "string" && msg?.isNotification === true) {
+          const notificationRef = doc(
+            db,
+            "users",
+            user.uid,
+            "notifications",
+            messageId,
+          );
+          console.log("🔍 Deleting:", notificationRef.path);
+          await deleteDoc(notificationRef);
+          return;
+        }
+
+        const inboxRef = doc(
           db,
           "users",
           user.uid,
-          collectionName,
+          "receivedMessages",
           messageId,
         );
-        console.log("🔍 Deleting:", messageRef.path);
-        return deleteDoc(messageRef);
+        console.log("🔍 Deleting:", inboxRef.path);
+        await deleteDoc(inboxRef);
       });
 
       await Promise.all(deletePromises);
+
+      const deletedIds = messagesArray
+        .map((msg) => (typeof msg === "string" ? msg : msg.id))
+        .filter(Boolean);
+
+      if (type === "inbox") {
+        setUserMessages((prev) =>
+          prev.filter((msg) => !deletedIds.includes(msg.id)),
+        );
+        setNotificationMessages((prev) =>
+          prev.filter((msg) => !deletedIds.includes(msg.id)),
+        );
+      } else {
+        setSentMessages((prev) =>
+          prev.filter((msg) => !deletedIds.includes(msg.id)),
+        );
+      }
 
       console.log(`✅ Deleted ${messagesArray.length} message(s) from ${type}`);
     } catch (error) {
       console.error("❌ Error during bulk delete:", error);
     }
   };
+
+
+
+  // const deleteMessage = async (messageOrMessages, type = "inbox") => {
+  //   console.log("🔥 deleteMessage CALLED:", messageOrMessages, type, user);
+
+  //   if (!user || !messageOrMessages || !["inbox", "sentbox"].includes(type)) {
+  //     console.warn("⚠️ Invalid deleteMessage parameters:", {
+  //       user,
+  //       messageOrMessages,
+  //       type,
+  //     });
+  //     return;
+  //   }
+
+  //   const messagesArray = Array.isArray(messageOrMessages)
+  //     ? messageOrMessages
+  //     : [messageOrMessages];
+
+  //   try {
+  //     const collectionName =
+  //       type === "inbox" ? "receivedMessages" : "sentMessages";
+
+  //     const deletePromises = messagesArray.map((msg) => {
+  //       const messageId = typeof msg === "string" ? msg : msg.id;
+  //       const messageRef = doc(
+  //         db,
+  //         "users",
+  //         user.uid,
+  //         collectionName,
+  //         messageId,
+  //       );
+  //       console.log("🔍 Deleting:", messageRef.path);
+  //       return deleteDoc(messageRef);
+  //     });
+
+  //     await Promise.all(deletePromises);
+
+  //     console.log(`✅ Deleted ${messagesArray.length} message(s) from ${type}`);
+  //   } catch (error) {
+  //     console.error("❌ Error during bulk delete:", error);
+  //   }
+  // };
 
   // (USER) UPDATE USER PROFILE DATA IN FIRESTORE GLOBALLY
   const updateUser = async (updatedFields) => {
@@ -4850,11 +5078,32 @@ Your request has been received and is now queued for review. We will notify you 
         isNotification: true,
       });
 
-      // Admin WEBSITE message
-      const adminInboxRef = doc(
-        collection(db, "users", adminUid, "receivedMessages"),
-      );
-      await setDoc(adminInboxRef, {
+//       // Admin WEBSITE message
+//       const adminInboxRef = doc(
+//         collection(db, "users", adminUid, "receivedMessages"),
+//       );
+//       await setDoc(adminInboxRef, {
+//         name: "System Notification",
+//         profilePic: "/assets/profile.png",
+//         email: "system@emnl.com",
+//         contact: "Notification",
+//         formattedDateTime,
+//         startTimestamp: serverTimestamp(),
+//         content: `<b>New Booking Request Submitted</b><br><br>
+// <b>Customer:</b> ${fullName || "Customer"} <br>
+// <b>Car:</b> ${bookingData.carName} <br>
+// <b>Plate No:</b> ${bookingData.plateNo || "N/A"} <br>
+// <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+// <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+// <b>Travel Location:</b> ${bookingData.location || "Not specified"} <br><br>
+// Please review this request in the admin panel and proceed with approval or rejection.`,
+//         isNotification: true,
+//       });
+
+
+
+// Admin WEBSITE message
+      await writeNotification(adminUid, {
         name: "System Notification",
         profilePic: "/assets/profile.png",
         email: "system@emnl.com",
@@ -6049,10 +6298,11 @@ Your rental is now confirmed. If you need assistance or schedule adjustments, pl
         isNotification: true,
       };
 
-      const userInboxRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxRef, inAppMessage);
+      // const userInboxRef = doc(
+      //   collection(db, "users", userId, "receivedMessages"),
+      // );
+      // await setDoc(userInboxRef, inAppMessage);
+      await writeNotification(userId, inAppMessage);
 
       console.log("💬 Friendly in-app message sent to user");
 
@@ -6092,10 +6342,11 @@ Please continue operational follow-ups and payment tracking for this rental.`,
         isNotification: true,
       };
 
-      const adminInboxRef = doc(
-        collection(db, "users", adminUid, "receivedMessages"),
-      );
-      await setDoc(adminInboxRef, adminInAppMessage);
+      // const adminInboxRef = doc(
+      //   collection(db, "users", adminUid, "receivedMessages"),
+      // );
+      // await setDoc(adminInboxRef, adminInAppMessage);
+      await writeNotification(adminUid, adminInAppMessage);
 
       console.log("📩 Admin notified via email and in-app message");
     } catch (error) {
