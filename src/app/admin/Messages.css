@@ -743,6 +743,49 @@ body.modal-open {
   background-color: #f7f7f7;
 }
 
+.conversation-load-more-btn {
+  display: block;
+  margin: 0 auto 12px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background-color: var(--accent-txt);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.conversation-load-more-btn:hover {
+  background-color: var(--supporting-txt);
+}
+
+.admin-conversation-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 12px;
+}
+
+.admin-conversation-spinner {
+  width: 28px;
+  height: 28px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #28a745;
+  border-radius: 50%;
+  animation: adminConversationSpin 1s linear infinite;
+}
+
+@keyframes adminConversationSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+text
+
+
+
 .conversation-chat-body::-webkit-scrollbar {
   width: 5px;
 }

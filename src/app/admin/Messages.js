@@ -19,7 +19,7 @@ const Messages = () => {
     hideCancelAnimation,
     setHideCancelAnimation,
     setActionOverlay,
-   loadMoreNotifications,
+    loadMoreNotifications,
     hasMoreNotifications,
   } = useUser();
 
@@ -40,7 +40,12 @@ const Messages = () => {
   const [deletedMessageCount, setDeletedMessageCount] = useState(0);
 
   const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
-
+  const [
+    isLoadingMoreConversationMessages,
+    setIsLoadingMoreConversationMessages,
+  ] = useState(false);
+  const [visibleConversationMessageCounts, setVisibleConversationMessageCounts] =
+    useState({});
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [chatInput, setChatInput] = useState("");
   const conversationChatBodyRef = useRef(null);
@@ -251,6 +256,51 @@ const Messages = () => {
       ) || null
     );
   }, [conversationThreads, selectedConversationId]);
+
+const currentVisibleConversationMessageCount =
+    visibleConversationMessageCounts[selectedConversationId] || 10;
+
+  const displayedThreadMessages = useMemo(() => {
+    if (!selectedThread?.messages) return [];
+    return selectedThread.messages.slice(-currentVisibleConversationMessageCount);
+  }, [selectedThread?.messages, currentVisibleConversationMessageCount]);
+
+  const canLoadMoreConversationMessages = useMemo(() => {
+    return (
+      (selectedThread?.messages?.length || 0) >
+        currentVisibleConversationMessageCount &&
+      !isLoadingMoreConversationMessages
+    );
+  }, [
+    selectedThread?.messages?.length,
+    currentVisibleConversationMessageCount,
+    isLoadingMoreConversationMessages,
+  ]);
+
+  useEffect(() => {
+    if (!selectedConversationId) return;
+
+    setVisibleConversationMessageCounts((prev) =>
+      prev[selectedConversationId]
+        ? prev
+        : { ...prev, [selectedConversationId]: 10 },
+    );
+    setIsLoadingMoreConversationMessages(false);
+  }, [selectedConversationId]);
+
+  useEffect(() => {
+    if (!isLoadingMoreConversationMessages) return;
+
+    const timer = setTimeout(() => {
+      setVisibleConversationMessageCounts((prev) => ({
+        ...prev,
+        [selectedConversationId]: (prev[selectedConversationId] || 10) + 10,
+      }));
+      setIsLoadingMoreConversationMessages(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [isLoadingMoreConversationMessages, selectedConversationId]);
 
   const handleMessagesDeleted = (count) => {
     setDeletedMessageCount(count);
@@ -1013,11 +1063,65 @@ const Messages = () => {
                       </div>
                     </div>
 
-                    <div
+                    {/* <div
                       className="conversation-chat-body"
                       ref={conversationChatBodyRef}
                     >
                       {selectedThread.messages.map((msg) => {
+                        const isMine = msg.senderUid === user?.uid;
+                        const htmlContent = msg.content || "";
+
+                        return (
+                          <div
+                            key={`${msg._source}-${msg.id}`}
+                            className={`conversation-chat-row ${isMine ? "mine" : "other"}`}
+                          >
+                            <div
+                              className={`conversation-bubble ${isMine ? "mine" : "other"}`}
+                            >
+                              {msg.sourcePage === "contact" && (
+                                <div className="message-source-chip">
+                                  From Contact Page
+                                </div>
+                              )}
+                              <div
+                                className="conversation-bubble-text"
+                                dangerouslySetInnerHTML={{
+                                  __html: htmlContent,
+                                }}
+                              />
+                              <div className="conversation-bubble-time">
+                                {formatMessageTimestamp(msg)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div> */}
+
+                    <div
+                      className="conversation-chat-body"
+                      ref={conversationChatBodyRef}
+                    >
+                      {isLoadingMoreConversationMessages ? (
+                        <div className="admin-conversation-spinner-wrap">
+                          <div className="admin-conversation-spinner" />
+                        </div>
+                      ) : (
+                        canLoadMoreConversationMessages && (
+                          <button
+                            type="button"
+                            className="conversation-load-more-btn"
+                            onClick={() => {
+                              setIsLoadingMoreConversationMessages(true);
+                            }}
+                          >
+                            Load 10 More Messages
+                          </button>
+                        )
+                      )}
+
+                      {displayedThreadMessages.map((msg) => {
                         const isMine = msg.senderUid === user?.uid;
                         const htmlContent = msg.content || "";
 
@@ -1086,13 +1190,13 @@ const Messages = () => {
                 ×
               </button> */}
 
-<button
-  className="close-btn"
-  type="button"
-  onClick={closeNotification}
->
-  <FiX className="close-icon" />
-</button>
+              <button
+                className="close-btn"
+                type="button"
+                onClick={closeNotification}
+              >
+                <FiX className="close-icon" />
+              </button>
 
               <div className="message-header">
                 <img

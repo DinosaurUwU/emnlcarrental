@@ -24,9 +24,11 @@ const Profile = ({ openBooking }) => {
     deleteUserAccount,
     userMessages,
     sentMessages,
-notificationMessages,
+    notificationMessages,
     loadMoreNotifications,
     hasMoreNotifications,
+    loadMoreUserMessages,
+    hasMoreUserMessages,
     markMessageAsRead,
     deleteMessage,
     sendMessage,
@@ -105,6 +107,14 @@ notificationMessages,
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
   const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
+    const [isLoadingMoreConversationMessages, setIsLoadingMoreConversationMessages] =
+    useState(false);
+  const [visibleConversationMessageCount, setVisibleConversationMessageCount] =
+    useState(10);
+      const [hasMoreConversationMessages, setHasMoreConversationMessages] =
+    useState(true);
+  const [conversationMessageCountBeforeLoad, setConversationMessageCountBeforeLoad] =
+    useState(0);
 
   useEffect(() => {
     if (!licenseGalleryRef.current) return;
@@ -919,7 +929,6 @@ notificationMessages,
     };
   }, []);
 
-
   const processedNotifications = useMemo(() => {
     return notificationMessages;
   }, [notificationMessages]);
@@ -1020,6 +1029,57 @@ notificationMessages,
     profileChatBodyRef.current.scrollTop =
       profileChatBodyRef.current.scrollHeight;
   }, [adminConversation?.messages?.length, activeTab]);
+
+    const displayedConversationMessages = useMemo(() => {
+    if (!adminConversation?.messages) return [];
+    return adminConversation.messages.slice(-visibleConversationMessageCount);
+  }, [adminConversation?.messages, visibleConversationMessageCount]);
+
+const canLoadMoreConversationMessages = useMemo(() => {
+    return (
+      ((((adminConversation?.messages?.length || 0) >
+        visibleConversationMessageCount) ||
+        hasMoreConversationMessages) &&
+        !isLoadingMoreConversationMessages)
+    );
+  }, [
+    adminConversation?.messages?.length,
+    visibleConversationMessageCount,
+    hasMoreConversationMessages,
+    isLoadingMoreConversationMessages,
+  ]);
+
+useEffect(() => {
+    if (!adminConversation?.id) return;
+    setIsLoadingMoreConversationMessages(false);
+    setHasMoreConversationMessages(true);
+  }, [adminConversation?.id]);
+
+  useEffect(() => {
+    if (!isLoadingMoreConversationMessages) return;
+
+    const timer = setTimeout(() => {
+      const currentConversationCount = adminConversation?.messages?.length || 0;
+      const addedConversationMessages =
+        currentConversationCount - conversationMessageCountBeforeLoad;
+
+      setVisibleConversationMessageCount((prev) =>
+        Math.max(prev + 10, currentConversationCount),
+      );
+
+      if (addedConversationMessages < 10) {
+        setHasMoreConversationMessages(false);
+      }
+
+      setIsLoadingMoreConversationMessages(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [
+    isLoadingMoreConversationMessages,
+    adminConversation?.messages?.length,
+    conversationMessageCountBeforeLoad,
+  ]);
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -1545,7 +1605,7 @@ notificationMessages,
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-<span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -1557,8 +1617,8 @@ notificationMessages,
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -1568,17 +1628,18 @@ notificationMessages,
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -2301,7 +2362,7 @@ notificationMessages,
 
         {/* Messages Section */}
         <div className="user-messages-container">
-                    <h3>
+          <h3>
             {activeTab === "notifications"
               ? `Notifications (${notificationMessages.length}${canLoadMoreNotifications ? "+" : ""})`
               : `Messages (${adminConversation?.messages?.length || 0})`}
@@ -2634,43 +2695,64 @@ notificationMessages,
                     </div>
                   </div>
 
-                  <div className="profile-chat-body" ref={profileChatBodyRef}>
+                 <div className="profile-chat-body" ref={profileChatBodyRef}>
                     {!adminConversation ||
                     adminConversation.messages.length === 0 ? (
                       <div className="profile-chat-empty">
                         No conversation yet.
                       </div>
                     ) : (
-                      adminConversation.messages.map((msg) => {
-                        const isMine = msg.senderUid === user?.uid;
-                        return (
-                          <div
-                            key={`${msg._source}-${msg.id}`}
-                            className={`profile-chat-row ${isMine ? "mine" : "other"}`}
-                          >
-                            <div
-                              className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}
+                      <>
+                        {isLoadingMoreConversationMessages ? (
+                          <div className="profile-conversation-spinner-wrap">
+                            <div className="profile-conversation-spinner" />
+                          </div>
+                        ) : (
+                          canLoadMoreConversationMessages && (
+<button
+                              type="button"
+                              className="profile-conversation-load-more-btn"
+                              onClick={() => {
+                                setConversationMessageCountBeforeLoad(
+                                  adminConversation?.messages?.length || 0,
+                                );
+                                setIsLoadingMoreConversationMessages(true);
+                                loadMoreUserMessages();
+                              }}
                             >
-                              {msg.sourcePage === "contact" && (
-                                <div className="message-source-chip">
-                                  From Contact Page
-                                </div>
-                              )}
+                              Load 10 More Messages
+                            </button>
+                          )
+                        )}
+
+                        {displayedConversationMessages.map((msg) => {
+                          const isMine = msg.senderUid === user?.uid;
+
+                          return (
+                            <div
+                              key={`${msg._source}-${msg.id}`}
+                              className={`profile-chat-row ${isMine ? "mine" : "other"}`}
+                            >
                               <div
-                                className="profile-chat-text"
-                                dangerouslySetInnerHTML={{
-                                  __html: msg.content || "",
-                                }}
-                              />
-                              <div className="profile-chat-time">
-                                {formatMessageTimestamp(msg)}
+                                className={`profile-chat-bubble ${isMine ? "mine" : "other"}`}
+                              >
+                                <div
+                                  className="profile-chat-text"
+                                  dangerouslySetInnerHTML={{
+                                    __html: msg.content || "",
+                                  }}
+                                />
+                                <div className="profile-chat-time">
+                                  {formatMessageTimestamp(msg)}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })
+                          );
+                        })}
+                      </>
                     )}
                   </div>
+
 
                   <div className="profile-chat-composer">
                     <textarea
@@ -2716,7 +2798,7 @@ notificationMessages,
                         rental.totalDurationInSeconds * 1000,
                     );
 
-                                        const rentalStatus = String(
+                    const rentalStatus = String(
                       rental.status || "",
                     ).toLowerCase();
                     const isLockedRental =
@@ -2728,7 +2810,7 @@ notificationMessages,
                       ? Math.max(Math.floor((endTimestamp - now) / 1000), 0)
                       : rental.totalDurationInSeconds;
 
-                                          const displayStatus =
+                    const displayStatus =
                       rentalStatus === "pending" && hasStarted
                         ? "Active"
                         : rental.status;
@@ -2848,14 +2930,14 @@ notificationMessages,
                             );
                           })()}
                         </div>
-{/* 
+                        {/* 
                         <div className="profile-status-row">
                           <span
                             className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
                           >
                             {rental.status}
                           </span> */}
-                           <div className="profile-status-row">
+                        <div className="profile-status-row">
                           <span
                             className={`ongoing-unit-status-badge ${String(displayStatus || "").toLowerCase()}`}
                           >
@@ -2927,7 +3009,7 @@ notificationMessages,
                               </button>
                             </div>
                           )} */}
-                                                    {!isLockedRental && (
+                          {!isLockedRental && (
                             <div className="ongoing-unit-action-buttons">
                               <button
                                 className="action-button finish"
@@ -3498,7 +3580,7 @@ notificationMessages,
           {showHistoryDetailsOverlay && selectedHistoryRental && (
             <div className="admin-booking-confirm-overlay">
               <div className="admin-booking-confirm-container">
- <button
+                <button
                   type="button"
                   title="Download Invoice"
                   onClick={() => generateInvoicePDF(selectedHistoryRental)}
@@ -3843,7 +3925,7 @@ notificationMessages,
                           <strong className="summary-label">
                             Rental Duration:
                           </strong>
-<span className="summary-value">
+                          <span className="summary-value">
                             {(() => {
                               const actualSeconds =
                                 selectedHistoryRental.rentalDuration
@@ -3857,9 +3939,9 @@ notificationMessages,
                                     )
                                   : (selectedHistoryRental.rentalDuration
                                       ?.extraHours ??
-                                      selectedHistoryRental.rentalDuration
-                                        ?.extraHour ??
-                                      0);
+                                    selectedHistoryRental.rentalDuration
+                                      ?.extraHour ??
+                                    0);
 
                               const displayExtraHourCharge =
                                 selectedHistoryRental.extraHourCharge ??
@@ -3897,9 +3979,7 @@ notificationMessages,
                                       (
                                       <span style={{ color: "#dc3545" }}>
                                         +{displayExtraHours}{" "}
-                                        {displayExtraHours === 1
-                                          ? "hr"
-                                          : "hrs"}{" "}
+                                        {displayExtraHours === 1 ? "hr" : "hrs"}{" "}
                                         | ₱
                                         {displayExtraHourCharge.toLocaleString()}
                                       </span>
