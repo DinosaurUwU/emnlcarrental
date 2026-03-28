@@ -257,7 +257,7 @@ const Messages = () => {
     return threads;
   }, [chatMessages, user?.uid]);
 
-useEffect(() => {
+  useEffect(() => {
     if (!isLoadingMoreConversationThreads) return;
 
     const timer = setTimeout(() => {
@@ -285,7 +285,7 @@ useEffect(() => {
     );
   }, [selectedThread?.messages, currentVisibleConversationMessageCount]);
 
-const canLoadMoreConversationMessages = useMemo(() => {
+  const canLoadMoreConversationMessages = useMemo(() => {
     return (
       (selectedThread?.messages?.length || 0) >
         currentVisibleConversationMessageCount &&
