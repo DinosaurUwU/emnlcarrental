@@ -90,7 +90,6 @@ const Profile = ({ openBooking }) => {
   });
 
   const fileInputRef = useRef(null);
-
   const dropdownRef = useRef(null);
   const [activeTab, setActiveTab] = useState("notifications");
   const [selectedMessageIds, setSelectedMessageIds] = useState([]);
