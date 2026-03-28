@@ -257,7 +257,7 @@ const Messages = () => {
     return threads;
   }, [chatMessages, user?.uid]);
 
-  useEffect(() => {
+useEffect(() => {
     if (!isLoadingMoreConversationThreads) return;
 
     const timer = setTimeout(() => {
@@ -265,7 +265,7 @@ const Messages = () => {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [conversationThreads?.length, isLoadingMoreConversationThreads]);
+  }, [chatMessages.length, isLoadingMoreConversationThreads]);
 
   const selectedThread = useMemo(() => {
     return (
@@ -285,17 +285,15 @@ const Messages = () => {
     );
   }, [selectedThread?.messages, currentVisibleConversationMessageCount]);
 
-  const canLoadMoreConversationMessages = useMemo(() => {
+const canLoadMoreConversationMessages = useMemo(() => {
     return (
-      ((selectedThread?.messages?.length || 0) >
-        currentVisibleConversationMessageCount ||
-        hasMoreUserMessages) &&
+      (selectedThread?.messages?.length || 0) >
+        currentVisibleConversationMessageCount &&
       !isLoadingMoreConversationMessages
     );
   }, [
     selectedThread?.messages?.length,
     currentVisibleConversationMessageCount,
-    hasMoreUserMessages,
     isLoadingMoreConversationMessages,
   ]);
 
