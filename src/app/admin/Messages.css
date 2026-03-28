@@ -16,8 +16,8 @@ body.modal-open {
   max-width: 800px;
   margin: 0px 10px 0px 10px;
   padding-bottom: 50px;
-    background-color: rgba(40, 167, 70, 0.2);
-    border-radius: 10px;
+  background-color: rgba(40, 167, 70, 0.2);
+  border-radius: 10px;
 }
 
 .messages-container h2 {
@@ -331,7 +331,7 @@ body.modal-open {
   font-weight: bold;
 }
 
-.full-message{
+.full-message {
   color: var(--txt-comp) !important;
 }
 
@@ -553,6 +553,47 @@ body.modal-open {
 .conversation-thread-list::-webkit-scrollbar-thumb {
   background-color: var(--accent-txt);
   border-radius: 5px;
+}
+
+.conversation-thread-load-more-btn {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px auto;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--accent-txt);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.conversation-thread-load-more-btn:hover {
+  background-color: var(--supporting-txt);
+}
+
+.admin-thread-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+}
+
+.admin-thread-spinner {
+  width: 28px;
+  height: 28px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #28a745;
+  border-radius: 50%;
+  animation: adminThreadSpin 1s linear infinite;
+}
+
+@keyframes adminThreadSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .conversation-empty {
@@ -782,11 +823,7 @@ body.modal-open {
     transform: rotate(360deg);
   }
 }
-text
-
-
-
-.conversation-chat-body::-webkit-scrollbar {
+text .conversation-chat-body::-webkit-scrollbar {
   width: 5px;
 }
 
@@ -794,7 +831,6 @@ text
   background-color: var(--accent-txt);
   border-radius: 5px;
 }
-
 
 .conversation-chat-row {
   display: flex;

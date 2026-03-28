@@ -1145,8 +1145,49 @@ Call them now to check if they want to extend. If no response, call them when re
       const userDocRef = doc(db, "users", authUser.uid);
       const snap = await getDoc(userDocRef);
 
-      // Build a normalized user object that ALWAYS includes providerData
-      if (snap.exists()) {
+      // // Build a normalized user object that ALWAYS includes providerData
+      // if (snap.exists()) {
+      //   const data = snap.data();
+      //   const normalized = {
+      //     uid: authUser.uid,
+      //     name: data.name || authUser.displayName || "",
+      //     email: data.email || authUser.email || "",
+      //     phone: data.phone || authUser.phoneNumber || "",
+      //     profilePic: data.profilePic || authUser.photoURL || "",
+      //     role: data.role || "user",
+      //     providerData, // IMPORTANT: keep auth provider info
+      //     // include other Firestore fields but prioritize auth
+      //     ...data,
+      //   };
+      //   setUser(normalized);
+      //   setUserAndRemember(normalized);
+      //   return normalized;
+      // } else {
+      //   const fallback = {
+      //     uid: authUser.uid,
+      //     name: authUser.displayName || "",
+      //     email: authUser.email || "",
+      //     phone: authUser.phoneNumber || "",
+      //     profilePic: authUser.photoURL || "",
+      //     role: "user",
+      //     providerData,
+      //   };
+      //   setUser(fallback);
+      //   setUserAndRemember(fallback);
+      //   return fallback;
+      // }
+
+    // } catch (err) {
+    //   console.error("reloadAndSyncUser error:", err);
+    //   setUser(null);
+    //   setUserAndRemember(null);
+    //   return null;
+    // }
+
+
+
+
+    if (snap.exists()) {
         const data = snap.data();
         const normalized = {
           uid: authUser.uid,
@@ -1154,7 +1195,11 @@ Call them now to check if they want to extend. If no response, call them when re
           email: data.email || authUser.email || "",
           phone: data.phone || authUser.phoneNumber || "",
           profilePic: data.profilePic || authUser.photoURL || "",
-          role: data.role || "user",
+          role:
+            data.role ||
+            lastKnownUserRef.current?.role ||
+            lastKnownUser?.role ||
+            "user",
           providerData, // IMPORTANT: keep auth provider info
           // include other Firestore fields but prioritize auth
           ...data,
@@ -1169,19 +1214,29 @@ Call them now to check if they want to extend. If no response, call them when re
           email: authUser.email || "",
           phone: authUser.phoneNumber || "",
           profilePic: authUser.photoURL || "",
-          role: "user",
+          role:
+            lastKnownUserRef.current?.role ||
+            lastKnownUser?.role ||
+            "user",
           providerData,
         };
         setUser(fallback);
         setUserAndRemember(fallback);
         return fallback;
       }
-    } catch (err) {
+} catch (err) {
       console.error("reloadAndSyncUser error:", err);
+
+      if (lastKnownUserRef.current) {
+        setUserAndRemember(lastKnownUserRef.current);
+        return lastKnownUserRef.current;
+      }
+
       setUser(null);
       setUserAndRemember(null);
       return null;
     }
+
   }
 
   // LINK ACCOUNT
@@ -1332,13 +1387,14 @@ Call them now to check if they want to extend. If no response, call them when re
 
   // Save Remember Me
   const rememberUser = () => {
-    const expiry = Date.now() + 10 * 1000; // FOR TESTING: SET TO 30s
+    const rememberDurationMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const expiry = Date.now() + rememberDurationMs;
     localStorage.setItem(REMEMBER_KEY, expiry.toString());
 
     if (logoutTimer) clearTimeout(logoutTimer);
     logoutTimer = setTimeout(() => {
       expireSession();
-    }, 10 * 1000);
+    }, rememberDurationMs);
   };
 
   const clearRememberMe = () => {

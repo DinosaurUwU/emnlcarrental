@@ -21,6 +21,8 @@ const Messages = () => {
     setActionOverlay,
     loadMoreNotifications,
     hasMoreNotifications,
+    loadMoreUserMessages,
+    hasMoreUserMessages,
   } = useUser();
 
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -44,8 +46,14 @@ const Messages = () => {
     isLoadingMoreConversationMessages,
     setIsLoadingMoreConversationMessages,
   ] = useState(false);
-  const [visibleConversationMessageCounts, setVisibleConversationMessageCounts] =
-    useState({});
+  const [
+    visibleConversationMessageCounts,
+    setVisibleConversationMessageCounts,
+  ] = useState({});
+  const [
+    isLoadingMoreConversationThreads,
+    setIsLoadingMoreConversationThreads,
+  ] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [chatInput, setChatInput] = useState("");
   const conversationChatBodyRef = useRef(null);
@@ -249,6 +257,16 @@ const Messages = () => {
     return threads;
   }, [chatMessages, user?.uid]);
 
+  useEffect(() => {
+    if (!isLoadingMoreConversationThreads) return;
+
+    const timer = setTimeout(() => {
+      setIsLoadingMoreConversationThreads(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [conversationThreads?.length, isLoadingMoreConversationThreads]);
+
   const selectedThread = useMemo(() => {
     return (
       conversationThreads.find(
@@ -257,23 +275,27 @@ const Messages = () => {
     );
   }, [conversationThreads, selectedConversationId]);
 
-const currentVisibleConversationMessageCount =
+  const currentVisibleConversationMessageCount =
     visibleConversationMessageCounts[selectedConversationId] || 10;
 
   const displayedThreadMessages = useMemo(() => {
     if (!selectedThread?.messages) return [];
-    return selectedThread.messages.slice(-currentVisibleConversationMessageCount);
+    return selectedThread.messages.slice(
+      -currentVisibleConversationMessageCount,
+    );
   }, [selectedThread?.messages, currentVisibleConversationMessageCount]);
 
   const canLoadMoreConversationMessages = useMemo(() => {
     return (
-      (selectedThread?.messages?.length || 0) >
-        currentVisibleConversationMessageCount &&
+      ((selectedThread?.messages?.length || 0) >
+        currentVisibleConversationMessageCount ||
+        hasMoreUserMessages) &&
       !isLoadingMoreConversationMessages
     );
   }, [
     selectedThread?.messages?.length,
     currentVisibleConversationMessageCount,
+    hasMoreUserMessages,
     isLoadingMoreConversationMessages,
   ]);
 
@@ -954,85 +976,106 @@ const currentVisibleConversationMessageCount =
                     No conversations yet.
                   </p>
                 ) : (
-                  conversationThreads.map((thread) => {
-                    const sourceTag =
-                      thread.latest?.sourcePage === "contact-guest"
-                        ? "[Guest Contact] "
-                        : thread.latest?.sourcePage === "contact"
-                          ? "[Contact] "
-                          : "";
+                  <>
+                    {conversationThreads.map((thread) => {
+                      const sourceTag =
+                        thread.latest?.sourcePage === "contact-guest"
+                          ? "[Guest Contact] "
+                          : thread.latest?.sourcePage === "contact"
+                            ? "[Contact] "
+                            : "";
 
-                    const lastText =
-                      sourceTag +
-                      (thread.latest?.content || "").replace(/<[^>]+>/g, "");
-                    return (
-                      <div
-                        key={thread.id}
-                        onClick={() => openConversation(thread.id)}
-                        className={`conversation-thread-item ${
-                          selectedConversationId === thread.id ? "active" : ""
-                        }`}
-                      >
-                        <div className="conversation-thread-row">
-                          <img
-                            src={
-                              thread.participant.profilePic ||
-                              "/assets/profile.png"
-                            }
-                            alt="Avatar"
-                            className="avatar"
-                          />
-                          <div className="thread-texts">
-                            <div className="thread-top-row">
-                              <div className="thread-name">
-                                {thread.participant.name}
+                      const lastText =
+                        sourceTag +
+                        (thread.latest?.content || "").replace(/<[^>]+>/g, "");
+                      return (
+                        <div
+                          key={thread.id}
+                          onClick={() => openConversation(thread.id)}
+                          className={`conversation-thread-item ${
+                            selectedConversationId === thread.id ? "active" : ""
+                          }`}
+                        >
+                          <div className="conversation-thread-row">
+                            <img
+                              src={
+                                thread.participant.profilePic ||
+                                "/assets/profile.png"
+                              }
+                              alt="Avatar"
+                              className="avatar"
+                            />
+                            <div className="thread-texts">
+                              <div className="thread-top-row">
+                                <div className="thread-name">
+                                  {thread.participant.name}
+                                </div>
+                                <div className="thread-time">
+                                  {formatElapsed(thread.latest)}
+                                </div>
                               </div>
-                              <div className="thread-time">
-                                {formatElapsed(thread.latest)}
+
+                              <div className="thread-bottom-row">
+                                <div className="thread-preview">
+                                  {lastText || "No message"}
+                                </div>
+                                {thread.unreadCount > 0 && (
+                                  <span className="thread-unread-badge">
+                                    {thread.unreadCount}
+                                  </span>
+                                )}
                               </div>
                             </div>
 
-                            <div className="thread-bottom-row">
-                              <div className="thread-preview">
-                                {lastText || "No message"}
-                              </div>
-                              {thread.unreadCount > 0 && (
-                                <span className="thread-unread-badge">
-                                  {thread.unreadCount}
-                                </span>
-                              )}
+                            <div className="thread-row-actions">
+                              <button
+                                type="button"
+                                className="thread-delete-btn"
+                                title="Delete conversation"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setThreadToDelete(thread);
+                                  setShowDeleteConversationOverlay(true);
+                                }}
+                              >
+                                <img
+                                  src="/assets/delete.png"
+                                  alt="Delete conversation"
+                                  className="message-action-icon"
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.src =
+                                      "/assets/delete-hover.png")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.src = "/assets/delete.png")
+                                  }
+                                />
+                              </button>
                             </div>
-                          </div>
-
-                          <div className="thread-row-actions">
-                            <button
-                              type="button"
-                              className="thread-delete-btn"
-                              title="Delete conversation"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setThreadToDelete(thread);
-                                setShowDeleteConversationOverlay(true);
-                              }}
-                            >
-                              <img
-                                src="/assets/delete.png"
-                                alt="Delete conversation"
-                                className="message-action-icon"
-                                onMouseEnter={(e) =>
-                                  (e.currentTarget.src =
-                                    "/assets/delete-hover.png")
-                                }
-                                onMouseLeave={(e) =>
-                                  (e.currentTarget.src = "/assets/delete.png")
-                                }
-                              />
-                            </button>
                           </div>
                         </div>
+                      );
+                    })}
+
+                    {isLoadingMoreConversationThreads ? (
+                      <div className="admin-thread-spinner-wrap">
+                        <div className="admin-thread-spinner" />
                       </div>
-                    );
-                  })
+                    ) : (
+                      hasMoreUserMessages && (
+                        <button
+                          type="button"
+                          className="conversation-thread-load-more-btn"
+                          onClick={() => {
+                            setIsLoadingMoreConversationThreads(true);
+                            loadMoreUserMessages();
+                          }}
+                        >
+                          Load 10 More Conversations
+                        </button>
+                      )
+                    )}
+                  </>
                 )}
               </div>
 
