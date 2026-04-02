@@ -298,10 +298,18 @@ useEffect(() => {
     setSearchOpen(false);
   };
 
+  // const getLogoForTheme = () => {
+  // // Get user's dark/light preference
+  // const isDark = userTheme === "dark" || 
+  //   (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  // const darkSuffix = isDark ? "-dark" : "";
+
   const getLogoForTheme = () => {
-  // Get user's dark/light preference
-  const isDark = userTheme === "dark" || 
-    (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  // Get user's dark/light preference - safely check for window
+  let isDark = userTheme === "dark";
+  if (typeof window !== 'undefined' && userTheme === "system") {
+    isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
   const darkSuffix = isDark ? "-dark" : "";
   
   switch (theme) {

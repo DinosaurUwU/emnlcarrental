@@ -11,6 +11,7 @@ const Messages = () => {
     conversationThreads: rawConversationThreads,
     notificationMessages,
     deleteMessage,
+    deleteConversationThreadForCurrentUser,
     markMessageAsRead,
     sendMessage,
     subscribeToConversationMessages,
@@ -58,9 +59,8 @@ const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [selectedThreadMessages, setSelectedThreadMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
-  const [conversationSendState, setConversationSendState] = useState("idle");
-  const [pendingConversationMessage, setPendingConversationMessage] =
-    useState(null);
+  const [pendingConversationMessages, setPendingConversationMessages] =
+    useState([]);
   const conversationChatBodyRef = useRef(null);
   const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
     useState(false);
@@ -162,14 +162,18 @@ const Messages = () => {
   }, [selectedThreadMeta, selectedThreadMessages]);
 
   const displayedThreadMessages = useMemo(() => {
-    const baseMessages = selectedThreadMessages || [];
+    const pendingIds = new Set(
+      (pendingConversationMessages || [])
+        .map((msg) => msg?.clientMessageId)
+        .filter(Boolean),
+    );
 
-    if (!pendingConversationMessage) {
-      return baseMessages;
-    }
+    const visibleRealMessages = (selectedThreadMessages || []).filter(
+      (msg) => !msg?.clientMessageId || !pendingIds.has(msg.clientMessageId),
+    );
 
-    return [...baseMessages, pendingConversationMessage];
-  }, [selectedThreadMessages, pendingConversationMessage]);
+    return [...visibleRealMessages, ...(pendingConversationMessages || [])];
+  }, [selectedThreadMessages, pendingConversationMessages]);
 
   const canLoadMoreConversationMessages = useMemo(() => {
     return hasMoreConversationMessages && !isLoadingMoreConversationMessages;
@@ -232,39 +236,30 @@ const Messages = () => {
     setProcessingConversationDelete({
       isProcessing: true,
       message: "Deleting conversation...",
-      textClass: "status-submitting",
+      textClass: "submitting-text-red",
     });
 
     try {
-      const inboxIds = (thread.messages || [])
-        .filter((m) => m?._source === "inbox" && m?.id)
-        .map((m) => m.id);
+      const result = await deleteConversationThreadForCurrentUser(thread.id);
 
-      const sentIds = (thread.messages || [])
-        .filter((m) => m?._source === "sentbox" && m?.id)
-        .map((m) => m.id);
-
-      if (inboxIds.length > 0) {
-        await deleteMessage(inboxIds, "inbox");
+      if (!result?.success) {
+        throw new Error(result?.error || "Failed to delete conversation.");
       }
 
-      if (sentIds.length > 0) {
-        await deleteMessage(sentIds, "sentbox");
-      }
-
-      const deletedCount = inboxIds.length + sentIds.length;
-      handleMessagesDeleted(deletedCount > 0 ? deletedCount : 1);
+      handleMessagesDeleted(result.deletedCount > 0 ? result.deletedCount : 1);
 
       if (selectedConversationId === thread.id) {
         setSelectedConversationId(null);
         setChatInput("");
+        setSelectedThreadMessages([]);
+        setPendingConversationMessages([]);
       }
 
       setThreadToDelete(null);
     } catch (error) {
       console.error("Error deleting conversation:", error);
       showActionOverlay({
-        message: "Failed to delete conversation.",
+        message: error?.message || "Failed to delete conversation.",
         type: "warning",
       });
     } finally {
@@ -289,10 +284,14 @@ const Messages = () => {
     const text = chatInput.trim();
     if (!text) return;
     if (!user?.uid || !selectedThread?.id) return;
-    if (conversationSendState === "sending") return;
+
+    const tempMessageId = `pending_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
 
     const tempMessage = {
-      id: `pending_${Date.now()}`,
+      id: tempMessageId,
+      clientMessageId: tempMessageId,
       senderUid: user.uid,
       recipientUid: selectedThread.participant?.uid || "",
       content: text,
@@ -303,8 +302,7 @@ const Messages = () => {
       _isPending: true,
     };
 
-    setConversationSendState("sending");
-    setPendingConversationMessage(tempMessage);
+    setPendingConversationMessages((prev) => [...prev, tempMessage]);
     setChatInput("");
 
     const contactInfo = {
@@ -318,14 +316,16 @@ const Messages = () => {
       recipientName: selectedThread.participant?.name,
       recipientEmail: selectedThread.participant?.email,
       recipientPhone: selectedThread.participant?.contact,
+      clientMessageId: tempMessageId,
     };
 
     const result = await sendMessage(contactInfo);
 
     if (!result?.success) {
-      setChatInput(text);
-      setPendingConversationMessage(null);
-      setConversationSendState("error");
+      setPendingConversationMessages((prev) =>
+        prev.filter((msg) => msg.id !== tempMessageId),
+      );
+      setChatInput((prev) => (prev ? prev : text));
       showActionOverlay({
         message: result?.error || "Failed to send message.",
         type: "warning",
@@ -333,12 +333,9 @@ const Messages = () => {
       return;
     }
 
-    setPendingConversationMessage(null);
-    setConversationSendState("sent");
-    showActionOverlay({
-      message: "Message sent!",
-      type: "success",
-    });
+    setPendingConversationMessages((prev) =>
+      prev.filter((msg) => msg.id !== tempMessageId),
+    );
 
     setTimeout(() => {
       if (conversationChatBodyRef.current) {
@@ -357,13 +354,17 @@ const Messages = () => {
 
   const sendFleetDetailsLink = async () => {
     if (!user?.uid || !selectedThread?.id) return;
-    if (conversationSendState === "sending") return;
 
     const fleetUrl = `${window.location.origin}/fleet-details`;
     const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
 
+    const tempMessageId = `pending_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+
     const tempMessage = {
-      id: `pending_${Date.now()}`,
+      id: tempMessageId,
+      clientMessageId: tempMessageId,
       senderUid: user.uid,
       recipientUid: selectedThread.participant?.uid || "",
       content: quickMessage,
@@ -375,8 +376,7 @@ const Messages = () => {
       sourcePage: "chat",
     };
 
-    setConversationSendState("sending");
-    setPendingConversationMessage(tempMessage);
+    setPendingConversationMessages((prev) => [...prev, tempMessage]);
 
     const contactInfo = {
       name: user.name,
@@ -389,13 +389,15 @@ const Messages = () => {
       recipientName: selectedThread.participant?.name,
       recipientEmail: selectedThread.participant?.email,
       recipientPhone: selectedThread.participant?.contact,
+      clientMessageId: tempMessageId,
     };
 
     const result = await sendMessage(contactInfo);
 
     if (!result?.success) {
-      setPendingConversationMessage(null);
-      setConversationSendState("error");
+      setPendingConversationMessages((prev) =>
+        prev.filter((msg) => msg.id !== tempMessageId),
+      );
       showActionOverlay({
         message: result?.error || "Failed to send fleet link.",
         type: "warning",
@@ -403,12 +405,9 @@ const Messages = () => {
       return;
     }
 
-    setPendingConversationMessage(null);
-    setConversationSendState("sent");
-    showActionOverlay({
-      message: "Fleet details link sent!",
-      type: "success",
-    });
+    setPendingConversationMessages((prev) =>
+      prev.filter((msg) => msg.id !== tempMessageId),
+    );
 
     setTimeout(() => {
       if (conversationChatBodyRef.current) {
@@ -1119,17 +1118,13 @@ const Messages = () => {
                         <button
                           className="fleet-link-btn"
                           onClick={sendFleetDetailsLink}
-                          disabled={conversationSendState === "sending"}
                         >
                           Send Fleet Link
                         </button>
                         <button
                           className="reply-btn"
                           onClick={sendConversationMessage}
-                          disabled={
-                            !chatInput.trim() ||
-                            conversationSendState === "sending"
-                          }
+                          disabled={!chatInput.trim()}
                         >
                           Send
                         </button>

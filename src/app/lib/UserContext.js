@@ -4037,6 +4037,7 @@ const sendMessage = async ({
     recipientPhone,
     sourcePage = "chat",
     sourceLabel = "Chat",
+    clientMessageId = "",
   }) => {
     if (!senderUid || !recipientUid) {
       console.error("Missing senderUid or recipientUid.");
@@ -4083,6 +4084,7 @@ const sendMessage = async ({
         startTimestamp: serverTimestamp(),
         profilePic: user?.profilePic || "/assets/profile.png",
         readStatus: false,
+        clientMessageId: clientMessageId || "",
         ...dateParts,
       };
 
@@ -4129,7 +4131,7 @@ const sendMessage = async ({
         }),
       ]);
 
-      return { success: true, threadId, messageId };
+      return { success: true, threadId, messageId, clientMessageId };
     } catch (err) {
       console.error("Error sending message:", err);
       return {
@@ -4750,6 +4752,50 @@ const sendMessage = async ({
   //     unsubscribeSent();
   //   };
   // }, [user?.uid]);
+
+  const deleteConversationThreadForCurrentUser = async (threadId) => {
+    if (!user?.uid || !threadId) {
+      return { success: false, error: "Missing user or threadId." };
+    }
+
+    try {
+      const messagesRef = collection(
+        db,
+        "users",
+        user.uid,
+        "conversationThreads",
+        threadId,
+        "messages",
+      );
+
+      const messagesSnapshot = await getDocs(messagesRef);
+
+      await Promise.all(
+        messagesSnapshot.docs.map((messageDoc) => deleteDoc(messageDoc.ref)),
+      );
+
+      const threadRef = doc(
+        db,
+        "users",
+        user.uid,
+        "conversationThreads",
+        threadId,
+      );
+
+      await deleteDoc(threadRef);
+
+      return {
+        success: true,
+        deletedCount: messagesSnapshot.size,
+      };
+    } catch (error) {
+      console.error("Error deleting conversation thread:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to delete conversation thread.",
+      };
+    }
+  };
 
   // (ADMIN & USER) DELETE MESSAGE
   const deleteMessage = async (messageOrMessages, type = "inbox") => {
@@ -9305,6 +9351,7 @@ Please review this request in the admin panel and proceed with approval or rejec
 
         sendMessage,
         deleteMessage,
+        deleteConversationThreadForCurrentUser,
         conversationThreads,
         subscribeToConversationMessages,
         hasMoreConversationMessages,

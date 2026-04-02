@@ -248,6 +248,7 @@ function Contact({ openBooking }) {
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [message, setMessage] = useState("");
+  const [isSendingContactMessage, setIsSendingContactMessage] = useState(false);
   const [adminUid, setAdminUid] = useState(null);
   const [adminName, setAdminName] = useState(null);
   const [adminEmail, setAdminEmail] = useState(null);
@@ -391,61 +392,70 @@ function Contact({ openBooking }) {
   }, []);
 
   //SUBMIT
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!adminUid) {
+    if (!adminUid || isSendingContactMessage) {
       console.error("Admin UID not available");
       return;
     }
 
-    const fullName = `${firstName} ${middleName} ${lastName}`
-      .trim()
-      .replace(/\s+/g, " ");
-    const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
+    setIsSendingContactMessage(true);
 
-    let result = null;
+    try {
+      const fullName = `${firstName} ${middleName} ${lastName}`
+        .trim()
+        .replace(/\s+/g, " ");
+      const fullPhone = `${selectedCountry.dialCode}${phone.replace(/^0/, "")}`;
 
-    if (user?.uid) {
-      result = await sendMessage({
-        name: fullName,
-        email,
-        phone: fullPhone,
-        message,
-        senderUid: user.uid,
-        recipientUid: adminUid,
-        isAdminSender: false,
-        recipientName: adminName,
-        recipientEmail: adminEmail,
-        recipientPhone: adminContact,
-        sourcePage: "contact",
-        sourceLabel: "Contact Page",
+      let result = null;
+
+      if (user?.uid) {
+        result = await sendMessage({
+          name: fullName,
+          email,
+          phone: fullPhone,
+          message,
+          senderUid: user.uid,
+          recipientUid: adminUid,
+          isAdminSender: false,
+          recipientName: adminName,
+          recipientEmail: adminEmail,
+          recipientPhone: adminContact,
+          sourcePage: "contact",
+          sourceLabel: "Contact Page",
+        });
+      } else {
+        result = await sendGuestContactMessage({
+          name: fullName,
+          email,
+          phone: fullPhone,
+          message,
+          recipientUid: adminUid,
+          recipientName: adminName,
+          recipientEmail: adminEmail,
+          recipientPhone: adminContact,
+        });
+      }
+
+      if (!result?.success) {
+        showContactAction({
+          message: result?.error || "Failed to send message.",
+          type: "warning",
+        });
+        return;
+      }
+
+      setMessage("");
+      setContactSuccessMessage("Message sent successfully!");
+      setShowContactSuccess(true);
+      showContactAction({
+        message: "Message sent successfully!",
+        type: "success",
       });
-    } else {
-      result = await sendGuestContactMessage({
-        name: fullName,
-        email,
-        phone: fullPhone,
-        message,
-        recipientUid: adminUid,
-        recipientName: adminName,
-        recipientEmail: adminEmail,
-        recipientPhone: adminContact,
-      });
+    } finally {
+      setIsSendingContactMessage(false);
     }
-
-    showContactAction({
-      message: result?.error || "Failed to send message.",
-      type: "warning",
-    });
-
-    setMessage("");
-    setContactSuccessMessage("Message sent successfully!");
-    setShowContactSuccess(true);
-    showContactAction({
-      message: "Message sent successfully!",
-      type: "success",
-    });
   };
 
   const filteredCountries = countries.filter((country) =>
@@ -578,7 +588,12 @@ function Contact({ openBooking }) {
               />
             </div>
 
-            <label htmlFor="message">Message</label>
+<label htmlFor="message" className="contact-message-label">
+              <span>Message</span>
+              {isSendingContactMessage && (
+                <span className="contact-message-spinner" />
+              )}
+            </label>
             <textarea
               id="message"
               placeholder="Enter Message..."
@@ -588,7 +603,9 @@ function Contact({ openBooking }) {
               required
             ></textarea>
 
-            <button type="submit">Send Message</button>
+            <button type="submit" disabled={isSendingContactMessage}>
+              {isSendingContactMessage ? "Sending..." : "Send Message"}
+            </button>
             <div className="contact-or-separator">
               <span>or</span>
             </div>

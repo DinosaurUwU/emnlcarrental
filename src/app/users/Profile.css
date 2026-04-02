@@ -1061,6 +1061,17 @@ body.modal-open {
   gap: 10px;
 }
 
+.profile-delete-conversation-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
 .profile-chat-user {
   min-width: 0;
 }

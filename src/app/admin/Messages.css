@@ -823,7 +823,8 @@ body.modal-open {
     transform: rotate(360deg);
   }
 }
-text .conversation-chat-body::-webkit-scrollbar {
+
+.conversation-chat-body::-webkit-scrollbar {
   width: 5px;
 }
 
@@ -887,10 +888,10 @@ text .conversation-chat-body::-webkit-scrollbar {
 
 .message-time-spinner {
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top: 2px solid #ffffff;
+  width: 8px;
+  height: 8px;
+  border: 2px solid rgba(var(--gradient-base), 0.3);
+  border-top: 2px solid var(--accent-txt);
   border-radius: 50%;
   animation: messageTimeSpin 0.8s linear infinite;
   vertical-align: middle;

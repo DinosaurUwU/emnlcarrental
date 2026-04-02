@@ -32,6 +32,7 @@ const Profile = ({ openBooking }) => {
     hasMoreConversationMessages,
     markMessageAsRead,
     deleteMessage,
+    deleteConversationThreadForCurrentUser,
     sendMessage,
     cancelUserBookingRequest,
 
@@ -75,6 +76,9 @@ const Profile = ({ openBooking }) => {
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
+  const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
+    useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState(null);
 
   const [showEditProfileOverlay, setShowEditProfileOverlay] = useState(false);
   const [tempProfilePic, setTempProfilePic] = useState(
@@ -96,11 +100,8 @@ const Profile = ({ openBooking }) => {
   const [selectedMessageIds, setSelectedMessageIds] = useState([]);
   const [selectedOption, setSelectedOption] = useState("none");
   const [chatInput, setChatInput] = useState("");
-  const [conversationSendState, setConversationSendState] = useState("idle");
-  const [conversationSendStatusText, setConversationSendStatusText] =
-    useState("");
-    const [pendingConversationMessage, setPendingConversationMessage] =
-    useState(null);
+  const [pendingConversationMessages, setPendingConversationMessages] =
+    useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [showHistoryDetailsOverlay, setShowHistoryDetailsOverlay] =
@@ -451,6 +452,12 @@ const Profile = ({ openBooking }) => {
   const [hideMessagesDeletedAnimation, setHideMessagesDeletedAnimation] =
     useState(false);
   const [deletedMessageCount, setDeletedMessageCount] = useState(0);
+  const [processingConversationDelete, setProcessingConversationDelete] =
+    useState({
+      isProcessing: false,
+      message: "",
+      textClass: "",
+    });
 
   // Trigger this when messages are deleted
   const handleMessagesDeleted = (count) => {
@@ -462,6 +469,44 @@ const Profile = ({ openBooking }) => {
       setHideMessagesDeletedAnimation(true);
       setTimeout(() => setShowMessagesDeletedOverlay(false), 400);
     }, 5000);
+  };
+
+const deleteUserConversationThread = async (thread) => {
+    if (!thread?.id) return;
+
+    setProcessingConversationDelete({
+      isProcessing: true,
+      message: "Deleting conversation...",
+      textClass: "submitting-text-red",
+    });
+
+    try {
+      const result = await deleteConversationThreadForCurrentUser(thread.id);
+
+      if (!result?.success) {
+        throw new Error(result?.error || "Failed to delete conversation.");
+      }
+
+      handleMessagesDeleted(result.deletedCount > 0 ? result.deletedCount : 1);
+
+      setAdminConversationMessages([]);
+      setPendingConversationMessages([]);
+      setChatInput("");
+      setConversationToDelete(null);
+      setShowDeleteConversationOverlay(false);
+    } catch (error) {
+      console.error("Error deleting user conversation:", error);
+      showActionOverlay({
+        message: error?.message || "Failed to delete conversation.",
+        type: "warning",
+      });
+    } finally {
+      setProcessingConversationDelete({
+        isProcessing: false,
+        message: "",
+        textClass: "",
+      });
+    }
   };
 
   const handleToggleGoogle = async () => {
@@ -1039,14 +1084,18 @@ const Profile = ({ openBooking }) => {
   }, [adminConversationMessages.length, activeTab]);
 
 const displayedConversationMessages = useMemo(() => {
-    const baseMessages = adminConversationMessages || [];
+    const pendingIds = new Set(
+      (pendingConversationMessages || [])
+        .map((msg) => msg?.clientMessageId)
+        .filter(Boolean),
+    );
 
-    if (!pendingConversationMessage) {
-      return baseMessages;
-    }
+    const visibleRealMessages = (adminConversationMessages || []).filter(
+      (msg) => !msg?.clientMessageId || !pendingIds.has(msg.clientMessageId),
+    );
 
-    return [...baseMessages, pendingConversationMessage];
-  }, [adminConversationMessages, pendingConversationMessage]);
+    return [...visibleRealMessages, ...(pendingConversationMessages || [])];
+  }, [adminConversationMessages, pendingConversationMessages]);
 
   const canLoadMoreConversationMessages = useMemo(() => {
     return hasMoreConversationMessages && !isLoadingMoreConversationMessages;
@@ -1093,31 +1142,20 @@ const displayedConversationMessages = useMemo(() => {
     });
   }, [activeTab, adminConversation, markMessageAsRead, user?.uid]);
 
-  useEffect(() => {
-    if (
-      conversationSendState !== "sent" &&
-      conversationSendState !== "error"
-    ) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setConversationSendState("idle");
-      setConversationSendStatusText("");
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [conversationSendState]);
-
-const sendConversationMessage = async () => {
+  const sendConversationMessage = async () => {
     const text = chatInput.trim();
     if (!text || !user?.uid) return;
-    if (conversationSendState === "sending") return;
+
+    const tempMessageId = `pending_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
 
     const tempMessage = {
-      id: `pending_${Date.now()}`,
+      id: tempMessageId,
+      clientMessageId: tempMessageId,
       senderUid: user.uid,
-      recipientUid: adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
+      recipientUid:
+        adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
       content: text,
       profilePic: user.profilePic || "/assets/profile.png",
       startTimestamp: null,
@@ -1126,9 +1164,7 @@ const sendConversationMessage = async () => {
       _isPending: true,
     };
 
-    setConversationSendState("sending");
-    setConversationSendStatusText("Sending...");
-    setPendingConversationMessage(tempMessage);
+    setPendingConversationMessages((prev) => [...prev, tempMessage]);
     setChatInput("");
 
     let resolvedAdmin = {
@@ -1164,10 +1200,10 @@ const sendConversationMessage = async () => {
     }
 
     if (!resolvedAdmin.uid) {
-      setChatInput(text);
-      setPendingConversationMessage(null);
-      setConversationSendState("error");
-      setConversationSendStatusText("Failed to send message");
+      setChatInput((prev) => (prev ? prev : text));
+      setPendingConversationMessages((prev) =>
+        prev.filter((msg) => msg.id !== tempMessageId),
+      );
       showActionOverlay({
         message: "Admin account not found.",
         type: "warning",
@@ -1186,13 +1222,14 @@ const sendConversationMessage = async () => {
       recipientName: resolvedAdmin.name,
       recipientEmail: resolvedAdmin.email,
       recipientPhone: resolvedAdmin.contact,
+      clientMessageId: tempMessageId,
     });
 
     if (!result?.success) {
-      setChatInput(text);
-      setPendingConversationMessage(null);
-      setConversationSendState("error");
-      setConversationSendStatusText("Failed to send message");
+      setPendingConversationMessages((prev) =>
+        prev.filter((msg) => msg.id !== tempMessageId),
+      );
+      setChatInput((prev) => (prev ? prev : text));
       showActionOverlay({
         message: result?.error || "Failed to send message.",
         type: "warning",
@@ -1200,13 +1237,9 @@ const sendConversationMessage = async () => {
       return;
     }
 
-    setPendingConversationMessage(null);
-    setConversationSendState("sent");
-    setConversationSendStatusText("Message sent");
-    showActionOverlay({
-      message: "Message sent!",
-      type: "success",
-    });
+    setPendingConversationMessages((prev) =>
+      prev.filter((msg) => msg.id !== tempMessageId),
+    );
 
     setTimeout(() => {
       if (profileChatBodyRef.current) {
@@ -2047,6 +2080,57 @@ const sendConversationMessage = async () => {
           </div>
         )}
 
+      {showDeleteConversationOverlay && conversationToDelete && (
+        <div className="overlay-revert">
+          <div className="confirm-modal">
+            <h3>Delete Conversation</h3>
+            <p>
+              This will delete all messages in this conversation from your
+              account only. Are you sure?
+            </p>
+            <div className="confirm-buttons">
+              <button
+                className="confirm-btn revert"
+                onClick={() => {
+                  deleteUserConversationThread(conversationToDelete);
+                }}
+              >
+                Delete
+              </button>
+
+              <button
+                className="confirm-btn cancel"
+                onClick={() => {
+                  setShowDeleteConversationOverlay(false);
+                  setConversationToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+              {processingConversationDelete.isProcessing && (
+          <div className="submitting-overlay">
+            <div className="loading-container">
+              <div className="loading-bar-road">
+                <img
+                  src="/assets/images/submitting.gif"
+                  alt={processingConversationDelete.message}
+                  className="car-gif"
+                />
+              </div>
+              <p className={processingConversationDelete.textClass}>
+                {processingConversationDelete.message}
+              </p>
+            </div>
+          </div>
+        )}
+
       <div className="profile-columns">
         <div className="profile-container">
           {showEditProfileOverlay && (
@@ -2712,6 +2796,31 @@ const sendConversationMessage = async () => {
                           "No contact"}
                       </div>
                     </div>
+
+                    {adminConversation?.id &&
+                      !String(adminConversation.id).startsWith("fallback_") && (
+                        <button
+                          type="button"
+                          className="profile-delete-conversation-btn"
+                          title="Delete conversation"
+                          onClick={() => {
+                            setConversationToDelete(adminConversation);
+                            setShowDeleteConversationOverlay(true);
+                          }}
+                        >
+                          <img
+                            src="/assets/delete.png"
+                            alt="Delete conversation"
+                            className="message-action-icon"
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.src = "/assets/delete-hover.png")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.src = "/assets/delete.png")
+                            }
+                          />
+                        </button>
+                      )}
                   </div>
 
                   <div className="profile-chat-body" ref={profileChatBodyRef}>
@@ -2772,7 +2881,7 @@ const sendConversationMessage = async () => {
                     )}
                   </div>
 
-<div className="profile-chat-composer">
+                  <div className="profile-chat-composer">
                     <textarea
                       className="profile-chat-input"
                       value={chatInput}
@@ -2783,10 +2892,7 @@ const sendConversationMessage = async () => {
                     <button
                       className="reply-btn"
                       onClick={sendConversationMessage}
-                      disabled={
-                        !chatInput.trim() ||
-                        conversationSendState === "sending"
-                      }
+                      disabled={!chatInput.trim()}
                       title="Send"
                     >
                       Send
