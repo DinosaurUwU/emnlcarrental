@@ -8,12 +8,13 @@ import { FiX } from "react-icons/fi";
 const Messages = () => {
   const {
     user,
-    userMessages,
-    sentMessages,
+    conversationThreads: rawConversationThreads,
     notificationMessages,
     deleteMessage,
     markMessageAsRead,
     sendMessage,
+    subscribeToConversationMessages,
+    hasMoreConversationMessages,
     actionOverlay,
     showActionOverlay,
     hideCancelAnimation,
@@ -55,6 +56,7 @@ const Messages = () => {
     setIsLoadingMoreConversationThreads,
   ] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
+  const [selectedThreadMessages, setSelectedThreadMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const conversationChatBodyRef = useRef(null);
   const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
@@ -86,176 +88,24 @@ const Messages = () => {
     return () => clearTimeout(timer);
   }, [notificationMessages.length, isLoadingMoreMessages]);
 
-  const chatMessages = useMemo(() => {
-    const inboxChat = (userMessages || [])
-      .filter((m) => !m?.isNotification)
-      .map((m) => ({ ...m, _source: "inbox" }));
-
-    const sentChat = (sentMessages || [])
-      .filter((m) => !m?.isNotification)
-      .map((m) => ({ ...m, _source: "sentbox" }));
-
-    return [...inboxChat, ...sentChat];
-  }, [userMessages, sentMessages]);
-
   const conversationThreads = useMemo(() => {
-    if (!user?.uid) return [];
-
-    const map = new Map();
-
-    const getMs = (msg) => {
-      const ts = msg?.startTimestamp;
-      if (ts?.toDate) return ts.toDate().getTime();
-      if (typeof ts?.seconds === "number") return ts.seconds * 1000;
-      if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
-      return 0;
-    };
-
-    for (const msg of chatMessages) {
-      const senderUid = msg?.senderUid || "";
-      const recipientUid = msg?.recipientUid || "";
-
-      const otherUid = senderUid === user.uid ? recipientUid : senderUid;
-      if (!otherUid) continue;
-
-      if (!map.has(otherUid)) {
-        map.set(otherUid, {
-          id: otherUid,
-          participant: {
-            name:
-              senderUid === user.uid
-                ? msg?.recipientName || msg?.recipientEmail || otherUid
-                : msg?.name || msg?.email || otherUid,
-            email:
-              senderUid === user.uid
-                ? msg?.recipientEmail || "No email"
-                : msg?.email || "No email",
-            contact:
-              senderUid === user.uid
-                ? msg?.recipientContact || msg?.recipientPhone || "No contact"
-                : msg?.contact || msg?.phone || "No contact",
-            profilePic: msg?.profilePic || "/assets/profile.png",
-          },
-          messages: [],
-          unreadCount: 0,
-          latest: null,
-        });
-      }
-
-      const thread = map.get(otherUid);
-      thread.messages.push(msg);
-
-      const isIncomingFromClient = senderUid !== user.uid;
-
-      const candidateName = isIncomingFromClient
-        ? msg?.name || msg?.email
-        : msg?.recipientName || msg?.recipientEmail;
-
-      const candidateEmail = isIncomingFromClient
-        ? msg?.email
-        : msg?.recipientEmail;
-
-      const candidateContact = isIncomingFromClient
-        ? msg?.contact || msg?.phone
-        : msg?.recipientContact || msg?.recipientPhone;
-
-      const candidateProfilePic = isIncomingFromClient ? msg?.profilePic : null;
-
-      // Upgrade fallback values when better data appears in newer/other messages
-      if (
-        (!thread.participant?.name || thread.participant.name === otherUid) &&
-        candidateName
-      ) {
-        thread.participant.name = candidateName;
-      }
-
-      if (
-        (!thread.participant?.email ||
-          thread.participant.email === "No email") &&
-        candidateEmail
-      ) {
-        thread.participant.email = candidateEmail;
-      }
-
-      if (
-        (!thread.participant?.contact ||
-          thread.participant.contact === "No contact") &&
-        candidateContact
-      ) {
-        thread.participant.contact = candidateContact;
-      }
-
-      if (
-        (!thread.participant?.profilePic ||
-          thread.participant.profilePic === "/assets/profile.png") &&
-        candidateProfilePic
-      ) {
-        thread.participant.profilePic = candidateProfilePic;
-      }
-
-      if (msg._source === "inbox" && !msg.readStatus) {
-        thread.unreadCount += 1;
-      }
-
-      if (!thread.latest || getMs(msg) > getMs(thread.latest)) {
-        thread.latest = msg;
-      }
-    }
-
-    const threads = Array.from(map.values())
-      .map((thread) => {
-        const messages = [...thread.messages].sort(
-          (a, b) => getMs(a) - getMs(b),
-        );
-
-        // Always derive participant from the latest messages so profile updates reflect immediately
-        const latestIncoming = [...messages]
-          .reverse()
-          .find((m) => (m?.senderUid || "") !== user.uid);
-
-        const latestOutgoing = [...messages]
-          .reverse()
-          .find((m) => (m?.senderUid || "") === user.uid);
-
-        const participant = {
-          name:
-            latestIncoming?.name ||
-            latestOutgoing?.recipientName ||
-            thread.participant?.name ||
-            thread.id,
-          email:
-            latestIncoming?.email ||
-            latestOutgoing?.recipientEmail ||
-            thread.participant?.email ||
-            "No email",
-          contact:
-            latestIncoming?.contact ||
-            latestOutgoing?.recipientContact ||
-            latestOutgoing?.recipientPhone ||
-            thread.participant?.contact ||
-            "No contact",
-          profilePic:
-            latestIncoming?.profilePic ||
-            thread.participant?.profilePic ||
-            "/assets/profile.png",
-        };
-
-        const latest =
-          messages.length > 0
-            ? messages[messages.length - 1]
-            : thread.latest || null;
-
-        return {
-          ...thread,
-          participant,
-          messages,
-          latest,
-        };
-      })
-      .sort((a, b) => getMs(b.latest) - getMs(a.latest));
-
-    return threads;
-  }, [chatMessages, user?.uid]);
+    return (rawConversationThreads || []).map((thread) => ({
+      ...thread,
+      participant: {
+        uid: thread.participantUid || "",
+        name: thread.participantName || "Unknown User",
+        email: thread.participantEmail || "No email",
+        contact: thread.participantContact || "No contact",
+        profilePic: thread.participantProfilePic || "/assets/profile.png",
+      },
+      latest: {
+        content: thread.lastMessageText || "",
+        sourcePage: thread.sourcePage || "chat",
+        startTimestamp: thread.lastMessageTimestamp || null,
+      },
+      unreadCount: thread.unreadCount || 0,
+    }));
+  }, [rawConversationThreads]);
 
   useEffect(() => {
     if (!isLoadingMoreConversationThreads) return;
@@ -265,9 +115,9 @@ const Messages = () => {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [chatMessages.length, isLoadingMoreConversationThreads]);
+  }, [conversationThreads.length, isLoadingMoreConversationThreads]);
 
-  const selectedThread = useMemo(() => {
+  const selectedThreadMeta = useMemo(() => {
     return (
       conversationThreads.find(
         (thread) => thread.id === selectedConversationId,
@@ -278,24 +128,43 @@ const Messages = () => {
   const currentVisibleConversationMessageCount =
     visibleConversationMessageCounts[selectedConversationId] || 10;
 
+  useEffect(() => {
+    if (!selectedConversationId) {
+      setSelectedThreadMessages([]);
+      return;
+    }
+
+    const unsubscribe = subscribeToConversationMessages({
+      threadId: selectedConversationId,
+      fetchLimit: currentVisibleConversationMessageCount,
+      onData: ({ messages }) => {
+        setSelectedThreadMessages(messages || []);
+      },
+    });
+
+    return () => unsubscribe();
+  }, [
+    selectedConversationId,
+    currentVisibleConversationMessageCount,
+    subscribeToConversationMessages,
+  ]);
+
+  const selectedThread = useMemo(() => {
+    if (!selectedThreadMeta) return null;
+
+    return {
+      ...selectedThreadMeta,
+      messages: selectedThreadMessages,
+    };
+  }, [selectedThreadMeta, selectedThreadMessages]);
+
   const displayedThreadMessages = useMemo(() => {
-    if (!selectedThread?.messages) return [];
-    return selectedThread.messages.slice(
-      -currentVisibleConversationMessageCount,
-    );
-  }, [selectedThread?.messages, currentVisibleConversationMessageCount]);
+    return selectedThreadMessages || [];
+  }, [selectedThreadMessages]);
 
   const canLoadMoreConversationMessages = useMemo(() => {
-    return (
-      (selectedThread?.messages?.length || 0) >
-        currentVisibleConversationMessageCount &&
-      !isLoadingMoreConversationMessages
-    );
-  }, [
-    selectedThread?.messages?.length,
-    currentVisibleConversationMessageCount,
-    isLoadingMoreConversationMessages,
-  ]);
+    return hasMoreConversationMessages && !isLoadingMoreConversationMessages;
+  }, [hasMoreConversationMessages, isLoadingMoreConversationMessages]);
 
   useEffect(() => {
     if (!selectedConversationId) return;
@@ -346,15 +215,6 @@ const Messages = () => {
 
   const openConversation = (threadId) => {
     setSelectedConversationId(threadId);
-
-    const thread = conversationThreads.find((t) => t.id === threadId);
-    if (!thread) return;
-
-    thread.messages.forEach((msg) => {
-      if (msg._source === "inbox" && !msg.readStatus) {
-        markMessageAsRead(msg.id);
-      }
-    });
   };
 
   const deleteConversationThread = async (thread) => {
@@ -414,7 +274,7 @@ const Messages = () => {
 
     conversationChatBodyRef.current.scrollTop =
       conversationChatBodyRef.current.scrollHeight;
-  }, [activeTab, selectedThread?.id, selectedThread?.messages?.length]);
+  }, [activeTab, selectedThread?.id, selectedThreadMessages.length]);
 
   const sendConversationMessage = async () => {
     const text = chatInput.trim();
@@ -428,7 +288,7 @@ const Messages = () => {
       email: user.email,
       phone: user.phone,
       message: text,
-      recipientUid: selectedThread.id,
+      recipientUid: selectedThread.participant?.uid,
       senderUid: user.uid,
       isAdminSender: true,
       recipientName: selectedThread.participant?.name,
@@ -478,7 +338,7 @@ const Messages = () => {
       email: user.email,
       phone: user.phone,
       message: quickMessage,
-      recipientUid: selectedThread.id,
+      recipientUid: selectedThread.participant?.uid,
       senderUid: user.uid,
       isAdminSender: true,
       recipientName: selectedThread.participant?.name,

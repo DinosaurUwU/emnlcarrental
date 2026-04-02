@@ -107,6 +107,9 @@ export const UserProvider = ({ children }) => {
   const [sentMessages, setSentMessages] = useState([]);
   const [messageFetchLimit, setMessageFetchLimit] = useState(10);
   const [hasMoreUserMessages, setHasMoreUserMessages] = useState(true);
+  const [conversationThreads, setConversationThreads] = useState([]);
+  const [hasMoreConversationMessages, setHasMoreConversationMessages] =
+    useState(false);
   const [notificationMessages, setNotificationMessages] = useState([]);
   const [notificationFetchLimit, setNotificationFetchLimit] = useState(10);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
@@ -469,8 +472,6 @@ export const UserProvider = ({ children }) => {
     }
   };
 
- 
-
   // REAL-TIME SYNC - Watch admin's activeBookings for new bookings
   useEffect(() => {
     if (!adminUid) return;
@@ -556,8 +557,6 @@ export const UserProvider = ({ children }) => {
       console.error("❌ Error syncing bookings to user:", err);
     }
   };
-
-  
 
   useEffect(() => {
     if (!adminUid || activeBookings.length === 0) return;
@@ -1016,7 +1015,6 @@ Call them now to check if they want to extend. If no response, call them when re
 
                 // await setDoc(receivedMessagesRef, welcomeMessage);
                 await writeNotification(authUser.uid, welcomeMessage);
-
               } catch (err) {
                 console.warn("Skipping welcome message:", err);
               }
@@ -1190,17 +1188,14 @@ Call them now to check if they want to extend. If no response, call them when re
       //   return fallback;
       // }
 
-    // } catch (err) {
-    //   console.error("reloadAndSyncUser error:", err);
-    //   setUser(null);
-    //   setUserAndRemember(null);
-    //   return null;
-    // }
+      // } catch (err) {
+      //   console.error("reloadAndSyncUser error:", err);
+      //   setUser(null);
+      //   setUserAndRemember(null);
+      //   return null;
+      // }
 
-
-
-
-    if (snap.exists()) {
+      if (snap.exists()) {
         const data = snap.data();
         const normalized = {
           uid: authUser.uid,
@@ -1227,17 +1222,14 @@ Call them now to check if they want to extend. If no response, call them when re
           email: authUser.email || "",
           phone: authUser.phoneNumber || "",
           profilePic: authUser.photoURL || "",
-          role:
-            lastKnownUserRef.current?.role ||
-            lastKnownUser?.role ||
-            "user",
+          role: lastKnownUserRef.current?.role || lastKnownUser?.role || "user",
           providerData,
         };
         setUser(fallback);
         setUserAndRemember(fallback);
         return fallback;
       }
-} catch (err) {
+    } catch (err) {
       console.error("reloadAndSyncUser error:", err);
 
       if (lastKnownUserRef.current) {
@@ -1249,7 +1241,6 @@ Call them now to check if they want to extend. If no response, call them when re
       setUserAndRemember(null);
       return null;
     }
-
   }
 
   // LINK ACCOUNT
@@ -2335,8 +2326,6 @@ Call them now to check if they want to extend. If no response, call them when re
 
     return () => clearInterval(intervalId);
   }, [adminUid, activeBookings]);
-
-  
 
   // SYNC UNITS HIDDEN STATUS BASED ON ACTIVE/PENDING BOOKINGS
   useEffect(() => {
@@ -3457,27 +3446,27 @@ If you have any questions or would like to reschedule, please don’t hesitate t
         },
       });
 
-//       // Admin WEBSITE NOTIFICATION
-//       const adminInboxRef = doc(
-//         collection(db, "users", adminUid, "receivedMessages"),
-//       );
-//       await setDoc(adminInboxRef, {
-//         name: "System Notification",
-//         profilePic: "/assets/profile.png",
-//         email: "system@emnl.com",
-//         contact: "Notification",
-//         formattedDateTime,
-//         startTimestamp: serverTimestamp(),
-//         content: `<b>Booking Request Rejected</b><br><br>
-// <b>Customer:</b> ${fullName || "Unknown"} <br>
-// <b>Car:</b> ${bookingPayload.carName} <br>
-// <b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
-// <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
-// <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-// <b>Reason for Rejection:</b> ${reasonText || "No reason specified"} <br><br>
-// Please monitor for possible resubmission or customer follow-up.`,
-//         isNotification: true,
-//       });
+      //       // Admin WEBSITE NOTIFICATION
+      //       const adminInboxRef = doc(
+      //         collection(db, "users", adminUid, "receivedMessages"),
+      //       );
+      //       await setDoc(adminInboxRef, {
+      //         name: "System Notification",
+      //         profilePic: "/assets/profile.png",
+      //         email: "system@emnl.com",
+      //         contact: "Notification",
+      //         formattedDateTime,
+      //         startTimestamp: serverTimestamp(),
+      //         content: `<b>Booking Request Rejected</b><br><br>
+      // <b>Customer:</b> ${fullName || "Unknown"} <br>
+      // <b>Car:</b> ${bookingPayload.carName} <br>
+      // <b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
+      // <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+      // <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+      // <b>Reason for Rejection:</b> ${reasonText || "No reason specified"} <br><br>
+      // Please monitor for possible resubmission or customer follow-up.`,
+      //         isNotification: true,
+      //       });
 
       await writeNotification(adminUid, {
         name: "System Notification",
@@ -3850,7 +3839,7 @@ Please review the resubmitted request and continue processing.`,
   // };
 
   // (ADMIN & USER) MARK MESSAGES AS READ/UNREAD
-const markMessageAsRead = async (messageId) => {
+  const markMessageAsRead = async (messageId) => {
     if (!user || !messageId) return;
 
     try {
@@ -3882,7 +3871,7 @@ const markMessageAsRead = async (messageId) => {
       console.error("🔥 Error toggling notification read status:", err);
     }
   };
-  
+
   // const markMessageAsRead = async (messageId) => {
   //   if (!user || !messageId) return;
 
@@ -3916,8 +3905,126 @@ const markMessageAsRead = async (messageId) => {
   //   }
   // };
 
+
+  const getMessagePreviewText = (value) =>
+    String(value || "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 160);
+
+  const buildConversationThreadId = ({
+    senderUid,
+    recipientUid,
+    guestSenderUid,
+    isGuestThread = false,
+  }) => {
+    if (isGuestThread) {
+      return `guest_thread_${String(guestSenderUid || "unknown").slice(0, 120)}`;
+    }
+
+    return [senderUid, recipientUid]
+      .filter(Boolean)
+      .map((value) => String(value).trim())
+      .sort()
+      .join("__");
+  };
+
+  const buildMessageDateParts = (baseDate = new Date()) => ({
+    date: baseDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    time: baseDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    formattedDateTime: baseDate.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Manila",
+    }),
+    clientCreatedAt: baseDate.getTime(),
+  });
+
+  const upsertConversationThread = async ({
+    ownerUid,
+    threadId,
+    participantUid,
+    participantName,
+    participantEmail,
+    participantContact,
+    participantProfilePic,
+    sourcePage = "chat",
+    sourceLabel = "Chat",
+    isGuestThread = false,
+    latestMessageText = "",
+    lastSenderUid = "",
+    guestEmail = "",
+    guestContact = "",
+  }) => {
+    if (!ownerUid || !threadId) return;
+
+    const threadRef = doc(
+      db,
+      "users",
+      ownerUid,
+      "conversationThreads",
+      threadId,
+    );
+
+    await setDoc(
+      threadRef,
+      {
+        threadId,
+        participantUid: participantUid || "",
+        participantName: participantName || "Unknown",
+        participantEmail: participantEmail || "",
+        participantContact: participantContact || "",
+        participantProfilePic: participantProfilePic || "/assets/profile.png",
+        sourcePage,
+        sourceLabel,
+        isGuestThread,
+        guestEmail,
+        guestContact,
+        lastMessageText: getMessagePreviewText(latestMessageText),
+        lastMessageTimestamp: serverTimestamp(),
+        lastSenderUid: lastSenderUid || "",
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  };
+
+  const addConversationMessage = async ({
+    ownerUid,
+    threadId,
+    messageId,
+    messageData,
+  }) => {
+    if (!ownerUid || !threadId || !messageId || !messageData) return;
+
+    const messageRef = doc(
+      db,
+      "users",
+      ownerUid,
+      "conversationThreads",
+      threadId,
+      "messages",
+      messageId,
+    );
+
+    await setDoc(messageRef, messageData);
+  };
+
   // (ADMIN & USER) SEND MESSAGE BETWEEN USERS
-  const sendMessage = async ({
+const sendMessage = async ({
     name,
     email,
     phone,
@@ -3928,72 +4035,187 @@ const markMessageAsRead = async (messageId) => {
     recipientName,
     recipientEmail,
     recipientPhone,
-    sourcePage = "chat", // <-- add
-    sourceLabel = "Chat", // <-- add
+    sourcePage = "chat",
+    sourceLabel = "Chat",
   }) => {
     if (!senderUid || !recipientUid) {
-      console.error("❌ Missing senderUid or recipientUid.");
+      console.error("Missing senderUid or recipientUid.");
       return { success: false, error: "Missing senderUid or recipientUid." };
     }
 
+    const safeMessage = String(message || "").trim();
+    if (!safeMessage) {
+      return { success: false, error: "Message is required." };
+    }
+
     try {
-      const senderSentRef = collection(db, "users", senderUid, "sentMessages");
-      const recipientInboxRef = collection(
-        db,
-        "users",
+      const now = new Date();
+      const dateParts = buildMessageDateParts(now);
+      const threadId = buildConversationThreadId({
+        senderUid,
         recipientUid,
-        "receivedMessages",
-      );
+      });
+
+      const messageId = doc(
+        collection(
+          db,
+          "users",
+          senderUid,
+          "conversationThreads",
+          threadId,
+          "messages",
+        ),
+      ).id;
 
       const newMessage = {
         senderUid,
         recipientUid,
-        name,
-        email,
-        contact: phone,
-        content: message,
-        recipientName,
-        recipientEmail,
-        recipientContact: recipientPhone,
-        sourcePage, // <-- add
-        sourceLabel, // <-- add
-        date: new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        time: new Date().toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        name: name || "Unknown",
+        email: email || "",
+        contact: phone || "",
+        content: safeMessage,
+        recipientName: recipientName || "",
+        recipientEmail: recipientEmail || "",
+        recipientContact: recipientPhone || "",
+        sourcePage,
+        sourceLabel,
+        isGuest: false,
         startTimestamp: serverTimestamp(),
-        clientCreatedAt: Date.now(),
-        formattedDateTime: new Date().toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Manila",
-        }),
-        profilePic: user.profilePic || null,
+        profilePic: user?.profilePic || "/assets/profile.png",
         readStatus: false,
+        ...dateParts,
       };
 
-      await setDoc(doc(senderSentRef), newMessage);
-      await setDoc(doc(recipientInboxRef), newMessage);
+      await Promise.all([
+        addConversationMessage({
+          ownerUid: senderUid,
+          threadId,
+          messageId,
+          messageData: newMessage,
+        }),
+        addConversationMessage({
+          ownerUid: recipientUid,
+          threadId,
+          messageId,
+          messageData: newMessage,
+        }),
+        upsertConversationThread({
+          ownerUid: senderUid,
+          threadId,
+          participantUid: recipientUid,
+          participantName: recipientName || "Recipient",
+          participantEmail: recipientEmail || "",
+          participantContact: recipientPhone || "",
+          participantProfilePic: "/assets/profile.png",
+          sourcePage,
+          sourceLabel,
+          isGuestThread: false,
+          latestMessageText: safeMessage,
+          lastSenderUid: senderUid,
+        }),
+        upsertConversationThread({
+          ownerUid: recipientUid,
+          threadId,
+          participantUid: senderUid,
+          participantName: name || "Sender",
+          participantEmail: email || "",
+          participantContact: phone || "",
+          participantProfilePic: user?.profilePic || "/assets/profile.png",
+          sourcePage,
+          sourceLabel,
+          isGuestThread: false,
+          latestMessageText: safeMessage,
+          lastSenderUid: senderUid,
+        }),
+      ]);
 
-      return { success: true };
+      return { success: true, threadId, messageId };
     } catch (err) {
-      console.error("🔥 Error sending message:", err);
+      console.error("Error sending message:", err);
       return {
         success: false,
         error: err?.message || "Failed to send message.",
       };
     }
   };
+
+  // const sendMessage = async ({
+  //   name,
+  //   email,
+  //   phone,
+  //   message,
+  //   recipientUid,
+  //   senderUid,
+  //   isAdminSender,
+  //   recipientName,
+  //   recipientEmail,
+  //   recipientPhone,
+  //   sourcePage = "chat", // <-- add
+  //   sourceLabel = "Chat", // <-- add
+  // }) => {
+  //   if (!senderUid || !recipientUid) {
+  //     console.error("❌ Missing senderUid or recipientUid.");
+  //     return { success: false, error: "Missing senderUid or recipientUid." };
+  //   }
+
+  //   try {
+  //     const senderSentRef = collection(db, "users", senderUid, "sentMessages");
+  //     const recipientInboxRef = collection(
+  //       db,
+  //       "users",
+  //       recipientUid,
+  //       "receivedMessages",
+  //     );
+
+  //     const newMessage = {
+  //       senderUid,
+  //       recipientUid,
+  //       name,
+  //       email,
+  //       contact: phone,
+  //       content: message,
+  //       recipientName,
+  //       recipientEmail,
+  //       recipientContact: recipientPhone,
+  //       sourcePage, // <-- add
+  //       sourceLabel, // <-- add
+  //       date: new Date().toLocaleDateString("en-US", {
+  //         weekday: "long",
+  //         year: "numeric",
+  //         month: "long",
+  //         day: "numeric",
+  //       }),
+  //       time: new Date().toLocaleTimeString("en-US", {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       }),
+  //       startTimestamp: serverTimestamp(),
+  //       clientCreatedAt: Date.now(),
+  //       formattedDateTime: new Date().toLocaleString("en-US", {
+  //         year: "numeric",
+  //         month: "short",
+  //         day: "numeric",
+  //         hour: "numeric",
+  //         minute: "2-digit",
+  //         hour12: true,
+  //         timeZone: "Asia/Manila",
+  //       }),
+  //       profilePic: user.profilePic || null,
+  //       readStatus: false,
+  //     };
+
+  //     await setDoc(doc(senderSentRef), newMessage);
+  //     await setDoc(doc(recipientInboxRef), newMessage);
+
+  //     return { success: true };
+  //   } catch (err) {
+  //     console.error("🔥 Error sending message:", err);
+  //     return {
+  //       success: false,
+  //       error: err?.message || "Failed to send message.",
+  //     };
+  //   }
+  // };
 
   // (GUEST) BUILD STABLE SENDER UID BASED ON GUEST DETAILS OR LOCAL STORAGE
   const buildStableGuestSenderUid = ({ name, email, phone }) => {
@@ -4062,6 +4284,26 @@ const markMessageAsRead = async (messageId) => {
         phone: safePhone,
       });
 
+      const threadId = buildConversationThreadId({
+        guestSenderUid,
+        recipientUid,
+        isGuestThread: true,
+      });
+
+      const now = new Date();
+      const dateParts = buildMessageDateParts(now);
+
+      const messageId = doc(
+        collection(
+          db,
+          "users",
+          recipientUid,
+          "conversationThreads",
+          threadId,
+          "messages",
+        ),
+      ).id;
+
       const guestMessage = {
         senderUid: guestSenderUid,
         recipientUid,
@@ -4075,44 +4317,125 @@ const markMessageAsRead = async (messageId) => {
         sourcePage: "contact-guest",
         sourceLabel: "Guest Contact Page",
         isGuest: true,
-        date: new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        time: new Date().toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
         startTimestamp: serverTimestamp(),
-        clientCreatedAt: Date.now(),
-        formattedDateTime: new Date().toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Manila",
-        }),
         profilePic: "/assets/profile.png",
         readStatus: false,
+        ...dateParts,
       };
 
-      await setDoc(
-        doc(collection(db, "users", recipientUid, "receivedMessages")),
-        guestMessage,
-      );
+      await Promise.all([
+        addConversationMessage({
+          ownerUid: recipientUid,
+          threadId,
+          messageId,
+          messageData: guestMessage,
+        }),
+        upsertConversationThread({
+          ownerUid: recipientUid,
+          threadId,
+          participantUid: guestSenderUid,
+          participantName: safeName,
+          participantEmail: safeEmail,
+          participantContact: safePhone,
+          participantProfilePic: "/assets/profile.png",
+          sourcePage: "contact-guest",
+          sourceLabel: "Guest Contact Page",
+          isGuestThread: true,
+          latestMessageText: safeMessage,
+          lastSenderUid: guestSenderUid,
+          guestEmail: safeEmail,
+          guestContact: safePhone,
+        }),
+      ]);
 
-      return { success: true, viaInApp: true, guest: true };
+      return { success: true, viaInApp: true, guest: true, threadId, messageId };
     } catch (error) {
-      console.error("❌ sendGuestContactMessage failed:", error);
+      console.error("sendGuestContactMessage failed:", error);
       return { success: false, error: error.message || "Guest send failed." };
     }
   };
 
-const getNotificationTimestampMs = (msg) => {
+  // const sendGuestContactMessage = async ({
+  //   name,
+  //   email,
+  //   phone,
+  //   message,
+  //   recipientUid,
+  //   recipientName,
+  //   recipientEmail,
+  //   recipientPhone,
+  // }) => {
+  //   try {
+  //     if (!recipientUid) {
+  //       return { success: false, error: "Missing recipientUid." };
+  //     }
+
+  //     const safeName = (name || "Guest").trim() || "Guest";
+  //     const safeEmail = (email || "No email").trim() || "No email";
+  //     const safePhone = (phone || "No contact").trim() || "No contact";
+  //     const safeMessage = (message || "").trim();
+
+  //     if (!safeMessage) {
+  //       return { success: false, error: "Message is required." };
+  //     }
+
+  //     const guestSenderUid = buildStableGuestSenderUid({
+  //       name: safeName,
+  //       email: safeEmail,
+  //       phone: safePhone,
+  //     });
+
+  //     const guestMessage = {
+  //       senderUid: guestSenderUid,
+  //       recipientUid,
+  //       name: safeName,
+  //       email: safeEmail,
+  //       contact: safePhone,
+  //       content: safeMessage,
+  //       recipientName: recipientName || "Admin",
+  //       recipientEmail: recipientEmail || "",
+  //       recipientContact: recipientPhone || "",
+  //       sourcePage: "contact-guest",
+  //       sourceLabel: "Guest Contact Page",
+  //       isGuest: true,
+  //       date: new Date().toLocaleDateString("en-US", {
+  //         weekday: "long",
+  //         year: "numeric",
+  //         month: "long",
+  //         day: "numeric",
+  //       }),
+  //       time: new Date().toLocaleTimeString("en-US", {
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       }),
+  //       startTimestamp: serverTimestamp(),
+  //       clientCreatedAt: Date.now(),
+  //       formattedDateTime: new Date().toLocaleString("en-US", {
+  //         year: "numeric",
+  //         month: "short",
+  //         day: "numeric",
+  //         hour: "numeric",
+  //         minute: "2-digit",
+  //         hour12: true,
+  //         timeZone: "Asia/Manila",
+  //       }),
+  //       profilePic: "/assets/profile.png",
+  //       readStatus: false,
+  //     };
+
+  //     await setDoc(
+  //       doc(collection(db, "users", recipientUid, "receivedMessages")),
+  //       guestMessage,
+  //     );
+
+  //     return { success: true, viaInApp: true, guest: true };
+  //   } catch (error) {
+  //     console.error("❌ sendGuestContactMessage failed:", error);
+  //     return { success: false, error: error.message || "Guest send failed." };
+  //   }
+  // };
+
+  const getNotificationTimestampMs = (msg) => {
     const ts = msg?.startTimestamp;
     if (ts?.toDate) return ts.toDate().getTime();
     if (typeof ts?.seconds === "number") return ts.seconds * 1000;
@@ -4138,6 +4461,50 @@ const getNotificationTimestampMs = (msg) => {
     return notificationData;
   };
 
+  const subscribeToConversationMessages = ({
+    ownerUid = user?.uid,
+    threadId,
+    fetchLimit = 10,
+    onData,
+  }) => {
+    if (!ownerUid || !threadId || typeof onData !== "function") {
+      return () => {};
+    }
+
+    const messagesQuery = query(
+      collection(
+        db,
+        "users",
+        ownerUid,
+        "conversationThreads",
+        threadId,
+        "messages",
+      ),
+      orderBy("startTimestamp", "desc"),
+      limit(fetchLimit),
+    );
+
+    return onSnapshot(
+      messagesQuery,
+      (snapshot) => {
+        const messages = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .reverse();
+
+        const hasMore = snapshot.size >= fetchLimit;
+        setHasMoreConversationMessages(hasMore);
+        onData({ messages, hasMore });
+      },
+      (error) => {
+        console.error("Conversation messages listener error:", error);
+        setHasMoreConversationMessages(false);
+        onData({ messages: [], hasMore: false, error });
+      },
+    );
+  };
 
   //   // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
   // useEffect(() => {
@@ -4170,11 +4537,8 @@ const getNotificationTimestampMs = (msg) => {
   //   };
   // }, [user?.uid, notificationFetchLimit]);
 
-
-
-
   // (ADMIN & USER) REAL-TIME LISTENER FOR NOTIFICATIONS ONLY
-useEffect(() => {
+  useEffect(() => {
     if (!user?.uid) {
       setNotificationMessages([]);
       setHasMoreNotifications(false);
@@ -4212,44 +4576,52 @@ useEffect(() => {
     };
   }, [user?.uid, notificationFetchLimit]);
 
-    // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
-    useEffect(() => {
-    if (!user?.uid) return;
+  // (ADMIN & USER) REAL-TIME LISTENER FOR MESSAGES
+  // (ADMIN & USER) REAL-TIME LISTENER FOR CONVERSATION THREADS
+  useEffect(() => {
+    if (!user?.uid) {
+      setConversationThreads([]);
+      setUserMessages([]);
+      setSentMessages([]);
+      setHasMoreUserMessages(false);
+      return;
+    }
 
-    const inboxQuery = query(
-      collection(db, "users", user.uid, "receivedMessages"),
-      orderBy("startTimestamp", "desc"),
+    const threadsQuery = query(
+      collection(db, "users", user.uid, "conversationThreads"),
+      orderBy("lastMessageTimestamp", "desc"),
       limit(messageFetchLimit),
     );
 
-    const sentQuery = query(
-      collection(db, "users", user.uid, "sentMessages"),
-      orderBy("startTimestamp", "desc"),
-      limit(messageFetchLimit),
+    const unsubscribeThreads = onSnapshot(
+      threadsQuery,
+      (snapshot) => {
+        const threads = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setConversationThreads(threads);
+
+        // Old arrays are intentionally cleared because chat no longer uses
+        // receivedMessages/sentMessages.
+        setUserMessages([]);
+        setSentMessages([]);
+
+        setHasMoreUserMessages(snapshot.size >= messageFetchLimit);
+        console.log("Real-time conversation threads:", threads);
+      },
+      (error) => {
+        console.error("Conversation threads listener error:", error);
+        setConversationThreads([]);
+        setUserMessages([]);
+        setSentMessages([]);
+        setHasMoreUserMessages(false);
+      },
     );
-
-    const unsubscribeInbox = onSnapshot(inboxQuery, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUserMessages(msgs);
-      setHasMoreUserMessages(snapshot.size >= messageFetchLimit);
-      console.log("📨 Real-time inbox:", msgs);
-    });
-
-    const unsubscribeSent = onSnapshot(sentQuery, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setSentMessages(msgs);
-      console.log("📨 Real-time sentbox:", msgs);
-    });
 
     return () => {
-      unsubscribeInbox();
-      unsubscribeSent();
+      unsubscribeThreads();
     };
   }, [user?.uid, messageFetchLimit]);
 
@@ -4258,7 +4630,7 @@ useEffect(() => {
     setMessageFetchLimit((prev) => prev + 10);
   };
 
-    const loadMoreNotifications = () => {
+  const loadMoreNotifications = () => {
     if (!hasMoreNotifications) return;
     setNotificationFetchLimit((prev) => prev + 10);
   };
@@ -4380,7 +4752,7 @@ useEffect(() => {
   // }, [user?.uid]);
 
   // (ADMIN & USER) DELETE MESSAGE
-const deleteMessage = async (messageOrMessages, type = "inbox") => {
+  const deleteMessage = async (messageOrMessages, type = "inbox") => {
     console.log("🔥 deleteMessage CALLED:", messageOrMessages, type, user);
 
     if (!user || !messageOrMessages || !["inbox", "sentbox"].includes(type)) {
@@ -4401,13 +4773,7 @@ const deleteMessage = async (messageOrMessages, type = "inbox") => {
         const messageId = typeof msg === "string" ? msg : msg.id;
 
         if (type === "sentbox") {
-          const sentRef = doc(
-            db,
-            "users",
-            user.uid,
-            "sentMessages",
-            messageId,
-          );
+          const sentRef = doc(db, "users", user.uid, "sentMessages", messageId);
           console.log("🔍 Deleting:", sentRef.path);
           await deleteDoc(sentRef);
           return;
@@ -4461,8 +4827,6 @@ const deleteMessage = async (messageOrMessages, type = "inbox") => {
       console.error("❌ Error during bulk delete:", error);
     }
   };
-
-
 
   // const deleteMessage = async (messageOrMessages, type = "inbox") => {
   //   console.log("🔥 deleteMessage CALLED:", messageOrMessages, type, user);
@@ -4743,39 +5107,14 @@ const deleteMessage = async (messageOrMessages, type = "inbox") => {
         (bookingData.rentalDuration?.days || 0) * 86400 +
           (bookingData.rentalDuration?.extraHours || 0) * 3600;
 
-      // const now = new Date();
-      // const readableTimestamp = `${String(now.getMonth() + 1).padStart(
-      //   2,
-      //   "0",
-      // )}${String(now.getDate()).padStart(2, "0")}${now.getFullYear()}${String(
-      //   now.getHours(),
-      // ).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(
-      //   now.getSeconds(),
-      // ).padStart(2, "0")}`;
-      // const docId = `${plateNo}_${readableTimestamp}`;
 
-      // const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
 
       // Use the provided bookingUid as docId to ensure consistency
       const docId = bookingUid;
 
       const bookingRef = doc(db, "users", adminUid, "activeBookings", docId);
 
-      // const userStartTime =
-      //   bookingData.startTimestamp?.toDate?.() || new Date();
-      // const hasStarted = userStartTime.getTime() <= Date.now();
-      // const rentalStatus = hasStarted ? "Active" : "Pending";
-      // const imageId = `${plateNo}_main`;
 
-      // await setDoc(bookingRef, {
-      //   totalDurationInSeconds,
-      //   ...bookingData,
-      //   driverLicense: driverLicenseUrl || null,
-      //   plateNo,
-      //   createdBy: user?.uid || "admin",
-      //   status: rentalStatus,
-      //   bookingUid,
-      // });
 
       const userStartTime =
         bookingData.startTimestamp?.toDate?.() || new Date();
@@ -4958,59 +5297,6 @@ const deleteMessage = async (messageOrMessages, type = "inbox") => {
         bookingData.endTime,
         bookingData.endDate,
       );
-      // const startDateStr = bookingData.startDate
-      //   ? new Date(bookingData.startDate).toLocaleDateString("en-US", {
-      //       year: "numeric",
-      //       month: "long",
-      //       day: "numeric",
-      //     })
-      //   : "";
-
-      // // Combine endDate + endTime into a Date object
-      // const finalEndTimestamp = new Date(
-      //   `${bookingData.endDate}T${bookingData.endTime}`,
-      // );
-
-      // // Format into separate strings
-      // const endDateStr = finalEndTimestamp.toLocaleDateString("en-US", {
-      //   year: "numeric",
-      //   month: "long",
-      //   day: "numeric",
-      // });
-
-      // const endTimeStr = finalEndTimestamp.toLocaleTimeString("en-US", {
-      //   hour: "numeric",
-      //   minute: "2-digit",
-      //   hour12: true,
-      // });
-
-      // function formatTime(value) {
-      //   if (!value) return "";
-
-      //   if (typeof value === "number") {
-      //     return new Date(value).toLocaleTimeString("en-US", {
-      //       hour: "numeric",
-      //       minute: "2-digit",
-      //       hour12: true,
-      //     });
-      //   }
-
-      //   if (typeof value === "string") {
-      //     const [hours, minutes] = value.split(":").map(Number);
-      //     const d = new Date();
-      //     d.setHours(hours, minutes);
-      //     return d.toLocaleTimeString("en-US", {
-      //       hour: "numeric",
-      //       minute: "2-digit",
-      //       hour12: true,
-      //     });
-      //   }
-
-      //   return "";
-      // }
-
-      // // Rental start time
-      // const startTimeStr = formatTime(bookingData.startTime);
 
       // EMAIL NOTIFICATIONS TEMPLATE 11
       await sendEmail({
@@ -5059,10 +5345,7 @@ const deleteMessage = async (messageOrMessages, type = "inbox") => {
       const formattedDateTime = `${datePart} | ${timePart}`;
 
       // User WEBSITE message
-      const userInboxRef = doc(
-        collection(db, "users", userId, "receivedMessages"),
-      );
-      await setDoc(userInboxRef, {
+      await writeNotification(userId, {
         name: "EMNL Car Rental Services",
         profilePic: "/assets/profile.png",
         email: adminEmail,
@@ -5078,31 +5361,7 @@ Your request has been received and is now queued for review. We will notify you 
         isNotification: true,
       });
 
-//       // Admin WEBSITE message
-//       const adminInboxRef = doc(
-//         collection(db, "users", adminUid, "receivedMessages"),
-//       );
-//       await setDoc(adminInboxRef, {
-//         name: "System Notification",
-//         profilePic: "/assets/profile.png",
-//         email: "system@emnl.com",
-//         contact: "Notification",
-//         formattedDateTime,
-//         startTimestamp: serverTimestamp(),
-//         content: `<b>New Booking Request Submitted</b><br><br>
-// <b>Customer:</b> ${fullName || "Customer"} <br>
-// <b>Car:</b> ${bookingData.carName} <br>
-// <b>Plate No:</b> ${bookingData.plateNo || "N/A"} <br>
-// <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
-// <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-// <b>Travel Location:</b> ${bookingData.location || "Not specified"} <br><br>
-// Please review this request in the admin panel and proceed with approval or rejection.`,
-//         isNotification: true,
-//       });
-
-
-
-// Admin WEBSITE message
+      // Admin WEBSITE message
       await writeNotification(adminUid, {
         name: "System Notification",
         profilePic: "/assets/profile.png",
@@ -5330,7 +5589,9 @@ Please review this request in the admin panel and proceed with approval or rejec
         driverLicenseUrl = updatedBookingData.uploadedID;
       }
 
-      const schedulePatch = buildBookingSchedulePatch(updatedBookingData.formData);
+      const schedulePatch = buildBookingSchedulePatch(
+        updatedBookingData.formData,
+      );
 
       const updatedData = {
         ...updatedBookingData.formData,
@@ -5373,7 +5634,7 @@ Please review this request in the admin panel and proceed with approval or rejec
       const bookingData = adminSnap.data() ?? {};
       const userId = bookingData.createdBy;
 
-            const schedulePatch = buildBookingSchedulePatch({
+      const schedulePatch = buildBookingSchedulePatch({
         ...bookingData,
         ...updatedData,
       });
@@ -5644,7 +5905,8 @@ Please review this request in the admin panel and proceed with approval or rejec
       const balanceDue = Math.max(0, discountedTotal - totalPaid);
 
       const { unitImage, ...safeBookingData } = bookingData || {};
-      const { unitImage: updatedUnitImage, ...safeUpdatedData } = updatedData || {};
+      const { unitImage: updatedUnitImage, ...safeUpdatedData } =
+        updatedData || {};
 
       const dataToUpdate = {
         ...safeBookingData,
@@ -5659,11 +5921,10 @@ Please review this request in the admin panel and proceed with approval or rejec
 
       await updateDoc(completedBookingRef, dataToUpdate);
 
-      
       // Also update user's rentalHistory
       const userEmail = bookingData.email?.trim().toLowerCase();
       const userId = bookingData.createdBy;
-      
+
       // If createdBy is admin, find user by email
       let actualUserId = userId;
       if (userId === adminUid && userEmail) {
@@ -5675,19 +5936,17 @@ Please review this request in the admin panel and proceed with approval or rejec
           actualUserId = userSnapshot.docs[0].id;
         }
       }
-      
+
       if (actualUserId && actualUserId !== adminUid) {
         const userRentalHistoryRef = doc(
           db,
           "users",
           actualUserId,
           "rentalHistory",
-          bookingId
+          bookingId,
         );
         await updateDoc(userRentalHistoryRef, dataToUpdate);
       }
-
-
 
       console.log("✅ Balance due booking updated successfully");
     } catch (error) {
@@ -5723,26 +5982,29 @@ Please review this request in the admin panel and proceed with approval or rejec
       // 2. Also update user's rentalHistory (same logic as updateBalanceDueBooking)
       const userId = bookingData.createdBy;
       const userEmailForQuery = bookingData.email?.trim().toLowerCase();
-      
+
       // If createdBy is admin, find user by email
       let actualUserId = userId;
       if (userId === adminUid && userEmailForQuery) {
         // Find user by email in users collection (not userAccounts!)
         const usersRef = collection(db, "users");
-        const userQuery = query(usersRef, where("email", "==", userEmailForQuery));
+        const userQuery = query(
+          usersRef,
+          where("email", "==", userEmailForQuery),
+        );
         const userSnapshot = await getDocs(userQuery);
         if (!userSnapshot.empty) {
           actualUserId = userSnapshot.docs[0].id;
         }
       }
-      
+
       if (actualUserId && actualUserId !== adminUid) {
         const userRentalHistoryRef = doc(
           db,
           "users",
           actualUserId,
           "rentalHistory",
-          bookingId
+          bookingId,
         );
         await updateDoc(userRentalHistoryRef, {
           paid: true,
@@ -5757,7 +6019,7 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
-    // (ADMIN) TOGGLE BOOKING PAID STATUS
+  // (ADMIN) TOGGLE BOOKING PAID STATUS
   const toggleBookingPaid = async (bookingId) => {
     try {
       const appSettingsDoc = await getDoc(doc(db, "config", "appSettings"));
@@ -5786,24 +6048,27 @@ Please review this request in the admin panel and proceed with approval or rejec
       // 2. Also toggle in user's rentalHistory
       const userId = bookingData.createdBy;
       const userEmailForQuery = bookingData.email?.trim().toLowerCase();
-      
+
       let actualUserId = userId;
       if (userId === adminUid && userEmailForQuery) {
         const usersRef = collection(db, "users");
-        const userQuery = query(usersRef, where("email", "==", userEmailForQuery));
+        const userQuery = query(
+          usersRef,
+          where("email", "==", userEmailForQuery),
+        );
         const userSnapshot = await getDocs(userQuery);
         if (!userSnapshot.empty) {
           actualUserId = userSnapshot.docs[0].id;
         }
       }
-      
+
       if (actualUserId && actualUserId !== adminUid) {
         const userRentalHistoryRef = doc(
           db,
           "users",
           actualUserId,
           "rentalHistory",
-          bookingId
+          bookingId,
         );
         await updateDoc(userRentalHistoryRef, {
           paid: newPaid,
@@ -5816,7 +6081,6 @@ Please review this request in the admin panel and proceed with approval or rejec
       throw error;
     }
   };
-
 
   // (USER) CANCEL USER BOOKING REQUEST
   const cancelUserBookingRequest = async (docId) => {
@@ -6206,51 +6470,7 @@ Please review this request in the admin panel and proceed with approval or rejec
         bookingPayload.endTime,
         bookingPayload.endDate,
       );
-      // const startDateStr = bookingPayload.startDate
-      //   ? new Date(bookingPayload.startDate).toLocaleDateString("en-US", {
-      //       year: "numeric",
-      //       month: "long",
-      //       day: "numeric",
-      //     })
-      //   : "";
 
-      // const endDateStr = bookingPayload.endDate
-      //   ? new Date(bookingPayload.endDate).toLocaleDateString("en-US", {
-      //       year: "numeric",
-      //       month: "long",
-      //       day: "numeric",
-      //     })
-      //   : "";
-
-      // // Helper to format both numeric timestamps and "HH:mm" strings
-      // function formatTime(value) {
-      //   if (!value) return "";
-
-      //   if (typeof value === "number") {
-      //     return new Date(value).toLocaleTimeString("en-US", {
-      //       hour: "numeric",
-      //       minute: "2-digit",
-      //       hour12: true,
-      //     });
-      //   }
-
-      //   if (typeof value === "string") {
-      //     const [hours, minutes] = value.split(":").map(Number);
-      //     const d = new Date();
-      //     d.setHours(hours, minutes);
-      //     return d.toLocaleTimeString("en-US", {
-      //       hour: "numeric",
-      //       minute: "2-digit",
-      //       hour12: true,
-      //     });
-      //   }
-
-      //   return "";
-      // }
-
-      // // Format time
-      // const startTimeStr = formatTime(bookingPayload.startTime);
-      // const endTimeStr = formatTime(bookingPayload.endTime);
 
       await sendEmail({
         toName: fullName || "Customer",
@@ -6289,12 +6509,12 @@ Please review this request in the admin panel and proceed with approval or rejec
         formattedDateTime,
         startTimestamp: serverTimestamp(),
         content: `Hi ${fullName || "Customer"}, <br><br>
-Your booking for <b>${bookingPayload.carName}</b> has been <b>Approved ✅</b>.<br><br>
-<b>Car:</b> ${bookingPayload.carName} <br>
-<b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
-<b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-<b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
-Your rental is now confirmed. If you need assistance or schedule adjustments, please contact us anytime.`,
+          Your booking for <b>${bookingPayload.carName}</b> has been <b>Approved ✅</b>.<br><br>
+          <b>Car:</b> ${bookingPayload.carName} <br>
+          <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+          <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+          <b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
+          Your rental is now confirmed. If you need assistance or schedule adjustments, please contact us anytime.`,
         isNotification: true,
       };
 
@@ -6332,20 +6552,16 @@ Your rental is now confirmed. If you need assistance or schedule adjustments, pl
         formattedDateTime,
         startTimestamp: serverTimestamp(),
         content: `<b>Booking Approved</b><br><br>
-<b>Customer:</b> ${fullName || "Customer"} <br>
-<b>Car:</b> ${bookingPayload.carName} <br>
-<b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
-<b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
-<b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
-<b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
-Please continue operational follow-ups and payment tracking for this rental.`,
+          <b>Customer:</b> ${fullName || "Customer"} <br>
+          <b>Car:</b> ${bookingPayload.carName} <br>
+          <b>Plate No:</b> ${bookingPayload.plateNo || "N/A"} <br>
+          <b>Start Date & Time:</b> ${startDateStr} | ${startTimeStr} <br>
+          <b>End Date & Time:</b> ${endDateStr} | ${endTimeStr} <br>
+          <b>Travel Location:</b> ${bookingPayload.location || "Not specified"} <br><br>
+          Please continue operational follow-ups and payment tracking for this rental.`,
         isNotification: true,
       };
 
-      // const adminInboxRef = doc(
-      //   collection(db, "users", adminUid, "receivedMessages"),
-      // );
-      // await setDoc(adminInboxRef, adminInAppMessage);
       await writeNotification(adminUid, adminInAppMessage);
 
       console.log("📩 Admin notified via email and in-app message");
@@ -6406,153 +6622,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
     const unsubscribeCompleted = onSnapshot(completedRef, (snapshot) => {
       const changes = snapshot.docChanges();
 
-      // changes.forEach((change) => {
-      //   if (change.type === "added") {
-      //     const data = change.doc.data();
-      //     if (data.status !== "Completed") return;
-
-      //     const docId = change.doc.id;
-      //     if (processedCompleted.has(docId)) return; // Skip duplicates
-      //     processedCompleted.add(docId);
-
-      //     // Process ONLY the new document
-      //     const plateNo = data.plateNo || "UNKNOWN_UNIT";
-      //     const carType = data.carType || "UNKNOWN";
-      //     const carName = data.carName || plateNo;
-      //     const totalRevenue = Number(data.totalPaid) || 0;
-      //     const durationSec = Number(data.totalDurationInSeconds) || 0;
-
-      //     if (!data.endTimestamp?.seconds && (!data.endDate || !data.endTime))
-      //       return;
-
-      //     let rentalEnd;
-      //     if (data.endTimestamp?.seconds) {
-      //       rentalEnd = new Date(data.endTimestamp.seconds * 1000);
-      //     } else if (data.endDate && data.endTime) {
-      //       const [year, month, day] = data.endDate.split("-");
-      //       const [hour, minute] = data.endTime.split(":");
-      //       rentalEnd = new Date(
-      //         Number(year),
-      //         Number(month) - 1,
-      //         Number(day),
-      //         Number(hour),
-      //         Number(minute),
-      //       );
-      //     } else {
-      //       return;
-      //     }
-
-      //     // // Update analyticsMap with new data
-      //     // setCompletedBookingsAnalytics((prevMap) => {
-      //     //   const newMap = { ...prevMap };
-      //     //   if (!newMap[plateNo]) {
-      //     //     newMap[plateNo] = {
-      //     //       carName,
-      //     //       carType,
-      //     //       unitImage: data.unitImage || "",
-      //     //     };
-      //     //   }
-
-      //     //   const dayKey = rentalEnd.toISOString().slice(0, 10);
-      //     //   const monthKey = rentalEnd.toISOString().slice(0, 7);
-      //     //   const yearKey = rentalEnd.getFullYear().toString();
-      //     //   const keys = [dayKey, monthKey, yearKey];
-
-      //     //   keys.forEach((key) => {
-      //     //     if (!newMap[plateNo][key]) {
-      //     //       newMap[plateNo][key] = {
-      //     //         revenue: 0,
-      //     //         hours: 0,
-      //     //         timesRented: 0,
-      //     //         bookings: [],
-      //     //       };
-      //     //     }
-      //     //     newMap[plateNo][key].revenue += totalRevenue;
-      //     //     newMap[plateNo][key].hours += durationSec / 3600;
-      //     //     newMap[plateNo][key].timesRented += 1;
-      //     //     newMap[plateNo][key].bookings.push({ id: docId, ...data });
-      //     //   });
-
-      //     //   return newMap;
-      //     // });
-
-      //     // Update analyticsMap with new data
-      //     setCompletedBookingsAnalytics((prevMap) => {
-      //       const newMap = { ...prevMap };
-      //       if (!newMap[plateNo]) {
-      //         newMap[plateNo] = {
-      //           carName,
-      //           carType,
-      //           unitImage: data.unitImage || "",
-      //         };
-      //       }
-
-      //       const dayKey = rentalEnd.toISOString().slice(0, 10);
-      //       const monthKey = rentalEnd.toISOString().slice(0, 7);
-      //       const yearKey = rentalEnd.getFullYear().toString();
-      //       const keys = [dayKey, monthKey, yearKey];
-
-      //       keys.forEach((key) => {
-      //         if (!newMap[plateNo][key]) {
-      //           newMap[plateNo][key] = {
-      //             revenue: 0,
-      //             hours: 0,
-      //             timesRented: 0,
-      //             bookings: [],
-      //           };
-      //         }
-      //         newMap[plateNo][key].revenue += totalRevenue;
-      //         newMap[plateNo][key].hours += durationSec / 3600;
-      //         newMap[plateNo][key].timesRented += 1;
-      //         newMap[plateNo][key].bookings.push({ id: docId, ...data });
-      //       });
-
-      //       // ✅ Rebuild flat bookings array for this plateNo
-      //       const allBookings = [];
-      //       for (const key in newMap[plateNo]) {
-      //         if (["carType", "unitImage", "carName", "bookings"].includes(key))
-      //           continue;
-      //         if (Array.isArray(newMap[plateNo][key]?.bookings)) {
-      //           allBookings.push(...newMap[plateNo][key].bookings);
-      //         }
-      //       }
-
-      //       // Deduplicate by id
-      //       const uniqueMap = new Map();
-      //       allBookings.forEach((booking) => {
-      //         const key =
-      //           booking.id ||
-      //           `${booking.startTimestamp?.seconds}-${booking.endTimestamp?.seconds}`;
-      //         uniqueMap.set(key, booking);
-      //       });
-
-      //       newMap[plateNo].bookings = Array.from(uniqueMap.values());
-
-      //       return newMap;
-      //     });
-
-      //     // Add to calendar
-      //     if (data.startTimestamp?.seconds) {
-      //       const start = new Date(data.startTimestamp.seconds * 1000);
-      //       setCalendarEventsSafe((prev) => [
-      //         ...prev,
-      //         {
-      //           title: `Completed: ${carName}`,
-      //           start: start.toISOString(),
-      //           end: rentalEnd.toISOString(),
-      //           fullData: data,
-      //           backgroundColor: statusColorMap["Completed"],
-      //           borderColor: "#00000020",
-      //           textColor: "#fff",
-      //           source: "completed",
-      //         },
-      //       ]);
-      //     }
-      //   }
-      // });
-    
-    
-            changes.forEach((change) => {
+      changes.forEach((change) => {
         if (change.type === "added") {
           const data = change.doc.data();
           if (data.status !== "Completed") return;
@@ -6621,8 +6691,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             // ✅ Rebuild flat bookings array for this plateNo
             const allBookings = [];
             for (const key in newMap[plateNo]) {
-              if (["carType", "carName", "bookings"].includes(key))
-                continue;
+              if (["carType", "carName", "bookings"].includes(key)) continue;
               if (Array.isArray(newMap[plateNo][key]?.bookings)) {
                 allBookings.push(...newMap[plateNo][key].bookings);
               }
@@ -6661,7 +6730,7 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           }
         }
 
-                        // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
+        // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.status !== "Completed") return;
@@ -6669,7 +6738,12 @@ Please continue operational follow-ups and payment tracking for this rental.`,
           const docId = change.doc.id;
           const plateNo = data.plateNo || "UNKNOWN_UNIT";
 
-          console.log("🔔 Modified booking detected:", docId, "paid:", data.paid);
+          console.log(
+            "🔔 Modified booking detected:",
+            docId,
+            "paid:",
+            data.paid,
+          );
 
           // Only update analytics - no need to add to calendar again
           setCompletedBookingsAnalytics((prevMap) => {
@@ -6682,18 +6756,24 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             // Find and update the booking in all time keys
             let found = false;
             for (const key in newMap[plateNo]) {
-              if (["carType", "carName", "bookings"].includes(key))
-                continue;
-              
+              if (["carType", "carName", "bookings"].includes(key)) continue;
+
               if (!newMap[plateNo][key]?.bookings) continue;
-              
-              const index = newMap[plateNo][key].bookings.findIndex((b) => b.id === docId);
-              
+
+              const index = newMap[plateNo][key].bookings.findIndex(
+                (b) => b.id === docId,
+              );
+
               if (index !== -1) {
                 // Replace the entire booking object with the updated data
                 newMap[plateNo][key].bookings[index] = { id: docId, ...data };
                 found = true;
-                console.log("✅ Updated booking in key:", key, "paid:", data.paid);
+                console.log(
+                  "✅ Updated booking in key:",
+                  key,
+                  "paid:",
+                  data.paid,
+                );
               }
             }
 
@@ -6704,102 +6784,14 @@ Please continue operational follow-ups and payment tracking for this rental.`,
             return newMap;
           });
         }
-
-
-        // // ✅ ADD THIS: Handle modified bookings (e.g., marked as paid)
-        // if (change.type === "modified") {
-        //   const data = change.doc.data();
-        //   if (data.status !== "Completed") return;
-
-        //   const docId = change.doc.id;
-        //   const plateNo = data.plateNo || "UNKNOWN_UNIT";
-        //   const carName = data.carName || plateNo;
-
-        //   // Only update analytics - no need to add to calendar again
-        //   setCompletedBookingsAnalytics((prevMap) => {
-        //     const newMap = { ...prevMap };
-        //     if (!newMap[plateNo]) return newMap;
-
-        //     // Find and update the booking in all time keys
-        //     for (const key in newMap[plateNo]) {
-        //       if (["carType", "unitImage", "carName", "bookings"].includes(key))
-        //         continue;
-              
-        //       if (!newMap[plateNo][key]?.bookings) continue;
-              
-        //       const bookings = newMap[plateNo][key].bookings;
-        //       const index = bookings.findIndex((b) => b.id === docId);
-              
-        //       if (index !== -1) {
-        //         // Update the existing booking with new data (including paid status)
-        //         bookings[index] = { ...bookings[index], ...data };
-        //       }
-        //     }
-
-        //     return newMap;
-        //   });
-        // }
       });
-
     });
 
     // LISTEN TO ACTIVE BOOKINGS (incremental only)
     const unsubscribeActive = onSnapshot(activeRef, (snapshot) => {
       const changes = snapshot.docChanges();
 
-      // changes.forEach((change) => {
-      //   if (change.type === "added" || change.type === "modified") {
-      //     const data = change.doc.data();
-      //     if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
-      //       return;
-
-      //     const docId = change.doc.id;
-      //     const start = new Date(data.startTimestamp.seconds * 1000);
-      //     const [year, month, day] = data.endDate.split("-");
-      //     const [hour, minute] = data.endTime.split(":");
-      //     const end = data.endTimestamp?.seconds
-      //       ? new Date(data.endTimestamp.seconds * 1000)
-      //       : new Date(
-      //           Number(year),
-      //           Number(month) - 1,
-      //           Number(day),
-      //           Number(hour),
-      //           Number(minute),
-      //         );
-
-      //     const carName = data.carName || "Unknown Car";
-      //     const status =
-      //       data.status?.charAt(0).toUpperCase() +
-      //         data.status?.slice(1).toLowerCase() || "Unknown";
-
-      //     setCalendarEventsSafe((prev) => {
-      //       const filtered = prev.filter((e) => e.fullData?.id !== docId);
-      //       return [
-      //         ...filtered,
-      //         {
-      //           title: `${status}: ${carName}`,
-      //           start: start.toISOString(),
-      //           end: end.toISOString(),
-      //           fullData: data,
-      //           backgroundColor: statusColorMap[status] || "#6c757d",
-      //           borderColor: "#00000020",
-      //           textColor: "#fff",
-      //           source: status.toLowerCase(),
-      //         },
-      //       ];
-      //     });
-      //   }
-
-      //   if (change.type === "removed") {
-      //     const docId = change.doc.id;
-      //     setCalendarEventsSafe((prev) =>
-      //       prev.filter((e) => e.fullData?.id !== docId),
-      //     );
-
-
-
-
-changes.forEach((change) => {
+      changes.forEach((change) => {
         if (change.type === "added" || change.type === "modified") {
           const data = change.doc.data();
           if (!data.startTimestamp?.seconds || !data.endDate || !data.endTime)
@@ -6860,11 +6852,6 @@ changes.forEach((change) => {
                 e.fullData?.bookingId !== docId,
             ),
           );
-        
-
-
-
-
         }
       });
     });
@@ -6875,7 +6862,6 @@ changes.forEach((change) => {
     };
   }, [adminUid]);
 
-  
   // useEffect(() => {
   //   if (!adminUid) return;
 
@@ -7496,7 +7482,6 @@ changes.forEach((change) => {
       return { success: false, error: error.message };
     }
   };
-
 
   const deleteImageFromFirestore = async (imageId) => {
     try {
@@ -9320,9 +9305,12 @@ changes.forEach((change) => {
 
         sendMessage,
         deleteMessage,
+        conversationThreads,
+        subscribeToConversationMessages,
+        hasMoreConversationMessages,
         sentMessages,
         userMessages,
-notificationMessages,
+        notificationMessages,
         messageFetchLimit,
         loadMoreUserMessages,
         hasMoreUserMessages,
@@ -9496,8 +9484,6 @@ notificationMessages,
     </UserContext.Provider>
   );
 };
-
-
 
 // const state = useMemo(() => ({
 //   isUpdatingUser,

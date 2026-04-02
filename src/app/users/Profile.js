@@ -1111,8 +1111,8 @@ useEffect(() => {
 
     setChatInput(""); // clear immediately for better UX
 
-    let resolvedAdmin = {
-      uid: adminConversation?.id || adminUid || adminMeta.uid || "",
+let resolvedAdmin = {
+      uid: adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
       name: adminConversation?.participant?.name || adminMeta.name || "Admin",
       email:
         adminConversation?.participant?.email || adminMeta.email || "No email",
@@ -2364,13 +2364,8 @@ useEffect(() => {
           <h3>
             {activeTab === "notifications"
               ? `Notifications (${notificationMessages.length}${canLoadMoreNotifications ? "+" : ""})`
-              : `Messages (${adminConversation?.messages?.length || 0})`}
+              : `Messages (${adminConversationMessages.length || 0})`}
           </h3>
-          {/* <h3>
-            {activeTab === "notifications"
-              ? `Notifications (${notificationMessages.length})`
-              : `Messages (${adminConversation?.messages?.length || 0})`}
-          </h3> */}
 
           <div className="message-tabs-controls">
             <div className="message-tabs">
@@ -2712,11 +2707,7 @@ useEffect(() => {
                               type="button"
                               className="profile-conversation-load-more-btn"
                               onClick={() => {
-                                setConversationMessageCountBeforeLoad(
-                                  adminConversation?.messages?.length || 0,
-                                );
                                 setIsLoadingMoreConversationMessages(true);
-                                loadMoreUserMessages();
                               }}
                             >
                               Load 10 More Messages
