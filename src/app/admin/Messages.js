@@ -518,7 +518,7 @@ const openConversation = (threadId) => {
                   className="confirm-btn revert"
                   onClick={() => {
                     const deleteType = messageToDelete?._source || "inbox";
-                    deleteMessage(messageToDelete.id, deleteType);
+                    deleteMessage(messageToDelete, deleteType);
                     handleMessagesDeleted(1);
                     setShowDeleteOverlay(false);
                     setMessageToDelete(null);

@@ -2015,8 +2015,8 @@ const Profile = ({ openBooking }) => {
               <button
                 className="confirm-btn revert"
                 onClick={() => {
-                  const deleteType = messageToDelete?._source || "inbox";
-                  deleteMessage(messageToDelete.id, deleteType);
+                   const deleteType = messageToDelete?._source || "inbox";
+                  deleteMessage(messageToDelete, deleteType);
                   handleMessagesDeleted(1);
                   setShowDeleteOverlay(false);
                   setMessageToDelete(null);

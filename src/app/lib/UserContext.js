@@ -4825,7 +4825,7 @@ const sendMessage = async ({
           return;
         }
 
-        if (typeof msg !== "string" && msg?.isNotification === true) {
+if (typeof msg !== "string" && msg?.isNotification === true) {
           const notificationRef = doc(
             db,
             "users",
@@ -4833,6 +4833,21 @@ const sendMessage = async ({
             "notifications",
             messageId,
           );
+          console.log("🔍 Deleting:", notificationRef.path);
+          await deleteDoc(notificationRef);
+          return;
+        }
+
+        const notificationRef = doc(
+          db,
+          "users",
+          user.uid,
+          "notifications",
+          messageId,
+        );
+        const notificationSnap = await getDoc(notificationRef);
+
+        if (notificationSnap.exists()) {
           console.log("🔍 Deleting:", notificationRef.path);
           await deleteDoc(notificationRef);
           return;

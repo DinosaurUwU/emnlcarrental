@@ -7982,7 +7982,7 @@ const hasReservedSource =
                       ? "BOOKING REQUESTS"
                       : "ONGOING RENTS"}
                 </h2>
-                <div className="filter-dropdown hoverable-dropdown">
+                {/* <div className="filter-dropdown hoverable-dropdown">
                   <button className="filter-button">
                     {ongoingFilter.charAt(0).toUpperCase() +
                       ongoingFilter.slice(1).toLowerCase()}{" "}
@@ -8001,7 +8001,47 @@ const hasReservedSource =
                       </div>
                     ))}
                   </div>
+                </div> */}
+
+<div className="filter-dropdown hoverable-dropdown">
+                  <button className="filter-button">
+                    <span className="filter-button-label">
+                      {ongoingFilter.charAt(0).toUpperCase() +
+                        ongoingFilter.slice(1).toLowerCase()}
+                    </span>
+
+                    {adminBookingRequests.length > 0 && (
+                      <span className="filter-request-badge">
+                        {adminBookingRequests.length}
+                      </span>
+                    )}
+
+                    <span className="filter-button-caret">▾</span>
+                  </button>
+
+                  <div className="filter-menu">
+                    {["ACTIVE", "PENDING", "REQUESTS"].map((type) => (
+                      <div
+                        key={type}
+                        className={`filter-option ${
+                          ongoingFilter === type ? "selected" : ""
+                        }`}
+                        onClick={() => setOngoingFilter(type)}
+                      >
+                        <span>
+                          {type.charAt(0) + type.slice(1).toLowerCase()}
+                        </span>
+
+                        {type === "REQUESTS" && adminBookingRequests.length > 0 && (
+                          <span className="filter-request-badge menu-badge">
+                            {adminBookingRequests.length}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
               </div>
 
               <div className="ongoing-rent-cards">
