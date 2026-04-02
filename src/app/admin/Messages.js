@@ -58,6 +58,9 @@ const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [selectedThreadMessages, setSelectedThreadMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
+  const [conversationSendState, setConversationSendState] = useState("idle");
+  const [pendingConversationMessage, setPendingConversationMessage] =
+    useState(null);
   const conversationChatBodyRef = useRef(null);
   const [showDeleteConversationOverlay, setShowDeleteConversationOverlay] =
     useState(false);
@@ -159,8 +162,14 @@ const Messages = () => {
   }, [selectedThreadMeta, selectedThreadMessages]);
 
   const displayedThreadMessages = useMemo(() => {
-    return selectedThreadMessages || [];
-  }, [selectedThreadMessages]);
+    const baseMessages = selectedThreadMessages || [];
+
+    if (!pendingConversationMessage) {
+      return baseMessages;
+    }
+
+    return [...baseMessages, pendingConversationMessage];
+  }, [selectedThreadMessages, pendingConversationMessage]);
 
   const canLoadMoreConversationMessages = useMemo(() => {
     return hasMoreConversationMessages && !isLoadingMoreConversationMessages;
@@ -280,8 +289,23 @@ const Messages = () => {
     const text = chatInput.trim();
     if (!text) return;
     if (!user?.uid || !selectedThread?.id) return;
+    if (conversationSendState === "sending") return;
 
-    setChatInput(""); // clear immediately
+    const tempMessage = {
+      id: `pending_${Date.now()}`,
+      senderUid: user.uid,
+      recipientUid: selectedThread.participant?.uid || "",
+      content: text,
+      profilePic: user?.profilePic || "/assets/profile.png",
+      startTimestamp: null,
+      formattedDateTime: "",
+      readStatus: true,
+      _isPending: true,
+    };
+
+    setConversationSendState("sending");
+    setPendingConversationMessage(tempMessage);
+    setChatInput("");
 
     const contactInfo = {
       name: user.name,
@@ -299,7 +323,9 @@ const Messages = () => {
     const result = await sendMessage(contactInfo);
 
     if (!result?.success) {
-      setChatInput(text); // restore on failure
+      setChatInput(text);
+      setPendingConversationMessage(null);
+      setConversationSendState("error");
       showActionOverlay({
         message: result?.error || "Failed to send message.",
         type: "warning",
@@ -307,6 +333,8 @@ const Messages = () => {
       return;
     }
 
+    setPendingConversationMessage(null);
+    setConversationSendState("sent");
     showActionOverlay({
       message: "Message sent!",
       type: "success",
@@ -329,9 +357,26 @@ const Messages = () => {
 
   const sendFleetDetailsLink = async () => {
     if (!user?.uid || !selectedThread?.id) return;
+    if (conversationSendState === "sending") return;
 
     const fleetUrl = `${window.location.origin}/fleet-details`;
     const quickMessage = `You can browse our available cars and pricing here:<br><a href="${fleetUrl}" target="_blank" rel="noopener noreferrer">${fleetUrl}</a>`;
+
+    const tempMessage = {
+      id: `pending_${Date.now()}`,
+      senderUid: user.uid,
+      recipientUid: selectedThread.participant?.uid || "",
+      content: quickMessage,
+      profilePic: user?.profilePic || "/assets/profile.png",
+      startTimestamp: null,
+      formattedDateTime: "",
+      readStatus: true,
+      _isPending: true,
+      sourcePage: "chat",
+    };
+
+    setConversationSendState("sending");
+    setPendingConversationMessage(tempMessage);
 
     const contactInfo = {
       name: user.name,
@@ -349,6 +394,8 @@ const Messages = () => {
     const result = await sendMessage(contactInfo);
 
     if (!result?.success) {
+      setPendingConversationMessage(null);
+      setConversationSendState("error");
       showActionOverlay({
         message: result?.error || "Failed to send fleet link.",
         type: "warning",
@@ -356,6 +403,8 @@ const Messages = () => {
       return;
     }
 
+    setPendingConversationMessage(null);
+    setConversationSendState("sent");
     showActionOverlay({
       message: "Fleet details link sent!",
       type: "success",
@@ -1046,7 +1095,11 @@ const Messages = () => {
                                 }}
                               />
                               <div className="conversation-bubble-time">
-                                {formatMessageTimestamp(msg)}
+                                {msg._isPending ? (
+                                  <span className="message-time-spinner" />
+                                ) : (
+                                  formatMessageTimestamp(msg)
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1066,12 +1119,17 @@ const Messages = () => {
                         <button
                           className="fleet-link-btn"
                           onClick={sendFleetDetailsLink}
+                          disabled={conversationSendState === "sending"}
                         >
                           Send Fleet Link
                         </button>
                         <button
                           className="reply-btn"
                           onClick={sendConversationMessage}
+                          disabled={
+                            !chatInput.trim() ||
+                            conversationSendState === "sending"
+                          }
                         >
                           Send
                         </button>

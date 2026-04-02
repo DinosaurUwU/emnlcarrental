@@ -22,13 +22,14 @@ const Profile = ({ openBooking }) => {
     updateUser,
     revertUserData,
     deleteUserAccount,
-    userMessages,
-    sentMessages,
+    conversationThreads,
     notificationMessages,
     loadMoreNotifications,
     hasMoreNotifications,
     loadMoreUserMessages,
     hasMoreUserMessages,
+    subscribeToConversationMessages,
+    hasMoreConversationMessages,
     markMessageAsRead,
     deleteMessage,
     sendMessage,
@@ -95,6 +96,11 @@ const Profile = ({ openBooking }) => {
   const [selectedMessageIds, setSelectedMessageIds] = useState([]);
   const [selectedOption, setSelectedOption] = useState("none");
   const [chatInput, setChatInput] = useState("");
+  const [conversationSendState, setConversationSendState] = useState("idle");
+  const [conversationSendStatusText, setConversationSendStatusText] =
+    useState("");
+    const [pendingConversationMessage, setPendingConversationMessage] =
+    useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [showHistoryDetailsOverlay, setShowHistoryDetailsOverlay] =
@@ -106,14 +112,16 @@ const Profile = ({ openBooking }) => {
   const previewKeyRef = useRef(0);
   const [pendingPreviewKey, setPendingPreviewKey] = useState(null);
   const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
-    const [isLoadingMoreConversationMessages, setIsLoadingMoreConversationMessages] =
-    useState(false);
+  const [
+    isLoadingMoreConversationMessages,
+    setIsLoadingMoreConversationMessages,
+  ] = useState(false);
   const [visibleConversationMessageCount, setVisibleConversationMessageCount] =
     useState(10);
-      const [hasMoreConversationMessages, setHasMoreConversationMessages] =
-    useState(true);
-  const [conversationMessageCountBeforeLoad, setConversationMessageCountBeforeLoad] =
-    useState(0);
+
+  const [adminConversationMessages, setAdminConversationMessages] = useState(
+    [],
+  );
 
   useEffect(() => {
     if (!licenseGalleryRef.current) return;
@@ -946,80 +954,81 @@ const Profile = ({ openBooking }) => {
     return () => clearTimeout(timer);
   }, [notificationMessages.length, isLoadingMoreMessages]);
 
-  const chatMessages = useMemo(() => {
-    const inboxChat = (userMessages || [])
-      .filter((m) => !m?.isNotification)
-      .map((m) => ({ ...m, _source: "inbox" }));
-
-    const sentChat = (sentMessages || [])
-      .filter((m) => !m?.isNotification)
-      .map((m) => ({ ...m, _source: "sentbox" }));
-
-    return [...inboxChat, ...sentChat];
-  }, [userMessages, sentMessages]);
-
   const adminConversation = useMemo(() => {
-    if (!user?.uid) return null;
+    const fallbackAdminUid = adminUid || adminMeta.uid || "";
+    const matchingThread =
+      (conversationThreads || []).find(
+        (thread) => thread?.participantUid === fallbackAdminUid,
+      ) || null;
 
-    const getMs = (msg) => {
-      const ts = msg?.startTimestamp;
-      if (ts?.toDate) return ts.toDate().getTime();
-      if (typeof ts?.seconds === "number") return ts.seconds * 1000;
-      if (typeof msg?.clientCreatedAt === "number") return msg.clientCreatedAt;
-      return 0;
-    };
-    const sorted = [...chatMessages].sort((a, b) => getMs(a) - getMs(b));
+    if (matchingThread) {
+      return {
+        id: matchingThread.id,
+        participant: {
+          uid: matchingThread.participantUid || fallbackAdminUid,
+          name: matchingThread.participantName || adminMeta.name || "Admin",
+          email:
+            matchingThread.participantEmail || adminMeta.email || "No email",
+          contact:
+            matchingThread.participantContact ||
+            adminMeta.contact ||
+            "No contact",
+          profilePic:
+            matchingThread.participantProfilePic ||
+            adminMeta.profilePic ||
+            "/assets/profile.png",
+        },
+        messages: adminConversationMessages,
+      };
+    }
 
-    const getOtherUid = (msg) => {
-      const senderUid = msg?.senderUid || "";
-      const recipientUid = msg?.recipientUid || "";
-      return senderUid === user.uid ? recipientUid : senderUid;
-    };
-
-    const firstWithOtherUid = sorted.find((msg) => getOtherUid(msg));
-    const resolvedAdminUid =
-      (firstWithOtherUid ? getOtherUid(firstWithOtherUid) : "") ||
-      adminUid ||
-      adminMeta.uid ||
-      null;
-
-    const incoming = sorted.find(
-      (msg) => msg?.senderUid && msg.senderUid !== user.uid,
-    );
-    const outgoing = sorted.find(
-      (msg) => msg?.recipientUid && msg.recipientUid !== user.uid,
-    );
-
-    const participant = {
-      name:
-        adminMeta.name ||
-        incoming?.name ||
-        outgoing?.recipientName ||
-        incoming?.email ||
-        outgoing?.recipientEmail ||
-        "Admin",
-      email:
-        adminMeta.email ||
-        incoming?.email ||
-        outgoing?.recipientEmail ||
-        "No email",
-      contact:
-        adminMeta.contact ||
-        incoming?.contact ||
-        outgoing?.recipientContact ||
-        "No contact",
-      profilePic:
-        adminMeta.profilePic || incoming?.profilePic || "/assets/profile.png",
-    };
+    if (!fallbackAdminUid) return null;
 
     return {
-      id: resolvedAdminUid,
-      participant,
-      messages: sorted,
+      id: `fallback_${fallbackAdminUid}`,
+      participant: {
+        uid: fallbackAdminUid,
+        name: adminMeta.name || "Admin",
+        email: adminMeta.email || "No email",
+        contact: adminMeta.contact || "No contact",
+        profilePic: adminMeta.profilePic || "/assets/profile.png",
+      },
+      messages: adminConversationMessages,
     };
-  }, [chatMessages, user?.uid, adminUid, adminMeta]);
+  }, [conversationThreads, adminUid, adminMeta, adminConversationMessages]);
 
   const profileChatBodyRef = useRef(null);
+
+  useEffect(() => {
+    const threadId = adminConversation?.id;
+    const participantUid = adminConversation?.participant?.uid;
+
+    if (
+      !threadId ||
+      String(threadId).startsWith("fallback_") ||
+      !participantUid
+    ) {
+      setAdminConversationMessages([]);
+      return;
+    }
+
+    const fetchLimit = visibleConversationMessageCount;
+
+    const unsubscribe = subscribeToConversationMessages({
+      threadId,
+      fetchLimit,
+      onData: ({ messages = [] }) => {
+        setAdminConversationMessages(messages);
+      },
+    });
+
+    return () => unsubscribe();
+  }, [
+    adminConversation?.id,
+    adminConversation?.participant?.uid,
+    visibleConversationMessageCount,
+    subscribeToConversationMessages,
+  ]);
 
   useEffect(() => {
     if (activeTab !== "conversations") return;
@@ -1027,58 +1036,37 @@ const Profile = ({ openBooking }) => {
 
     profileChatBodyRef.current.scrollTop =
       profileChatBodyRef.current.scrollHeight;
-  }, [adminConversation?.messages?.length, activeTab]);
+  }, [adminConversationMessages.length, activeTab]);
 
-    const displayedConversationMessages = useMemo(() => {
-    if (!adminConversation?.messages) return [];
-    return adminConversation.messages.slice(-visibleConversationMessageCount);
-  }, [adminConversation?.messages, visibleConversationMessageCount]);
+const displayedConversationMessages = useMemo(() => {
+    const baseMessages = adminConversationMessages || [];
 
-const canLoadMoreConversationMessages = useMemo(() => {
-    return (
-      ((((adminConversation?.messages?.length || 0) >
-        visibleConversationMessageCount) ||
-        hasMoreConversationMessages) &&
-        !isLoadingMoreConversationMessages)
-    );
-  }, [
-    adminConversation?.messages?.length,
-    visibleConversationMessageCount,
-    hasMoreConversationMessages,
-    isLoadingMoreConversationMessages,
-  ]);
+    if (!pendingConversationMessage) {
+      return baseMessages;
+    }
 
-useEffect(() => {
+    return [...baseMessages, pendingConversationMessage];
+  }, [adminConversationMessages, pendingConversationMessage]);
+
+  const canLoadMoreConversationMessages = useMemo(() => {
+    return hasMoreConversationMessages && !isLoadingMoreConversationMessages;
+  }, [hasMoreConversationMessages, isLoadingMoreConversationMessages]);
+
+  useEffect(() => {
     if (!adminConversation?.id) return;
     setIsLoadingMoreConversationMessages(false);
-    setHasMoreConversationMessages(true);
   }, [adminConversation?.id]);
 
   useEffect(() => {
     if (!isLoadingMoreConversationMessages) return;
 
     const timer = setTimeout(() => {
-      const currentConversationCount = adminConversation?.messages?.length || 0;
-      const addedConversationMessages =
-        currentConversationCount - conversationMessageCountBeforeLoad;
-
-      setVisibleConversationMessageCount((prev) =>
-        Math.max(prev + 10, currentConversationCount),
-      );
-
-      if (addedConversationMessages < 10) {
-        setHasMoreConversationMessages(false);
-      }
-
+      setVisibleConversationMessageCount((prev) => prev + 10);
       setIsLoadingMoreConversationMessages(false);
-    }, 600);
+    }, 400);
 
     return () => clearTimeout(timer);
-  }, [
-    isLoadingMoreConversationMessages,
-    adminConversation?.messages?.length,
-    conversationMessageCountBeforeLoad,
-  ]);
+  }, [isLoadingMoreConversationMessages]);
 
   const openNotificationOverlay = (message) => {
     setSelectedMessage(message);
@@ -1099,20 +1087,53 @@ useEffect(() => {
     if (activeTab !== "conversations" || !adminConversation) return;
 
     adminConversation.messages.forEach((msg) => {
-      if (msg._source === "inbox" && !msg.readStatus) {
+      if (msg?.senderUid !== user?.uid && !msg?.readStatus) {
         markMessageAsRead(msg.id);
       }
     });
-  }, [activeTab, adminConversation, markMessageAsRead]);
+  }, [activeTab, adminConversation, markMessageAsRead, user?.uid]);
 
-  const sendConversationMessage = async () => {
+  useEffect(() => {
+    if (
+      conversationSendState !== "sent" &&
+      conversationSendState !== "error"
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setConversationSendState("idle");
+      setConversationSendStatusText("");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [conversationSendState]);
+
+const sendConversationMessage = async () => {
     const text = chatInput.trim();
     if (!text || !user?.uid) return;
+    if (conversationSendState === "sending") return;
 
-    setChatInput(""); // clear immediately for better UX
+    const tempMessage = {
+      id: `pending_${Date.now()}`,
+      senderUid: user.uid,
+      recipientUid: adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
+      content: text,
+      profilePic: user.profilePic || "/assets/profile.png",
+      startTimestamp: null,
+      formattedDateTime: "",
+      readStatus: true,
+      _isPending: true,
+    };
 
-let resolvedAdmin = {
-      uid: adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
+    setConversationSendState("sending");
+    setConversationSendStatusText("Sending...");
+    setPendingConversationMessage(tempMessage);
+    setChatInput("");
+
+    let resolvedAdmin = {
+      uid:
+        adminConversation?.participant?.uid || adminUid || adminMeta.uid || "",
       name: adminConversation?.participant?.name || adminMeta.name || "Admin",
       email:
         adminConversation?.participant?.email || adminMeta.email || "No email",
@@ -1143,21 +1164,19 @@ let resolvedAdmin = {
     }
 
     if (!resolvedAdmin.uid) {
-      setChatInput(text); // restore on failure
+      setChatInput(text);
+      setPendingConversationMessage(null);
+      setConversationSendState("error");
+      setConversationSendStatusText("Failed to send message");
       showActionOverlay({
-        message: "Admin chat is not ready yet. Please try again.",
+        message: "Admin account not found.",
         type: "warning",
       });
       return;
     }
 
     const result = await sendMessage({
-      name:
-        `${user?.surname || ""} ${user?.firstName || ""}`
-          .replace(/\s+/g, " ")
-          .trim() ||
-        user?.name ||
-        "User",
+      name: user.name,
       email: user.email,
       phone: user.phone,
       message: text,
@@ -1170,7 +1189,10 @@ let resolvedAdmin = {
     });
 
     if (!result?.success) {
-      setChatInput(text); // restore on failure
+      setChatInput(text);
+      setPendingConversationMessage(null);
+      setConversationSendState("error");
+      setConversationSendStatusText("Failed to send message");
       showActionOverlay({
         message: result?.error || "Failed to send message.",
         type: "warning",
@@ -1178,17 +1200,20 @@ let resolvedAdmin = {
       return;
     }
 
+    setPendingConversationMessage(null);
+    setConversationSendState("sent");
+    setConversationSendStatusText("Message sent");
+    showActionOverlay({
+      message: "Message sent!",
+      type: "success",
+    });
+
     setTimeout(() => {
       if (profileChatBodyRef.current) {
         profileChatBodyRef.current.scrollTop =
           profileChatBodyRef.current.scrollHeight;
       }
     }, 0);
-
-    showActionOverlay({
-      message: "Message sent successfully!",
-      type: "success",
-    });
   };
 
   const handleProfileChatKeyDown = (e) => {
@@ -2689,7 +2714,7 @@ let resolvedAdmin = {
                     </div>
                   </div>
 
-                 <div className="profile-chat-body" ref={profileChatBodyRef}>
+                  <div className="profile-chat-body" ref={profileChatBodyRef}>
                     {!adminConversation ||
                     adminConversation.messages.length === 0 ? (
                       <div className="profile-chat-empty">
@@ -2703,7 +2728,7 @@ let resolvedAdmin = {
                           </div>
                         ) : (
                           canLoadMoreConversationMessages && (
-<button
+                            <button
                               type="button"
                               className="profile-conversation-load-more-btn"
                               onClick={() => {
@@ -2733,7 +2758,11 @@ let resolvedAdmin = {
                                   }}
                                 />
                                 <div className="profile-chat-time">
-                                  {formatMessageTimestamp(msg)}
+                                  {msg._isPending ? (
+                                    <span className="message-time-spinner" />
+                                  ) : (
+                                    formatMessageTimestamp(msg)
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -2743,8 +2772,7 @@ let resolvedAdmin = {
                     )}
                   </div>
 
-
-                  <div className="profile-chat-composer">
+<div className="profile-chat-composer">
                     <textarea
                       className="profile-chat-input"
                       value={chatInput}
@@ -2755,7 +2783,10 @@ let resolvedAdmin = {
                     <button
                       className="reply-btn"
                       onClick={sendConversationMessage}
-                      disabled={!chatInput.trim()}
+                      disabled={
+                        !chatInput.trim() ||
+                        conversationSendState === "sending"
+                      }
                       title="Send"
                     >
                       Send

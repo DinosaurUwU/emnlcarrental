@@ -885,6 +885,23 @@ text .conversation-chat-body::-webkit-scrollbar {
   text-align: right;
 }
 
+.message-time-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: messageTimeSpin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes messageTimeSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .conversation-chat-composer {
   border-top: 1px solid #eee;
   padding: 10px;
