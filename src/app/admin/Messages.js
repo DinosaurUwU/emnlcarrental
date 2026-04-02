@@ -131,9 +131,11 @@ const Messages = () => {
   const currentVisibleConversationMessageCount =
     visibleConversationMessageCounts[selectedConversationId] || 10;
 
-  useEffect(() => {
+useEffect(() => {
+    setSelectedThreadMessages([]);
+    setPendingConversationMessages([]);
+
     if (!selectedConversationId) {
-      setSelectedThreadMessages([]);
       return;
     }
 
@@ -226,7 +228,9 @@ const Messages = () => {
     setSelectedNotification(null);
   };
 
-  const openConversation = (threadId) => {
+const openConversation = (threadId) => {
+    setSelectedThreadMessages([]);
+    setPendingConversationMessages([]);
     setSelectedConversationId(threadId);
   };
 
@@ -1012,43 +1016,8 @@ const Messages = () => {
                       </div>
                     </div>
 
-                    {/* <div
-                      className="conversation-chat-body"
-                      ref={conversationChatBodyRef}
-                    >
-                      {selectedThread.messages.map((msg) => {
-                        const isMine = msg.senderUid === user?.uid;
-                        const htmlContent = msg.content || "";
-
-                        return (
-                          <div
-                            key={`${msg._source}-${msg.id}`}
-                            className={`conversation-chat-row ${isMine ? "mine" : "other"}`}
-                          >
-                            <div
-                              className={`conversation-bubble ${isMine ? "mine" : "other"}`}
-                            >
-                              {msg.sourcePage === "contact" && (
-                                <div className="message-source-chip">
-                                  From Contact Page
-                                </div>
-                              )}
-                              <div
-                                className="conversation-bubble-text"
-                                dangerouslySetInnerHTML={{
-                                  __html: htmlContent,
-                                }}
-                              />
-                              <div className="conversation-bubble-time">
-                                {formatMessageTimestamp(msg)}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div> */}
-
-                    <div
+                    
+<div
                       className="conversation-chat-body"
                       ref={conversationChatBodyRef}
                     >
@@ -1073,10 +1042,15 @@ const Messages = () => {
                       {displayedThreadMessages.map((msg) => {
                         const isMine = msg.senderUid === user?.uid;
                         const htmlContent = msg.content || "";
+                        const isGuestIncoming =
+                          !isMine &&
+                          (selectedThread?.isGuestThread === true ||
+                            msg.isGuest === true ||
+                            msg.sourcePage === "contact-guest");
 
                         return (
                           <div
-                            key={`${msg._source}-${msg.id}`}
+                            key={`${msg._source || "thread"}-${msg.id}`}
                             className={`conversation-chat-row ${isMine ? "mine" : "other"}`}
                           >
                             <div
@@ -1087,6 +1061,13 @@ const Messages = () => {
                                   From Contact Page
                                 </div>
                               )}
+
+                              {isGuestIncoming && (
+                                <div className="message-source-chip guest-chip">
+                                  Guest User
+                                </div>
+                              )}
+
                               <div
                                 className="conversation-bubble-text"
                                 dangerouslySetInnerHTML={{
@@ -1106,30 +1087,32 @@ const Messages = () => {
                       })}
                     </div>
 
-                    <div className="conversation-chat-composer">
-                      <textarea
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onKeyDown={handleAdminChatKeyDown}
-                        placeholder="Type your message..."
-                        className="conversation-chat-input"
-                      />
-                      <div className="conversation-chat-actions">
-                        <button
-                          className="fleet-link-btn"
-                          onClick={sendFleetDetailsLink}
-                        >
-                          Send Fleet Link
-                        </button>
-                        <button
-                          className="reply-btn"
-                          onClick={sendConversationMessage}
-                          disabled={!chatInput.trim()}
-                        >
-                          Send
-                        </button>
+                    {!selectedThread?.isGuestThread && (
+                      <div className="conversation-chat-composer">
+                        <textarea
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={handleAdminChatKeyDown}
+                          placeholder="Type your message..."
+                          className="conversation-chat-input"
+                        />
+                        <div className="conversation-chat-actions">
+                          <button
+                            className="fleet-link-btn"
+                            onClick={sendFleetDetailsLink}
+                          >
+                            Send Fleet Link
+                          </button>
+                          <button
+                            className="reply-btn"
+                            onClick={sendConversationMessage}
+                            disabled={!chatInput.trim()}
+                          >
+                            Send
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
               </div>

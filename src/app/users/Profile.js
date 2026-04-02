@@ -471,7 +471,7 @@ const Profile = ({ openBooking }) => {
     }, 5000);
   };
 
-const deleteUserConversationThread = async (thread) => {
+  const deleteUserConversationThread = async (thread) => {
     if (!thread?.id) return;
 
     setProcessingConversationDelete({
@@ -1083,7 +1083,7 @@ const deleteUserConversationThread = async (thread) => {
       profileChatBodyRef.current.scrollHeight;
   }, [adminConversationMessages.length, activeTab]);
 
-const displayedConversationMessages = useMemo(() => {
+  const displayedConversationMessages = useMemo(() => {
     const pendingIds = new Set(
       (pendingConversationMessages || [])
         .map((msg) => msg?.clientMessageId)
@@ -2112,24 +2112,22 @@ const displayedConversationMessages = useMemo(() => {
         </div>
       )}
 
-
-
-              {processingConversationDelete.isProcessing && (
-          <div className="submitting-overlay">
-            <div className="loading-container">
-              <div className="loading-bar-road">
-                <img
-                  src="/assets/images/submitting.gif"
-                  alt={processingConversationDelete.message}
-                  className="car-gif"
-                />
-              </div>
-              <p className={processingConversationDelete.textClass}>
-                {processingConversationDelete.message}
-              </p>
+      {processingConversationDelete.isProcessing && (
+        <div className="submitting-overlay">
+          <div className="loading-container">
+            <div className="loading-bar-road">
+              <img
+                src="/assets/images/submitting.gif"
+                alt={processingConversationDelete.message}
+                className="car-gif"
+              />
             </div>
+            <p className={processingConversationDelete.textClass}>
+              {processingConversationDelete.message}
+            </p>
           </div>
-        )}
+        </div>
+      )}
 
       <div className="profile-columns">
         <div className="profile-container">
