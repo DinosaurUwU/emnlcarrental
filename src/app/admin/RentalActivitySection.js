@@ -157,6 +157,10 @@ const RentalActivitySection = ({ subSection }) => {
   const [filterType, setFilterType] = useState("ALL");
   const [ongoingFilter, setOngoingFilter] = useState("ACTIVE");
   const [balanceFilter, setBalanceFilter] = useState("ALL");
+  const [showOngoingFilterMenu, setShowOngoingFilterMenu] = useState(false);
+  const [showAvailableFilterMenu, setShowAvailableFilterMenu] = useState(false);
+  const ongoingFilterDropdownRef = useRef(null);
+  const availableFilterDropdownRef = useRef(null);
 
   const filteredOngoingRentals = ongoingRentals.filter((rental) => {
     if (ongoingFilter === "ACTIVE")
@@ -552,6 +556,30 @@ const RentalActivitySection = ({ subSection }) => {
       if (a.balanceDue !== 0 && b.balanceDue === 0) return 1;
       return 0;
     });
+
+    useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        ongoingFilterDropdownRef.current &&
+        !ongoingFilterDropdownRef.current.contains(event.target)
+      ) {
+        setShowOngoingFilterMenu(false);
+      }
+
+      if (
+        availableFilterDropdownRef.current &&
+        !availableFilterDropdownRef.current.contains(event.target)
+      ) {
+        setShowAvailableFilterMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // PICK-A-CAR DISPLAY
   useEffect(() => {
@@ -8028,8 +8056,19 @@ const hasReservedSource =
                   </div>
                 </div> */}
 
-<div className="filter-dropdown hoverable-dropdown">
-                  <button className="filter-button">
+<div
+                  className="filter-dropdown"
+                  ref={ongoingFilterDropdownRef}
+                >
+                  <button
+                    type="button"
+                    className="filter-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAvailableFilterMenu(false);
+                      setShowOngoingFilterMenu((prev) => !prev);
+                    }}
+                  >
                     <span className="filter-button-label">
                       {ongoingFilter.charAt(0).toUpperCase() +
                         ongoingFilter.slice(1).toLowerCase()}
@@ -8044,8 +8083,11 @@ const hasReservedSource =
                     <span className="filter-button-caret">▾</span>
                   </button>
 
-                  <div className="filter-menu">
-{["ACTIVE", "PENDING", "REQUESTS"].map((type) => {
+                  <div
+                    className="filter-menu"
+                    style={{ display: showOngoingFilterMenu ? "block" : "none" }}
+                  >
+                    {["ACTIVE", "PENDING", "REQUESTS"].map((type) => {
                       const count =
                         type === "ACTIVE"
                           ? activeBookings.filter(
@@ -8067,7 +8109,11 @@ const hasReservedSource =
                           className={`filter-option ${
                             ongoingFilter === type ? "selected" : ""
                           }`}
-                          onClick={() => setOngoingFilter(type)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOngoingFilter(type);
+                            setShowOngoingFilterMenu(false);
+                          }}
                         >
                           <span className="filter-option-label">
                             {type === "ACTIVE" && (
@@ -8081,19 +8127,17 @@ const hasReservedSource =
                             </span>
                           </span>
 
-                          {count > 0 && (
-                            <span
-                              className={`filter-request-badge menu-badge ${
-                                type === "ACTIVE"
-                                  ? "active-badge"
-                                  : type === "PENDING"
-                                    ? "pending-badge"
-                                    : "request-badge"
-                              }`}
-                            >
-                              {count}
-                            </span>
-                          )}
+                          <span
+                            className={`filter-request-badge menu-badge ${
+                              type === "ACTIVE"
+                                ? "active-badge"
+                                : type === "PENDING"
+                                  ? "pending-badge"
+                                  : "request-badge"
+                            }`}
+                          >
+                            {count}
+                          </span>
                         </div>
                       );
                     })}
@@ -8717,13 +8761,24 @@ const hasReservedSource =
                   </div>
                 </div> */}
 
-<div className="filter-dropdown">
+<div
+                  className="filter-dropdown"
+                  ref={availableFilterDropdownRef}
+                >
                   {(() => {
                     const selectedStats = getAvailableUnitStats(filterType);
 
                     return (
                       <>
-                        <button className="filter-button">
+                        <button
+                          type="button"
+                          className="filter-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowOngoingFilterMenu(false);
+                            setShowAvailableFilterMenu((prev) => !prev);
+                          }}
+                        >
                           <span className="filter-button-label">
                             {filterType.charAt(0).toUpperCase() +
                               filterType.slice(1).toUpperCase()}
@@ -8740,7 +8795,12 @@ const hasReservedSource =
                           <span className="filter-button-caret">▾</span>
                         </button>
 
-                        <div className="filter-menu">
+                        <div
+                          className="filter-menu"
+                          style={{
+                            display: showAvailableFilterMenu ? "block" : "none",
+                          }}
+                        >
                           {["ALL", "SEDAN", "SUV", "MPV", "VAN", "PICKUP"].map(
                             (carType) => {
                               const stats = getAvailableUnitStats(carType);
@@ -8751,7 +8811,11 @@ const hasReservedSource =
                                   className={`filter-option ${
                                     filterType === carType ? "selected" : ""
                                   }`}
-                                  onClick={() => setFilterType(carType)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFilterType(carType);
+                                    setShowAvailableFilterMenu(false);
+                                  }}
                                 >
                                   <span className="filter-option-label">
                                     <span>{carType}</span>
