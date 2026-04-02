@@ -747,9 +747,9 @@
   width: 100px;
   text-align: left;
   display: inline-flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   transition: all 0.5s ease;
 }
 
@@ -780,23 +780,36 @@
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 20px;
+  text-align: center;
   flex: 0 0 20px;
   box-sizing: border-box;
+  padding: 0;
 }
 
 .filter-button > .filter-request-badge {
   position: absolute;
   top: 50%;
-  right: 16px;
+  right: -13px;
   transform: translateY(-50%);
 }
 
+.filter-option-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .filter-option {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: right;
   gap: 8px;
+  padding-right: 18px;
+  overflow: visible;
+  text-align: center;
 }
 
 .filter-request-badge.menu-badge {
@@ -804,11 +817,28 @@
   height: 18px;
   flex: 0 0 18px;
   font-size: 0.68rem;
-  position: static;
-  transform: none;
+  line-height: 18px;
+  position: absolute;
+  right: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
+.filter-request-badge.menu-badge.active-badge {
+  background-color: #28a745;
+  color: #fff;
+}
 
+.filter-request-badge.menu-badge.pending-badge {
+  background-color: #ffc107;
+  color: #1f1f1f;
+}
+
+.filter-request-badge.menu-badge.request-badge {
+  background-color: #dc3545;
+  color: #fff;
+}
 
 
 

@@ -8020,25 +8020,58 @@ const hasReservedSource =
                   </button>
 
                   <div className="filter-menu">
-                    {["ACTIVE", "PENDING", "REQUESTS"].map((type) => (
-                      <div
-                        key={type}
-                        className={`filter-option ${
-                          ongoingFilter === type ? "selected" : ""
-                        }`}
-                        onClick={() => setOngoingFilter(type)}
-                      >
-                        <span>
-                          {type.charAt(0) + type.slice(1).toLowerCase()}
-                        </span>
+{["ACTIVE", "PENDING", "REQUESTS"].map((type) => {
+                      const count =
+                        type === "ACTIVE"
+                          ? activeBookings.filter(
+                              (booking) =>
+                                String(booking?.status || "").toUpperCase() ===
+                                "ACTIVE",
+                            ).length
+                          : type === "PENDING"
+                            ? activeBookings.filter(
+                                (booking) =>
+                                  String(booking?.status || "").toUpperCase() ===
+                                  "PENDING",
+                              ).length
+                            : adminBookingRequests.length;
 
-                        {type === "REQUESTS" && adminBookingRequests.length > 0 && (
-                          <span className="filter-request-badge menu-badge">
-                            {adminBookingRequests.length}
+                      return (
+                        <div
+                          key={type}
+                          className={`filter-option ${
+                            ongoingFilter === type ? "selected" : ""
+                          }`}
+                          onClick={() => setOngoingFilter(type)}
+                        >
+                          <span className="filter-option-label">
+                            {type === "ACTIVE" && (
+                              <span className="filter-status-dot active-dot" />
+                            )}
+                            {type === "PENDING" && (
+                              <span className="filter-status-dot pending-dot" />
+                            )}
+                            <span>
+                              {type.charAt(0) + type.slice(1).toLowerCase()}
+                            </span>
                           </span>
-                        )}
-                      </div>
-                    ))}
+
+                          {count > 0 && (
+                            <span
+                              className={`filter-request-badge menu-badge ${
+                                type === "ACTIVE"
+                                  ? "active-badge"
+                                  : type === "PENDING"
+                                    ? "pending-badge"
+                                    : "request-badge"
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
