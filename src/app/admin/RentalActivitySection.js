@@ -1827,6 +1827,31 @@ const RentalActivitySection = ({ subSection }) => {
     setRentalErrorMessage("");
   };
 
+  const getAvailableUnitStats = (carType) => {
+    const matchingUnits = (allUnitData || []).filter(
+      (unit) =>
+        carType === "ALL" || unit.carType?.toUpperCase() === carType,
+    );
+
+    const totalCount = matchingUnits.length;
+    const availableCount = matchingUnits.filter((unit) => !unit.hidden).length;
+    const availabilityRatio =
+      totalCount === 0 ? 0 : availableCount / totalCount;
+
+    return {
+      totalCount,
+      availableCount,
+      availabilityRatio,
+    };
+  };
+
+  const getAvailabilityBadgeClass = (ratio) => {
+    if (ratio >= 0.75) return "availability-high";
+    if (ratio >= 0.5) return "availability-mid";
+    if (ratio > 0) return "availability-low";
+    return "availability-empty";
+  };
+
   return (
     <>
       {isImageModalOpen && modalImage && (
@@ -8669,7 +8694,7 @@ const hasReservedSource =
                   })()}
                 </div>
 
-                <div className="filter-dropdown">
+                {/* <div className="filter-dropdown">
                   <button className="filter-button">
                     {filterType.charAt(0).toUpperCase() +
                       filterType.slice(1).toUpperCase()}{" "}
@@ -8690,7 +8715,65 @@ const hasReservedSource =
                       ),
                     )}
                   </div>
+                </div> */}
+
+<div className="filter-dropdown">
+                  {(() => {
+                    const selectedStats = getAvailableUnitStats(filterType);
+
+                    return (
+                      <>
+                        <button className="filter-button">
+                          <span className="filter-button-label">
+                            {filterType.charAt(0).toUpperCase() +
+                              filterType.slice(1).toUpperCase()}
+                          </span>
+
+                          <span
+                            className={`filter-request-badge availability-badge ${getAvailabilityBadgeClass(
+                              selectedStats.availabilityRatio,
+                            )}`}
+                          >
+                            {selectedStats.availableCount}
+                          </span>
+
+                          <span className="filter-button-caret">▾</span>
+                        </button>
+
+                        <div className="filter-menu">
+                          {["ALL", "SEDAN", "SUV", "MPV", "VAN", "PICKUP"].map(
+                            (carType) => {
+                              const stats = getAvailableUnitStats(carType);
+
+                              return (
+                                <div
+                                  key={carType}
+                                  className={`filter-option ${
+                                    filterType === carType ? "selected" : ""
+                                  }`}
+                                  onClick={() => setFilterType(carType)}
+                                >
+                                  <span className="filter-option-label">
+                                    <span>{carType}</span>
+                                  </span>
+
+                                  <span
+                                    className={`filter-request-badge menu-badge availability-badge ${getAvailabilityBadgeClass(
+                                      stats.availabilityRatio,
+                                    )}`}
+                                  >
+                                    {stats.availableCount}
+                                  </span>
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
+
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -8805,7 +8888,7 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                       return (
                         <>
                           <div className="sticky-banner-group">
-                            <div className="selected-unit-image">
+                            {/* <div className="selected-unit-image">
                               {reservedActiveBooking && (
                                 <span className="selected-unit-reserved-badge">
                                   Reserved Booking
@@ -8841,6 +8924,57 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                                     alt={selectedUnit.name}
                                     className="unit-image"
                                   />
+                                );
+                              })()}
+                            </div> */}
+
+                            <div className="selected-unit-image">
+                              {reservedActiveBooking && (
+                                <span className="selected-unit-reserved-badge" style={{ color: "#fff", borderColor: "#fff", backgroundColor: "rgba(40, 167, 70, 0.5)"}}>
+                                  Reserved Booking
+                                </span>
+                              )}
+                              {(() => {
+                                if (!selectedUnit) {
+                                  return (
+                                    <div className="unit-main-image-placeholder">
+                                      No image
+                                    </div>
+                                  );
+                                }
+
+                                const imageId =
+                                  selectedUnit.imageId ||
+                                  `${selectedUnit.plateNo}_main`;
+
+                                const image = fetchedImages[imageId];
+
+                                if (!image?.base64) {
+                                  return (
+                                    <div className="unit-main-image-placeholder">
+                                      Loading...
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <>
+                                    <div className="selected-unit-image-bg">
+                                      <div
+                                        className="selected-unit-image-bg-blur"
+                                        style={{
+                                          backgroundImage: `url(${image.base64})`,
+                                        }}
+                                      />
+                                    </div>
+
+                                    <img
+                                      src={image.base64}
+                                      key={image.updatedAt}
+                                      alt={selectedUnit.name}
+                                      className="unit-image"
+                                    />
+                                  </>
                                 );
                               })()}
                             </div>

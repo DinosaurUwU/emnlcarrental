@@ -1605,7 +1605,7 @@ ref={accountRef}
   >
     <FiUser style={{ marginRight: "10px" }} /> Profile
   </div>
-  <div
+  {/* <div
     className="dropdown-item"
     onClick={() => {
       setAccountDropdownOpen(false);
@@ -1613,7 +1613,7 @@ ref={accountRef}
     }}
   >
     <FiSettings style={{ marginRight: "10px" }} /> Settings
-  </div>
+  </div> */}
 
 {/* Theme Toggle */}
 <div className="theme-toggle-container">

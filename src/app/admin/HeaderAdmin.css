@@ -777,7 +777,7 @@
 
 /* Hover effect */
 .Admin-SearchDropdown li:hover {
-  background-color: #f0f0f0;
+  background-color: #f1f1f1;
   color: var(--accent-txt);
 }
 

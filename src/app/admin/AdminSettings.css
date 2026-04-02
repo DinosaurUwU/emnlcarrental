@@ -96,7 +96,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f1f1f1;
 }
 
 .unit-type-option:last-child {
@@ -2284,7 +2284,7 @@
   padding: 10px;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #024001 #f0f0f0;
+  scrollbar-color: #024001 #f1f1f1;
 }
 
 .reviews-container::-webkit-scrollbar {
@@ -2292,7 +2292,7 @@
 }
 
 .reviews-container::-webkit-scrollbar-track {
-  background: #f0f0f0;
+  background: #f1f1f1;
 }
 
 .reviews-container::-webkit-scrollbar-thumb {

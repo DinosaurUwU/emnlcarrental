@@ -3924,7 +3924,7 @@ legend: {
           <button
             onClick={() => setShowCalendarImagesOnly(!showCalendarImagesOnly)}
             style={{
-              background: showCalendarImagesOnly ? "#4caf50" : "#f0f0f0",
+              background: showCalendarImagesOnly ? "#4caf50" : "#f1f1f1",
               color: showCalendarImagesOnly ? "#fff" : "#333",
               border: "1px solid #ccc",
               borderRadius: "4px",

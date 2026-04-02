@@ -114,9 +114,7 @@
   color: #6c757d;
 }
 
-.filter-dropdown {
-  position: relative;
-}
+
 
 .ongoing-rent-column .extend-input-group {
   display: flex;
@@ -734,6 +732,7 @@
 .filter-dropdown {
   position: relative;
   display: inline-block;
+  overflow: visible;
 }
 
 .filter-button {
@@ -741,16 +740,20 @@
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 6px 10px;
+  padding: 6px 18px 6px 10px;
   font-size: 0.9rem;
   cursor: pointer;
   width: 100px;
-  text-align: left;
+  min-height: 32px;
+  text-align: center;
   display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
   transition: all 0.5s ease;
+  position: relative;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .filter-button:hover {
@@ -769,29 +772,36 @@
   align-items: center;
 }
 
-.filter-request-badge {
+.filter-request-badge,
+.filter-request-badge.availability-badge,
+.filter-request-badge.menu-badge,
+.filter-request-badge.menu-badge.availability-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
   border-radius: 50%;
   background-color: #dc3545;
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 1;
   text-align: center;
-  flex: 0 0 20px;
+  flex: 0 0 22px;
   box-sizing: border-box;
-  padding: 0;
+  padding: 0 !important;
 }
 
 .filter-button > .filter-request-badge {
   position: absolute;
   top: 50%;
   right: -13px;
-  transform: translateY(-50%);
+  transform: translate(0, -50%);
+  margin: 0;
+  z-index: 3;
 }
 
 .filter-option-label {
@@ -805,19 +815,16 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: right;
-  gap: 8px;
-  padding-right: 18px;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 18px 6px 10px;
   overflow: visible;
   text-align: center;
+  box-sizing: border-box;
+  background-color: #f1f1f1;
 }
 
 .filter-request-badge.menu-badge {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  font-size: 0.68rem;
-  line-height: 18px;
   position: absolute;
   right: -13px;
   top: 50%;
@@ -839,6 +846,27 @@
   background-color: #dc3545;
   color: #fff;
 }
+
+.filter-request-badge.availability-badge.availability-high {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.filter-request-badge.availability-badge.availability-mid {
+  background-color: #ffc107;
+  color: #1f1f1f;
+}
+
+.filter-request-badge.availability-badge.availability-low {
+  background-color: #fd7e14;
+  color: #fff;
+}
+
+.filter-request-badge.availability-badge.availability-empty {
+  background-color: #dc3545;
+  color: #fff;
+}
+text
 
 
 
@@ -1099,6 +1127,8 @@
 }
 
 .unit-image {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 170px;
   object-fit: contain;
@@ -1127,6 +1157,37 @@
 
 .selected-unit-image {
   position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(7, 70, 9, 0.18) 0%,
+    rgba(40, 167, 69, 0.122) 100%
+  );
+}
+
+.selected-unit-image-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.selected-unit-image-bg-blur {
+  position: absolute;
+  inset: -8px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(5px);
+  transform: scale(1.06);
+}
+
+.selected-unit-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.78);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .selected-unit-reserved-badge {
@@ -1655,7 +1716,7 @@
 
 .edit-payment-btn {
   padding: 4px 8px;
-  border: 2px solid #f0f0f000;
+  border: 2px solid #f1f1f100;
   border-radius: 4px;
   background-color: #007bff;
   color: white;
@@ -1670,7 +1731,7 @@
 
 .remove-payment-btn {
   padding: 4px 8px;
-  border: 2px solid #f0f0f000;
+  border: 2px solid #f1f1f100;
   border-radius: 4px;
   background-color: #dc3545;
   color: white;
