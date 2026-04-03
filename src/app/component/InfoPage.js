@@ -648,7 +648,7 @@ const InfoPage = ({ openBooking }) => {
         },
         {
           type: "bullet",
-          text: "Return inspection typically takes 15-30 minutes and must be completed before departure",
+          text: "Return inspection typically takes 5-10 minutes and must be completed before departure",
         },
         {
           type: "bullet",
@@ -904,19 +904,16 @@ const InfoPage = ({ openBooking }) => {
 
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
 
+  const [userTheme, setUserTheme] = useState("system");
 
-const [userTheme, setUserTheme] = useState("system");
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setUserTheme(localStorage.getItem("userTheme") || "system");
+    };
 
-useEffect(() => {
-  const handleThemeChange = () => {
-    setUserTheme(localStorage.getItem("userTheme") || "system");
-  };
-  
-  window.addEventListener("themeChanged", handleThemeChange);
-  return () => window.removeEventListener("themeChanged", handleThemeChange);
-}, []);
-
-
+    window.addEventListener("themeChanged", handleThemeChange);
+    return () => window.removeEventListener("themeChanged", handleThemeChange);
+  }, []);
 
   // At the top of InfoPage.js, after imports
   const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
@@ -1334,22 +1331,22 @@ useEffect(() => {
       answer:
         "To book a vehicle, you must be at least 21 years old, have a valid driver's license, and provide a government-issued ID. International drivers may need additional documentation. Guest users must call or message to book a rental or create an account in this website to be eligible in the online booking.",
     },
-        {
+    {
       question: "Can I modify or cancel my booking?",
       answer:
         "You can modify your booking up to 24 hours before pickup through your account dashboard (My Bookings section). Cancellations made 48+ hours in advance receive full refunds. Late cancellations may incur fees.",
     },
-            {
+    {
       question: "When do I need to pay for my booking?",
       answer:
         "Payment is required at the time of vehicle pickup at our office. We accept cash, bank transfers, GCash, and other approved digital payment methods. A security deposit may also be required.",
     },
-            {
+    {
       question: "How do I know my booking is confirmed?",
       answer:
         "You'll receive a booking confirmation email with your reservation details. You can also check your booking status through your account dashboard under 'My Bookings' or by logging into your profile.",
     },
-            {
+    {
       question: "Can I pick up my vehicle early?",
       answer:
         "Early pickups are subject to vehicle availability. Please contact us at least 24 hours in advance to arrange an early pickup time. You can reach us through the Contact section or by phone.",
@@ -1359,35 +1356,34 @@ useEffect(() => {
   const accountFAQs = [
     {
       question: "How do I create an account?",
-      answer: "In /login page, fill out the registration form with your personal details, email, and password or you can just directly sign in with Google. For Email and Passwords, you'll need to verify your email address to complete registration. You can access the verification in /account page.",
+      answer:
+        "In the /login page, simply click the 'Sign in with Google' button to create an account and get started.",
     },
     {
       question: "I'm having trouble logging in",
-      answer: "Make sure you're using the correct email and password. If you've forgotten your password, use the 'Forgot Password' link. In other cases, you may have forgotten that you logged in with your account using Google. Email / Passwords log in are different from Google direct signup Clear your browser cache and try again. Contact support if issues persist.",
+      answer:
+        "Make sure you're using the correct Google account. Clear your browser cache and try again. Contact support if issues persist.",
     },
-        {
-      question: "How do I reset my password?",
-      answer: "In /login page, in the bottom part of the password field, select 'Forgot Password'. You will be given an password reset email from the gmail account you used, make sure you entered your email address, before clicking on forgot password, and follow the instructions sent to your email. The reset link is valid for 24 hours.",
-    },
-        {
-      question: "How do I link my Google account?",
-      answer: "After logging in, go to your Account Dashboard or Profile settings. In the Right top most part of your Profile Picture, click the 3 vertical dotted menu, Look for the 'Link Account' option to link your email/password account with your Google account for easier login.",
-    },
-        {
+
+    {
       question: "How do I update my profile information?",
-      answer: "Click the profile/account icon in the header to access your Account Dashboard. You can update your personal information, contact details, and preferences in the Profile section. Some changes may require verification.",
+      answer:
+        "Click the profile/account icon in the header to access your Account Dashboard. You can update your personal information, contact details, and preferences in the Profile section. Some changes may require verification.",
     },
-        {
+    {
       question: "How is my account information protected?",
-      answer: "We use industry-standard encryption and security measures to protect your account. NEVER SHARE your login credentials with others.",
+      answer:
+        "We use industry-standard encryption and security measures to protect your account. NEVER SHARE your login credentials with others.",
     },
-        {
+    {
       question: "How do I delete my account?",
-      answer: "Go to your Account Dashboard, in the right top most corner of your profile picture, there is a 3 dotted vertical menu, click that and select 'Delete Account'. You'll need to confirm this action. Note that some data may be retained for legal compliance purposes.",
+      answer:
+        "Go to your Account Dashboard, in the right top most corner of your profile picture, there is a 3 dotted vertical menu, click that and select 'Delete Account'. You'll need to confirm this action. Note that some data may be retained for legal compliance purposes.",
     },
-            {
+    {
       question: "How do I view my booking history?",
-      answer: "Click the profile/account icon in the header to access your Account Dashboard. Navigate to 'My Bookings' or 'Rental History' section to view past and current bookings.",
+      answer:
+        "Click the profile/account icon in the header to access your Account Dashboard. Navigate to 'My Bookings' or 'Rental History' section to view past and current bookings.",
     },
   ];
 
@@ -1533,35 +1529,41 @@ useEffect(() => {
     }
   };
 
+  useEffect(() => {
+    // Initial load
+    const savedTheme = localStorage.getItem("userTheme");
+    if (savedTheme) setUserTheme(savedTheme);
 
-useEffect(() => {
-  // Initial load
-  const savedTheme = localStorage.getItem("userTheme");
-  if (savedTheme) setUserTheme(savedTheme);
-  
-  // Listen for changes
-  const handleStorage = (e) => {
-    if (e.key === "userTheme") {
-      setUserTheme(e.newValue || "system");
+    // Listen for changes
+    const handleStorage = (e) => {
+      if (e.key === "userTheme") {
+        setUserTheme(e.newValue || "system");
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
+    // Apply theme when userTheme changes
+    if (userTheme === "system") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-color-mode",
+        prefersDark ? "dark" : "light",
+      );
+    } else {
+      document.documentElement.setAttribute("data-color-mode", userTheme);
     }
-  };
-  
-  window.addEventListener("storage", handleStorage);
-  return () => window.removeEventListener("storage", handleStorage);
-}, []);
+  }, [userTheme]);
 
-useEffect(() => {
-  // Apply theme when userTheme changes
-  if (userTheme === "system") {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
-  } else {
-    document.documentElement.setAttribute("data-color-mode", userTheme);
-  }
-}, [userTheme]);
-
-const isDark = userTheme === "dark" || 
-  (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark =
+    userTheme === "dark" ||
+    (userTheme === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
     <div className="info-page" ref={pageRef}>
@@ -1571,14 +1573,13 @@ const isDark = userTheme === "dark" ||
         <img src="/assets/dark-logo.png" alt="Logo" className="login-logo" />
       </div> */}
 
-<div className="info-title" ref={(el) => (infoTitleRef = el)}>
-<img 
-  src={isDark ? "/assets/logo-dark.png" : "/assets/dark-logo.png"} 
-  alt="Logo" 
-  className="login-logo" 
-/>
-
-</div>
+      <div className="info-title" ref={(el) => (infoTitleRef = el)}>
+        <img
+          src={isDark ? "/assets/logo-dark.png" : "/assets/dark-logo.png"}
+          alt="Logo"
+          className="login-logo"
+        />
+      </div>
 
       {/* Help Center */}
       <section id="help-center" className="help-center">
@@ -1737,17 +1738,21 @@ const isDark = userTheme === "dark" ||
           {faqs.map((faq, index) => (
             <div key={index} className="faq-item">
               <button
-                className={`faq-question ${openFAQ === 'faq-' + index ? "active" : ""}`}
-                onClick={() => setOpenFAQ(openFAQ === 'faq-' + index ? null : 'faq-' + index)}
+                className={`faq-question ${openFAQ === "faq-" + index ? "active" : ""}`}
+                onClick={() =>
+                  setOpenFAQ(openFAQ === "faq-" + index ? null : "faq-" + index)
+                }
               >
                 <span>{faq.question}</span>
                 <span
-                  className={`faq-icon ${openFAQ === 'faq-' + index ? "rotate" : ""}`}
+                  className={`faq-icon ${openFAQ === "faq-" + index ? "rotate" : ""}`}
                 >
                   ▼
                 </span>
               </button>
-              <div className={`faq-answer ${openFAQ === 'faq-' + index ? "show" : ""}`}>
+              <div
+                className={`faq-answer ${openFAQ === "faq-" + index ? "show" : ""}`}
+              >
                 <p className="infopage-p">{faq.answer}</p>
               </div>
             </div>
@@ -1755,48 +1760,67 @@ const isDark = userTheme === "dark" ||
         </div>
       </section>
 
-{/* Bookings */}
-<section id="bookings">
-  <h2 className="section-title">Bookings</h2>
-  <div className="faq-list">
-    {bookingsFAQs.map((faq, index) => (
-      <div key={index} className="faq-item">
-        <button
-          className={`faq-question ${openFAQ === 'booking-' + index ? "active" : ""}`}
-          onClick={() => setOpenFAQ(openFAQ === 'booking-' + index ? null : 'booking-' + index)}
-        >
-          <span>{faq.question}</span>
-          <span className={`faq-icon ${openFAQ === 'booking-' + index ? "rotate" : ""}`}>▼</span>
-        </button>
-        <div className={`faq-answer ${openFAQ === 'booking-' + index ? "show" : ""}`}>
-          <p className="infopage-p">{faq.answer}</p>
+      {/* Bookings */}
+      <section id="bookings">
+        <h2 className="section-title">Bookings</h2>
+        <div className="faq-list">
+          {bookingsFAQs.map((faq, index) => (
+            <div key={index} className="faq-item">
+              <button
+                className={`faq-question ${openFAQ === "booking-" + index ? "active" : ""}`}
+                onClick={() =>
+                  setOpenFAQ(
+                    openFAQ === "booking-" + index ? null : "booking-" + index,
+                  )
+                }
+              >
+                <span>{faq.question}</span>
+                <span
+                  className={`faq-icon ${openFAQ === "booking-" + index ? "rotate" : ""}`}
+                >
+                  ▼
+                </span>
+              </button>
+              <div
+                className={`faq-answer ${openFAQ === "booking-" + index ? "show" : ""}`}
+              >
+                <p className="infopage-p">{faq.answer}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-</section>
+      </section>
 
-{/* Account Support */}
-<section id="account">
-  <h2 className="section-title">Account Support</h2>
-  <div className="faq-list">
-    {accountFAQs.map((faq, index) => (
-      <div key={index} className="faq-item">
-        <button
-          className={`faq-question ${openFAQ === 'account-' + index ? "active" : ""}`}
-          onClick={() => setOpenFAQ(openFAQ === 'account-' + index ? null : 'account-' + index)}
-        >
-          <span>{faq.question}</span>
-          <span className={`faq-icon ${openFAQ === 'account-' + index ? "rotate" : ""}`}>▼</span>
-        </button>
-        <div className={`faq-answer ${openFAQ === 'account-' + index ? "show" : ""}`}>
-          <p className="infopage-p">{faq.answer}</p>
+      {/* Account Support */}
+      <section id="account">
+        <h2 className="section-title">Account Support</h2>
+        <div className="faq-list">
+          {accountFAQs.map((faq, index) => (
+            <div key={index} className="faq-item">
+              <button
+                className={`faq-question ${openFAQ === "account-" + index ? "active" : ""}`}
+                onClick={() =>
+                  setOpenFAQ(
+                    openFAQ === "account-" + index ? null : "account-" + index,
+                  )
+                }
+              >
+                <span>{faq.question}</span>
+                <span
+                  className={`faq-icon ${openFAQ === "account-" + index ? "rotate" : ""}`}
+                >
+                  ▼
+                </span>
+              </button>
+              <div
+                className={`faq-answer ${openFAQ === "account-" + index ? "show" : ""}`}
+              >
+                <p className="infopage-p">{faq.answer}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-</section>
-
+      </section>
 
       {/* Privacy Policy */}
       <section id="privacy-policy">
@@ -1913,7 +1937,7 @@ const isDark = userTheme === "dark" ||
         </h2>
 
         <p style={{ color: "var(--accent-txt)" }}>
-          <strong >Last Updated:</strong>{" "}
+          <strong>Last Updated:</strong>{" "}
           {privacyLastUpdated
             ? privacyLastUpdated.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -2194,7 +2218,7 @@ const isDark = userTheme === "dark" ||
         </h2>
 
         <p style={{ color: "var(--accent-txt)" }}>
-          <strong >Last Updated:</strong>{" "}
+          <strong>Last Updated:</strong>{" "}
           {termsLastUpdated
             ? termsLastUpdated.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -2407,13 +2431,13 @@ const isDark = userTheme === "dark" ||
               />
             </button> */}
 
-                          <button
-                            className="close-btn"
-                            type="button"
-                                           onClick={() => setShowHistoryOverlay(false)}
-                          >
-                            <FiX className="close-icon" />
-                          </button>
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowHistoryOverlay(false)}
+            >
+              <FiX className="close-icon" />
+            </button>
 
             <div className="history-header-actions">
               <button
@@ -2537,13 +2561,13 @@ const isDark = userTheme === "dark" ||
               />
             </button> */}
 
-                          <button
-                            className="close-btn"
-                            type="button"
-                            onClick={() => setShowTermsHistoryOverlay(false)}
-                          >
-                            <FiX className="close-icon" />
-                          </button>
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowTermsHistoryOverlay(false)}
+            >
+              <FiX className="close-icon" />
+            </button>
 
             <div className="history-header-actions">
               <button

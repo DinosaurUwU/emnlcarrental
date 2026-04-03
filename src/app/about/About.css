@@ -118,6 +118,172 @@
   margin-bottom: 150px;
 }
 
+
+
+
+
+
+
+
+
+
+
+/* Mission & Vision Section */
+.about-mission-vision-section {
+  padding: 80px 50px;
+  background-color: var(--page-bg);
+}
+
+.about-mv-container {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.about-mv-block {
+  flex: 1;
+  max-width: 500px;
+}
+
+.about-mv-block h2 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.8rem;
+  color: var(--accent-txt);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.about-mv-block p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  text-align: justify;
+  color: var(--txt-comp);
+}
+
+/* Why Choose Us Section */
+.about-why-choose-section {
+  padding-top: 0px !important;
+  padding: 80px 50px;
+  background-color: var(--page-bg);
+  text-align: center;
+}
+
+.about-why-choose-section h2 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 2.5rem;
+  color: var(--accent-txt);
+  margin-bottom: 60px;
+}
+
+.about-why-choose-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.about-why-choose-card {
+  background-color: rgba(40, 167, 70, 0.2);
+  padding: 30px 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.about-why-choose-card:hover {
+  transform: translateY(-5px);
+}
+
+.about-why-choose-card h3 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--accent-txt);
+  margin-bottom: 15px;
+}
+
+.about-why-choose-card p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--txt-comp);
+}
+
+/* Call to Action Section */
+.about-cta-section {
+  padding: 80px 50px;
+  background-color: var(--accent-txt);
+  text-align: center;
+}
+
+.about-cta-content {
+  max-width: 800px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.about-cta-content h2 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 2rem;
+  margin-bottom: 25px;
+}
+
+.about-cta-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.about-cta-note {
+  font-style: italic;
+  font-weight: 500;
+  margin-top: 20px !important;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .about-why-choose-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-mv-container {
+    justify-content: center;
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .about-why-choose-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-mission-vision-section,
+  .about-why-choose-section,
+  .about-cta-section {
+    padding: 50px 20px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 .team-section h2 {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;

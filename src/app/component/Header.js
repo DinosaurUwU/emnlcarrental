@@ -495,7 +495,7 @@ useEffect(() => {
 
         <div className="Header__center">
           <ul className="Header__nav">
-            <li>
+            {/* <li>
               <button
                 type="button"
                 className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
@@ -515,6 +515,26 @@ useEffect(() => {
                 <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
                 Fleet
               </button>
+            </li> */}
+
+                        <li>
+              <Link
+                href="/"
+                className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
+              >
+                <FiHome className="nav-icon" style={{ marginRight: "5px" }} />
+                Home
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/fleet-details"
+                className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
+              >
+                <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
+                Fleet
+              </Link>
             </li>
 
             <li>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor, FiHome, FiSettings, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor, FiHome, FiSettings, FiLogOut, FiX } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
 
 const Header = ({
@@ -1656,7 +1656,7 @@ ref={accountRef}
       {showAdminDetailsOverlay && selectedAdmin && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowAdminDetailsOverlay(false)}
@@ -1671,6 +1671,14 @@ ref={accountRef}
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowAdminDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="client-details-title">Admin Details</h3>
@@ -1983,7 +1991,7 @@ ref={accountRef}
       {showBookingDetailsOverlay && selectedBooking && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingDetailsOverlay(false)}
@@ -1998,6 +2006,14 @@ ref={accountRef}
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                        <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowBookingDetailsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <div className="unit-details-scrollable">
@@ -3966,7 +3982,7 @@ ref={accountRef}
 
             {/* Close Button */}
 
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => {
@@ -3985,6 +4001,18 @@ ref={accountRef}
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+                                    <button
+              className="close-btn"
+              type="button"
+              onClick={() => {
+                setShowProfileOverlay(false);
+                setOverlayActiveSection("");
+                setContainerHeight(300);
+              }}
+            >
+              <FiX className="close-icon" />
             </button>
 
             {/* Dynamic Title */}
@@ -4425,7 +4453,7 @@ ref={accountRef}
       {showSettingsOverlay && (
         <div className="admin-settings-overlay">
           <div className="admin-settings-container">
-            <button
+            {/* <button
               className="close-btn"
               type="button"
               onClick={() => setShowSettingsOverlay(false)}
@@ -4440,6 +4468,14 @@ ref={accountRef}
                 alt="Close"
                 className="close-icon close-icon-1"
               />
+            </button> */}
+
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowSettingsOverlay(false)}
+            >
+              <FiX className="close-icon" />
             </button>
 
             <h3 className="confirm-header">SETTINGS</h3>
