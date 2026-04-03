@@ -876,6 +876,12 @@
   color: #fff;
 }
 
+.filter-request-badge.menu-badge.unpaid-badge {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+
 .filter-menu {
   display: none;
   position: absolute;
@@ -1235,10 +1241,11 @@
 .sticky-banner-group {
   position: sticky;
   top: 0;
-  z-index: 900;
+  z-index: 1;
   background-color: var(--page-bg);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
+
 
 .quotation-summary-wrapper {
   position: relative;

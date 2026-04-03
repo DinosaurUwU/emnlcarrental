@@ -1,8 +1,6 @@
 "use client";
 //RentalActivitySection.js
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import ReactDOM from "react-dom";
-
 import { useUser } from "../lib/UserContext";
 import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
@@ -161,6 +159,8 @@ const RentalActivitySection = ({ subSection }) => {
   const [balanceFilter, setBalanceFilter] = useState("ALL");
   const [showOngoingFilterMenu, setShowOngoingFilterMenu] = useState(false);
   const [showAvailableFilterMenu, setShowAvailableFilterMenu] = useState(false);
+  const [showBalanceFilterMenu, setShowBalanceFilterMenu] = useState(false);
+
   const ongoingFilterDropdownRef = useRef(null);
   const availableFilterDropdownRef = useRef(null);
 
@@ -558,6 +558,10 @@ const RentalActivitySection = ({ subSection }) => {
       if (a.balanceDue !== 0 && b.balanceDue === 0) return 1;
       return 0;
     });
+
+      const pendingCount = balanceDueBookings.filter(b => b.balanceDue === 0).length;
+  const unpaidCount = balanceDueBookings.filter(b => b.balanceDue !== 0).length;
+
 
     useEffect(() => {
     const handleClickOutside = (event) => {
@@ -8797,7 +8801,7 @@ const hasReservedSource =
                           <span className="filter-button-caret">▾</span>
                         </button>
 
-                        {/* <div
+                        <div
                           className="filter-menu"
                           style={{
                             display: showAvailableFilterMenu ? "block" : "none",
@@ -8834,67 +8838,7 @@ const hasReservedSource =
                               );
                             },
                           )}
-                        </div> */}
-
-                        {showAvailableFilterMenu && ReactDOM.createPortal(
-                          <div
-                            style={{
-                              position: "fixed",
-                              inset: 0,
-                              zIndex: 99998,
-                            }}
-                            onClick={() => setShowAvailableFilterMenu(false)}
-                          />,
-                          document.body
-                        )}
-
-                        {showAvailableFilterMenu && ReactDOM.createPortal(
-                          <div
-                            className="filter-menu"
-                            style={{
-                              position: "fixed",
-                              zIndex: 99999,
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                            }}
-                          >
-                            {["ALL", "SEDAN", "SUV", "MPV", "VAN", "PICKUP"].map(
-                              (carType) => {
-                                const stats = getAvailableUnitStats(carType);
-
-                                return (
-                                  <div
-                                    key={carType}
-                                    className={`filter-option ${
-                                      filterType === carType ? "selected" : ""
-                                    }`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setFilterType(carType);
-                                      setShowAvailableFilterMenu(false);
-                                    }}
-                                  >
-                                    <span className="filter-option-label">
-                                      <span>{carType}</span>
-                                    </span>
-
-                                    <span
-                                      className={`filter-request-badge menu-badge availability-badge ${getAvailabilityBadgeClass(
-                                        stats.availabilityRatio,
-                                      )}`}
-                                    >
-                                      {stats.availableCount}
-                                    </span>
-                                  </div>
-                                );
-                              },
-                            )}
-                          </div>,
-                          document.body
-                        )}
-
-
+                        </div>
                       </>
                     );
                   })()}
@@ -10170,6 +10114,23 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
           >
             <div className="ongoing-units-header-wrapper">
               <h2 className="ongoing-units-header">BALANCE DUE</h2>
+
+
+              <div className="filter-dropdown">
+                <button className="filter-button" onClick={() => setShowBalanceFilterMenu(!showBalanceFilterMenu)}>
+                  {balanceFilter === "ALL"
+                    ? "All"
+                    : balanceFilter === "ZERO"
+                      ? "Pending"
+                      : "Unpaid"}{" "}
+                  ▾
+                  {pendingCount > 0 && <span className="filter-request-badge">{pendingCount}</span>}
+                </button>
+
+
+
+
+              {/*
               <div className="filter-dropdown hoverable-dropdown">
                 <button className="filter-button">
                   {balanceFilter === "ALL"
@@ -10179,7 +10140,7 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                       : "Unpaid"}{" "}
                   ▾
                 </button>
-                <div className="filter-menu">
+                 <div className="filter-menu">
                   {["ALL", "ZERO", "NONZERO"].map((type) => (
                     <div
                       key={type}
@@ -10195,7 +10156,37 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                           : "Unpaid"}
                     </div>
                   ))}
+                </div> */}
+
+                                                <div className="filter-menu" style={{ display: showBalanceFilterMenu ? "block" : "none" }}>
+
+                  {["ALL", "ZERO", "NONZERO"].map((type) => (
+                    <div
+                      key={type}
+                      className={`filter-option ${
+                        balanceFilter === type ? "selected" : ""
+                      }`}
+                      onClick={() => setBalanceFilter(type)}
+                    >
+                      {type === "ALL"
+                        ? "All"
+                        : type === "ZERO"
+                          ? "Pending"
+                          : "Unpaid"}
+                      {type === "ZERO" && pendingCount > 0 && (
+                        <span className={`filter-request-badge menu-badge pending-badge`}>
+                          {pendingCount}
+                        </span>
+                      )}
+                      {type === "NONZERO" && unpaidCount > 0 && (
+                        <span className={`filter-request-badge menu-badge unpaid-badge`}>
+                          {unpaidCount}
+                        </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
+
               </div>
             </div>
             <div className="balance-due-cards">
