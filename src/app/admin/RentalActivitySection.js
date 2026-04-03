@@ -1,6 +1,8 @@
 "use client";
 //RentalActivitySection.js
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import ReactDOM from "react-dom";
+
 import { useUser } from "../lib/UserContext";
 import { Timestamp } from "firebase/firestore";
 import { generateFilledContract } from "./generateFilledContract";
@@ -8795,7 +8797,7 @@ const hasReservedSource =
                           <span className="filter-button-caret">▾</span>
                         </button>
 
-                        <div
+                        {/* <div
                           className="filter-menu"
                           style={{
                             display: showAvailableFilterMenu ? "block" : "none",
@@ -8832,7 +8834,67 @@ const hasReservedSource =
                               );
                             },
                           )}
-                        </div>
+                        </div> */}
+
+                        {showAvailableFilterMenu && ReactDOM.createPortal(
+                          <div
+                            style={{
+                              position: "fixed",
+                              inset: 0,
+                              zIndex: 99998,
+                            }}
+                            onClick={() => setShowAvailableFilterMenu(false)}
+                          />,
+                          document.body
+                        )}
+
+                        {showAvailableFilterMenu && ReactDOM.createPortal(
+                          <div
+                            className="filter-menu"
+                            style={{
+                              position: "fixed",
+                              zIndex: 99999,
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                            }}
+                          >
+                            {["ALL", "SEDAN", "SUV", "MPV", "VAN", "PICKUP"].map(
+                              (carType) => {
+                                const stats = getAvailableUnitStats(carType);
+
+                                return (
+                                  <div
+                                    key={carType}
+                                    className={`filter-option ${
+                                      filterType === carType ? "selected" : ""
+                                    }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFilterType(carType);
+                                      setShowAvailableFilterMenu(false);
+                                    }}
+                                  >
+                                    <span className="filter-option-label">
+                                      <span>{carType}</span>
+                                    </span>
+
+                                    <span
+                                      className={`filter-request-badge menu-badge availability-badge ${getAvailabilityBadgeClass(
+                                        stats.availabilityRatio,
+                                      )}`}
+                                    >
+                                      {stats.availableCount}
+                                    </span>
+                                  </div>
+                                );
+                              },
+                            )}
+                          </div>,
+                          document.body
+                        )}
+
+
                       </>
                     );
                   })()}
