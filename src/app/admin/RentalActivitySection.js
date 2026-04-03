@@ -8038,10 +8038,10 @@ const hasReservedSource =
               <div className="ongoing-units-header-wrapper">
                 <h2 className="ongoing-units-header">
                   {ongoingFilter === "PENDING"
-                    ? "PENDING RENTS"
+                    ? `PENDING BOOKINGS (${activeBookings.filter(b => String(b?.status || "").toUpperCase() === "PENDING").length})`
                     : ongoingFilter === "REQUESTS"
-                      ? "BOOKING REQUESTS"
-                      : "ONGOING RENTS"}
+                      ? `BOOKING REQUESTS (${adminBookingRequests.length})`
+                      : `ONGOING RENTALS (${activeBookings.filter(b => String(b?.status || "").toUpperCase() === "ACTIVE").length})`}
                 </h2>
                 {/* <div className="filter-dropdown hoverable-dropdown">
                   <button className="filter-button">
@@ -10159,35 +10159,39 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                     </div>
                   ))}
                 </div> */}
+<div className="filter-menu" style={{ display: showBalanceFilterMenu ? "block" : "none" }}>
 
-                                                <div className="filter-menu" style={{ display: showBalanceFilterMenu ? "block" : "none" }}>
-
-                  {["ALL", "ZERO", "NONZERO"].map((type) => (
-                    <div
-                      key={type}
-                      className={`filter-option ${
-                        balanceFilter === type ? "selected" : ""
-                      }`}
-                      onClick={() => setBalanceFilter(type)}
-                    >
-                      {type === "ALL"
-                        ? "All"
-                        : type === "ZERO"
-                          ? "Pending"
-                          : "Unpaid"}
-                      {type === "ZERO" && pendingCount > 0 && (
-                        <span className={`filter-request-badge menu-badge pending-badge`}>
-                          {pendingCount}
-                        </span>
-                      )}
-                      {type === "NONZERO" && unpaidCount > 0 && (
-                        <span className={`filter-request-badge menu-badge unpaid-badge`}>
-                          {unpaidCount}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+  {["ALL", "ZERO", "NONZERO"].map((type) => (
+    <div
+      key={type}
+      className={`filter-option ${
+        balanceFilter === type ? "selected" : ""
+      }`}
+      onClick={() => setBalanceFilter(type)}
+    >
+      {type === "ALL"
+        ? "All"
+        : type === "ZERO"
+          ? "Pending"
+          : "Unpaid"}
+      {type === "ALL" && (pendingCount + unpaidCount) > 0 && (
+        <span className={`filter-request-badge menu-badge all-badge`}>
+          {pendingCount + unpaidCount}
+        </span>
+      )}
+      {type === "ZERO" && pendingCount > 0 && (
+        <span className={`filter-request-badge menu-badge pending-badge`}>
+          {pendingCount}
+        </span>
+      )}
+      {type === "NONZERO" && unpaidCount > 0 && (
+        <span className={`filter-request-badge menu-badge unpaid-badge`}>
+          {unpaidCount}
+        </span>
+      )}
+    </div>
+  ))}
+</div>
 
               </div>
             </div>

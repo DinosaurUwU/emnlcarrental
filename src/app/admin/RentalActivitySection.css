@@ -813,6 +813,25 @@
   z-index: 3;
 }
 
+
+/* Ongoing Rents filter badge (red) - default */
+.ongoing-units-header-wrapper .filter-button .filter-request-badge {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+/* Balance Due filter badge (yellow) - must come AFTER to override */
+.balance-due-column .filter-button .filter-request-badge {
+  background-color: #ffc107;
+  color: #1f1f1f;
+}
+
+/* All badge in balance filter menu */
+.filter-request-badge.menu-badge.all-badge {
+  background-color: #24c97c;
+  color: #fff;
+}
+
 .filter-option-label {
   display: inline-flex;
   align-items: center;
@@ -881,10 +900,6 @@
   color: #fff;
 }
 
-.filter-request-badge.menu-badge.pending-badge {
-  background-color: #ffc107;
-  color: #1f1f1f;
-}
 
 
 .filter-menu {
