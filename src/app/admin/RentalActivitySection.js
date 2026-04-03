@@ -559,8 +559,10 @@ const RentalActivitySection = ({ subSection }) => {
       return 0;
     });
 
-      const pendingCount = balanceDueBookings.filter(b => b.balanceDue === 0).length;
-  const unpaidCount = balanceDueBookings.filter(b => b.balanceDue !== 0).length;
+  const pendingCount = balanceDueBookings.filter(b => b.balanceDue == 0).length;
+  const unpaidCount = balanceDueBookings.filter(b => b.balanceDue != 0).length;
+
+
 
 
     useEffect(() => {

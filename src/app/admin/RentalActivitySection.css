@@ -881,6 +881,11 @@
   color: #fff;
 }
 
+.filter-request-badge.menu-badge.pending-badge {
+  background-color: #ffc107;
+  color: #1f1f1f;
+}
+
 
 .filter-menu {
   display: none;
