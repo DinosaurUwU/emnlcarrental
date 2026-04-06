@@ -5,20 +5,25 @@ import {
   FiArrowDown,
   FiArrowUp,
   FiCheck,
+  FiEdit3,
   FiImage,
+  FiEye,
   FiTrash2,
   FiType,
   FiUpload,
 } from "react-icons/fi";
 import { useUser } from "../lib/UserContext";
+import BlogArticleRenderer from "../blog/BlogArticleRenderer";
 import "./BlogPosts.css";
 
 const createBlock = (type = "paragraph") => ({
   id: `block_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
   type,
   text: "",
+  title: "",
   imageId: "",
   caption: "",
+  imagePosition: "left",
 });
 
 const initialDraft = {
@@ -50,8 +55,10 @@ const mapPostToDraft = (post = {}) => ({
           id: block.id || createBlock(block.type).id,
           type: block.type || "paragraph",
           text: block.text || "",
+          title: block.title || "",
           imageId: block.imageId || "",
           caption: block.caption || "",
+          imagePosition: block.imagePosition === "right" ? "right" : "left",
         }))
       : [createBlock("paragraph")],
 });
@@ -111,6 +118,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isUploadingBlockImageId, setIsUploadingBlockImageId] = useState("");
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
+  const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
   const blockImageInputRefs = useRef({});
@@ -153,13 +161,29 @@ const BlogPosts = ({ subSection = "overview" }) => {
     [postImages],
   );
 
+  const previewPost = useMemo(
+    () => ({
+      ...normalizedDraftForSave,
+      id: draft.id || "preview",
+      title: String(draft.title || "").trim() || "Untitled Post",
+      excerpt: String(draft.excerpt || "").trim(),
+      publishedAt: selectedPost?.publishedAt || selectedPost?.updatedAt || null,
+      updatedAt: selectedPost?.updatedAt || null,
+    }),
+    [draft.excerpt, draft.id, draft.title, normalizedDraftForSave, selectedPost],
+  );
+
   const draftChecklist = useMemo(() => {
     const hasBodyContent =
       Boolean(draft.content.trim()) ||
       draft.contentBlocks.some((block) =>
         block.type === "image"
           ? Boolean(block.imageId)
-          : Boolean(String(block.text || "").trim()),
+          : block.type === "split"
+            ? Boolean(block.imageId) ||
+              Boolean(String(block.title || "").trim()) ||
+              Boolean(String(block.text || "").trim())
+            : Boolean(String(block.text || "").trim()),
       );
 
     return [
@@ -777,6 +801,30 @@ const BlogPosts = ({ subSection = "overview" }) => {
         </div>
 
         <div className="blog-posts-editor">
+          <div className="blog-posts-view-toggle">
+            <button
+              type="button"
+              className={`blog-posts-view-toggle-btn ${
+                activeEditorView === "editor" ? "active" : ""
+              }`}
+              onClick={() => setActiveEditorView("editor")}
+            >
+              <FiEdit3 />
+              <span>Editor</span>
+            </button>
+            <button
+              type="button"
+              className={`blog-posts-view-toggle-btn ${
+                activeEditorView === "preview" ? "active" : ""
+              }`}
+              onClick={() => setActiveEditorView("preview")}
+            >
+              <FiEye />
+              <span>Preview</span>
+            </button>
+          </div>
+
+          {activeEditorView === "editor" ? (
           <div className="blog-posts-panel">
             <div className="blog-posts-panel-header">
               <h3>Post Editor</h3>
@@ -918,6 +966,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
                     <FiImage />
                     <span>Add Image</span>
                   </button>
+                  <button
+                    type="button"
+                    className="blog-posts-secondary-btn blog-posts-btn-violet"
+                    onClick={() => addBlock("split")}
+                  >
+                    <FiType />
+                    <span>Add Split Section</span>
+                  </button>
                 </div>
               </div>
 
@@ -962,7 +1018,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                       </div>
                     </div>
 
-                    {block.type === "image" ? (
+                    {block.type === "image" || block.type === "split" ? (
                       <>
                         <div className="blog-posts-block-image-shell">
                           <input
@@ -1004,7 +1060,9 @@ const BlogPosts = ({ subSection = "overview" }) => {
                               {block.imageId
                                 ? postImageLabelMap.get(block.imageId) ||
                                   "Saved image"
-                                : "No image selected"}
+                                : block.type === "split"
+                                  ? "No split image selected"
+                                  : "No image selected"}
                             </span>
                             <button
                               type="button"
@@ -1027,7 +1085,11 @@ const BlogPosts = ({ subSection = "overview" }) => {
                         </div>
 
                         <label className="blog-posts-field">
-                          <span>Reuse Saved Image</span>
+                          <span>
+                            {block.type === "split"
+                              ? "Split Image"
+                              : "Reuse Saved Image"}
+                          </span>
                           <select
                             value={block.imageId}
                             onChange={(e) =>
@@ -1042,6 +1104,72 @@ const BlogPosts = ({ subSection = "overview" }) => {
                             ))}
                           </select>
                         </label>
+
+                        {block.type === "split" && (
+                          <>
+                            <label className="blog-posts-field">
+                              <span>Section Title</span>
+                              <input
+                                type="text"
+                                value={block.title}
+                                onChange={(e) =>
+                                  updateBlock(block.id, {
+                                    title: e.target.value,
+                                  })
+                                }
+                                placeholder="Write a split-section heading"
+                              />
+                            </label>
+
+                            <label className="blog-posts-field">
+                              <span>Layout</span>
+                              <div className="blog-posts-split-toggle">
+                                <button
+                                  type="button"
+                                  className={`blog-posts-split-toggle-btn ${
+                                    block.imagePosition !== "right"
+                                      ? "active"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    updateBlock(block.id, {
+                                      imagePosition: "left",
+                                    })
+                                  }
+                                >
+                                  Image Left
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`blog-posts-split-toggle-btn ${
+                                    block.imagePosition === "right"
+                                      ? "active"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    updateBlock(block.id, {
+                                      imagePosition: "right",
+                                    })
+                                  }
+                                >
+                                  Image Right
+                                </button>
+                              </div>
+                            </label>
+
+                            <label className="blog-posts-field">
+                              <span>Paragraph</span>
+                              <textarea
+                                rows="5"
+                                value={block.text}
+                                onChange={(e) =>
+                                  updateBlock(block.id, { text: e.target.value })
+                                }
+                                placeholder="Write the text for this split section"
+                              />
+                            </label>
+                          </>
+                        )}
 
                         <label className="blog-posts-field">
                           <span>Caption</span>
@@ -1111,6 +1239,47 @@ const BlogPosts = ({ subSection = "overview" }) => {
               </button>
             </div>
           </div>
+          ) : (
+            <div className="blog-posts-panel blog-posts-preview-panel">
+              <div className="blog-posts-panel-header">
+                <h3>Live Preview</h3>
+                <div className="blog-posts-status-pill draft">
+                  Unsaved Changes Included
+                </div>
+              </div>
+
+              <div className="blog-posts-preview-shell">
+                <div className="blog-detail-header blog-posts-preview-header">
+                  <span className="blog-detail-date">
+                    Preview Mode
+                  </span>
+                  <h1>{previewPost.title}</h1>
+                  {previewPost.excerpt && (
+                    <p className="blog-detail-excerpt">{previewPost.excerpt}</p>
+                  )}
+                </div>
+
+                {coverImagePreview ? (
+                  <div className="blog-detail-cover blog-posts-preview-cover">
+                    <img
+                      src={coverImagePreview}
+                      alt={previewPost.title || "Blog cover preview"}
+                    />
+                  </div>
+                ) : (
+                  <div className="blog-posts-preview-cover-placeholder">
+                    Cover image preview will appear here.
+                  </div>
+                )}
+
+                <BlogArticleRenderer
+                  post={previewPost}
+                  postImages={postImagesById}
+                  className="blog-posts-preview-content"
+                />
+              </div>
+            </div>
+          )}
 
           <div className="blog-posts-panel">
             <div className="blog-posts-panel-header">

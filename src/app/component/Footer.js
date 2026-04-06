@@ -27,6 +27,9 @@ const Footer = () => {
           <h3 className="footer-section-h3">Information</h3>
           <ul className="footer-section-ul">
             <li>
+              <Link href="/blog">Blogs</Link>
+            </li>
+            <li>
               <Link href="/about">About Us</Link>
             </li>
             <li>

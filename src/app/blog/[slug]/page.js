@@ -6,6 +6,7 @@ import Header from "../../component/Header";
 import Footer from "../../component/Footer";
 import { useBooking } from "../../component/BookingProvider";
 import { useUser } from "../../lib/UserContext";
+import BlogArticleRenderer from "../BlogArticleRenderer";
 import "../../component/Footer.css";
 import "../blog.css";
 
@@ -30,13 +31,6 @@ const formatBlogDate = (value) => {
   } catch {
     return "";
   }
-};
-
-const renderParagraphs = (content = "") => {
-  return String(content || "")
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
 };
 
 export default function BlogPostPage({ params }) {
@@ -102,9 +96,6 @@ export default function BlogPostPage({ params }) {
   }
 
   const coverImage = post.coverImageId ? postImages[post.coverImageId]?.base64 : "";
-  const hasBlocks =
-    Array.isArray(post.contentBlocks) && post.contentBlocks.length > 0;
-
   return (
     <div className="blog-page">
       <Header openBooking={openBooking} />
@@ -129,48 +120,7 @@ export default function BlogPostPage({ params }) {
             </div>
           )}
 
-          <article className="blog-detail-content">
-            {hasBlocks
-              ? post.contentBlocks.map((block, index) => {
-                  if (block.type === "heading") {
-                    return (
-                      <h2 key={block.id || `${post.id}_heading_${index}`} className="blog-block-heading">
-                        {block.text}
-                      </h2>
-                    );
-                  }
-
-                  if (block.type === "image") {
-                    const image = postImages[block.imageId];
-
-                    if (!image?.base64) {
-                      return null;
-                    }
-
-                    return (
-                      <figure
-                        key={block.id || `${post.id}_image_${index}`}
-                        className="blog-block-image"
-                      >
-                        <img
-                          src={image.base64}
-                          alt={image.altText || block.caption || post.title || "Blog image"}
-                        />
-                        {block.caption && <figcaption>{block.caption}</figcaption>}
-                      </figure>
-                    );
-                  }
-
-                  return (
-                    <p key={block.id || `${post.id}_paragraph_${index}`}>
-                      {block.text}
-                    </p>
-                  );
-                })
-              : renderParagraphs(post.content).map((paragraph, index) => (
-                  <p key={`${post.id}_paragraph_${index}`}>{paragraph}</p>
-                ))}
-          </article>
+          <BlogArticleRenderer post={post} postImages={postImages} />
         </div>
       </section>
 

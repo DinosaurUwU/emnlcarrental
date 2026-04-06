@@ -116,6 +116,21 @@ const BlogPreviewSection = () => {
           </Link>
         ))}
       </div>
+
+      <div className="blog-preview-footer">
+        <div className="blog-preview-footer-copy">
+          <span className="blog-preview-footer-kicker">More Reads</span>
+          <h3>Explore More Travel Guides And Rental Tips</h3>
+          <p>
+            Browse the rest of our articles for booking advice, destination ideas,
+            and practical rental information.
+          </p>
+        </div>
+
+        <Link href="/blog" className="blog-preview-footer-link">
+          View Other Blogs
+        </Link>
+      </div>
     </section>
   );
 };
