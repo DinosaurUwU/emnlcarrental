@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Header from "../../component/Header";
 import Footer from "../../component/Footer";
@@ -43,8 +43,9 @@ export default function BlogPostPage({ params }) {
   const { openBooking } = useBooking();
   const { blogPosts, fetchBlogPostImage } = useUser();
   const [coverImage, setCoverImage] = useState("");
+  const resolvedParams = use(params);
 
-  const slug = decodeURIComponent(params?.slug || "");
+  const slug = decodeURIComponent(resolvedParams?.slug || "");
 
   const post = useMemo(() => {
     return (

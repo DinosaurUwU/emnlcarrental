@@ -54,12 +54,8 @@ function Header() {
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
-const [userTheme, setUserTheme] = useState(() => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('userTheme') || 'system';
-  }
-  return 'system';
-});
+  const [userTheme, setUserTheme] = useState("system");
+  const [themeReady, setThemeReady] = useState(false);
 
 
 
@@ -84,7 +80,10 @@ useEffect(() => {
 
 useEffect(() => {
   const savedTheme = localStorage.getItem("userTheme");
-  if (savedTheme) setUserTheme(savedTheme);
+  if (savedTheme) {
+    setUserTheme(savedTheme);
+  }
+  setThemeReady(true);
 }, []);
 
 useEffect(() => {
@@ -307,7 +306,7 @@ useEffect(() => {
   const getLogoForTheme = () => {
   // Get user's dark/light preference - safely check for window
   let isDark = userTheme === "dark";
-  if (typeof window !== 'undefined' && userTheme === "system") {
+  if (themeReady && typeof window !== 'undefined' && userTheme === "system") {
     isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
   const darkSuffix = isDark ? "-dark" : "";
@@ -444,19 +443,19 @@ useEffect(() => {
 
 <div className="user-theme-toggle">
   <button 
-    className={userTheme === "light" ? "active" : ""} 
+    className={themeReady && userTheme === "light" ? "active" : ""} 
     onClick={() => toggleUserTheme("light")}
   >
     <FiSun />
   </button>
   <button 
-    className={userTheme === "system" ? "active" : ""} 
+    className={themeReady && userTheme === "system" ? "active" : ""} 
     onClick={() => toggleUserTheme("system")}
   >
     <FiMonitor />
   </button>
   <button 
-    className={userTheme === "dark" ? "active" : ""} 
+    className={themeReady && userTheme === "dark" ? "active" : ""} 
     onClick={() => toggleUserTheme("dark")}
   >
     <FiMoon />
