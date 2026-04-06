@@ -110,6 +110,7 @@ export const UserProvider = ({ children }) => {
   const [conversationThreads, setConversationThreads] = useState([]);
   const [hasMoreConversationMessages, setHasMoreConversationMessages] =
     useState(false);
+  const [blogPosts, setBlogPosts] = useState([]);
   const [notificationMessages, setNotificationMessages] = useState([]);
   const [notificationFetchLimit, setNotificationFetchLimit] = useState(10);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
@@ -165,6 +166,16 @@ export const UserProvider = ({ children }) => {
     lastKnownUserRef.current = u;
     setLastKnownUser(u);
     setUser(u);
+  };
+
+  const normalizeBlogSlug = (value = "") => {
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
   };
 
   const signInWithFacebook = async () => {
@@ -4637,6 +4648,41 @@ const sendMessage = async ({
     setNotificationFetchLimit((prev) => prev + 10);
   };
 
+  useEffect(() => {
+    if (!user?.uid) {
+      setBlogPosts([]);
+      return;
+    }
+
+    const blogPostsRef = collection(db, "blogPosts");
+    const blogPostsQuery =
+      user?.role === "admin"
+        ? query(blogPostsRef, orderBy("updatedAt", "desc"))
+        : query(
+            blogPostsRef,
+            where("published", "==", true),
+            orderBy("updatedAt", "desc"),
+          );
+
+    const unsubscribe = onSnapshot(
+      blogPostsQuery,
+      (snapshot) => {
+        const posts = snapshot.docs.map((blogDoc) => ({
+          id: blogDoc.id,
+          ...blogDoc.data(),
+        }));
+
+        setBlogPosts(posts);
+      },
+      (error) => {
+        console.error("Blog posts listener error:", error);
+        setBlogPosts([]);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [user?.uid, user?.role]);
+
   // const sendGuestContactMessage = async ({
   //   name,
   //   email,
@@ -8067,6 +8113,275 @@ Please review this request in the admin panel and proceed with approval or rejec
     });
   };
 
+  const ensureUniqueBlogSlug = async (baseSlug, currentPostId = "") => {
+    const safeBaseSlug = normalizeBlogSlug(baseSlug) || "untitled-post";
+    const snapshot = await getDocs(collection(db, "blogPosts"));
+    const existingSlugs = new Set(
+      snapshot.docs
+        .filter((blogDoc) => blogDoc.id !== currentPostId)
+        .map((blogDoc) => String(blogDoc.data()?.slug || "").trim())
+        .filter(Boolean),
+    );
+
+    if (!existingSlugs.has(safeBaseSlug)) {
+      return safeBaseSlug;
+    }
+
+    let counter = 2;
+    let candidate = `${safeBaseSlug}-${counter}`;
+
+    while (existingSlugs.has(candidate)) {
+      counter += 1;
+      candidate = `${safeBaseSlug}-${counter}`;
+    }
+
+    return candidate;
+  };
+
+  const saveBlogPostDraft = async (draftPayload = {}) => {
+    if (!user || user.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      const postId = draftPayload.id || doc(collection(db, "blogPosts")).id;
+      const postRef = doc(db, "blogPosts", postId);
+      const existingSnap = await getDoc(postRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : null;
+
+      const title = String(draftPayload.title || "").trim() || "Untitled Post";
+      const slug = await ensureUniqueBlogSlug(
+        draftPayload.slug || title,
+        postId,
+      );
+      const excerpt = String(draftPayload.excerpt || "").trim();
+      const content = String(draftPayload.content || "").trim();
+      const seoTitle =
+        String(draftPayload.seoTitle || "").trim() || `${title} | EMNL`;
+      const seoDescription =
+        String(draftPayload.seoDescription || "").trim() || excerpt;
+      const coverImageId = String(draftPayload.coverImageId || "").trim();
+      const published = Boolean(draftPayload.published);
+      const contentBlocks = Array.isArray(draftPayload.contentBlocks)
+        ? draftPayload.contentBlocks
+        : existingData?.contentBlocks || [];
+
+      const patch = {
+        title,
+        slug,
+        excerpt,
+        content,
+        contentBlocks,
+        coverImageId,
+        seoTitle,
+        seoDescription,
+        published,
+        authorUid: user.uid,
+        authorName: user.name || user.email || "Admin",
+        updatedAt: serverTimestamp(),
+      };
+
+      if (!existingSnap.exists()) {
+        await setDoc(postRef, {
+          ...patch,
+          createdAt: serverTimestamp(),
+          publishedAt: published ? serverTimestamp() : null,
+        });
+      } else {
+        if (published && !existingData?.publishedAt) {
+          patch.publishedAt = serverTimestamp();
+        }
+
+        await updateDoc(postRef, patch);
+      }
+
+      return {
+        success: true,
+        postId,
+        slug,
+        postData: {
+          id: postId,
+          ...(existingData || {}),
+          ...draftPayload,
+          title,
+          slug,
+          excerpt,
+          content,
+          contentBlocks,
+          coverImageId,
+          seoTitle,
+          seoDescription,
+          published,
+          authorUid: user.uid,
+          authorName: user.name || user.email || "Admin",
+        },
+      };
+    } catch (error) {
+      console.error("Error saving blog post draft:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to save blog post draft.",
+      };
+    }
+  };
+
+  const deleteBlogPost = async (postId) => {
+    if (!user || user.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    if (!postId) {
+      return { success: false, error: "Missing postId." };
+    }
+
+    try {
+      const imagesRef = collection(db, "blogPosts", postId, "images");
+      const imagesSnapshot = await getDocs(imagesRef);
+
+      await Promise.all(
+        imagesSnapshot.docs.map((imageDoc) => deleteDoc(imageDoc.ref)),
+      );
+
+      await deleteDoc(doc(db, "blogPosts", postId));
+
+      return {
+        success: true,
+        deletedImageCount: imagesSnapshot.size,
+      };
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to delete blog post.",
+      };
+    }
+  };
+
+  const uploadBlogPostImage = async (
+    postId,
+    file,
+    imageIdOverride = "",
+    metadata = {},
+  ) => {
+    if (!user || user.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    if (!postId || !file) {
+      return { success: false, error: "Missing postId or file." };
+    }
+
+    try {
+      const { base64, sizeInKB, quality } = await compressAndConvertToBase64(
+        file,
+      );
+      const imageId =
+        imageIdOverride ||
+        doc(collection(db, "blogPosts", postId, "images")).id;
+
+      const imageRef = doc(db, "blogPosts", postId, "images", imageId);
+
+      await setDoc(imageRef, {
+        id: imageId,
+        postId,
+        base64,
+        fileName: file.name || imageId,
+        mimeType: file.type || "image/jpeg",
+        sizeInKB,
+        quality,
+        altText: String(metadata.altText || "").trim(),
+        caption: String(metadata.caption || "").trim(),
+        role: String(metadata.role || "inline").trim(),
+        uploadedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      return {
+        success: true,
+        imageId,
+        base64,
+        sizeInKB,
+        quality,
+      };
+    } catch (error) {
+      console.error("Error uploading blog post image:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to upload blog post image.",
+      };
+    }
+  };
+
+  const fetchBlogPostImages = async (postId) => {
+    if (!postId) return [];
+
+    try {
+      const imagesSnapshot = await getDocs(
+        query(collection(db, "blogPosts", postId, "images"), orderBy("updatedAt", "desc")),
+      );
+
+      return imagesSnapshot.docs.map((imageDoc) => ({
+        id: imageDoc.id,
+        ...imageDoc.data(),
+      }));
+    } catch (error) {
+      console.error("Error fetching blog post images:", error);
+      return [];
+    }
+  };
+
+  const fetchBlogPostImage = async (postId, imageId) => {
+    if (!postId || !imageId) return null;
+
+    try {
+      const imageSnap = await getDoc(doc(db, "blogPosts", postId, "images", imageId));
+
+      if (!imageSnap.exists()) {
+        return null;
+      }
+
+      return {
+        id: imageSnap.id,
+        ...imageSnap.data(),
+      };
+    } catch (error) {
+      console.error("Error fetching blog post image:", error);
+      return null;
+    }
+  };
+
+  const deleteBlogPostImage = async (postId, imageId) => {
+    if (!user || user.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    if (!postId || !imageId) {
+      return { success: false, error: "Missing postId or imageId." };
+    }
+
+    try {
+      await deleteDoc(doc(db, "blogPosts", postId, "images", imageId));
+
+      const postRef = doc(db, "blogPosts", postId);
+      const postSnap = await getDoc(postRef);
+
+      if (postSnap.exists() && postSnap.data()?.coverImageId === imageId) {
+        await updateDoc(postRef, {
+          coverImageId: "",
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting blog post image:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to delete blog post image.",
+      };
+    }
+  };
+
   // FUNCTION TO CREATE A NEW REVIEW WITH AUTO-INCREMENTED ID
   const createReview = async (reviewData) => {
     try {
@@ -9368,6 +9683,13 @@ Please review this request in the admin panel and proceed with approval or rejec
         deleteMessage,
         deleteConversationThreadForCurrentUser,
         conversationThreads,
+        blogPosts,
+        saveBlogPostDraft,
+        deleteBlogPost,
+        uploadBlogPostImage,
+        fetchBlogPostImages,
+        fetchBlogPostImage,
+        deleteBlogPostImage,
         subscribeToConversationMessages,
         hasMoreConversationMessages,
         sentMessages,
