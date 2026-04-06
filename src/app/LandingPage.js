@@ -8,6 +8,7 @@ import HowItWorks from "./HowItWorks";
 import WhyChooseUs from "./WhyChooseUs";
 import CustomerTestimonials from "./CustomerTestimonials";
 import CompanyMap from "./CompanyMap";
+import BlogPreviewSection from "./BlogPreviewSection";
 import Footer from "./component/Footer";
 import { useBooking } from "./component/BookingProvider";
 import { useUser } from "./lib/UserContext";
@@ -21,6 +22,7 @@ import "./SpecialOffers.css";
 import "./WhyChooseUs.css";
 import "./CustomerTestimonials.css";
 import "./CompanyMap.css";
+import "./BlogPreviewSection.css";
 import "./component/Footer.css";
 
 function LandingPage() {
@@ -326,6 +328,7 @@ useEffect(() => {
       </div>
 
       <CompanyMap />
+      <BlogPreviewSection />
       <Footer />
     </div>
   );

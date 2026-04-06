@@ -4649,11 +4649,6 @@ const sendMessage = async ({
   };
 
   useEffect(() => {
-    if (!user?.uid) {
-      setBlogPosts([]);
-      return;
-    }
-
     const blogPostsRef = collection(db, "blogPosts");
     const blogPostsQuery =
       user?.role === "admin"
@@ -4681,7 +4676,7 @@ const sendMessage = async ({
     );
 
     return () => unsubscribe();
-  }, [user?.uid, user?.role]);
+  }, [user?.role]);
 
   // const sendGuestContactMessage = async ({
   //   name,
