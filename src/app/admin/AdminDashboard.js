@@ -8,6 +8,7 @@ import RentalActivitySection from "./RentalActivitySection";
 import AnalyticsSection from "./AnalyticsSection";
 import FinancialReports from "./FinancialReports";
 import Messages from "./Messages";
+import BlogPosts from "./BlogPosts";
 import AdminSettings from "./AdminSettings";
 
 import { useUser } from "../lib/UserContext";
@@ -22,6 +23,7 @@ const AdminDashboard = () => {
   const [activeSubSections, setActiveSubSections] = useState({
     "rental-activity": "overview",
     analytics: "overview",
+    "blog-posts": "overview",
     settings: "overview",
   });
 
@@ -68,6 +70,10 @@ const AdminDashboard = () => {
 
         {activeSection === "messages" && (
           <Messages subSection={activeSubSections["messages"]} />
+        )}
+
+        {activeSection === "blog-posts" && (
+          <BlogPosts subSection={activeSubSections["blog-posts"]} />
         )}
 
         {activeSection === "settings" && (

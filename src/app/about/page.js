@@ -144,7 +144,7 @@ function About({ openBooking }) {
               We've designed our rental process to be clear and straightforward.
               Browse our vehicle selection, make your reservation, and either
               pick up your car from our location or have it delivered directly
-              to you—no hidden fees, no surprises.
+              to you, no hidden fees, no surprises.
             </p>
           </div>
           <div className="about-why-choose-card">

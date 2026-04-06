@@ -764,6 +764,7 @@ const getLogoForTheme = () => {
     { name: "Analytics", id: "analytics", icon: "/assets/analytics.png" },
     { name: "Reports", id: "financial-reports", icon: "/assets/reports.png" },
     { name: "Messages", id: "messages", icon: "/assets/notifications.png" },
+    { name: "Blog Posts", id: "blog-posts", icon: "/assets/content.png" },
     { name: "Admin", id: "settings", icon: "/assets/settings.png" },
   ];
 
