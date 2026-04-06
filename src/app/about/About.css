@@ -255,6 +255,7 @@
   }
 }
 
+
 @media (max-width: 768px) {
   .about-mv-container {
     flex-direction: column;
