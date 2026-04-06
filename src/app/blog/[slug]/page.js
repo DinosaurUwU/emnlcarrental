@@ -41,8 +41,8 @@ const renderParagraphs = (content = "") => {
 
 export default function BlogPostPage({ params }) {
   const { openBooking } = useBooking();
-  const { blogPosts, fetchBlogPostImage } = useUser();
-  const [coverImage, setCoverImage] = useState("");
+  const { blogPosts, fetchBlogPostImages } = useUser();
+  const [postImages, setPostImages] = useState({});
   const resolvedParams = use(params);
 
   const slug = decodeURIComponent(resolvedParams?.slug || "");
@@ -58,23 +58,28 @@ export default function BlogPostPage({ params }) {
   useEffect(() => {
     let cancelled = false;
 
-    const loadCover = async () => {
-      if (!post?.id || !post?.coverImageId) {
-        setCoverImage("");
+    const loadImages = async () => {
+      if (!post?.id) {
+        setPostImages({});
         return;
       }
 
-      const image = await fetchBlogPostImage(post.id, post.coverImageId);
+      const images = await fetchBlogPostImages(post.id);
       if (cancelled) return;
-      setCoverImage(image?.base64 || "");
+
+      setPostImages(
+        Object.fromEntries(
+          (images || []).map((image) => [image.id, image]),
+        ),
+      );
     };
 
-    loadCover();
+    loadImages();
 
     return () => {
       cancelled = true;
     };
-  }, [post?.id, post?.coverImageId]);
+  }, [post?.id]);
 
   if (!post) {
     return (
@@ -95,6 +100,10 @@ export default function BlogPostPage({ params }) {
       </div>
     );
   }
+
+  const coverImage = post.coverImageId ? postImages[post.coverImageId]?.base64 : "";
+  const hasBlocks =
+    Array.isArray(post.contentBlocks) && post.contentBlocks.length > 0;
 
   return (
     <div className="blog-page">
@@ -121,9 +130,46 @@ export default function BlogPostPage({ params }) {
           )}
 
           <article className="blog-detail-content">
-            {renderParagraphs(post.content).map((paragraph, index) => (
-              <p key={`${post.id}_paragraph_${index}`}>{paragraph}</p>
-            ))}
+            {hasBlocks
+              ? post.contentBlocks.map((block, index) => {
+                  if (block.type === "heading") {
+                    return (
+                      <h2 key={block.id || `${post.id}_heading_${index}`} className="blog-block-heading">
+                        {block.text}
+                      </h2>
+                    );
+                  }
+
+                  if (block.type === "image") {
+                    const image = postImages[block.imageId];
+
+                    if (!image?.base64) {
+                      return null;
+                    }
+
+                    return (
+                      <figure
+                        key={block.id || `${post.id}_image_${index}`}
+                        className="blog-block-image"
+                      >
+                        <img
+                          src={image.base64}
+                          alt={image.altText || block.caption || post.title || "Blog image"}
+                        />
+                        {block.caption && <figcaption>{block.caption}</figcaption>}
+                      </figure>
+                    );
+                  }
+
+                  return (
+                    <p key={block.id || `${post.id}_paragraph_${index}`}>
+                      {block.text}
+                    </p>
+                  );
+                })
+              : renderParagraphs(post.content).map((paragraph, index) => (
+                  <p key={`${post.id}_paragraph_${index}`}>{paragraph}</p>
+                ))}
           </article>
         </div>
       </section>
