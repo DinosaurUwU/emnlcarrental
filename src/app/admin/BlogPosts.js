@@ -104,124 +104,70 @@ const stripRichTextToPlainText = (value = "") =>
     .replace(/\s+/g, " ")
     .trim();
 
-const starterBlogPost = {
-  title: "How To Rent A Car In Leyte Without Delays",
+const rentalGuidesPost = {
+  title: "Rental Guide: What To Prepare Before Booking A Car In Leyte",
   excerpt:
-    "A practical guide to booking a rental car in Leyte, preparing the right documents, and choosing the right unit for your trip.",
-  contentBlocks: [
-    createBlock("heading"),
-    createBlock("paragraph"),
-    createBlock("heading"),
-    createBlock("paragraph"),
-    createBlock("heading"),
-    createBlock("paragraph"),
-    createBlock("heading"),
-    createBlock("paragraph"),
-  ].map((block, index) => {
-    const content = [
-      {
-        text: "Start With Your Travel Plan",
-      },
-      {
-        text:
-          "Before booking a car, decide how you will actually use it. A short city trip, an airport pickup, and a longer drive across Leyte need different kinds of vehicles. If you already know how many passengers you have, how much luggage you are bringing, and whether your trip includes mostly urban roads or longer provincial travel, choosing the right unit becomes much easier from the start.",
-      },
-      {
-        text: "Prepare Your Documents Early",
-      },
-      {
-        text:
-          "One of the most common causes of booking delays is incomplete information. Prepare your valid driver's license, a working contact number, and your confirmed travel schedule before sending your request. If you are arriving from outside Leyte or coordinating a pickup from a port, terminal, or airport, it helps to confirm your arrival details early so the rental process stays smooth on the day itself.",
-      },
-      {
-        text: "Choose The Right Vehicle, Not Just The Cheapest One",
-      },
-      {
-        text:
-          "A smaller unit may be fine for solo travel or quick errands, but it can quickly become uncomfortable for family trips or longer drives. Think about passenger space, luggage room, road conditions, and comfort. If your trip includes multiple stops, intercity travel, or a full day on the road, choosing the right vehicle from the start usually saves more stress than trying to minimize cost at the expense of convenience.",
-      },
-      {
-        text: "Book Early During Busy Travel Dates",
-      },
-      {
-        text:
-          "If your trip falls on a holiday weekend, school break, or peak travel period, do not wait until the last minute. Popular units get reserved quickly, especially those suited for families and group travel. Booking early gives you better availability, a better chance of getting the exact unit you need, and more time to coordinate pickup, payment, and any special requests for your Leyte trip.",
-      },
-    ][index];
-
-    return { ...block, ...content };
-  }),
-};
-
-const wigoFeaturePost = {
-  title: "Why The Red Toyota Wigo Is A Smart Choice For Leyte City Drives",
-  excerpt:
-    "A closer look at the red Toyota Wigo and why it works well for solo trips, couples, and small-group travel around Ormoc City and nearby Leyte routes.",
+    "A practical rental guide covering the key things customers should prepare before booking a car in Leyte, from trip details and valid documents to vehicle choice and timing.",
   contentBlocks: [
     {
       ...createBlock("heading"),
-      text: "A Compact Sedan That Still Feels Ready For Daily Travel",
+      text: "Start With The Basics Before You Send A Booking Request",
     },
     {
       ...createBlock("paragraph"),
       text:
-        "Not every trip around Leyte needs a large vehicle. For errands around the city, airport or port pickups, short business travel, and practical day-to-day driving, the Toyota Wigo offers the kind of size that feels easy to manage without making the ride feel bare. It is compact enough for tighter streets and parking spaces, but still comfortable for passengers who want a clean, modern ride that does not feel oversized for the route.",
+        "A smoother rental experience usually begins before the message is sent. If you already know your travel date, pickup time, drop-off plan, number of passengers, and how much luggage you are bringing, it becomes much easier to choose the right unit and get a clear response quickly. Many booking delays happen because the trip details are still incomplete, so preparing the essentials early saves time for both the customer and the rental team.",
     },
     {
       ...createBlock("image"),
       caption:
-        "The red Toyota Wigo gives a clean, modern first impression that works well for personal travel and everyday city driving.",
+        "Add a booking-related visual here, such as a car key, parked rental unit, or travel-preparation image.",
     },
     {
       ...createBlock("split"),
-      title: "Small Footprint, Easy To Park, Easy To Use",
+      title: "Bring The Right Documents And Contact Details",
       text:
-        "One of the strongest things about the Wigo is how easy it is to live with. In city areas where parking slots, side streets, and quick stopovers matter, a smaller vehicle saves time and stress. That makes it a practical option for drivers who want something straightforward, fuel-conscious, and easy to maneuver, especially for regular point-to-point travel around Ormoc and nearby areas.",
+        "A booking becomes easier to confirm when the basic requirements are already prepared. A valid driver's license, a working mobile number, and accurate contact details should be ready before finalizing the request. If someone else is driving, that should be clarified early as well. Complete information reduces back-and-forth and helps confirm availability, identity, and trip details without unnecessary delay.",
       caption:
-        "The Wigo nameplate reflects the identity of a practical city-ready unit.",
+        "Use an image here that suggests identity, preparation, or pre-trip confirmation.",
       imagePosition: "right",
     },
     {
       ...createBlock("split"),
-      title: "A Cabin Layout That Feels Familiar Right Away",
+      title: "Choose The Vehicle Based On The Trip, Not Only The Price",
       text:
-        "Inside, the Toyota Wigo keeps things simple in the best way. The dashboard layout is clean, controls are easy to reach, and the driving position feels approachable even for renters who just want a no-fuss vehicle for the day. For short drives, errands, or business appointments, this kind of straightforward interior matters because it lets you settle in quickly and focus on the road instead of adjusting to a complicated cabin.",
+        "The most affordable option is not always the most practical one. A compact unit may work well for solo trips or short city travel, but families, longer drives, or passengers with extra bags may need more room. Before booking, think about comfort, seating, luggage space, and how long the group will stay on the road. Choosing the right vehicle from the beginning usually prevents avoidable stress once the trip is already underway.",
       caption:
-        "The cabin layout keeps the driving experience simple, readable, and easy to settle into.",
+        "Add an image of a vehicle interior, luggage space, or passenger-ready setup here.",
       imagePosition: "left",
     },
     {
       ...createBlock("heading"),
-      text: "Exterior Details That Still Feel Sharp And Modern",
+      text: "Confirm Timing, Pickup, And Drop-Off Clearly",
     },
     {
       ...createBlock("paragraph"),
       text:
-        "Even though the Wigo sits in the practical side of the rental lineup, it still carries styling details that make it feel well-kept and presentable. The rear lamp design, mirror profile, and clean red finish give it a more polished look than what many people expect from a compact city car. That makes it a good fit not only for errands and casual travel, but also for guests who still want a tidy and respectable unit when arriving for meetings or appointments.",
+        "Even when a unit is available, a booking can still become confusing if the pickup and return details are vague. Confirm the date, time, location, and expected duration as early as possible. This matters even more for travelers arriving through terminals, ports, or airport connections where timing can affect the schedule. Clear pickup and return details make the whole booking process easier to organize and easier to honor on the actual day.",
     },
     {
       ...createBlock("image"),
       caption:
-        "Rear styling details help the Toyota Wigo look neat and current, even in a compact form factor.",
-    },
-    {
-      ...createBlock("image"),
-      caption:
-        "Side mirror details and body lines show why the Wigo still feels polished for everyday rentals.",
+        "Use an image of a pickup point, parking area, terminal, or arrival setup here.",
     },
     {
       ...createBlock("heading"),
-      text: "Best For Practical Travel Around Leyte",
+      text: "Book Earlier If The Date Matters",
     },
     {
       ...createBlock("paragraph"),
       text:
-        "The Toyota Wigo is a strong choice for renters who value ease, efficiency, and simple comfort. It fits solo travelers, couples, and very small groups who want a reliable vehicle for city driving, routine transfers, and manageable day trips. If the goal is to have a unit that is easy to drive, easy to park, and easy on the eyes, the red Wigo is one of the most sensible choices in the lineup.",
+        "If the trip falls on a weekend, holiday, school break, or an important family or business date, booking early gives you a better chance of getting the unit that actually fits your needs. Waiting too long can reduce your options and force you to settle for a vehicle that does not match the trip as well. Early booking is one of the simplest ways to keep the process smoother and more predictable.",
     },
     {
       ...createBlock("image"),
       caption:
-        "The promotional Wigo visual works well as a closing image for a feature-style vehicle article.",
+        "Close with an image that suggests confirmed travel plans, a ready-to-go rental, or a clean departure scene.",
     },
   ],
 };
@@ -248,8 +194,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isUploadingBlockImageId, setIsUploadingBlockImageId] = useState("");
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
-  const [isCreatingStarterPost, setIsCreatingStarterPost] = useState(false);
-  const [isCreatingWigoPost, setIsCreatingWigoPost] = useState(false);
+  const [isCreatingRentalGuidesPost, setIsCreatingRentalGuidesPost] = useState(false);
   const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
@@ -804,52 +749,19 @@ const BlogPosts = ({ subSection = "overview" }) => {
   };
 
 
-  const handleCreateStarterPost = async () => {
-    setIsCreatingStarterPost(true);
+  const handleCreateRentalGuidesPost = async () => {
+    setIsCreatingRentalGuidesPost(true);
 
     try {
       const result = await saveBlogPostDraft({
-        ...starterBlogPost,
-        published: true,
-        coverImageId: "",
-      });
-
-      if (!result?.success) {
-        showActionOverlay({
-          message: result?.error || "Failed to create starter blog post.",
-          type: "warning",
-        });
-        return;
-      }
-
-      setSelectedPostId(result.postId);
-      replaceDraftState(mapPostToDraft(result.postData));
-      setCoverImagePreview("");
-      setPostImages([]);
-      setActiveEditorView("editor");
-
-      showActionOverlay({
-        message: "Starter blog post created and published.",
-        type: "success",
-      });
-    } finally {
-      setIsCreatingStarterPost(false);
-    }
-  };
-
-  const handleCreateWigoPost = async () => {
-    setIsCreatingWigoPost(true);
-
-    try {
-      const result = await saveBlogPostDraft({
-        ...wigoFeaturePost,
+        ...rentalGuidesPost,
         published: false,
         coverImageId: "",
       });
 
       if (!result?.success) {
         showActionOverlay({
-          message: result?.error || "Failed to create Toyota Wigo draft.",
+          message: result?.error || "Failed to create Rental Guide draft.",
           type: "warning",
         });
         return;
@@ -863,11 +775,11 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       showActionOverlay({
         message:
-          "Toyota Wigo draft created. Upload the 6 local images next and assign them to the prepared blocks.",
+          "Rental Guide draft created. Upload your chosen images next and assign them to the prepared blocks.",
         type: "success",
       });
     } finally {
-      setIsCreatingWigoPost(false);
+      setIsCreatingRentalGuidesPost(false);
     }
   };
 
@@ -883,26 +795,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
               <div className="blog-posts-panel-header-actions">
                 <button
                   type="button"
-                  className="blog-posts-secondary-btn blog-posts-btn-blue"
-                  onClick={handleCreateStarterPost}
-                  disabled={isCreatingStarterPost}
-                >
-                  <span>
-                    {isCreatingStarterPost
-                      ? "Creating..."
-                      : "Create Starter Post"}
-                  </span>
-                </button>
-                <button
-                  type="button"
                   className="blog-posts-secondary-btn blog-posts-btn-orange"
-                  onClick={handleCreateWigoPost}
-                  disabled={isCreatingWigoPost}
+                  onClick={handleCreateRentalGuidesPost}
+                  disabled={isCreatingRentalGuidesPost}
                 >
                   <span>
-                    {isCreatingWigoPost
+                    {isCreatingRentalGuidesPost
                       ? "Creating..."
-                      : "Create Wigo Draft"}
+                      : "Sample Blog"}
                   </span>
                 </button>
                 <button
