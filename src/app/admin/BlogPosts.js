@@ -12,6 +12,13 @@ import {
   FiType,
   FiUpload,
 } from "react-icons/fi";
+import {
+  MdFormatBold,
+  MdFormatItalic,
+  MdFormatListBulleted,
+  MdFormatUnderlined,
+  MdInsertLink,
+} from "react-icons/md";
 import { useUser } from "../lib/UserContext";
 import BlogArticleRenderer from "../blog/BlogArticleRenderer";
 import "./BlogPosts.css";
@@ -96,6 +103,55 @@ const buildSlugFromTitle = (value = "") =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "untitled-post";
 
+const starterBlogPost = {
+  title: "How To Rent A Car In Leyte Without Delays",
+  excerpt:
+    "A practical guide to booking a rental car in Leyte, preparing the right documents, and choosing the right unit for your trip.",
+  contentBlocks: [
+    createBlock("heading"),
+    createBlock("paragraph"),
+    createBlock("heading"),
+    createBlock("paragraph"),
+    createBlock("heading"),
+    createBlock("paragraph"),
+    createBlock("heading"),
+    createBlock("paragraph"),
+  ].map((block, index) => {
+    const content = [
+      {
+        text: "Start With Your Travel Plan",
+      },
+      {
+        text:
+          "Before booking a car, decide how you will actually use it. A short city trip, an airport pickup, and a longer drive across Leyte need different kinds of vehicles. If you already know how many passengers you have, how much luggage you are bringing, and whether your trip includes mostly urban roads or longer provincial travel, choosing the right unit becomes much easier from the start.",
+      },
+      {
+        text: "Prepare Your Documents Early",
+      },
+      {
+        text:
+          "One of the most common causes of booking delays is incomplete information. Prepare your valid driver's license, a working contact number, and your confirmed travel schedule before sending your request. If you are arriving from outside Leyte or coordinating a pickup from a port, terminal, or airport, it helps to confirm your arrival details early so the rental process stays smooth on the day itself.",
+      },
+      {
+        text: "Choose The Right Vehicle, Not Just The Cheapest One",
+      },
+      {
+        text:
+          "A smaller unit may be fine for solo travel or quick errands, but it can quickly become uncomfortable for family trips or longer drives. Think about passenger space, luggage room, road conditions, and comfort. If your trip includes multiple stops, intercity travel, or a full day on the road, choosing the right vehicle from the start usually saves more stress than trying to minimize cost at the expense of convenience.",
+      },
+      {
+        text: "Book Early During Busy Travel Dates",
+      },
+      {
+        text:
+          "If your trip falls on a holiday weekend, school break, or peak travel period, do not wait until the last minute. Popular units get reserved quickly, especially those suited for families and group travel. Booking early gives you better availability, a better chance of getting the exact unit you need, and more time to coordinate pickup, payment, and any special requests for your Leyte trip.",
+      },
+    ][index];
+
+    return { ...block, ...content };
+  }),
+};
+
 const BlogPosts = ({ subSection = "overview" }) => {
   const {
     blogPosts,
@@ -118,10 +174,12 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isUploadingBlockImageId, setIsUploadingBlockImageId] = useState("");
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
+  const [isCreatingStarterPost, setIsCreatingStarterPost] = useState(false);
   const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
   const blockImageInputRefs = useRef({});
+  const richTextInputRefs = useRef({});
 
   const selectedPost = useMemo(() => {
     return blogPosts.find((post) => post.id === selectedPostId) || null;
@@ -640,6 +698,152 @@ const BlogPosts = ({ subSection = "overview" }) => {
     }
   };
 
+  const setRichTextInputRef = (fieldKey) => (node) => {
+    if (node) {
+      richTextInputRefs.current[fieldKey] = node;
+    } else {
+      delete richTextInputRefs.current[fieldKey];
+    }
+  };
+
+  const applyRichTextFormat = (fieldKey, currentValue, onChangeValue, formatType) => {
+    const input = richTextInputRefs.current[fieldKey];
+    const safeValue = String(currentValue || "");
+    const selectionStart = input?.selectionStart ?? safeValue.length;
+    const selectionEnd = input?.selectionEnd ?? safeValue.length;
+    const selectedText = safeValue.slice(selectionStart, selectionEnd);
+
+    let replacement = "";
+
+    if (formatType === "bold") {
+      replacement = `**${selectedText || "bold text"}**`;
+    } else if (formatType === "italic") {
+      replacement = `*${selectedText || "italic text"}*`;
+    } else if (formatType === "underline") {
+      replacement = `__${selectedText || "underlined text"}__`;
+    } else if (formatType === "list") {
+      const baseText = selectedText || "List item";
+      replacement = baseText
+        .split("\n")
+        .map((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) return "";
+          return `- ${trimmed.replace(/^[-*]\s+/, "")}`;
+        })
+        .join("\n");
+    } else if (formatType === "link") {
+      const url =
+        window.prompt("Enter the full URL for this link:", "https://") || "";
+      const safeUrl = url.trim();
+      if (!safeUrl) return;
+      replacement = `[${selectedText || "link text"}](${safeUrl})`;
+    }
+
+    const nextValue =
+      safeValue.slice(0, selectionStart) +
+      replacement +
+      safeValue.slice(selectionEnd);
+
+    onChangeValue(nextValue);
+
+    window.setTimeout(() => {
+      const nextInput = richTextInputRefs.current[fieldKey];
+      if (!nextInput) return;
+
+      const cursorPosition = selectionStart + replacement.length;
+      nextInput.focus();
+      nextInput.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+  };
+
+  const renderFormatToolbar = (fieldKey, currentValue, onChangeValue) => (
+    <div className="blog-posts-format-toolbar">
+      <button
+        type="button"
+        className="blog-posts-format-btn"
+        title="Bold"
+        onClick={() =>
+          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "bold")
+        }
+      >
+        <MdFormatBold />
+      </button>
+      <button
+        type="button"
+        className="blog-posts-format-btn"
+        title="Italic"
+        onClick={() =>
+          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "italic")
+        }
+      >
+        <MdFormatItalic />
+      </button>
+      <button
+        type="button"
+        className="blog-posts-format-btn"
+        title="Underline"
+        onClick={() =>
+          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "underline")
+        }
+      >
+        <MdFormatUnderlined />
+      </button>
+      <button
+        type="button"
+        className="blog-posts-format-btn"
+        title="Bullet List"
+        onClick={() =>
+          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "list")
+        }
+      >
+        <MdFormatListBulleted />
+      </button>
+      <button
+        type="button"
+        className="blog-posts-format-btn"
+        title="Insert Link"
+        onClick={() =>
+          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "link")
+        }
+      >
+        <MdInsertLink />
+      </button>
+    </div>
+  );
+
+  const handleCreateStarterPost = async () => {
+    setIsCreatingStarterPost(true);
+
+    try {
+      const result = await saveBlogPostDraft({
+        ...starterBlogPost,
+        published: true,
+        coverImageId: "",
+      });
+
+      if (!result?.success) {
+        showActionOverlay({
+          message: result?.error || "Failed to create starter blog post.",
+          type: "warning",
+        });
+        return;
+      }
+
+      setSelectedPostId(result.postId);
+      setDraft(mapPostToDraft(result.postData));
+      setCoverImagePreview("");
+      setPostImages([]);
+      setActiveEditorView("editor");
+
+      showActionOverlay({
+        message: "Starter blog post created and published.",
+        type: "success",
+      });
+    } finally {
+      setIsCreatingStarterPost(false);
+    }
+  };
+
   return (
     <section className="blog-posts-section">
       <h2 className="section-title">Blog Posts</h2>
@@ -649,13 +853,27 @@ const BlogPosts = ({ subSection = "overview" }) => {
           <div className="blog-posts-panel">
             <div className="blog-posts-panel-header">
               <h3>Posts</h3>
-              <button
-                type="button"
-                className="blog-posts-primary-btn"
-                onClick={handleStartNewPost}
-              >
-                New Post
-              </button>
+              <div className="blog-posts-panel-header-actions">
+                <button
+                  type="button"
+                  className="blog-posts-secondary-btn blog-posts-btn-blue"
+                  onClick={handleCreateStarterPost}
+                  disabled={isCreatingStarterPost}
+                >
+                  <span>
+                    {isCreatingStarterPost
+                      ? "Creating..."
+                      : "Create Starter Post"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="blog-posts-primary-btn"
+                  onClick={handleStartNewPost}
+                >
+                  New Post
+                </button>
+              </div>
             </div>
 
             {blogPosts.length === 0 ? (
@@ -865,7 +1083,11 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
               <label className="blog-posts-field blog-posts-field-full">
                 <span>Excerpt</span>
+                {renderFormatToolbar("draft-excerpt", draft.excerpt, (nextValue) =>
+                  setDraft((prev) => ({ ...prev, excerpt: nextValue }))
+                )}
                 <textarea
+                  ref={setRichTextInputRef("draft-excerpt")}
                   rows="4"
                   value={draft.excerpt}
                   onChange={(e) =>
@@ -1109,7 +1331,16 @@ const BlogPosts = ({ subSection = "overview" }) => {
                           <>
                             <label className="blog-posts-field">
                               <span>Section Title</span>
+                              {renderFormatToolbar(
+                                `block-${block.id}-title`,
+                                block.title,
+                                (nextValue) =>
+                                  updateBlock(block.id, {
+                                    title: nextValue,
+                                  }),
+                              )}
                               <input
+                                ref={setRichTextInputRef(`block-${block.id}-title`)}
                                 type="text"
                                 value={block.title}
                                 onChange={(e) =>
@@ -1159,7 +1390,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
                             <label className="blog-posts-field">
                               <span>Paragraph</span>
+                              {renderFormatToolbar(
+                                `block-${block.id}-text`,
+                                block.text,
+                                (nextValue) =>
+                                  updateBlock(block.id, { text: nextValue }),
+                              )}
                               <textarea
+                                ref={setRichTextInputRef(`block-${block.id}-text`)}
                                 rows="5"
                                 value={block.text}
                                 onChange={(e) =>
@@ -1173,7 +1411,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
                         <label className="blog-posts-field">
                           <span>Caption</span>
+                          {renderFormatToolbar(
+                            `block-${block.id}-caption`,
+                            block.caption,
+                            (nextValue) =>
+                              updateBlock(block.id, { caption: nextValue }),
+                          )}
                           <input
+                            ref={setRichTextInputRef(`block-${block.id}-caption`)}
                             type="text"
                             value={block.caption}
                             onChange={(e) =>
@@ -1186,7 +1431,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
                     ) : (
                       <label className="blog-posts-field">
                         <span>{block.type === "heading" ? "Heading" : "Paragraph"}</span>
+                        {renderFormatToolbar(
+                          `block-${block.id}-text`,
+                          block.text,
+                          (nextValue) =>
+                            updateBlock(block.id, { text: nextValue }),
+                        )}
                         <textarea
+                          ref={setRichTextInputRef(`block-${block.id}-text`)}
                           rows={block.type === "heading" ? 3 : 6}
                           value={block.text}
                           onChange={(e) =>

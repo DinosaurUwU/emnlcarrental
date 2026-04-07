@@ -1,8 +1,9 @@
 .blog-preview-section {
   padding: 4rem 2rem;
-  background:
+  background-color: var(--page-bg);
+  /* background:
     radial-gradient(circle at top left, rgba(40, 167, 69, 0.14), transparent 30%),
-    linear-gradient(180deg, rgba(7, 70, 9, 0.04), rgba(40, 167, 69, 0.02));
+    linear-gradient(180deg, rgba(7, 70, 9, 0.04), rgba(40, 167, 69, 0.02)); */
 }
 
 .blog-preview-header {

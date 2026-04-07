@@ -83,6 +83,14 @@
   margin-bottom: 1rem;
 }
 
+.blog-posts-panel-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .blog-posts-panel-header h3 {
   margin: 0;
   font-family: "Montserrat", sans-serif;
@@ -434,6 +442,38 @@
   font-size: 0.76rem;
   line-height: 1.45;
   color: var(--supporting-txt);
+}
+
+.blog-posts-format-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0.45rem;
+  border-radius: 10px;
+  background-color: rgba(40, 167, 69, 0.06);
+  border: 1px solid rgba(40, 167, 69, 0.12);
+}
+
+.blog-posts-format-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(40, 167, 69, 0.18);
+  border-radius: 8px;
+  background-color: var(--page-bg);
+  color: var(--accent-txt);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.blog-posts-format-btn:hover {
+  border-color: #28a745;
+  color: #1f7a33;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.16);
 }
 
 .blog-posts-actions {
@@ -893,6 +933,11 @@
   .blog-posts-panel-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .blog-posts-panel-header-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .blog-posts-cover-header {

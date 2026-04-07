@@ -35,8 +35,9 @@ const formatBlogDate = (value) => {
 
 export default function BlogPostPage({ params }) {
   const { openBooking } = useBooking();
-  const { blogPosts, fetchBlogPostImages } = useUser();
+  const { blogPosts, fetchBlogPostImages, fetchBlogPostImage } = useUser();
   const [postImages, setPostImages] = useState({});
+  const [relatedCoverImages, setRelatedCoverImages] = useState({});
   const resolvedParams = use(params);
 
   const slug = decodeURIComponent(resolvedParams?.slug || "");
@@ -47,6 +48,14 @@ export default function BlogPostPage({ params }) {
         (blogPost) => blogPost.published === true && blogPost.slug === slug,
       ) || null
     );
+  }, [blogPosts, slug]);
+
+  const relatedPosts = useMemo(() => {
+    return [...(blogPosts || [])]
+      .filter(
+        (blogPost) => blogPost.published === true && blogPost.slug !== slug,
+      )
+      .slice(0, 3);
   }, [blogPosts, slug]);
 
   useEffect(() => {
@@ -74,6 +83,37 @@ export default function BlogPostPage({ params }) {
       cancelled = true;
     };
   }, [post?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRelatedCovers = async () => {
+      const entries = await Promise.all(
+        relatedPosts.map(async (relatedPost) => {
+          if (!relatedPost?.id || !relatedPost?.coverImageId) {
+            return [relatedPost.id, ""];
+          }
+
+          const image = await fetchBlogPostImage(
+            relatedPost.id,
+            relatedPost.coverImageId,
+          );
+
+          return [relatedPost.id, image?.base64 || ""];
+        }),
+      );
+
+      if (cancelled) return;
+
+      setRelatedCoverImages(Object.fromEntries(entries));
+    };
+
+    loadRelatedCovers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchBlogPostImage, relatedPosts]);
 
   if (!post) {
     return (
@@ -121,6 +161,54 @@ export default function BlogPostPage({ params }) {
           )}
 
           <BlogArticleRenderer post={post} postImages={postImages} />
+
+          {relatedPosts.length > 0 && (
+            <section className="blog-related-section">
+              <div className="blog-related-header">
+                <span className="blog-related-kicker">Read More</span>
+                <h2>More Articles You Might Like</h2>
+                <p>
+                  Keep exploring travel guides, booking tips, and practical rental
+                  advice from EMNL Car Rental.
+                </p>
+              </div>
+
+              <div className="blog-related-grid">
+                {relatedPosts.map((relatedPost) => (
+                  <Link
+                    key={relatedPost.id}
+                    href={`/blog/${relatedPost.slug}`}
+                    className="blog-list-card blog-related-card"
+                  >
+                    <div className="blog-list-card-image-wrap">
+                      {relatedCoverImages[relatedPost.id] ? (
+                        <img
+                          src={relatedCoverImages[relatedPost.id]}
+                          alt={relatedPost.title || "Blog cover"}
+                          className="blog-list-card-image"
+                        />
+                      ) : (
+                        <div className="blog-list-card-placeholder">EMNL</div>
+                      )}
+                    </div>
+
+                    <div className="blog-list-card-body">
+                      <span className="blog-list-card-date">
+                        {formatBlogDate(
+                          relatedPost.publishedAt || relatedPost.updatedAt,
+                        )}
+                      </span>
+                      <h2>{relatedPost.title || "Untitled Post"}</h2>
+                      <p>
+                        {relatedPost.excerpt ||
+                          "Read the full article for more details."}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </section>
 

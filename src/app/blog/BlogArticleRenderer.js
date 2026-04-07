@@ -10,6 +10,83 @@ export const renderParagraphs = (content = "") => {
     .filter(Boolean);
 };
 
+const renderInlineFormatting = (text = "", keyBase = "inline") => {
+  const source = String(text || "");
+  const pattern =
+    /(\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*]+)\*)/g;
+
+  const nodes = [];
+  let lastIndex = 0;
+  let match;
+  let segmentIndex = 0;
+
+  while ((match = pattern.exec(source)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(source.slice(lastIndex, match.index));
+    }
+
+    if (match[2] && match[3]) {
+      nodes.push(
+        <a
+          key={`${keyBase}_link_${segmentIndex}`}
+          href={match[3]}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {match[2]}
+        </a>,
+      );
+    } else if (match[4]) {
+      nodes.push(<strong key={`${keyBase}_bold_${segmentIndex}`}>{match[4]}</strong>);
+    } else if (match[5]) {
+      nodes.push(<u key={`${keyBase}_underline_${segmentIndex}`}>{match[5]}</u>);
+    } else if (match[6]) {
+      nodes.push(<em key={`${keyBase}_italic_${segmentIndex}`}>{match[6]}</em>);
+    }
+
+    lastIndex = pattern.lastIndex;
+    segmentIndex += 1;
+  }
+
+  if (lastIndex < source.length) {
+    nodes.push(source.slice(lastIndex));
+  }
+
+  return nodes.length > 0 ? nodes : source;
+};
+
+const renderRichTextBlocks = (content = "", keyBase = "block") => {
+  return renderParagraphs(content).map((segment, segmentIndex) => {
+    const lines = segment
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const isBulletList =
+      lines.length > 0 && lines.every((line) => /^[-*]\s+/.test(line));
+
+    if (isBulletList) {
+      return (
+        <ul key={`${keyBase}_list_${segmentIndex}`} className="blog-rich-list">
+          {lines.map((line, lineIndex) => (
+            <li key={`${keyBase}_item_${segmentIndex}_${lineIndex}`}>
+              {renderInlineFormatting(
+                line.replace(/^[-*]\s+/, ""),
+                `${keyBase}_item_${segmentIndex}_${lineIndex}`,
+              )}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+      <p key={`${keyBase}_paragraph_${segmentIndex}`}>
+        {renderInlineFormatting(segment, `${keyBase}_paragraph_${segmentIndex}`)}
+      </p>
+    );
+  });
+};
+
 const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
   const hasBlocks =
     Array.isArray(post?.contentBlocks) && post.contentBlocks.length > 0;
@@ -24,7 +101,10 @@ const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
                   key={block.id || `${post.id || "preview"}_heading_${index}`}
                   className="blog-block-heading"
                 >
-                  {block.text}
+                  {renderInlineFormatting(
+                    block.text,
+                    `${block.id || `${post.id || "preview"}_heading_${index}`}_heading`,
+                  )}
                 </h2>
               );
             }
@@ -45,7 +125,14 @@ const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
                     src={image.base64}
                     alt={image.altText || block.caption || post.title || "Blog image"}
                   />
-                  {block.caption && <figcaption>{block.caption}</figcaption>}
+                  {block.caption && (
+                    <figcaption>
+                      {renderInlineFormatting(
+                        block.caption,
+                        `${block.id || `${post.id || "preview"}_image_${index}`}_caption`,
+                      )}
+                    </figcaption>
+                  )}
                 </figure>
               );
             }
@@ -83,30 +170,29 @@ const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
                   </div>
 
                   <div className="blog-block-split-copy">
-                    {block.title && <h2>{block.title}</h2>}
-                    {renderParagraphs(block.text).map((paragraph, paragraphIndex) => (
-                      <p
-                        key={`${
-                          block.id || `${post.id || "preview"}_split_${index}`
-                        }_paragraph_${paragraphIndex}`}
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
+                    {block.title && (
+                      <h2>
+                        {renderInlineFormatting(
+                          block.title,
+                          `${block.id || `${post.id || "preview"}_split_${index}`}_title`,
+                        )}
+                      </h2>
+                    )}
+                    {renderRichTextBlocks(
+                      block.text,
+                      `${block.id || `${post.id || "preview"}_split_${index}`}_copy`,
+                    )}
                   </div>
                 </section>
               );
             }
 
-            return (
-              <p key={block.id || `${post.id || "preview"}_paragraph_${index}`}>
-                {block.text}
-              </p>
+            return renderRichTextBlocks(
+              block.text,
+              block.id || `${post.id || "preview"}_paragraph_${index}`,
             );
           })
-        : renderParagraphs(post?.content).map((paragraph, index) => (
-            <p key={`${post.id || "preview"}_paragraph_${index}`}>{paragraph}</p>
-          ))}
+        : renderRichTextBlocks(post?.content, `${post.id || "preview"}_content`)}
     </article>
   );
 };
