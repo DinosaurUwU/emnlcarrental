@@ -74,9 +74,16 @@ export default function RichTextEditor({
   minHeight = 120,
   singleLine = false,
   className = "",
+  historyMode = "native",
 }) {
+  const useGroupedHistory = historyMode === "grouped";
   const editorRef = useRef(null);
   const savedRangeRef = useRef(null);
+  const historyRef = useRef([]);
+  const futureRef = useRef([]);
+  const currentValueRef = useRef(normalizeEditorHtml(value));
+  const lastInputAtRef = useRef(0);
+  const isApplyingHistoryRef = useRef(false);
 
   const editorClassName = useMemo(
     () =>
@@ -94,12 +101,21 @@ export default function RichTextEditor({
     if (normalizedIncoming !== normalizedCurrent) {
       editor.innerHTML = normalizedIncoming;
     }
-  }, [value]);
+
+    if (useGroupedHistory && normalizedIncoming !== currentValueRef.current) {
+      currentValueRef.current = normalizedIncoming;
+      historyRef.current = [normalizedIncoming];
+      futureRef.current = [];
+      lastInputAtRef.current = 0;
+    }
+  }, [useGroupedHistory, value]);
 
   const emitChange = () => {
     const editor = editorRef.current;
     if (!editor || typeof onChange !== "function") return;
-    onChange(normalizeEditorHtml(editor.innerHTML));
+    const nextValue = normalizeEditorHtml(editor.innerHTML);
+    currentValueRef.current = nextValue;
+    onChange(nextValue);
   };
 
   const focusEditor = () => {
@@ -136,9 +152,98 @@ export default function RichTextEditor({
     savedRangeRef.current = selection.getRangeAt(0).cloneRange();
   };
 
+  const moveCaretToEnd = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+
+    const selection = window.getSelection();
+    if (!selection) return;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedRangeRef.current = range.cloneRange();
+  };
+
+  const pushHistoryCheckpoint = (snapshot) => {
+    const normalizedSnapshot = normalizeEditorHtml(snapshot);
+    const lastEntry = historyRef.current[historyRef.current.length - 1];
+
+    if (lastEntry === normalizedSnapshot) {
+      return;
+    }
+
+    historyRef.current.push(normalizedSnapshot);
+
+    if (historyRef.current.length > 100) {
+      historyRef.current.shift();
+    }
+  };
+
+  const applySnapshot = (snapshot) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    isApplyingHistoryRef.current = true;
+    editor.innerHTML = normalizeEditorHtml(snapshot);
+    moveCaretToEnd();
+    emitChange();
+    isApplyingHistoryRef.current = false;
+  };
+
+  const handleUndo = () => {
+    if (historyRef.current.length === 0) return;
+
+    const currentSnapshot = currentValueRef.current;
+    const previousSnapshot = historyRef.current.pop();
+
+    if (typeof previousSnapshot !== "string") {
+      return;
+    }
+
+    futureRef.current.push(currentSnapshot);
+    applySnapshot(previousSnapshot);
+  };
+
+  const handleRedo = () => {
+    if (futureRef.current.length === 0) return;
+
+    const nextSnapshot = futureRef.current.pop();
+    pushHistoryCheckpoint(currentValueRef.current);
+    applySnapshot(nextSnapshot);
+  };
+
   const runCommand = (command) => {
+    if (command === "undo") {
+      if (!useGroupedHistory) {
+        document.execCommand("undo", false, null);
+        emitChange();
+        return;
+      }
+
+      handleUndo();
+      return;
+    }
+
+    if (command === "redo") {
+      if (!useGroupedHistory) {
+        document.execCommand("redo", false, null);
+        emitChange();
+        return;
+      }
+
+      handleRedo();
+      return;
+    }
+
     focusEditor();
     restoreSelection();
+    if (useGroupedHistory) {
+      pushHistoryCheckpoint(currentValueRef.current);
+      futureRef.current = [];
+    }
 
     if (command === "bold") {
       toggleInlineTag("strong");
@@ -261,13 +366,69 @@ export default function RichTextEditor({
       document.execCommand("insertHTML", false, withLineBreaks);
     }
 
+    if (useGroupedHistory) {
+      pushHistoryCheckpoint(currentValueRef.current);
+      futureRef.current = [];
+    }
     emitChange();
   };
 
   const handleKeyDown = (event) => {
+    const isUndo =
+      (event.ctrlKey || event.metaKey) &&
+      !event.shiftKey &&
+      event.key.toLowerCase() === "z";
+    const isRedo =
+      (event.ctrlKey || event.metaKey) &&
+      (event.key.toLowerCase() === "y" ||
+        (event.shiftKey && event.key.toLowerCase() === "z"));
+
+    if (isUndo) {
+      if (!useGroupedHistory) {
+        return;
+      }
+
+      event.preventDefault();
+      handleUndo();
+      return;
+    }
+
+    if (isRedo) {
+      if (!useGroupedHistory) {
+        return;
+      }
+
+      event.preventDefault();
+      handleRedo();
+      return;
+    }
+
     if (singleLine && event.key === "Enter") {
       event.preventDefault();
     }
+  };
+
+  const handleInput = () => {
+    if (!useGroupedHistory) {
+      emitChange();
+      return;
+    }
+
+    if (isApplyingHistoryRef.current) return;
+
+    const now = Date.now();
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const nextValue = normalizeEditorHtml(editor.innerHTML);
+
+    if (now - lastInputAtRef.current > 900) {
+      pushHistoryCheckpoint(currentValueRef.current);
+    }
+
+    lastInputAtRef.current = now;
+    futureRef.current = [];
+    emitChange();
   };
 
   return (
@@ -298,7 +459,7 @@ export default function RichTextEditor({
         contentEditable
         suppressContentEditableWarning
         data-placeholder={placeholder}
-        onInput={emitChange}
+        onInput={handleInput}
         onPaste={handlePaste}
         onKeyDown={handleKeyDown}
         onMouseUp={captureSelection}
