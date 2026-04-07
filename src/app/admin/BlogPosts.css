@@ -67,6 +67,12 @@
   box-shadow: 0 0 12px rgba(40, 167, 69, 0.18);
 }
 
+.blog-posts-view-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .blog-posts-panel {
   background-color: rgba(40, 167, 69, 0.12);
   border: 1px solid rgba(40, 167, 69, 0.2);

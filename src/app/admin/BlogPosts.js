@@ -12,15 +12,9 @@ import {
   FiType,
   FiUpload,
 } from "react-icons/fi";
-import {
-  MdFormatBold,
-  MdFormatItalic,
-  MdFormatListBulleted,
-  MdFormatUnderlined,
-  MdInsertLink,
-} from "react-icons/md";
 import { useUser } from "../lib/UserContext";
 import BlogArticleRenderer from "../blog/BlogArticleRenderer";
+import RichTextEditor from "./RichTextEditor";
 import "./BlogPosts.css";
 
 const createBlock = (type = "paragraph") => ({
@@ -179,7 +173,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
   const blockImageInputRefs = useRef({});
-  const richTextInputRefs = useRef({});
 
   const selectedPost = useMemo(() => {
     return blogPosts.find((post) => post.id === selectedPostId) || null;
@@ -276,9 +269,21 @@ const BlogPosts = ({ subSection = "overview" }) => {
     ];
   }, [autoSeoDescription, autoSeoTitle, autoSlug, draft]);
 
+  const replaceDraftState = (nextDraft) => {
+    setDraft(JSON.parse(JSON.stringify(nextDraft)));
+  };
+
+  const applyDraftChange = (updater) => {
+    setDraft((prev) => {
+      const next =
+        typeof updater === "function" ? updater(prev) : updater;
+      return JSON.parse(JSON.stringify(next));
+    });
+  };
+
   useEffect(() => {
     if (!selectedPost) return;
-    setDraft(mapPostToDraft(selectedPost));
+    replaceDraftState(mapPostToDraft(selectedPost));
   }, [selectedPost]);
 
   useEffect(() => {
@@ -311,24 +316,25 @@ const BlogPosts = ({ subSection = "overview" }) => {
     };
   }, [draft.id, draft.coverImageId]);
 
+
   if (subSection !== "overview") {
     return null;
   }
 
   const handleStartNewPost = () => {
     setSelectedPostId("");
-    setDraft(initialDraft);
+    replaceDraftState(initialDraft);
     setCoverImagePreview("");
     setPostImages([]);
   };
 
   const handleSelectPost = (post) => {
     setSelectedPostId(post.id);
-    setDraft(mapPostToDraft(post));
+    replaceDraftState(mapPostToDraft(post));
   };
 
   const updateBlock = (blockId, patch) => {
-    setDraft((prev) => ({
+    applyDraftChange((prev) => ({
       ...prev,
       contentBlocks: prev.contentBlocks.map((block) =>
         block.id === blockId ? { ...block, ...patch } : block,
@@ -336,15 +342,31 @@ const BlogPosts = ({ subSection = "overview" }) => {
     }));
   };
 
+  const updateDraftField = (fieldKey, value) => {
+    applyDraftChange((prev) => ({
+      ...prev,
+      [fieldKey]: value,
+    }));
+  };
+
+  const updateBlockField = (blockId, fieldKey, value) => {
+    applyDraftChange((prev) => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.map((block) =>
+        block.id === blockId ? { ...block, [fieldKey]: value } : block,
+      ),
+    }));
+  };
+
   const addBlock = (type) => {
-    setDraft((prev) => ({
+    applyDraftChange((prev) => ({
       ...prev,
       contentBlocks: [...prev.contentBlocks, createBlock(type)],
     }));
   };
 
   const removeBlock = (blockId) => {
-    setDraft((prev) => {
+    applyDraftChange((prev) => {
       const nextBlocks = prev.contentBlocks.filter((block) => block.id !== blockId);
       return {
         ...prev,
@@ -354,7 +376,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   };
 
   const moveBlock = (blockId, direction) => {
-    setDraft((prev) => {
+    applyDraftChange((prev) => {
       const index = prev.contentBlocks.findIndex((block) => block.id === blockId);
       if (index < 0) return prev;
 
@@ -389,7 +411,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
     }
 
     setSelectedPostId(result.postId);
-    setDraft((prev) => ({
+    applyDraftChange((prev) => ({
       ...prev,
       id: result.postId,
       slug: result.slug,
@@ -416,12 +438,12 @@ const BlogPosts = ({ subSection = "overview" }) => {
       }
 
       setSelectedPostId(result.postId);
-      setDraft((prev) => ({
-        ...prev,
+      replaceDraftState({
+        ...draft,
         id: result.postId,
         slug: result.slug,
-        published: publish ? true : prev.published,
-      }));
+        published: publish ? true : draft.published,
+      });
 
       showActionOverlay({
         message: publish ? "Blog post published." : "Draft saved successfully.",
@@ -473,7 +495,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       return;
     }
 
-    setDraft((prev) => ({
+    applyDraftChange((prev) => ({
       ...prev,
       id: result.postId,
       slug: result.slug,
@@ -539,7 +561,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       }
 
       setSelectedPostId(postResult.postId);
-      setDraft((prev) => ({
+      applyDraftChange((prev) => ({
         ...prev,
         id: postResult.postId,
         slug: postResult.slug,
@@ -623,7 +645,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       }
 
       setPostImages((prev) => prev.filter((image) => image.id !== imageId));
-      setDraft((prev) => ({
+      applyDraftChange((prev) => ({
         ...prev,
         coverImageId: prev.coverImageId === imageId ? "" : prev.coverImageId,
         contentBlocks: prev.contentBlocks.map((block) =>
@@ -677,7 +699,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       const refreshedImages = await fetchBlogPostImages(postResult.postId);
       setPostImages(refreshedImages || []);
       setSelectedPostId(postResult.postId);
-      setDraft((prev) => ({
+      applyDraftChange((prev) => ({
         ...prev,
         id: postResult.postId,
         slug: postResult.slug,
@@ -698,118 +720,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
     }
   };
 
-  const setRichTextInputRef = (fieldKey) => (node) => {
-    if (node) {
-      richTextInputRefs.current[fieldKey] = node;
-    } else {
-      delete richTextInputRefs.current[fieldKey];
-    }
-  };
-
-  const applyRichTextFormat = (fieldKey, currentValue, onChangeValue, formatType) => {
-    const input = richTextInputRefs.current[fieldKey];
-    const safeValue = String(currentValue || "");
-    const selectionStart = input?.selectionStart ?? safeValue.length;
-    const selectionEnd = input?.selectionEnd ?? safeValue.length;
-    const selectedText = safeValue.slice(selectionStart, selectionEnd);
-
-    let replacement = "";
-
-    if (formatType === "bold") {
-      replacement = `**${selectedText || "bold text"}**`;
-    } else if (formatType === "italic") {
-      replacement = `*${selectedText || "italic text"}*`;
-    } else if (formatType === "underline") {
-      replacement = `__${selectedText || "underlined text"}__`;
-    } else if (formatType === "list") {
-      const baseText = selectedText || "List item";
-      replacement = baseText
-        .split("\n")
-        .map((line) => {
-          const trimmed = line.trim();
-          if (!trimmed) return "";
-          return `- ${trimmed.replace(/^[-*]\s+/, "")}`;
-        })
-        .join("\n");
-    } else if (formatType === "link") {
-      const url =
-        window.prompt("Enter the full URL for this link:", "https://") || "";
-      const safeUrl = url.trim();
-      if (!safeUrl) return;
-      replacement = `[${selectedText || "link text"}](${safeUrl})`;
-    }
-
-    const nextValue =
-      safeValue.slice(0, selectionStart) +
-      replacement +
-      safeValue.slice(selectionEnd);
-
-    onChangeValue(nextValue);
-
-    window.setTimeout(() => {
-      const nextInput = richTextInputRefs.current[fieldKey];
-      if (!nextInput) return;
-
-      const cursorPosition = selectionStart + replacement.length;
-      nextInput.focus();
-      nextInput.setSelectionRange(cursorPosition, cursorPosition);
-    }, 0);
-  };
-
-  const renderFormatToolbar = (fieldKey, currentValue, onChangeValue) => (
-    <div className="blog-posts-format-toolbar">
-      <button
-        type="button"
-        className="blog-posts-format-btn"
-        title="Bold"
-        onClick={() =>
-          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "bold")
-        }
-      >
-        <MdFormatBold />
-      </button>
-      <button
-        type="button"
-        className="blog-posts-format-btn"
-        title="Italic"
-        onClick={() =>
-          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "italic")
-        }
-      >
-        <MdFormatItalic />
-      </button>
-      <button
-        type="button"
-        className="blog-posts-format-btn"
-        title="Underline"
-        onClick={() =>
-          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "underline")
-        }
-      >
-        <MdFormatUnderlined />
-      </button>
-      <button
-        type="button"
-        className="blog-posts-format-btn"
-        title="Bullet List"
-        onClick={() =>
-          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "list")
-        }
-      >
-        <MdFormatListBulleted />
-      </button>
-      <button
-        type="button"
-        className="blog-posts-format-btn"
-        title="Insert Link"
-        onClick={() =>
-          applyRichTextFormat(fieldKey, currentValue, onChangeValue, "link")
-        }
-      >
-        <MdInsertLink />
-      </button>
-    </div>
-  );
 
   const handleCreateStarterPost = async () => {
     setIsCreatingStarterPost(true);
@@ -830,7 +740,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       }
 
       setSelectedPostId(result.postId);
-      setDraft(mapPostToDraft(result.postData));
+      replaceDraftState(mapPostToDraft(result.postData));
       setCoverImagePreview("");
       setPostImages([]);
       setActiveEditorView("editor");
@@ -848,7 +758,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
     <section className="blog-posts-section">
       <h2 className="section-title">Blog Posts</h2>
 
-      <div className="blog-posts-layout">
+      <div className="blog-posts-layout" ref={editorRootRef}>
         <div className="blog-posts-sidebar">
           <div className="blog-posts-panel">
             <div className="blog-posts-panel-header">
@@ -1040,6 +950,26 @@ const BlogPosts = ({ subSection = "overview" }) => {
               <FiEye />
               <span>Preview</span>
             </button>
+            <button
+              type="button"
+              className="blog-posts-view-toggle-btn"
+              onClick={handleUndoDraft}
+              disabled={!canUndoDraft}
+              title="Undo (Ctrl/Cmd + Z)"
+            >
+              <FiRotateCcw />
+              <span>Undo</span>
+            </button>
+            <button
+              type="button"
+              className="blog-posts-view-toggle-btn"
+              onClick={handleRedoDraft}
+              disabled={!canRedoDraft}
+              title="Redo (Ctrl + Y / Ctrl+Shift+Z)"
+            >
+              <FiRotateCw />
+              <span>Redo</span>
+            </button>
           </div>
 
           {activeEditorView === "editor" ? (
@@ -1061,10 +991,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
                 <input
                   type="text"
                   value={draft.title}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="How to Rent a Car in Dumaguete"
+                  onChange={(e) => updateDraftField("title", e.target.value)}
+                  placeholder="How to Rent a Car in Leyte"
                 />
               </label>
 
@@ -1083,16 +1011,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
               <label className="blog-posts-field blog-posts-field-full">
                 <span>Excerpt</span>
-                {renderFormatToolbar("draft-excerpt", draft.excerpt, (nextValue) =>
-                  setDraft((prev) => ({ ...prev, excerpt: nextValue }))
+                {renderFormatToolbar("draft-excerpt", draft.excerpt, (nextValue, metaType) =>
+                  updateDraftField("excerpt", nextValue, metaType)
                 )}
                 <textarea
                   ref={setRichTextInputRef("draft-excerpt")}
                   rows="4"
                   value={draft.excerpt}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, excerpt: e.target.value }))
-                  }
+                  onChange={(e) => updateDraftField("excerpt", e.target.value)}
                   placeholder="Short preview text for the landing page and blog list."
                 />
               </label>
@@ -1344,9 +1270,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                                 type="text"
                                 value={block.title}
                                 onChange={(e) =>
-                                  updateBlock(block.id, {
-                                    title: e.target.value,
-                                  })
+                                  updateBlockField(block.id, "title", e.target.value)
                                 }
                                 placeholder="Write a split-section heading"
                               />
@@ -1393,15 +1317,20 @@ const BlogPosts = ({ subSection = "overview" }) => {
                               {renderFormatToolbar(
                                 `block-${block.id}-text`,
                                 block.text,
-                                (nextValue) =>
-                                  updateBlock(block.id, { text: nextValue }),
+                                (nextValue, metaType) =>
+                                  updateBlockField(
+                                    block.id,
+                                    "text",
+                                    nextValue,
+                                    metaType,
+                                  ),
                               )}
                               <textarea
                                 ref={setRichTextInputRef(`block-${block.id}-text`)}
                                 rows="5"
                                 value={block.text}
                                 onChange={(e) =>
-                                  updateBlock(block.id, { text: e.target.value })
+                                  updateBlockField(block.id, "text", e.target.value)
                                 }
                                 placeholder="Write the text for this split section"
                               />
@@ -1414,15 +1343,20 @@ const BlogPosts = ({ subSection = "overview" }) => {
                           {renderFormatToolbar(
                             `block-${block.id}-caption`,
                             block.caption,
-                            (nextValue) =>
-                              updateBlock(block.id, { caption: nextValue }),
+                            (nextValue, metaType) =>
+                              updateBlockField(
+                                block.id,
+                                "caption",
+                                nextValue,
+                                metaType,
+                              ),
                           )}
                           <input
                             ref={setRichTextInputRef(`block-${block.id}-caption`)}
                             type="text"
                             value={block.caption}
                             onChange={(e) =>
-                              updateBlock(block.id, { caption: e.target.value })
+                              updateBlockField(block.id, "caption", e.target.value)
                             }
                             placeholder="Optional image caption"
                           />
@@ -1434,15 +1368,20 @@ const BlogPosts = ({ subSection = "overview" }) => {
                         {renderFormatToolbar(
                           `block-${block.id}-text`,
                           block.text,
-                          (nextValue) =>
-                            updateBlock(block.id, { text: nextValue }),
+                          (nextValue, metaType) =>
+                            updateBlockField(
+                              block.id,
+                              "text",
+                              nextValue,
+                              metaType,
+                            ),
                         )}
                         <textarea
                           ref={setRichTextInputRef(`block-${block.id}-text`)}
                           rows={block.type === "heading" ? 3 : 6}
                           value={block.text}
                           onChange={(e) =>
-                            updateBlock(block.id, { text: e.target.value })
+                            updateBlockField(block.id, "text", e.target.value)
                           }
                           placeholder={
                             block.type === "heading"
