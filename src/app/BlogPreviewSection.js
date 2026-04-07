@@ -54,7 +54,7 @@ const BlogPreviewSection = () => {
 
   const publishedPosts = useMemo(() => {
     return [...(blogPosts || [])]
-      .filter((post) => post.published === true)
+      .filter((post) => post.published === true && post.hidden !== true)
       .slice(0, 3);
   }, [blogPosts]);
 
@@ -129,7 +129,14 @@ const BlogPreviewSection = () => {
             <div className="blog-preview-card-body">
               <div className="blog-preview-card-meta">
                 <span>{getPublicDateLabel(post)}</span>
-                <span>By EMNL Car Rental Services</span>
+                <div className="blog-preview-author-row">
+                  <img
+                    src="/assets/profile.png"
+                    alt="EMNL Car Rental Services"
+                    className="blog-preview-author-avatar"
+                  />
+                  <span>By EMNL Car Rental Services</span>
+                </div>
               </div>
               <h3>{post.title || "Untitled Post"}</h3>
               <RichTextContent

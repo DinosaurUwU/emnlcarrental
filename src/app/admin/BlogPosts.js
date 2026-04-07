@@ -203,6 +203,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
   const [isCreatingRentalGuidesPost, setIsCreatingRentalGuidesPost] = useState(false);
+  const [isTogglingHidden, setIsTogglingHidden] = useState(false);
   const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
@@ -494,7 +495,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const handleToggleHidden = async () => {
     if (!draft.id) return;
 
-    setIsSavingDraft(true);
+    setIsTogglingHidden(true);
 
     try {
       const nextHidden = !draft.hidden;
@@ -524,7 +525,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
         type: "success",
       });
     } finally {
-      setIsSavingDraft(false);
+      setIsTogglingHidden(false);
     }
   };
 
@@ -1429,9 +1430,13 @@ const BlogPosts = ({ subSection = "overview" }) => {
                   type="button"
                   className="blog-posts-secondary-btn blog-posts-btn-orange"
                   onClick={handleToggleHidden}
-                  disabled={isSavingDraft}
+                  disabled={isTogglingHidden || isSavingDraft}
                 >
-                  {draft.hidden ? "Show Publicly" : "Hide For Now"}
+                  {isTogglingHidden
+                    ? "Updating Visibility..."
+                    : draft.hidden
+                      ? "Show Publicly"
+                      : "Hide For Now"}
                 </button>
               )}
               <button

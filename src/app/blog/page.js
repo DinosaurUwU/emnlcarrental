@@ -58,7 +58,9 @@ export default function BlogPage() {
   const [coverImages, setCoverImages] = useState({});
 
   const publishedPosts = useMemo(() => {
-    return [...(blogPosts || [])].filter((post) => post.published === true);
+    return [...(blogPosts || [])].filter(
+      (post) => post.published === true && post.hidden !== true,
+    );
   }, [blogPosts]);
 
   useEffect(() => {
@@ -127,9 +129,16 @@ export default function BlogPage() {
                 <span className="blog-list-card-date">
                   {getPublicDateLabel(post)}
                 </span>
-                <span className="blog-list-card-date blog-list-card-author">
-                  By EMNL Car Rental Services
-                </span>
+                <div className="blog-author-row">
+                  <img
+                    src="/assets/profile.png"
+                    alt="EMNL Car Rental Services"
+                    className="blog-author-avatar"
+                  />
+                  <span className="blog-list-card-date blog-list-card-author">
+                    By EMNL Car Rental Services
+                  </span>
+                </div>
                 <h2>{post.title || "Untitled Post"}</h2>
                 <RichTextContent
                   value={post.excerpt || "Read the full article for more details."}

@@ -62,6 +62,7 @@ const Header = ({
 
   // Selected collections for import
   const [selectedCollections, setSelectedCollections] = useState({
+    blogPosts: true,
     config: true,
     images: true,
     reviews: true,
@@ -72,6 +73,7 @@ const Header = ({
 
   // Selected collections for backup
   const [selectedBackupCollections, setSelectedBackupCollections] = useState({
+    blogPosts: true,
     config: true,
     images: true,
     reviews: true,
@@ -90,8 +92,8 @@ const Header = ({
     financialReports: true,
     activeBookings: true,
     adminBookingRequests: true,
-    sentMessages: true,
-    receivedMessages: true,
+    notifications: true,
+    conversationThreads: true,
   });
   const [
     selectedBackupRegularUserSubcollections,
@@ -100,13 +102,14 @@ const Header = ({
     rentalHistory: true,
     activeRentals: true,
     userBookingRequest: true,
-    sentMessages: true,
-    receivedMessages: true,
+    notifications: true,
+    conversationThreads: true,
   });
 
   // Selected collections for download
   const [selectedDownloadCollections, setSelectedDownloadCollections] =
     useState({
+      blogPosts: true,
       config: true,
       images: true,
       reviews: true,
@@ -123,8 +126,8 @@ const Header = ({
       financialReports: true,
       activeBookings: true,
       adminBookingRequests: true,
-      sentMessages: true,
-      receivedMessages: true,
+      notifications: true,
+      conversationThreads: true,
     });
   const [
     selectedRegularUserSubcollections,
@@ -133,8 +136,8 @@ const Header = ({
     rentalHistory: true,
     activeRentals: true,
     userBookingRequest: true,
-    sentMessages: true,
-    receivedMessages: true,
+    notifications: true,
+    conversationThreads: true,
   });
 
   const [fetchedImages, setFetchedImages] = useState({});
@@ -330,8 +333,8 @@ const Header = ({
     financialReports: true,
     activeBookings: true,
     adminBookingRequests: true,
-    sentMessages: true,
-    receivedMessages: true,
+    notifications: true,
+    conversationThreads: true,
   });
   const [
     selectedImportRegularUserSubcollections,
@@ -340,8 +343,8 @@ const Header = ({
     rentalHistory: true,
     activeRentals: true,
     userBookingRequest: true,
-    sentMessages: true,
-    receivedMessages: true,
+    notifications: true,
+    conversationThreads: true,
   });
 
   const useAdminSubcollections =

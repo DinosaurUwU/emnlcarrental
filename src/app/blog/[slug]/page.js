@@ -33,6 +33,25 @@ const formatBlogDate = (value) => {
   }
 };
 
+const getPublicDateLabel = (post = {}) => {
+  const publishedText = formatBlogDate(post?.publishedAt);
+  const updatedText = formatBlogDate(post?.updatedAt);
+
+  if (publishedText && updatedText && publishedText !== updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  if (publishedText) {
+    return `Published ${publishedText}`;
+  }
+
+  if (updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  return "";
+};
+
 export default function BlogPostPage({ params }) {
   const { openBooking } = useBooking();
   const { blogPosts, fetchBlogPostImages, fetchBlogPostImage } = useUser();
@@ -45,7 +64,10 @@ export default function BlogPostPage({ params }) {
   const post = useMemo(() => {
     return (
       (blogPosts || []).find(
-        (blogPost) => blogPost.published === true && blogPost.slug === slug,
+        (blogPost) =>
+          blogPost.published === true &&
+          blogPost.hidden !== true &&
+          blogPost.slug === slug,
       ) || null
     );
   }, [blogPosts, slug]);
@@ -53,7 +75,10 @@ export default function BlogPostPage({ params }) {
   const relatedPosts = useMemo(() => {
     return [...(blogPosts || [])]
       .filter(
-        (blogPost) => blogPost.published === true && blogPost.slug !== slug,
+        (blogPost) =>
+          blogPost.published === true &&
+          blogPost.hidden !== true &&
+          blogPost.slug !== slug,
       )
       .slice(0, 3);
   }, [blogPosts, slug]);
@@ -147,9 +172,19 @@ export default function BlogPostPage({ params }) {
           </Link>
 
           <div className="blog-detail-header">
-            <span className="blog-detail-date">
-              {formatBlogDate(post.publishedAt || post.updatedAt)}
-            </span>
+            <div className="blog-detail-meta">
+              <span className="blog-detail-date">
+                {getPublicDateLabel(post)}
+              </span>
+              <div className="blog-author-row blog-detail-author-row">
+                <img
+                  src="/assets/profile.png"
+                  alt="EMNL Car Rental Services"
+                  className="blog-author-avatar"
+                />
+                <span className="blog-detail-author">By EMNL Car Rental Services</span>
+              </div>
+            </div>
             <h1>{post.title}</h1>
             {post.excerpt && (
               <RichTextContent
@@ -199,10 +234,18 @@ export default function BlogPostPage({ params }) {
 
                     <div className="blog-list-card-body">
                       <span className="blog-list-card-date">
-                        {formatBlogDate(
-                          relatedPost.publishedAt || relatedPost.updatedAt,
-                        )}
+                        {getPublicDateLabel(relatedPost)}
                       </span>
+                      <div className="blog-author-row">
+                        <img
+                          src="/assets/profile.png"
+                          alt="EMNL Car Rental Services"
+                          className="blog-author-avatar"
+                        />
+                        <span className="blog-list-card-date blog-list-card-author">
+                          By EMNL Car Rental Services
+                        </span>
+                      </div>
                       <h2>{relatedPost.title || "Untitled Post"}</h2>
                       <RichTextContent
                         value={

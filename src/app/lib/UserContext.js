@@ -103,8 +103,6 @@ export const UserProvider = ({ children }) => {
 
   const [authLoading, setAuthLoading] = useState(true);
   const [originalUser, setOriginalUser] = useState(null);
-  const [userMessages, setUserMessages] = useState([]);
-  const [sentMessages, setSentMessages] = useState([]);
   const [messageFetchLimit, setMessageFetchLimit] = useState(10);
   const [hasMoreUserMessages, setHasMoreUserMessages] = useState(true);
   const [conversationThreads, setConversationThreads] = useState([]);
@@ -4594,8 +4592,6 @@ const sendMessage = async ({
   useEffect(() => {
     if (!user?.uid) {
       setConversationThreads([]);
-      setUserMessages([]);
-      setSentMessages([]);
       setHasMoreUserMessages(false);
       return;
     }
@@ -4616,19 +4612,12 @@ const sendMessage = async ({
 
         setConversationThreads(threads);
 
-        // Old arrays are intentionally cleared because chat no longer uses
-        // receivedMessages/sentMessages.
-        setUserMessages([]);
-        setSentMessages([]);
-
         setHasMoreUserMessages(snapshot.size >= messageFetchLimit);
         console.log("Real-time conversation threads:", threads);
       },
       (error) => {
         console.error("Conversation threads listener error:", error);
         setConversationThreads([]);
-        setUserMessages([]);
-        setSentMessages([]);
         setHasMoreUserMessages(false);
       },
     );
@@ -4656,7 +4645,6 @@ const sendMessage = async ({
         : query(
             blogPostsRef,
             where("published", "==", true),
-            where("hidden", "==", false),
             orderBy("updatedAt", "desc"),
           );
 
@@ -4825,6 +4813,9 @@ const sendMessage = async ({
       );
 
       await deleteDoc(threadRef);
+      setConversationThreads((prev) =>
+        prev.filter((thread) => thread.id !== threadId),
+      );
 
       return {
         success: true,
@@ -4861,13 +4852,18 @@ const sendMessage = async ({
         const messageId = typeof msg === "string" ? msg : msg.id;
 
         if (type === "sentbox") {
-          const sentRef = doc(db, "users", user.uid, "sentMessages", messageId);
-          console.log("🔍 Deleting:", sentRef.path);
-          await deleteDoc(sentRef);
+          const threadId =
+            typeof msg === "string"
+              ? msg
+              : msg?.threadId || msg?.conversationId || msg?.id;
+
+          if (threadId) {
+            await deleteConversationThreadForCurrentUser(threadId);
+          }
           return;
         }
 
-if (typeof msg !== "string" && msg?.isNotification === true) {
+        if (typeof msg !== "string" && msg?.isNotification === true) {
           const notificationRef = doc(
             db,
             "users",
@@ -4895,15 +4891,7 @@ if (typeof msg !== "string" && msg?.isNotification === true) {
           return;
         }
 
-        const inboxRef = doc(
-          db,
-          "users",
-          user.uid,
-          "receivedMessages",
-          messageId,
-        );
-        console.log("🔍 Deleting:", inboxRef.path);
-        await deleteDoc(inboxRef);
+        await deleteConversationThreadForCurrentUser(messageId);
       });
 
       await Promise.all(deletePromises);
@@ -4913,15 +4901,12 @@ if (typeof msg !== "string" && msg?.isNotification === true) {
         .filter(Boolean);
 
       if (type === "inbox") {
-        setUserMessages((prev) =>
-          prev.filter((msg) => !deletedIds.includes(msg.id)),
-        );
         setNotificationMessages((prev) =>
           prev.filter((msg) => !deletedIds.includes(msg.id)),
         );
       } else {
-        setSentMessages((prev) =>
-          prev.filter((msg) => !deletedIds.includes(msg.id)),
+        setConversationThreads((prev) =>
+          prev.filter((thread) => !deletedIds.includes(thread.id)),
         );
       }
 
@@ -5053,9 +5038,38 @@ if (typeof msg !== "string" && msg?.isNotification === true) {
         console.log(`🗑️ Deleted subcollection: ${subcollectionName}`);
       };
 
+      const deleteConversationThreadsSubcollection = async () => {
+        const threadsRef = collection(db, "users", userId, "conversationThreads");
+        const threadsSnapshot = await getDocs(threadsRef);
+
+        await Promise.all(
+          threadsSnapshot.docs.map(async (threadDoc) => {
+            const threadMessagesRef = collection(
+              db,
+              "users",
+              userId,
+              "conversationThreads",
+              threadDoc.id,
+              "messages",
+            );
+            const threadMessagesSnapshot = await getDocs(threadMessagesRef);
+
+            await Promise.all(
+              threadMessagesSnapshot.docs.map((messageDoc) =>
+                deleteDoc(messageDoc.ref),
+              ),
+            );
+
+            await deleteDoc(threadDoc.ref);
+          }),
+        );
+
+        console.log("🗑️ Deleted subcollection: conversationThreads");
+      };
+
       await Promise.all([
-        deleteSubcollection("receivedMessages"),
-        deleteSubcollection("sentMessages"),
+        deleteSubcollection("notifications"),
+        deleteConversationThreadsSubcollection(),
         deleteSubcollection("rentalHistory"),
       ]);
 
@@ -8581,6 +8595,7 @@ Please review this request in the admin panel and proceed with approval or rejec
       }, {});
 
     const allCollections = [
+      "blogPosts",
       "config",
       "images",
       "reviews",
@@ -8594,16 +8609,16 @@ Please review this request in the admin panel and proceed with approval or rejec
       "financialReports",
       "activeBookings",
       "adminBookingRequests",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const userAvailableSubcollections = [
       "rentalHistory",
       "activeRentals",
       "userBookingRequest",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const defaultUsersOptions = {
@@ -8877,6 +8892,7 @@ Please review this request in the admin panel and proceed with approval or rejec
       }, {});
 
     const allCollections = [
+      "blogPosts",
       "config",
       "images",
       "reviews",
@@ -8890,16 +8906,16 @@ Please review this request in the admin panel and proceed with approval or rejec
       "financialReports",
       "activeBookings",
       "adminBookingRequests",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const userAvailableSubcollections = [
       "rentalHistory",
       "activeRentals",
       "userBookingRequest",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const defaultUsersOptions = {
@@ -9239,6 +9255,7 @@ Please review this request in the admin panel and proceed with approval or rejec
     setIsImportMinimized(false);
 
     const allCollections = [
+      "blogPosts",
       "config",
       "images",
       "reviews",
@@ -9252,16 +9269,16 @@ Please review this request in the admin panel and proceed with approval or rejec
       "financialReports",
       "activeBookings",
       "adminBookingRequests",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const userAvailableSubcollections = [
       "rentalHistory",
       "activeRentals",
       "userBookingRequest",
-      "sentMessages",
-      "receivedMessages",
+      "notifications",
+      "conversationThreads",
     ];
 
     const defaultUsersOptions = {
@@ -9691,8 +9708,6 @@ Please review this request in the admin panel and proceed with approval or rejec
         deleteBlogPostImage,
         subscribeToConversationMessages,
         hasMoreConversationMessages,
-        sentMessages,
-        userMessages,
         notificationMessages,
         messageFetchLimit,
         loadMoreUserMessages,
