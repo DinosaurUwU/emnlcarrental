@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   MdFormatBold,
   MdFormatItalic,
@@ -42,6 +42,31 @@ const toolbarButtons = [
   { command: "createLink", icon: <MdInsertLink />, title: "Insert Link" },
 ];
 
+const getClosestFormatNode = (node, tagName, root) => {
+  let current =
+    node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement || null;
+
+  while (current && current !== root) {
+    if (current.tagName?.toLowerCase() === tagName.toLowerCase()) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return null;
+};
+
+const unwrapElement = (element) => {
+  const parent = element?.parentNode;
+  if (!parent) return;
+
+  while (element.firstChild) {
+    parent.insertBefore(element.firstChild, element);
+  }
+
+  parent.removeChild(element);
+};
+
 export default function RichTextEditor({
   value = "",
   onChange,
@@ -52,12 +77,6 @@ export default function RichTextEditor({
 }) {
   const editorRef = useRef(null);
   const savedRangeRef = useRef(null);
-  const [activeCommands, setActiveCommands] = useState({
-    bold: false,
-    italic: false,
-    underline: false,
-    insertUnorderedList: false,
-  });
 
   const editorClassName = useMemo(
     () =>
@@ -76,43 +95,6 @@ export default function RichTextEditor({
       editor.innerHTML = normalizedIncoming;
     }
   }, [value]);
-
-  useEffect(() => {
-    const syncActiveCommands = () => {
-      const editor = editorRef.current;
-      if (!editor) return;
-
-      const selection = window.getSelection();
-      const withinEditor =
-        selection &&
-        selection.rangeCount > 0 &&
-        editor.contains(selection.anchorNode);
-
-      if (!withinEditor) {
-        setActiveCommands({
-          bold: false,
-          italic: false,
-          underline: false,
-          insertUnorderedList: false,
-        });
-        return;
-      }
-
-      savedRangeRef.current = selection.getRangeAt(0).cloneRange();
-
-      setActiveCommands({
-        bold: document.queryCommandState("bold"),
-        italic: document.queryCommandState("italic"),
-        underline: document.queryCommandState("underline"),
-        insertUnorderedList: document.queryCommandState("insertUnorderedList"),
-      });
-    };
-
-    document.addEventListener("selectionchange", syncActiveCommands);
-    return () => {
-      document.removeEventListener("selectionchange", syncActiveCommands);
-    };
-  }, []);
 
   const emitChange = () => {
     const editor = editorRef.current;
@@ -158,17 +140,109 @@ export default function RichTextEditor({
     focusEditor();
     restoreSelection();
 
+    if (command === "bold") {
+      toggleInlineTag("strong");
+      return;
+    }
+
+    if (command === "italic") {
+      toggleInlineTag("em");
+      return;
+    }
+
+    if (command === "underline") {
+      toggleInlineTag("u");
+      return;
+    }
+
     if (command === "createLink") {
-      const url = window.prompt("Enter the link URL");
-      if (!url) return;
-      document.execCommand("createLink", false, url);
-      captureSelection();
-      emitChange();
+      insertLinkTag();
       return;
     }
 
     document.execCommand(command, false, null);
     captureSelection();
+    emitChange();
+  };
+
+  const toggleInlineTag = (tagName) => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+
+    if (
+      !editor ||
+      !selection ||
+      selection.rangeCount === 0 ||
+      selection.isCollapsed
+    ) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const startTag = getClosestFormatNode(range.startContainer, tagName, editor);
+    const endTag = getClosestFormatNode(range.endContainer, tagName, editor);
+
+    if (startTag && endTag && startTag === endTag) {
+      const parent = startTag.parentNode;
+      const beforeRange = document.createRange();
+      beforeRange.setStartBefore(startTag);
+      beforeRange.setEndAfter(startTag);
+
+      unwrapElement(startTag);
+
+      if (parent) {
+        selection.removeAllRanges();
+        selection.addRange(beforeRange);
+        savedRangeRef.current = beforeRange.cloneRange();
+      }
+
+      emitChange();
+      return;
+    }
+
+    const wrapper = document.createElement(tagName);
+    const extracted = range.extractContents();
+    wrapper.appendChild(extracted);
+    range.insertNode(wrapper);
+
+    const nextRange = document.createRange();
+    nextRange.selectNodeContents(wrapper);
+    selection.removeAllRanges();
+    selection.addRange(nextRange);
+    savedRangeRef.current = nextRange.cloneRange();
+    emitChange();
+  };
+
+  const insertLinkTag = () => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+
+    if (
+      !editor ||
+      !selection ||
+      selection.rangeCount === 0 ||
+      selection.isCollapsed
+    ) {
+      return;
+    }
+
+    const url = window.prompt("Enter the link URL");
+    if (!url) return;
+
+    const range = selection.getRangeAt(0);
+    const safeUrl = /^(https?:|mailto:|tel:|\/)/i.test(url) ? url : `https://${url}`;
+    const link = document.createElement("a");
+    link.setAttribute("href", safeUrl);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    link.appendChild(range.extractContents());
+    range.insertNode(link);
+
+    const nextRange = document.createRange();
+    nextRange.selectNodeContents(link);
+    selection.removeAllRanges();
+    selection.addRange(nextRange);
+    savedRangeRef.current = nextRange.cloneRange();
     emitChange();
   };
 
@@ -200,22 +274,13 @@ export default function RichTextEditor({
     <div className={editorClassName}>
       <div className="blog-posts-rich-toolbar">
         {toolbarButtons.map((button) => {
-          const isActive =
-            button.command in activeCommands
-              ? activeCommands[button.command]
-              : false;
-
           return (
             <button
               key={button.command}
               type="button"
-              className={`blog-posts-rich-btn ${isActive ? "active" : ""}`}
+              className="blog-posts-rich-btn"
               title={button.title}
               onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 runCommand(button.command);
