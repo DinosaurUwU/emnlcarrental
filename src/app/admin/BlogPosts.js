@@ -153,6 +153,79 @@ const starterBlogPost = {
   }),
 };
 
+const wigoFeaturePost = {
+  title: "Why The Red Toyota Wigo Is A Smart Choice For Leyte City Drives",
+  excerpt:
+    "A closer look at the red Toyota Wigo and why it works well for solo trips, couples, and small-group travel around Ormoc City and nearby Leyte routes.",
+  contentBlocks: [
+    {
+      ...createBlock("heading"),
+      text: "A Compact Sedan That Still Feels Ready For Daily Travel",
+    },
+    {
+      ...createBlock("paragraph"),
+      text:
+        "Not every trip around Leyte needs a large vehicle. For errands around the city, airport or port pickups, short business travel, and practical day-to-day driving, the Toyota Wigo offers the kind of size that feels easy to manage without making the ride feel bare. It is compact enough for tighter streets and parking spaces, but still comfortable for passengers who want a clean, modern ride that does not feel oversized for the route.",
+    },
+    {
+      ...createBlock("image"),
+      caption:
+        "The red Toyota Wigo gives a clean, modern first impression that works well for personal travel and everyday city driving.",
+    },
+    {
+      ...createBlock("split"),
+      title: "Small Footprint, Easy To Park, Easy To Use",
+      text:
+        "One of the strongest things about the Wigo is how easy it is to live with. In city areas where parking slots, side streets, and quick stopovers matter, a smaller vehicle saves time and stress. That makes it a practical option for drivers who want something straightforward, fuel-conscious, and easy to maneuver, especially for regular point-to-point travel around Ormoc and nearby areas.",
+      caption:
+        "The Wigo nameplate reflects the identity of a practical city-ready unit.",
+      imagePosition: "right",
+    },
+    {
+      ...createBlock("split"),
+      title: "A Cabin Layout That Feels Familiar Right Away",
+      text:
+        "Inside, the Toyota Wigo keeps things simple in the best way. The dashboard layout is clean, controls are easy to reach, and the driving position feels approachable even for renters who just want a no-fuss vehicle for the day. For short drives, errands, or business appointments, this kind of straightforward interior matters because it lets you settle in quickly and focus on the road instead of adjusting to a complicated cabin.",
+      caption:
+        "The cabin layout keeps the driving experience simple, readable, and easy to settle into.",
+      imagePosition: "left",
+    },
+    {
+      ...createBlock("heading"),
+      text: "Exterior Details That Still Feel Sharp And Modern",
+    },
+    {
+      ...createBlock("paragraph"),
+      text:
+        "Even though the Wigo sits in the practical side of the rental lineup, it still carries styling details that make it feel well-kept and presentable. The rear lamp design, mirror profile, and clean red finish give it a more polished look than what many people expect from a compact city car. That makes it a good fit not only for errands and casual travel, but also for guests who still want a tidy and respectable unit when arriving for meetings or appointments.",
+    },
+    {
+      ...createBlock("image"),
+      caption:
+        "Rear styling details help the Toyota Wigo look neat and current, even in a compact form factor.",
+    },
+    {
+      ...createBlock("image"),
+      caption:
+        "Side mirror details and body lines show why the Wigo still feels polished for everyday rentals.",
+    },
+    {
+      ...createBlock("heading"),
+      text: "Best For Practical Travel Around Leyte",
+    },
+    {
+      ...createBlock("paragraph"),
+      text:
+        "The Toyota Wigo is a strong choice for renters who value ease, efficiency, and simple comfort. It fits solo travelers, couples, and very small groups who want a reliable vehicle for city driving, routine transfers, and manageable day trips. If the goal is to have a unit that is easy to drive, easy to park, and easy on the eyes, the red Wigo is one of the most sensible choices in the lineup.",
+    },
+    {
+      ...createBlock("image"),
+      caption:
+        "The promotional Wigo visual works well as a closing image for a feature-style vehicle article.",
+    },
+  ],
+};
+
 const BlogPosts = ({ subSection = "overview" }) => {
   const {
     blogPosts,
@@ -176,6 +249,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
   const [isCreatingStarterPost, setIsCreatingStarterPost] = useState(false);
+  const [isCreatingWigoPost, setIsCreatingWigoPost] = useState(false);
   const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
   const assetInputRef = useRef(null);
@@ -763,6 +837,40 @@ const BlogPosts = ({ subSection = "overview" }) => {
     }
   };
 
+  const handleCreateWigoPost = async () => {
+    setIsCreatingWigoPost(true);
+
+    try {
+      const result = await saveBlogPostDraft({
+        ...wigoFeaturePost,
+        published: false,
+        coverImageId: "",
+      });
+
+      if (!result?.success) {
+        showActionOverlay({
+          message: result?.error || "Failed to create Toyota Wigo draft.",
+          type: "warning",
+        });
+        return;
+      }
+
+      setSelectedPostId(result.postId);
+      replaceDraftState(mapPostToDraft(result.postData));
+      setCoverImagePreview("");
+      setPostImages([]);
+      setActiveEditorView("editor");
+
+      showActionOverlay({
+        message:
+          "Toyota Wigo draft created. Upload the 6 local images next and assign them to the prepared blocks.",
+        type: "success",
+      });
+    } finally {
+      setIsCreatingWigoPost(false);
+    }
+  };
+
   return (
     <section className="blog-posts-section">
       <h2 className="section-title">Blog Posts</h2>
@@ -783,6 +891,18 @@ const BlogPosts = ({ subSection = "overview" }) => {
                     {isCreatingStarterPost
                       ? "Creating..."
                       : "Create Starter Post"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="blog-posts-secondary-btn blog-posts-btn-orange"
+                  onClick={handleCreateWigoPost}
+                  disabled={isCreatingWigoPost}
+                >
+                  <span>
+                    {isCreatingWigoPost
+                      ? "Creating..."
+                      : "Create Wigo Draft"}
                   </span>
                 </button>
                 <button
@@ -1312,7 +1432,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
                             }
                             placeholder="Optional image caption"
                             minHeight={64}
-                            singleLine
                           />
                         </div>
                       </>

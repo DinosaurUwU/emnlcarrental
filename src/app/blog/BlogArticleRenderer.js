@@ -196,6 +196,7 @@ const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
                 <h2
                   key={block.id || `${post.id || "preview"}_heading_${index}`}
                   className="blog-block-heading"
+                  style={{ textAlign: "left"}}
                 >
                   <RichTextContent value={block.text} inline />
                 </h2>
