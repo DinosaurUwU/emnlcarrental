@@ -998,7 +998,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                 </small>
               </label>
 
-              <label className="blog-posts-field blog-posts-field-full">
+              <div className="blog-posts-field blog-posts-field-full">
                 <span>Excerpt</span>
                 <RichTextEditor
                   value={draft.excerpt}
@@ -1006,7 +1006,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                   placeholder="Short preview text for the landing page and blog list."
                   minHeight={150}
                 />
-              </label>
+              </div>
 
               <label className="blog-posts-field">
                 <span>SEO Title</span>
@@ -1240,7 +1240,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
                         {block.type === "split" && (
                           <>
-                            <label className="blog-posts-field">
+                            <div className="blog-posts-field">
                               <span>Section Title</span>
                               <RichTextEditor
                                 value={block.title}
@@ -1251,7 +1251,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                                 minHeight={64}
                                 singleLine
                               />
-                            </label>
+                            </div>
 
                             <label className="blog-posts-field">
                               <span>Layout</span>
@@ -1289,7 +1289,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                               </div>
                             </label>
 
-                            <label className="blog-posts-field">
+                            <div className="blog-posts-field">
                               <span>Paragraph</span>
                               <RichTextEditor
                                 value={block.text}
@@ -1299,11 +1299,11 @@ const BlogPosts = ({ subSection = "overview" }) => {
                                 placeholder="Write the text for this split section"
                                 minHeight={180}
                               />
-                            </label>
+                            </div>
                           </>
                         )}
 
-                        <label className="blog-posts-field">
+                        <div className="blog-posts-field">
                           <span>Caption</span>
                           <RichTextEditor
                             value={block.caption}
@@ -1314,10 +1314,10 @@ const BlogPosts = ({ subSection = "overview" }) => {
                             minHeight={64}
                             singleLine
                           />
-                        </label>
+                        </div>
                       </>
                     ) : (
-                      <label className="blog-posts-field">
+                      <div className="blog-posts-field">
                         <span>{block.type === "heading" ? "Heading" : "Paragraph"}</span>
                         <RichTextEditor
                           value={block.text}
@@ -1332,7 +1332,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                           minHeight={block.type === "heading" ? 84 : 220}
                           singleLine={block.type === "heading"}
                         />
-                      </label>
+                      </div>
                     )}
                   </div>
                 ))}
