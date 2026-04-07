@@ -2,6 +2,7 @@
 //Messages.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../lib/UserContext";
+import { sanitizeRichHtml } from "../blog/BlogArticleRenderer";
 import "./Messages.css";
 import { FiX } from "react-icons/fi";
 
@@ -1068,10 +1069,16 @@ const openConversation = (threadId) => {
                                 </div>
                               )}
 
-                              <div
+                              {/* <div
                                 className="conversation-bubble-text"
                                 dangerouslySetInnerHTML={{
                                   __html: htmlContent,
+                                }}
+                              /> */}
+                              <div
+                                className="conversation-bubble-text"
+                                dangerouslySetInnerHTML={{
+                                  __html: sanitizeRichHtml(htmlContent),
                                 }}
                               />
                               <div className="conversation-bubble-time">
