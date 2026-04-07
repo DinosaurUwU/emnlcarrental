@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useUser } from "./lib/UserContext";
+import { RichTextContent } from "./blog/BlogArticleRenderer";
 import "./BlogPreviewSection.css";
 
 const formatBlogDate = (value) => {
@@ -71,6 +72,7 @@ const BlogPreviewSection = () => {
 
   return (
     <section className="blog-preview-section">
+      <div className="blog-preview-bg">
       <div className="blog-preview-header">
         <div>
           <span className="blog-preview-kicker">Travel Journal</span>
@@ -110,7 +112,10 @@ const BlogPreviewSection = () => {
                 <span>{formatBlogDate(post.publishedAt || post.updatedAt)}</span>
               </div>
               <h3>{post.title || "Untitled Post"}</h3>
-              <p>{post.excerpt || "Read the full article for more details."}</p>
+              <RichTextContent
+                value={post.excerpt || "Read the full article for more details."}
+                className="blog-preview-card-excerpt"
+              />
               <span className="blog-preview-readmore">Read More</span>
             </div>
           </Link>
@@ -130,6 +135,7 @@ const BlogPreviewSection = () => {
         <Link href="/blog" className="blog-preview-footer-link">
           View Other Blogs
         </Link>
+      </div>
       </div>
     </section>
   );

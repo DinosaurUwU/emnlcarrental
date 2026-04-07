@@ -126,6 +126,7 @@
 }
 
 .blog-list-card-body p,
+.blog-list-card-excerpt,
 .blog-detail-excerpt,
 .blog-not-found p {
   margin: 0;
@@ -150,6 +151,11 @@
 .blog-detail-excerpt {
   margin-top: 1rem;
   font-size: 1.06rem;
+}
+
+.blog-list-card-excerpt p,
+.blog-detail-excerpt p {
+  margin: 0;
 }
 
 .blog-detail-cover {

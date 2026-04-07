@@ -51,6 +51,7 @@ export default function RichTextEditor({
   className = "",
 }) {
   const editorRef = useRef(null);
+  const savedRangeRef = useRef(null);
   const [activeCommands, setActiveCommands] = useState({
     bold: false,
     italic: false,
@@ -97,6 +98,8 @@ export default function RichTextEditor({
         return;
       }
 
+      savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+
       setActiveCommands({
         bold: document.queryCommandState("bold"),
         italic: document.queryCommandState("italic"),
@@ -123,18 +126,49 @@ export default function RichTextEditor({
     editor.focus();
   };
 
+  const restoreSelection = () => {
+    const editor = editorRef.current;
+    const savedRange = savedRangeRef.current;
+    if (!editor || !savedRange) return;
+
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+  };
+
+  const captureSelection = () => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+
+    if (
+      !editor ||
+      !selection ||
+      selection.rangeCount === 0 ||
+      !editor.contains(selection.anchorNode)
+    ) {
+      return;
+    }
+
+    savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+  };
+
   const runCommand = (command) => {
     focusEditor();
+    restoreSelection();
 
     if (command === "createLink") {
       const url = window.prompt("Enter the link URL");
       if (!url) return;
       document.execCommand("createLink", false, url);
+      captureSelection();
       emitChange();
       return;
     }
 
     document.execCommand(command, false, null);
+    captureSelection();
     emitChange();
   };
 
@@ -177,8 +211,15 @@ export default function RichTextEditor({
               type="button"
               className={`blog-posts-rich-btn ${isActive ? "active" : ""}`}
               title={button.title}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => runCommand(button.command)}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                runCommand(button.command);
+              }}
             >
               {button.icon}
             </button>
@@ -195,6 +236,9 @@ export default function RichTextEditor({
         onInput={emitChange}
         onPaste={handlePaste}
         onKeyDown={handleKeyDown}
+        onMouseUp={captureSelection}
+        onKeyUp={captureSelection}
+        onFocus={captureSelection}
         style={{ minHeight: typeof minHeight === "number" ? `${minHeight}px` : minHeight }}
       />
     </div>

@@ -6,6 +6,7 @@ import Header from "../component/Header";
 import Footer from "../component/Footer";
 import { useBooking } from "../component/BookingProvider";
 import { useUser } from "../lib/UserContext";
+import { RichTextContent } from "./BlogArticleRenderer";
 import "../component/Footer.css";
 import "./blog.css";
 
@@ -108,7 +109,10 @@ export default function BlogPage() {
                   {formatBlogDate(post.publishedAt || post.updatedAt)}
                 </span>
                 <h2>{post.title || "Untitled Post"}</h2>
-                <p>{post.excerpt || "Read the full article for more details."}</p>
+                <RichTextContent
+                  value={post.excerpt || "Read the full article for more details."}
+                  className="blog-list-card-excerpt"
+                />
               </div>
             </Link>
           ))}

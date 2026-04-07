@@ -13,7 +13,7 @@ import {
   FiUpload,
 } from "react-icons/fi";
 import { useUser } from "../lib/UserContext";
-import BlogArticleRenderer from "../blog/BlogArticleRenderer";
+import BlogArticleRenderer, { RichTextContent } from "../blog/BlogArticleRenderer";
 import RichTextEditor from "./RichTextEditor";
 import "./BlogPosts.css";
 
@@ -96,6 +96,13 @@ const buildSlugFromTitle = (value = "") =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "untitled-post";
+
+const stripRichTextToPlainText = (value = "") =>
+  String(value || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const starterBlogPost = {
   title: "How To Rent A Car In Leyte Without Delays",
@@ -185,8 +192,10 @@ const BlogPosts = ({ subSection = "overview" }) => {
   }, [draft.title]);
   const autoSeoDescription = useMemo(() => {
     const safeTitle = String(draft.title || "").trim() || "Untitled Post";
+    const plainExcerpt = stripRichTextToPlainText(draft.excerpt);
+
     return (
-      String(draft.excerpt || "").trim() ||
+      plainExcerpt ||
       `Read ${safeTitle} from EMNL Car Rental.`
     );
   }, [draft.excerpt, draft.title]);
@@ -248,7 +257,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       },
       {
         label: "Short excerpt",
-        done: Boolean(draft.excerpt.trim()),
+        done: Boolean(stripRichTextToPlainText(draft.excerpt)),
       },
       {
         label: "Body content",
@@ -758,7 +767,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
     <section className="blog-posts-section">
       <h2 className="section-title">Blog Posts</h2>
 
-      <div className="blog-posts-layout" ref={editorRootRef}>
+      <div className="blog-posts-layout">
         <div className="blog-posts-sidebar">
           <div className="blog-posts-panel">
             <div className="blog-posts-panel-header">
@@ -950,26 +959,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
               <FiEye />
               <span>Preview</span>
             </button>
-            <button
-              type="button"
-              className="blog-posts-view-toggle-btn"
-              onClick={handleUndoDraft}
-              disabled={!canUndoDraft}
-              title="Undo (Ctrl/Cmd + Z)"
-            >
-              <FiRotateCcw />
-              <span>Undo</span>
-            </button>
-            <button
-              type="button"
-              className="blog-posts-view-toggle-btn"
-              onClick={handleRedoDraft}
-              disabled={!canRedoDraft}
-              title="Redo (Ctrl + Y / Ctrl+Shift+Z)"
-            >
-              <FiRotateCw />
-              <span>Redo</span>
-            </button>
           </div>
 
           {activeEditorView === "editor" ? (
@@ -1011,15 +1000,11 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
               <label className="blog-posts-field blog-posts-field-full">
                 <span>Excerpt</span>
-                {renderFormatToolbar("draft-excerpt", draft.excerpt, (nextValue, metaType) =>
-                  updateDraftField("excerpt", nextValue, metaType)
-                )}
-                <textarea
-                  ref={setRichTextInputRef("draft-excerpt")}
-                  rows="4"
+                <RichTextEditor
                   value={draft.excerpt}
-                  onChange={(e) => updateDraftField("excerpt", e.target.value)}
+                  onChange={(nextValue) => updateDraftField("excerpt", nextValue)}
                   placeholder="Short preview text for the landing page and blog list."
+                  minHeight={150}
                 />
               </label>
 
@@ -1257,22 +1242,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
                           <>
                             <label className="blog-posts-field">
                               <span>Section Title</span>
-                              {renderFormatToolbar(
-                                `block-${block.id}-title`,
-                                block.title,
-                                (nextValue) =>
-                                  updateBlock(block.id, {
-                                    title: nextValue,
-                                  }),
-                              )}
-                              <input
-                                ref={setRichTextInputRef(`block-${block.id}-title`)}
-                                type="text"
+                              <RichTextEditor
                                 value={block.title}
-                                onChange={(e) =>
-                                  updateBlockField(block.id, "title", e.target.value)
+                                onChange={(nextValue) =>
+                                  updateBlockField(block.id, "title", nextValue)
                                 }
                                 placeholder="Write a split-section heading"
+                                minHeight={64}
+                                singleLine
                               />
                             </label>
 
@@ -1314,25 +1291,13 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
                             <label className="blog-posts-field">
                               <span>Paragraph</span>
-                              {renderFormatToolbar(
-                                `block-${block.id}-text`,
-                                block.text,
-                                (nextValue, metaType) =>
-                                  updateBlockField(
-                                    block.id,
-                                    "text",
-                                    nextValue,
-                                    metaType,
-                                  ),
-                              )}
-                              <textarea
-                                ref={setRichTextInputRef(`block-${block.id}-text`)}
-                                rows="5"
+                              <RichTextEditor
                                 value={block.text}
-                                onChange={(e) =>
-                                  updateBlockField(block.id, "text", e.target.value)
+                                onChange={(nextValue) =>
+                                  updateBlockField(block.id, "text", nextValue)
                                 }
                                 placeholder="Write the text for this split section"
+                                minHeight={180}
                               />
                             </label>
                           </>
@@ -1340,54 +1305,32 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
                         <label className="blog-posts-field">
                           <span>Caption</span>
-                          {renderFormatToolbar(
-                            `block-${block.id}-caption`,
-                            block.caption,
-                            (nextValue, metaType) =>
-                              updateBlockField(
-                                block.id,
-                                "caption",
-                                nextValue,
-                                metaType,
-                              ),
-                          )}
-                          <input
-                            ref={setRichTextInputRef(`block-${block.id}-caption`)}
-                            type="text"
+                          <RichTextEditor
                             value={block.caption}
-                            onChange={(e) =>
-                              updateBlockField(block.id, "caption", e.target.value)
+                            onChange={(nextValue) =>
+                              updateBlockField(block.id, "caption", nextValue)
                             }
                             placeholder="Optional image caption"
+                            minHeight={64}
+                            singleLine
                           />
                         </label>
                       </>
                     ) : (
                       <label className="blog-posts-field">
                         <span>{block.type === "heading" ? "Heading" : "Paragraph"}</span>
-                        {renderFormatToolbar(
-                          `block-${block.id}-text`,
-                          block.text,
-                          (nextValue, metaType) =>
-                            updateBlockField(
-                              block.id,
-                              "text",
-                              nextValue,
-                              metaType,
-                            ),
-                        )}
-                        <textarea
-                          ref={setRichTextInputRef(`block-${block.id}-text`)}
-                          rows={block.type === "heading" ? 3 : 6}
+                        <RichTextEditor
                           value={block.text}
-                          onChange={(e) =>
-                            updateBlockField(block.id, "text", e.target.value)
+                          onChange={(nextValue) =>
+                            updateBlockField(block.id, "text", nextValue)
                           }
                           placeholder={
                             block.type === "heading"
                               ? "Write a section heading"
                               : "Write a paragraph"
                           }
+                          minHeight={block.type === "heading" ? 84 : 220}
+                          singleLine={block.type === "heading"}
                         />
                       </label>
                     )}
@@ -1446,7 +1389,10 @@ const BlogPosts = ({ subSection = "overview" }) => {
                   </span>
                   <h1>{previewPost.title}</h1>
                   {previewPost.excerpt && (
-                    <p className="blog-detail-excerpt">{previewPost.excerpt}</p>
+                    <RichTextContent
+                      value={previewPost.excerpt}
+                      className="blog-detail-excerpt"
+                    />
                   )}
                 </div>
 

@@ -6,7 +6,7 @@ import Header from "../../component/Header";
 import Footer from "../../component/Footer";
 import { useBooking } from "../../component/BookingProvider";
 import { useUser } from "../../lib/UserContext";
-import BlogArticleRenderer from "../BlogArticleRenderer";
+import BlogArticleRenderer, { RichTextContent } from "../BlogArticleRenderer";
 import "../../component/Footer.css";
 import "../blog.css";
 
@@ -151,7 +151,12 @@ export default function BlogPostPage({ params }) {
               {formatBlogDate(post.publishedAt || post.updatedAt)}
             </span>
             <h1>{post.title}</h1>
-            {post.excerpt && <p className="blog-detail-excerpt">{post.excerpt}</p>}
+            {post.excerpt && (
+              <RichTextContent
+                value={post.excerpt}
+                className="blog-detail-excerpt"
+              />
+            )}
           </div>
 
           {coverImage && (
@@ -199,10 +204,13 @@ export default function BlogPostPage({ params }) {
                         )}
                       </span>
                       <h2>{relatedPost.title || "Untitled Post"}</h2>
-                      <p>
-                        {relatedPost.excerpt ||
-                          "Read the full article for more details."}
-                      </p>
+                      <RichTextContent
+                        value={
+                          relatedPost.excerpt ||
+                          "Read the full article for more details."
+                        }
+                        className="blog-list-card-excerpt"
+                      />
                     </div>
                   </Link>
                 ))}

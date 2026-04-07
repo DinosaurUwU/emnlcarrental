@@ -1,9 +1,16 @@
 .blog-preview-section {
-  padding: 4rem 2rem;
+
   background-color: var(--page-bg);
   /* background:
     radial-gradient(circle at top left, rgba(40, 167, 69, 0.14), transparent 30%),
     linear-gradient(180deg, rgba(7, 70, 9, 0.04), rgba(40, 167, 69, 0.02)); */
+}
+
+.blog-preview-bg {
+    padding: 4rem 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(40, 167, 69, 0.18), transparent 32%),
+    linear-gradient(135deg, rgba(7, 70, 9, 0.08), rgba(40, 167, 69, 0.04));
 }
 
 .blog-preview-header {
@@ -135,10 +142,15 @@
   line-height: 1.4;
 }
 
-.blog-preview-card-body p {
+.blog-preview-card-body p,
+.blog-preview-card-excerpt {
   margin: 0;
   color: var(--supporting-txt);
   line-height: 1.7;
+}
+
+.blog-preview-card-excerpt p {
+  margin: 0;
 }
 
 .blog-preview-readmore {
