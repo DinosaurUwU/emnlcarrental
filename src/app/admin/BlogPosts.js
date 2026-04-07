@@ -37,6 +37,7 @@ const initialDraft = {
   seoDescription: "",
   coverImageId: "",
   published: false,
+  hidden: false,
   contentBlocks: [createBlock("paragraph")],
 };
 
@@ -50,6 +51,7 @@ const mapPostToDraft = (post = {}) => ({
   seoDescription: post.seoDescription || "",
   coverImageId: post.coverImageId || "",
   published: Boolean(post.published),
+  hidden: Boolean(post.hidden),
   contentBlocks:
     Array.isArray(post.contentBlocks) && post.contentBlocks.length > 0
       ? post.contentBlocks.map((block) => ({
@@ -88,6 +90,12 @@ const formatFirestoreDate = (value) => {
   } catch {
     return "Not saved yet";
   }
+};
+
+const getAdminPostStatusLabel = (post = {}) => {
+  if (post?.published && post?.hidden) return "Hidden";
+  if (post?.published) return "Published";
+  return "Draft";
 };
 
 const buildSlugFromTitle = (value = "") =>
@@ -246,6 +254,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
       id: draft.id || "preview",
       title: String(draft.title || "").trim() || "Untitled Post",
       excerpt: String(draft.excerpt || "").trim(),
+      authorName: "EMNL Car Rental Services",
       publishedAt: selectedPost?.publishedAt || selectedPost?.updatedAt || null,
       updatedAt: selectedPost?.updatedAt || null,
     }),
@@ -475,6 +484,43 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       showActionOverlay({
         message: publish ? "Blog post published." : "Draft saved successfully.",
+        type: "success",
+      });
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const handleToggleHidden = async () => {
+    if (!draft.id) return;
+
+    setIsSavingDraft(true);
+
+    try {
+      const nextHidden = !draft.hidden;
+      const result = await saveBlogPostDraft({
+        ...normalizedDraftForSave,
+        hidden: nextHidden,
+        published: draft.published,
+      });
+
+      if (!result?.success) {
+        showActionOverlay({
+          message: result?.error || "Failed to update post visibility.",
+          type: "warning",
+        });
+        return;
+      }
+
+      replaceDraftState({
+        ...draft,
+        id: result.postId,
+        slug: result.slug,
+        hidden: nextHidden,
+      });
+
+      showActionOverlay({
+        message: nextHidden ? "Post hidden from public view." : "Post is public again.",
         type: "success",
       });
     } finally {
@@ -835,8 +881,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
                       {post.title || "Untitled Post"}
                     </span>
                     <span className="blog-posts-list-meta">
-                      {post.published ? "Published" : "Draft"} |{" "}
-                      {formatFirestoreDate(post.updatedAt)}
+                      {getAdminPostStatusLabel(post)} |{" "}
+                      Updated {formatFirestoreDate(post.updatedAt)}
                     </span>
                   </button>
                 ))}
@@ -987,10 +1033,10 @@ const BlogPosts = ({ subSection = "overview" }) => {
               <h3>Post Editor</h3>
               <div
                 className={`blog-posts-status-pill ${
-                  draft.published ? "published" : "draft"
+                  draft.published ? (draft.hidden ? "hidden" : "published") : "draft"
                 }`}
               >
-                {draft.published ? "Published" : "Draft"}
+                {draft.published ? (draft.hidden ? "Hidden" : "Published") : "Draft"}
               </div>
             </div>
 
@@ -1378,6 +1424,16 @@ const BlogPosts = ({ subSection = "overview" }) => {
               >
                 {isSavingDraft ? "Saving..." : "Save Draft"}
               </button>
+              {draft.published && (
+                <button
+                  type="button"
+                  className="blog-posts-secondary-btn blog-posts-btn-orange"
+                  onClick={handleToggleHidden}
+                  disabled={isSavingDraft}
+                >
+                  {draft.hidden ? "Show Publicly" : "Hide For Now"}
+                </button>
+              )}
               <button
                 type="button"
                 className="blog-posts-primary-btn"

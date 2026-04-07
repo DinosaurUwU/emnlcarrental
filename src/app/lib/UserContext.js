@@ -4656,6 +4656,7 @@ const sendMessage = async ({
         : query(
             blogPostsRef,
             where("published", "==", true),
+            where("hidden", "==", false),
             orderBy("updatedAt", "desc"),
           );
 
@@ -8157,6 +8158,7 @@ Please review this request in the admin panel and proceed with approval or rejec
         String(draftPayload.seoDescription || "").trim() || excerpt;
       const coverImageId = String(draftPayload.coverImageId || "").trim();
       const published = Boolean(draftPayload.published);
+      const hidden = Boolean(draftPayload.hidden);
       const contentBlocks = Array.isArray(draftPayload.contentBlocks)
         ? draftPayload.contentBlocks
         : existingData?.contentBlocks || [];
@@ -8171,8 +8173,9 @@ Please review this request in the admin panel and proceed with approval or rejec
         seoTitle,
         seoDescription,
         published,
+        hidden,
         authorUid: user.uid,
-        authorName: user.name || user.email || "Admin",
+        authorName: "EMNL Car Rental Services",
         updatedAt: serverTimestamp(),
       };
 
@@ -8207,8 +8210,9 @@ Please review this request in the admin panel and proceed with approval or rejec
           seoTitle,
           seoDescription,
           published,
+          hidden,
           authorUid: user.uid,
-          authorName: user.name || user.email || "Admin",
+          authorName: "EMNL Car Rental Services",
         },
       };
     } catch (error) {

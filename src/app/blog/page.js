@@ -33,6 +33,25 @@ const formatBlogDate = (value) => {
   }
 };
 
+const getPublicDateLabel = (post = {}) => {
+  const publishedText = formatBlogDate(post?.publishedAt);
+  const updatedText = formatBlogDate(post?.updatedAt);
+
+  if (publishedText && updatedText && publishedText !== updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  if (publishedText) {
+    return `Published ${publishedText}`;
+  }
+
+  if (updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  return "";
+};
+
 export default function BlogPage() {
   const { openBooking } = useBooking();
   const { blogPosts, fetchBlogPostImage } = useUser();
@@ -106,7 +125,10 @@ export default function BlogPage() {
 
               <div className="blog-list-card-body">
                 <span className="blog-list-card-date">
-                  {formatBlogDate(post.publishedAt || post.updatedAt)}
+                  {getPublicDateLabel(post)}
+                </span>
+                <span className="blog-list-card-date blog-list-card-author">
+                  By EMNL Car Rental Services
                 </span>
                 <h2>{post.title || "Untitled Post"}</h2>
                 <RichTextContent

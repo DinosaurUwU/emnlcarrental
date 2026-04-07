@@ -29,6 +29,25 @@ const formatBlogDate = (value) => {
   }
 };
 
+const getPublicDateLabel = (post = {}) => {
+  const publishedText = formatBlogDate(post?.publishedAt);
+  const updatedText = formatBlogDate(post?.updatedAt);
+
+  if (publishedText && updatedText && publishedText !== updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  if (publishedText) {
+    return `Published ${publishedText}`;
+  }
+
+  if (updatedText) {
+    return `Updated ${updatedText}`;
+  }
+
+  return "";
+};
+
 const BlogPreviewSection = () => {
   const { blogPosts, fetchBlogPostImage } = useUser();
   const [coverImages, setCoverImages] = useState({});
@@ -109,7 +128,8 @@ const BlogPreviewSection = () => {
 
             <div className="blog-preview-card-body">
               <div className="blog-preview-card-meta">
-                <span>{formatBlogDate(post.publishedAt || post.updatedAt)}</span>
+                <span>{getPublicDateLabel(post)}</span>
+                <span>By EMNL Car Rental Services</span>
               </div>
               <h3>{post.title || "Untitled Post"}</h3>
               <RichTextContent
