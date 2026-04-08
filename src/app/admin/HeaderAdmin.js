@@ -6,7 +6,17 @@ import { useRouter } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import "./HeaderAdmin.css";
 
-import { FiMenu, FiUser, FiSun, FiMoon, FiMonitor, FiHome, FiSettings, FiLogOut, FiX } from "react-icons/fi";
+import {
+  FiMenu,
+  FiUser,
+  FiSun,
+  FiMoon,
+  FiMonitor,
+  FiHome,
+  FiSettings,
+  FiLogOut,
+  FiX,
+} from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
 
 const Header = ({
@@ -635,14 +645,10 @@ const Header = ({
     }, 50);
   };
 
-
-
   // THEME LISTENER
   useEffect(() => {
     setPendingTheme(theme);
   }, [theme]);
-
-  
 
   // Save to Firestore through UserContext
   const handleSaveTheme = async () => {
@@ -656,100 +662,99 @@ const Header = ({
     setShowSettingsOverlay(false);
   };
 
-const [adminUserTheme, setAdminUserTheme] = useState(() => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('userTheme') || 'system';
-  }
-  return 'system';
-});
+  const [adminUserTheme, setAdminUserTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userTheme") || "system";
+    }
+    return "system";
+  });
 
-// Listen for storage changes from other tabs
-useEffect(() => {
-  const handleStorageChange = (e) => {
-    if (e.key === "userTheme") {
-      setAdminUserTheme(e.newValue || "system");
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "userTheme") {
+        setAdminUserTheme(e.newValue || "system");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Apply theme on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("userTheme");
+    if (saved) setAdminUserTheme(saved);
+  }, []);
+
+  // ADD THIS: Apply theme when adminUserTheme changes
+  useEffect(() => {
+    const root = document.documentElement;
+    if (adminUserTheme === "system") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+    } else {
+      root.setAttribute("data-color-mode", adminUserTheme);
+    }
+  }, [adminUserTheme]);
+
+  const toggleAdminTheme = (newTheme) => {
+    setAdminUserTheme(newTheme);
+    localStorage.setItem("userTheme", newTheme);
+
+    // Apply to document
+    const root = document.documentElement;
+    if (newTheme === "system") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+    } else {
+      root.setAttribute("data-color-mode", newTheme);
     }
   };
-  
-  window.addEventListener("storage", handleStorageChange);
-  return () => window.removeEventListener("storage", handleStorageChange);
-}, []);
 
+  const getLogoForTheme = () => {
+    const isDark =
+      adminUserTheme === "dark" ||
+      (adminUserTheme === "system" &&
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const darkSuffix = isDark ? "-dark" : "";
 
-// Apply theme on mount
-useEffect(() => {
-  const saved = localStorage.getItem("userTheme");
-  if (saved) setAdminUserTheme(saved);
-}, []);
-
-// ADD THIS: Apply theme when adminUserTheme changes
-useEffect(() => {
-  const root = document.documentElement;
-  if (adminUserTheme === "system") {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
-  } else {
-    root.setAttribute("data-color-mode", adminUserTheme);
-  }
-}, [adminUserTheme]);
-
-
-const toggleAdminTheme = (newTheme) => {
-  setAdminUserTheme(newTheme);
-  localStorage.setItem("userTheme", newTheme);
-  
-  // Apply to document
-  const root = document.documentElement;
-  if (newTheme === "system") {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
-  } else {
-    root.setAttribute("data-color-mode", newTheme);
-  }
-};
-
-
-
-
-
-const getLogoForTheme = () => {
-  const isDark = adminUserTheme === "dark" || 
-    (adminUserTheme === "system" && typeof window !== "undefined" && 
-     window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const darkSuffix = isDark ? "-dark" : "";
-
-  switch (theme) {
-    case "december":
-      return (
-        <img 
-          src={`/assets/december-logo${darkSuffix}.png`} 
-          className="header-admin-logo" 
-        />
-      );
-    case "november":
-      return (
-        <img 
-          src={`/assets/november-logo${darkSuffix}.png`} 
-          className="header-admin-logo" 
-        />
-      );
-    case "clover":
-      return (
-        <img 
-          src={`/assets/clover-logo${darkSuffix}.png`} 
-          className="header-admin-logo" 
-        />
-      );
-    default:
-      return (
-        <img 
-          src={`/assets/logo${darkSuffix}.png`} 
-          className="header-admin-logo" 
-        />
-      );
-  }
-};
-
+    switch (theme) {
+      case "december":
+        return (
+          <img
+            src={`/assets/december-logo${darkSuffix}.png`}
+            className="header-admin-logo"
+          />
+        );
+      case "november":
+        return (
+          <img
+            src={`/assets/november-logo${darkSuffix}.png`}
+            className="header-admin-logo"
+          />
+        );
+      case "clover":
+        return (
+          <img
+            src={`/assets/clover-logo${darkSuffix}.png`}
+            className="header-admin-logo"
+          />
+        );
+      default:
+        return (
+          <img
+            src={`/assets/logo${darkSuffix}.png`}
+            className="header-admin-logo"
+          />
+        );
+    }
+  };
 
   const formatDate = (date) => {
     const options = { month: "short", day: "numeric", year: "numeric" };
@@ -1480,7 +1485,7 @@ const getLogoForTheme = () => {
         {/* Icons in main content area */}
         <div className="main-icons">
           <FiMenu
-          style={{color:"var(--accent-txt)"}}
+            style={{ color: "var(--accent-txt)" }}
             className="hamburger-icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           />
@@ -1583,33 +1588,33 @@ const getLogoForTheme = () => {
             })}
           </div>
 
-{/* Account dropdown */}
-<div
-ref={accountRef}
-  className={`account-dropdown ${
-    accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
-  }`}
->
-  <div
-    className="dropdown-item"
-    onClick={() => {
-      setAccountDropdownOpen(false);
-      router.push("/");
-    }}
-  >
-    <FiHome style={{ marginRight: "10px" }} /> Home
-  </div>
-  <div
-    className="dropdown-item"
-    onClick={() => {
-      setAccountDropdownOpen(false);
-      setShowProfileOverlay(true);
-      setOverlayActiveSection("");
-    }}
-  >
-    <FiUser style={{ marginRight: "10px" }} /> Profile
-  </div>
-  {/* <div
+          {/* Account dropdown */}
+          <div
+            ref={accountRef}
+            className={`account-dropdown ${
+              accountDropdownOpen ? "dropdown-visible" : "dropdown-hidden"
+            }`}
+          >
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setAccountDropdownOpen(false);
+                router.push("/");
+              }}
+            >
+              <FiHome style={{ marginRight: "10px" }} /> Home
+            </div>
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setAccountDropdownOpen(false);
+                setShowProfileOverlay(true);
+                setOverlayActiveSection("");
+              }}
+            >
+              <FiUser style={{ marginRight: "10px" }} /> Profile
+            </div>
+            {/* <div
     className="dropdown-item"
     onClick={() => {
       setAccountDropdownOpen(false);
@@ -1619,64 +1624,45 @@ ref={accountRef}
     <FiSettings style={{ marginRight: "10px" }} /> Settings
   </div> */}
 
-{/* Theme Toggle */}
-<div className="theme-toggle-container">
-  <button
-    className={`theme-btn ${adminUserTheme === "light" ? "active" : ""}`}
-    onClick={() => toggleAdminTheme("light")}
-  >
-    <FiSun />
-  </button>
-  <button
-    className={`theme-btn ${adminUserTheme === "system" ? "active" : ""}`}
-    onClick={() => toggleAdminTheme("system")}
-  >
-    <FiMonitor />
-  </button>
-  <button
-    className={`theme-btn ${adminUserTheme === "dark" ? "active" : ""}`}
-    onClick={() => toggleAdminTheme("dark")}
-  >
-    <FiMoon />
-  </button>
-</div>
+            {/* Theme Toggle */}
+            <div className="theme-toggle-container">
+              <button
+                className={`theme-btn ${adminUserTheme === "light" ? "active" : ""}`}
+                onClick={() => toggleAdminTheme("light")}
+              >
+                <FiSun />
+              </button>
+              <button
+                className={`theme-btn ${adminUserTheme === "system" ? "active" : ""}`}
+                onClick={() => toggleAdminTheme("system")}
+              >
+                <FiMonitor />
+              </button>
+              <button
+                className={`theme-btn ${adminUserTheme === "dark" ? "active" : ""}`}
+                onClick={() => toggleAdminTheme("dark")}
+              >
+                <FiMoon />
+              </button>
+            </div>
 
-
-
-<div
-    className="dropdown-item"
-    onClick={() => {
-      setAccountDropdownOpen(false);
-      setShowLogoutOverlay(true);
-    }}
-    style={{color:"#dc3545"}}
-  >
-    <FiLogOut style={{ marginRight: "10px" }} /> Logout
-  </div>
-</div>
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setAccountDropdownOpen(false);
+                setShowLogoutOverlay(true);
+              }}
+              style={{ color: "#dc3545" }}
+            >
+              <FiLogOut style={{ marginRight: "10px" }} /> Logout
+            </div>
+          </div>
         </div>
       </div>
 
       {showAdminDetailsOverlay && selectedAdmin && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowAdminDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -2012,7 +1998,7 @@ ref={accountRef}
               />
             </button> */}
 
-                        <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingDetailsOverlay(false)}
@@ -4007,7 +3993,7 @@ ref={accountRef}
               />
             </button> */}
 
-                                    <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => {
@@ -4516,9 +4502,9 @@ ref={accountRef}
                     background:
                       pendingTheme === "pine"
                         ? "linear-gradient(135deg, #074609, #133c09)"
-                          : pendingTheme === "november"
-                            ? "linear-gradient(135deg, #b3541e, #8c3a13)"
-                            : "linear-gradient(135deg, #b3001b, #0d4d1a)", // December
+                        : pendingTheme === "november"
+                          ? "linear-gradient(135deg, #b3541e, #8c3a13)"
+                          : "linear-gradient(135deg, #b3001b, #0d4d1a)", // December
                   }}
                 />
               </div>
