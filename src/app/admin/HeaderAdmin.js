@@ -18,6 +18,9 @@ import {
   FiX,
 } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
+import { MdSpaceDashboard, MdAnalytics, MdNotificationsActive, MdAdminPanelSettings } from "react-icons/md";
+import { HiTableCells } from "react-icons/hi2";
+import { BsFillFilePostFill } from "react-icons/bs";
 
 const Header = ({
   onNavClick,
@@ -768,12 +771,12 @@ const Header = ({
   };
 
   const navItems = [
-    { name: "Dashboard", id: "rental-activity", icon: "/assets/rental.png" },
-    { name: "Analytics", id: "analytics", icon: "/assets/analytics.png" },
-    { name: "Reports", id: "financial-reports", icon: "/assets/reports.png" },
-    { name: "Messages", id: "messages", icon: "/assets/notifications.png" },
-    { name: "Blog Posts", id: "blog-posts", icon: "/assets/reports.png" },
-    { name: "Admin", id: "settings", icon: "/assets/settings.png" },
+    { name: "Dashboard", id: "rental-activity", icon: MdSpaceDashboard },
+    { name: "Analytics", id: "analytics", icon: MdAnalytics },
+    { name: "Reports", id: "financial-reports", icon: HiTableCells },
+    { name: "Messages", id: "messages", icon: MdNotificationsActive },
+    { name: "Blog Posts", id: "blog-posts", icon: BsFillFilePostFill },
+    { name: "Admin", id: "settings", icon: MdAdminPanelSettings },
   ];
 
   const icons = [
@@ -1224,7 +1227,7 @@ const Header = ({
                     }}
                   >
                     <span className="sidebar-icon">
-                      <img src={item.icon} alt={item.name} />
+                      <item.icon />
                     </span>
                     <span
                       className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
@@ -1298,7 +1301,7 @@ const Header = ({
                     }}
                   >
                     <span className="sidebar-icon">
-                      <img src={item.icon} alt={item.name} />
+                     <item.icon />
                     </span>
                     <span
                       className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
@@ -1384,7 +1387,7 @@ const Header = ({
                     }}
                   >
                     <span className="sidebar-icon">
-                      <img src={item.icon} alt={item.name} />
+                      <item.icon />
                     </span>
                     <span
                       className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
@@ -1465,7 +1468,7 @@ const Header = ({
                 }}
               >
                 <span className="sidebar-icon">
-                  <img src={item.icon} alt={item.name} />
+                  <item.icon />
                 </span>
                 <span
                   className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
