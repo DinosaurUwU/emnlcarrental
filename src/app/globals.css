@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap");
 
 body,
 html,
@@ -13,18 +13,14 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
-
-
-
-
 /* ==============================
    DEFAULT THEME - LIGHT MODE
    ============================== */
 :root {
-  /* Text colors (on light backgrounds) */
+  /* Text colors */
   --accent-txt: #074609;
   --supporting-txt: #133c09;
-  
+
   /* Background colors */
   --accent-bg: #074609;
   --supporting-bg: #133c09;
@@ -34,11 +30,11 @@ body {
 
   /* Box Shadow */
   --shadow-base: 26, 26, 26;
-  
-  /* Page background - light mode */
+
+  /* Page background */
   --page-bg: #f1f1f1;
 
-    /* Text Complement */
+  /* Text Complement */
   --txt-comp: #1a1a1a;
 }
 
@@ -46,20 +42,20 @@ body {
    DEFAULT THEME - DARK MODE  
    ============================== */
 :root[data-color-mode="dark"] {
-  /* Text colors - lighter for dark backgrounds */
+  /* Text colors */
   --accent-txt: #28a745;
   --supporting-txt: #218838;
-  
-  /* Background colors - lighter for dark backgrounds */
+
+  /* Background colors */
   --accent-bg: #28a745;
   --supporting-bg: #218838;
 
   /* Gradient */
   --gradient-base: 26, 26, 26;
 
-    /* Gradient */
+  /* Gradient */
   --shadow-base: 241, 241, 241;
-  
+
   /* Page background - dark mode */
   --page-bg: #1a1a1a;
 
@@ -67,13 +63,10 @@ body {
   --txt-comp: #f1f1f1;
 }
 
-
-
-
 /* ==============================
    NOVEMBER THEME - LIGHT MODE
    ============================== */
-:root[data-theme="november"] {   /* ← ADD data-theme attribute! */
+:root[data-theme="november"] {
   --accent-txt: #b3541e;
   --supporting-txt: #8c3a13;
   --accent-bg: #b3541e;
@@ -87,7 +80,7 @@ body {
 /* ==============================
    NOVEMBER THEME - DARK MODE  
    ============================== */
-:root[data-theme="november"][data-color-mode="dark"] {  /* ← COMBINE both! */
+:root[data-theme="november"][data-color-mode="dark"] {
   --accent-txt: #b3541e;
   --supporting-txt: #8c3a13;
   --accent-bg: #b3541e;
@@ -101,7 +94,7 @@ body {
 /* ==============================
    DECEMBER THEME - LIGHT MODE
    ============================== */
-:root[data-theme="december"] {   /* ← ADD data-theme attribute! */
+:root[data-theme="december"] {
   --accent-txt: #b3001b;
   --supporting-txt: #0d4d1a;
   --accent-bg: #b3001b;
@@ -115,7 +108,7 @@ body {
 /* ==============================
    DECEMBER THEME - DARK MODE  
    ============================== */
-:root[data-theme="december"][data-color-mode="dark"] {  /* ← COMBINE both! */
+:root[data-theme="december"][data-color-mode="dark"] {
   --accent-txt: #b3001b;
   --supporting-txt: #0d4d1a;
   --accent-bg: #b3001b;
@@ -125,70 +118,6 @@ body {
   --page-bg: #1a1a1a;
   --txt-comp: #f1f1f1;
 }
-
-
-
-
-/* Default */
-/* :root {
-  --accent-txt: #074609;
-  --supporting-txt: #133c09;
-
-  --accent-bg: #074609;
-  --supporting-bg: #133c09;
-
-  --light-mode: #f1f1f1;
-} */
-
-/* Add to globals.css */
-/* [data-color-mode="dark"] {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --card-bg: #333333;
-} */
-
-
-/* 
-:root[data-theme="clover"] {
-  --accent-color: #28a745;
-  --supporting-color: #218838;
-  --light-mode: #f1f1f1;
-  --dark-mode: #1a1a1a;
-}
-
-
-
-:root[data-theme="november"] {
-  --accent-color: #b3541e;
-  --supporting-color: #8c3a13;
-    --light-mode: #f1f1f1;
-  --dark-mode: #1a1a1a;
-}
-
-
-:root[data-theme="december"] {
-  --accent-color: #b3001b;
-  --supporting-color: #0d4d1a;
-  --light-mode: #f1f1f1;
-  --dark-mode: #1a1a1a;
-}
-
-
-:root[data-theme="december"] {
-  --accent-txt: #b3001b;
-  --supporting-txt: #750012;
-
-  --accent-bg: #0d4d1a;
-  --supporting-bg: #083110;
-
-  --light-mode: #f1f1f1;
-  --dark-mode: #1a1a1a;
-}
-
-*/
-
 
 /* ================= Error Overlay ================= */
 .error-overlay {
@@ -267,7 +196,6 @@ body {
   box-shadow: 0 0px 10px var(--accent-color);
 }
 
-
 /* Warning Overlay (Yellow) */
 .warning-overlay {
   position: fixed;
@@ -344,7 +272,6 @@ body {
   color: #fff;
   box-shadow: 0 0px 10px var(--accent-color);
 }
-
 
 /* Success Overlay (Green) */
 .success-overlay {

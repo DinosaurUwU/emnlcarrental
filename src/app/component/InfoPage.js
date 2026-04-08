@@ -1,6 +1,7 @@
 "use client";
 // src/user/InfoPage.js
 import React, { useState, useEffect, useRef } from "react";
+import { sanitizeRichHtml } from "../blog/BlogArticleRenderer";
 import { usePathname } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import Header from "./Header";
@@ -1625,7 +1626,8 @@ const InfoPage = ({ openBooking }) => {
                         <div className="result-title">{r.title}</div>
                         <div
                           className="result-snippet"
-                          dangerouslySetInnerHTML={{ __html: r.snippet }}
+                          // dangerouslySetInnerHTML={{ __html: r.snippet }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(r.snippet) }}
                         />
                       </button>
                     ))}

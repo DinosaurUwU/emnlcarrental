@@ -6,11 +6,8 @@ import {
   useState,
   useEffect,
   useRef,
-  useMemo,
-  useCallback,
 } from "react";
 import {
-  onAuthStateChanged,
   onIdTokenChanged,
   signOut,
   deleteUser,
@@ -25,10 +22,6 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   applyActionCode,
-  getAuth,
-  updateEmail,
-  verifyBeforeUpdateEmail,
-  signInAnonymously,
 } from "firebase/auth";
 
 import {
@@ -46,7 +39,6 @@ import {
   orderBy,
   where,
   deleteField,
-  increment,
   limit,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
@@ -79,14 +71,11 @@ export const UserProvider = ({ children }) => {
   const [importProgress, setImportProgress] = useState(0);
   const [isImportMinimized, setIsImportMinimized] = useState(false);
 
-  const [theme, setTheme] = useState("default"); // fallback theme
-
+  const [theme, setTheme] = useState("default");
   const router = useRouter();
-
   const [imageCache, setImageCache] = useState({});
 
   const [blockedUsers, setBlockedUsers] = useState([]);
-
   const [showBlockUserReason, setShowBlockUserReason] = useState(false);
   const [showUnblockUserConfirm, setShowUnblockUserConfirm] = useState(false);
   const [blockReason, setBlockReason] = useState("");
@@ -141,7 +130,6 @@ export const UserProvider = ({ children }) => {
   const [expenseGrid, setExpenseGrid] = useState({});
 
   const [isActivatingBooking, setIsActivatingBooking] = useState(false);
-
   const [showVerifyOverlay, setShowVerifyOverlay] = useState(false);
 
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
@@ -152,11 +140,6 @@ export const UserProvider = ({ children }) => {
 
   const [hasServerChange, setHasServerChange] = useState(false);
   const [serverChangeCounter, setServerChangeCounter] = useState(0);
-
-  const [isSaving, setIsSaving] = useState(false);
-  const justSavedRef = useRef(false);
-
-  const [lastSyncedUid, setLastSyncedUid] = useState(null);
 
   const lastKnownUserRef = useRef(null);
   const [lastKnownUser, setLastKnownUser] = useState(null);
@@ -176,6 +159,7 @@ export const UserProvider = ({ children }) => {
       .replace(/^-|-$/g, "");
   };
 
+  // FACEBOOK
   const signInWithFacebook = async () => {
     try {
       const result = await signInWithPopup(auth, fbProvider);

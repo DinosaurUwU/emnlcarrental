@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { sanitizeRichHtml } from "../blog/BlogArticleRenderer";
 
 import { useUser } from "../lib/UserContext";
 import { auth } from "../lib/firebase";
@@ -2860,8 +2861,11 @@ const Profile = ({ openBooking }) => {
                               >
                                 <div
                                   className="profile-chat-text"
+                                  // dangerouslySetInnerHTML={{
+                                  //   __html: msg.content || "",
+                                  // }}
                                   dangerouslySetInnerHTML={{
-                                    __html: msg.content || "",
+                                    __html: sanitizeRichHtml(msg.content || ""),
                                   }}
                                 />
                                 <div className="profile-chat-time">
@@ -4375,7 +4379,8 @@ const Profile = ({ openBooking }) => {
 
             <div
               className="full-message"
-              dangerouslySetInnerHTML={{ __html: selectedMessage.content }}
+              // dangerouslySetInnerHTML={{ __html: selectedMessage.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(selectedMessage.content) }}
             ></div>
 
             <div className="overlay-actions">
