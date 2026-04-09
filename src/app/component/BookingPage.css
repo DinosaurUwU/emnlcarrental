@@ -309,8 +309,6 @@
   cursor: not-allowed;
 }
 
-
-
 .fixed-header {
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
@@ -569,7 +567,7 @@ select option {
 
 .form-row .first-name-field {
   position: relative;
-  flex: 1 1 calc(50% - 10px); /* keep original 2-column look */
+  flex: 1 1 calc(50% - 10px); /* 2-column */
   min-width: 0;
 }
 
@@ -1108,8 +1106,6 @@ select option {
   color: var(--accent-txt);
 }
 
-
-
 /* Text */
 .confirm-text {
   margin-bottom: 10px;
@@ -1262,7 +1258,6 @@ select option {
   text-align: left;
   flex: 1;
 }
-
 
 /* Total price */
 .confirm-total-price {

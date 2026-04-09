@@ -10,11 +10,8 @@ import { useUser } from "../lib/UserContext";
 import BookingPage from "./BookingPage";
 import { MdClose } from "react-icons/md";
 
-
 const BookingContext = createContext();
-
 export const useBooking = () => useContext(BookingContext);
-
 const BookingProviderInner = ({ children }) => {
   const {
     user,
@@ -82,33 +79,6 @@ const BookingProviderInner = ({ children }) => {
       document.body.style.top = "";
     };
   }, [showVerifyOverlay, showVerifyInstructions]);
-
-  // const openBooking = (event, prefillData = {}) => {
-  //   event.stopPropagation();
-
-  //   const rect = event.target.getBoundingClientRect();
-  //   setButtonRect({
-  //     top: rect.top + window.scrollY,
-  //     left: rect.left + window.scrollX,
-  //     width: rect.width,
-  //     height: rect.height,
-  //   });
-
-  //   const mergedData = {
-  //     firstName: user?.firstName || "",
-  //     middleName: user?.middleName || "",
-  //     surname: user?.surname || "",
-  //     occupation: user?.occupation || "",
-  //     address: user?.address || "",
-  //     contact: user?.phone || "",
-  //     email: user?.email || "",
-  //     ...prefillData, // Car info overrides or adds
-  //   };
-
-  //   setPrefillBookingData(mergedData);
-
-  //   setIsBookingOpen(true);
-  // };
 
   const openBooking = (event, prefillData = {}) => {
     if (event) {
@@ -361,8 +331,8 @@ const BookingProviderInner = ({ children }) => {
         <div className="error-overlay" onClick={closeVerifyError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
             <div className="error-icon">
-      <MdClose size={32} />
-    </div>
+              <MdClose size={32} />
+            </div>
             <h3>Error!</h3>
             <p>{verifyErrorMessage}</p>
             <button className="error-btn" onClick={closeVerifyError}>

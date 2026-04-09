@@ -23,7 +23,6 @@ const RentalActivitySection = ({ subSection }) => {
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const [hideAnimation, setHideAnimation] = useState(false);
   const [isEndDateInvalid, setIsEndDateInvalid] = useState(false);
-  const [expandedUnits, setExpandedUnits] = useState({});
   const [formData, setFormData] = useState({});
   const scrollRefs = useRef({});
   const fileInputRefs = useRef({});
@@ -43,8 +42,6 @@ const RentalActivitySection = ({ subSection }) => {
   const [showSuccessBooking, setShowSuccessBooking] = useState(false);
 
   const {
-    serverTimestamp,
-    triggerForceFinishRental,
     unitData,
     allUnitData,
     saveBookingToFirestore,
@@ -71,8 +68,6 @@ const RentalActivitySection = ({ subSection }) => {
     removePaymentEntry,
 
     triggerAutoFill,
-    autoFillTrigger,
-
     triggerCancelFill,
 
     mopTypes,
@@ -81,7 +76,6 @@ const RentalActivitySection = ({ subSection }) => {
     fetchImageFromFirestore,
     imageUpdateTrigger,
     imageCache,
-    user,
     userAccounts,
   } = useUser();
   const [clientsSearchTerm, setClientsSearchTerm] = useState("");
@@ -147,13 +141,11 @@ const RentalActivitySection = ({ subSection }) => {
   const [showCallBookingConfirm, setShowCallBookingConfirm] = useState(false);
   const [showCallActiveBookingConfirm, setShowCallActiveBookingConfirm] =
     useState(false);
-  const [showRejectBookingConfirm, setShowRejectBookingConfirm] =
-    useState(false);
+
   const [showRejectBookingReason, setShowRejectBookingReason] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [extendValue, setExtendValue] = useState(1); // default to 1
   const [extendUnit, setExtendUnit] = useState("Hours"); // default unit
-  const printRef = useRef();
   const [filterType, setFilterType] = useState("ALL");
   const [ongoingFilter, setOngoingFilter] = useState("ACTIVE");
   const [balanceFilter, setBalanceFilter] = useState("ALL");
@@ -534,7 +526,8 @@ const RentalActivitySection = ({ subSection }) => {
               ...booking,
               carName: carData.carName,
               carType: carData.carType,
-              imageId: booking.imageId || carData.imageId || `${booking.plateNo}_main`,
+              imageId:
+                booking.imageId || carData.imageId || `${booking.plateNo}_main`,
               paymentEntries: paymentList,
               balanceDue,
             });
@@ -559,13 +552,14 @@ const RentalActivitySection = ({ subSection }) => {
       return 0;
     });
 
-  const pendingCount = balanceDueBookings.filter(b => b.balanceDue == 0).length;
-  const unpaidCount = balanceDueBookings.filter(b => b.balanceDue != 0).length;
+  const pendingCount = balanceDueBookings.filter(
+    (b) => b.balanceDue == 0,
+  ).length;
+  const unpaidCount = balanceDueBookings.filter(
+    (b) => b.balanceDue != 0,
+  ).length;
 
-
-
-
-    useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         ongoingFilterDropdownRef.current &&
@@ -1044,15 +1038,12 @@ const RentalActivitySection = ({ subSection }) => {
 
     const bookingData = {
       paymentEntries: localPaymentEntries || [],
-
       totalPaid,
       balanceDue,
       paid,
-
       startTimestamp,
 
       carName: currentUnit.name,
-
       imageId: currentUnit.imageId,
       plateNo: currentUnit.plateNo,
       carType: currentUnit.carType,
@@ -1081,13 +1072,11 @@ const RentalActivitySection = ({ subSection }) => {
       purpose: unitForm.purpose,
 
       referralSource: unitForm.referralSource || "Walk-in",
-
       additionalMessage: unitForm.additionalMessage || "None",
 
       // Include discount info
       discountType: unitForm.discountType || "peso",
       discountValue: Number(unitForm.discountValue || 0),
-
       reservation: isReservedFlow,
 
       // Breakdown of pricing
@@ -1095,9 +1084,7 @@ const RentalActivitySection = ({ subSection }) => {
       drivingPrice,
       pickupPrice,
       extraHourCharge,
-
       totalPrice: discountedTotal,
-
       billedDays,
 
       // Duration details
@@ -1214,13 +1201,6 @@ const RentalActivitySection = ({ subSection }) => {
         textClass: "submitting-text",
       });
     }
-  };
-
-  const toggleExpand = (unitId) => {
-    setExpandedUnits((prev) => ({
-      ...prev,
-      [unitId]: !prev[unitId],
-    }));
   };
 
   const toggleQuotationDetails = (unitId) => {
@@ -1460,7 +1440,7 @@ const RentalActivitySection = ({ subSection }) => {
         ),
       );
 
-      // 🟡 Call global context for user requests
+      // Call global context for user requests
       if (editRequestFormData?.id) {
         updatePaymentEntry(
           editRequestFormData.id,
@@ -1476,7 +1456,7 @@ const RentalActivitySection = ({ subSection }) => {
         }));
       }
 
-      // 🟡 Call global context for active bookings
+      // Call global context for active bookings
       if (editFormData?.bookingUid) {
         updatePaymentEntry(
           editFormData.bookingUid,
@@ -1498,7 +1478,7 @@ const RentalActivitySection = ({ subSection }) => {
     else {
       setLocalPaymentEntries((prev) => [...prev, currentPayment]);
 
-      // 🟡 Call global context for user requests
+      // Call global context for user requests
       if (editRequestFormData?.id) {
         addPaymentEntry(editRequestFormData.id, currentPayment);
         setPaymentEntries((prev) => ({
@@ -1514,7 +1494,7 @@ const RentalActivitySection = ({ subSection }) => {
         }));
       }
 
-      // 🟡 Call global context for active bookings
+      // Call global context for active bookings
       if (editFormData?.bookingUid) {
         addPaymentEntry(editFormData.bookingUid, currentPayment);
         setPaymentEntries((prev) => ({
@@ -1538,7 +1518,7 @@ const RentalActivitySection = ({ subSection }) => {
   const localRemovePaymentEntry = (index) => {
     setLocalPaymentEntries((prev) => prev.filter((_, i) => i !== index));
 
-    // 🟡 Call global context for user requests
+    // Call global context for user requests
     if (editRequestFormData?.id) {
       removePaymentEntry(editRequestFormData.id, index);
       setPaymentEntries((prev) => {
@@ -1554,7 +1534,7 @@ const RentalActivitySection = ({ subSection }) => {
       });
     }
 
-    // 🟡 Call global context for active bookings
+    // Call global context for active bookings
     if (editFormData?.bookingUid) {
       removePaymentEntry(editFormData.bookingUid, index);
       setPaymentEntries((prev) => {
@@ -1865,8 +1845,7 @@ const RentalActivitySection = ({ subSection }) => {
 
   const getAvailableUnitStats = (carType) => {
     const matchingUnits = (allUnitData || []).filter(
-      (unit) =>
-        carType === "ALL" || unit.carType?.toUpperCase() === carType,
+      (unit) => carType === "ALL" || unit.carType?.toUpperCase() === carType,
     );
 
     const totalCount = matchingUnits.length;
@@ -1904,27 +1883,10 @@ const RentalActivitySection = ({ subSection }) => {
       {showBookingConfirmOverlay && confirmUnitId && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingConfirmOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                        <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowBookingConfirmOverlay(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -1943,28 +1905,29 @@ const RentalActivitySection = ({ subSection }) => {
                 .trim()
                 .toUpperCase();
 
-const hasReservedSource =
-    !!confirmPlate &&
-    (activeBookings || []).some((booking) => {
-      const plateMatch = String(booking?.plateNo || "")
-        .trim()
-        .toUpperCase() === confirmPlate;
-      const status = String(booking?.status || "").toLowerCase();
-      const isActiveOrPending = 
-        status === "active" || 
-        status === "pending" || 
-        status === "confirmed";
-      
-      return plateMatch && isActiveOrPending;
-    });
+              const hasReservedSource =
+                !!confirmPlate &&
+                (activeBookings || []).some((booking) => {
+                  const plateMatch =
+                    String(booking?.plateNo || "")
+                      .trim()
+                      .toUpperCase() === confirmPlate;
+                  const status = String(booking?.status || "").toLowerCase();
+                  const isActiveOrPending =
+                    status === "active" ||
+                    status === "pending" ||
+                    status === "confirmed";
 
-  const isReservedDraft =
-    formData[confirmUnitId]?.reservation === true;
+                  return plateMatch && isActiveOrPending;
+                });
 
-  return isReservedDraft || hasReservedSource ? (
-    <div className="confirm-reserved-flag">Reserved Booking</div>
-  ) : null;
-})()}
+              const isReservedDraft =
+                formData[confirmUnitId]?.reservation === true;
+
+              return isReservedDraft || hasReservedSource ? (
+                <div className="confirm-reserved-flag">Reserved Booking</div>
+              ) : null;
+            })()}
 
             <div className="admin-confirm-details">
               <div className="admin-confirm-scroll-container">
@@ -2527,27 +2490,10 @@ const hasReservedSource =
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                                    <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowDetailsOverlay(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -2557,8 +2503,7 @@ const hasReservedSource =
               Detailed information about this rental.
             </p>
 
-
-                        <div className="confirm-flag-row">
+            <div className="confirm-flag-row">
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -2823,7 +2768,7 @@ const hasReservedSource =
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
- <span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -2835,8 +2780,8 @@ const hasReservedSource =
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -2846,17 +2791,18 @@ const hasReservedSource =
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -3095,27 +3041,10 @@ const hasReservedSource =
       {showBalanceDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowBalanceDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                        <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowBalanceDetailsOverlay(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -3137,7 +3066,7 @@ const hasReservedSource =
                 <div className="confirm-reserved-flag">Reserved Booking</div>
               )}
 
-<div
+              <div
                 className={`confirm-status-flag status-${
                   selectedBooking?.paid === true
                     ? "paid"
@@ -3394,7 +3323,7 @@ const hasReservedSource =
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-<span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -3406,8 +3335,8 @@ const hasReservedSource =
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -3417,17 +3346,18 @@ const hasReservedSource =
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -4412,27 +4342,10 @@ const hasReservedSource =
       {showEditRequest && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditRequest(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                                 <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowEditRequest(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -5385,7 +5298,7 @@ const hasReservedSource =
                       editRequestFormData,
                     );
 
-                    // 🟢 Trigger autofill update for FinancialReports.js
+                    // Trigger autofill update for FinancialReports.js
                     triggerAutoFill({
                       ...paymentEntries,
                       [String(editRequestFormData.bookingUid)]:
@@ -5718,36 +5631,18 @@ const hasReservedSource =
       {showEditBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            \
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditBooking(false)}
             >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                                             <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowEditBooking(false)}
-            >
               <FiX className="close-icon" />
             </button>
-
             <h3 className="confirm-header">EDIT BOOKING</h3>
             <p className="confirm-text">
               You can modify the booking details here.
             </p>
-
             <div className="select-container">
               <div className="payment-section">
                 <h4 className="payment-label">Payment Details</h4>
@@ -6081,7 +5976,7 @@ const hasReservedSource =
                   </li>
                   <li>
                     <strong className="summary-label">Rental Duration:</strong>
-                                        <span className="summary-value">
+                    <span className="summary-value">
                       {(() => {
                         const actualSeconds =
                           selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -6093,28 +5988,28 @@ const hasReservedSource =
                                   selectedBooking.billedDays * 24,
                               )
                             : (selectedBooking.rentalDuration?.extraHours ??
-                                selectedBooking.rentalDuration?.extraHour ??
-                                0);
+                              selectedBooking.rentalDuration?.extraHour ??
+                              0);
 
                         const displayExtraHourCharge =
                           selectedBooking.extraHourCharge ??
-                          displayExtraHours *
-                            (selectedBooking.extension ?? 0);
+                          displayExtraHours * (selectedBooking.extension ?? 0);
 
                         return (
                           <>
                             ({selectedBooking.billedDays} Day /{" "}
-                            {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                            {selectedBooking.rentalDuration
+                              .isFlatRateSameDay ? (
                               <>
                                 for{" "}
                                 <span style={{ color: "#dc3545" }}>
                                   {Math.floor(
-                                    selectedBooking.rentalDuration.actualSeconds /
-                                      3600,
+                                    selectedBooking.rentalDuration
+                                      .actualSeconds / 3600,
                                   )}
                                   {Math.floor(
-                                    selectedBooking.rentalDuration.actualSeconds /
-                                      3600,
+                                    selectedBooking.rentalDuration
+                                      .actualSeconds / 3600,
                                   ) === 1
                                     ? "hr"
                                     : "hrs"}
@@ -6625,7 +6520,6 @@ const hasReservedSource =
                 />
               </div>
             </div>
-
             <div className="rental-actions-container">
               <button
                 className="rental-actions start-rental"
@@ -6745,7 +6639,7 @@ const hasReservedSource =
                   try {
                     await updateActiveBooking(selectedBooking.id, editFormData);
 
-                    // 🟢 Trigger autofill update for FinancialReports.js
+                    // Trigger autofill update for FinancialReports.js
                     triggerAutoFill({
                       ...paymentEntries,
                       [String(editFormData.bookingUid)]:
@@ -6847,27 +6741,10 @@ const hasReservedSource =
       {showEditBalanceDueBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowEditBalanceDueBooking(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                                                         <button
-              className="close-btn"
-              type="button"
-            onClick={() => setShowEditBalanceDueBooking(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -7205,7 +7082,7 @@ const hasReservedSource =
                 </li>
                 <li>
                   <strong className="summary-label">Rental Duration:</strong>
-<span className="summary-value">
+                  <span className="summary-value">
                     {(() => {
                       const actualSeconds =
                         selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -7217,13 +7094,12 @@ const hasReservedSource =
                                 selectedBooking.billedDays * 24,
                             )
                           : (selectedBooking.rentalDuration?.extraHours ??
-                              selectedBooking.rentalDuration?.extraHour ??
-                              0);
+                            selectedBooking.rentalDuration?.extraHour ??
+                            0);
 
                       const displayExtraHourCharge =
                         selectedBooking.extraHourCharge ??
-                        displayExtraHours *
-                          (selectedBooking.extension ?? 0);
+                        displayExtraHours * (selectedBooking.extension ?? 0);
 
                       return (
                         <>
@@ -7549,7 +7425,7 @@ const hasReservedSource =
                       balanceDueFormData,
                     );
 
-                    // 🟢 Trigger autofill update for FinancialReports
+                    // Trigger autofill update for FinancialReports
                     triggerAutoFill({
                       ...paymentEntries,
                       [String(balanceDueFormData.id)]:
@@ -8038,36 +7914,13 @@ const hasReservedSource =
               <div className="ongoing-units-header-wrapper">
                 <h2 className="ongoing-units-header">
                   {ongoingFilter === "PENDING"
-                    ? `PENDING BOOKINGS (${activeBookings.filter(b => String(b?.status || "").toUpperCase() === "PENDING").length})`
+                    ? `PENDING BOOKINGS (${activeBookings.filter((b) => String(b?.status || "").toUpperCase() === "PENDING").length})`
                     : ongoingFilter === "REQUESTS"
                       ? `BOOKING REQUESTS (${adminBookingRequests.length})`
-                      : `ONGOING RENTALS (${activeBookings.filter(b => String(b?.status || "").toUpperCase() === "ACTIVE").length})`}
+                      : `ONGOING RENTALS (${activeBookings.filter((b) => String(b?.status || "").toUpperCase() === "ACTIVE").length})`}
                 </h2>
-                {/* <div className="filter-dropdown hoverable-dropdown">
-                  <button className="filter-button">
-                    {ongoingFilter.charAt(0).toUpperCase() +
-                      ongoingFilter.slice(1).toLowerCase()}{" "}
-                    ▾
-                  </button>
-                  <div className="filter-menu">
-                    {["ACTIVE", "PENDING", "REQUESTS"].map((type) => (
-                      <div
-                        key={type}
-                        className={`filter-option ${
-                          ongoingFilter === type ? "selected" : ""
-                        }`}
-                        onClick={() => setOngoingFilter(type)}
-                      >
-                        {type.charAt(0) + type.slice(1).toLowerCase()}
-                      </div>
-                    ))}
-                  </div>
-                </div> */}
 
-<div
-                  className="filter-dropdown"
-                  ref={ongoingFilterDropdownRef}
-                >
+                <div className="filter-dropdown" ref={ongoingFilterDropdownRef}>
                   <button
                     type="button"
                     className="filter-button"
@@ -8093,7 +7946,9 @@ const hasReservedSource =
 
                   <div
                     className="filter-menu"
-                    style={{ display: showOngoingFilterMenu ? "block" : "none" }}
+                    style={{
+                      display: showOngoingFilterMenu ? "block" : "none",
+                    }}
                   >
                     {["ACTIVE", "PENDING", "REQUESTS"].map((type) => {
                       const count =
@@ -8106,8 +7961,9 @@ const hasReservedSource =
                           : type === "PENDING"
                             ? activeBookings.filter(
                                 (booking) =>
-                                  String(booking?.status || "").toUpperCase() ===
-                                  "PENDING",
+                                  String(
+                                    booking?.status || "",
+                                  ).toUpperCase() === "PENDING",
                               ).length
                             : adminBookingRequests.length;
 
@@ -8151,7 +8007,6 @@ const hasReservedSource =
                     })}
                   </div>
                 </div>
-
               </div>
 
               <div className="ongoing-rent-cards">
@@ -8675,7 +8530,6 @@ const hasReservedSource =
                                   >
                                     Download Invoice
                                   </button>
-
                                 </div>
                               )}
                             </div>
@@ -8746,30 +8600,7 @@ const hasReservedSource =
                   })()}
                 </div>
 
-                {/* <div className="filter-dropdown">
-                  <button className="filter-button">
-                    {filterType.charAt(0).toUpperCase() +
-                      filterType.slice(1).toUpperCase()}{" "}
-                    ▾
-                  </button>
-                  <div className="filter-menu">
-                    {["ALL", "SEDAN", "SUV", "MPV", "VAN", "PICKUP"].map(
-                      (carType) => (
-                        <div
-                          key={carType}
-                          className={`filter-option ${
-                            filterType === carType ? "selected" : ""
-                          }`}
-                          onClick={() => setFilterType(carType)}
-                        >
-                          {carType}
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div> */}
-
-<div
+                <div
                   className="filter-dropdown"
                   ref={availableFilterDropdownRef}
                 >
@@ -8845,7 +8676,6 @@ const hasReservedSource =
                     );
                   })()}
                 </div>
-
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -8890,18 +8720,27 @@ const hasReservedSource =
 
                       const unitForm = formData[selectedUnitId] || {};
 
-                      
-const reservedActiveBooking = activeBookings?.find((booking) => {
-  const plateMatch = String(booking?.plateNo || "").toUpperCase() === 
-                     String(selectedUnit?.plateNo || "").toUpperCase();
-  const status = String(booking?.status || "").toLowerCase();
-  const isActiveOrPending = status === "active" || status === "pending" || status === "confirmed";
-  
-  return plateMatch && isActiveOrPending;
-});
+                      const reservedActiveBooking = activeBookings?.find(
+                        (booking) => {
+                          const plateMatch =
+                            String(booking?.plateNo || "").toUpperCase() ===
+                            String(selectedUnit?.plateNo || "").toUpperCase();
+                          const status = String(
+                            booking?.status || "",
+                          ).toLowerCase();
+                          const isActiveOrPending =
+                            status === "active" ||
+                            status === "pending" ||
+                            status === "confirmed";
 
-console.log("reservedActiveBooking:", reservedActiveBooking);
+                          return plateMatch && isActiveOrPending;
+                        },
+                      );
 
+                      console.log(
+                        "reservedActiveBooking:",
+                        reservedActiveBooking,
+                      );
 
                       const mop = unitForm.mop || "Cash";
                       const pop = unitForm.pop || "None";
@@ -8960,49 +8799,16 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                       return (
                         <>
                           <div className="sticky-banner-group">
-                            {/* <div className="selected-unit-image">
-                              {reservedActiveBooking && (
-                                <span className="selected-unit-reserved-badge">
-                                  Reserved Booking
-                                </span>
-                              )}
-                              {(() => {
-                                if (!selectedUnit) {
-                                  return (
-                                    <div className="unit-main-image-placeholder">
-                                      No image
-                                    </div>
-                                  );
-                                }
-
-                                const imageId =
-                                  selectedUnit.imageId ||
-                                  `${selectedUnit.plateNo}_main`;
-
-                                const image = fetchedImages[imageId];
-
-                                if (!image?.base64) {
-                                  return (
-                                    <div className="unit-main-image-placeholder">
-                                      Loading...
-                                    </div>
-                                  );
-                                }
-
-                                return (
-                                  <img
-                                    src={image.base64}
-                                    key={image.updatedAt}
-                                    alt={selectedUnit.name}
-                                    className="unit-image"
-                                  />
-                                );
-                              })()}
-                            </div> */}
-
                             <div className="selected-unit-image">
                               {reservedActiveBooking && (
-                                <span className="selected-unit-reserved-badge" style={{ color: "#fff", borderColor: "#fff", backgroundColor: "rgba(40, 167, 70, 0.5)"}}>
+                                <span
+                                  className="selected-unit-reserved-badge"
+                                  style={{
+                                    color: "#fff",
+                                    borderColor: "#fff",
+                                    backgroundColor: "rgba(40, 167, 70, 0.5)",
+                                  }}
+                                >
                                   Reserved Booking
                                 </span>
                               )}
@@ -9962,143 +9768,172 @@ console.log("reservedActiveBooking:", reservedActiveBooking);
                         </>
                       );
                     })()}
-
-
-
-
                 </div>
 
-                                  {selectedUnitId && (
-                    <div className="rental-actions-container">
+                {selectedUnitId && (
+                  <div className="rental-actions-container">
+                    <button
+                      className="rental-actions start-rental"
+                      onClick={(e) => handleSubmit(e, selectedUnitId)}
+                    >
+                      Start Rental
+                    </button>
 
+                    <button
+                      type="button"
+                      className="rental-actions clear-all"
+                      onClick={() => {
+                        setClearUnitId(selectedUnitId);
+                        setShowClearConfirm(true);
+                      }}
+                    >
+                      Clear All
+                    </button>
 
-
-                      <button
-                        className="rental-actions start-rental"
-                        onClick={(e) => handleSubmit(e, selectedUnitId)}
-                      >
-                        Start Rental
-                      </button>
-
+                    {/* More button with dropdown */}
+                    <div className="action-more">
                       <button
                         type="button"
-                        className="rental-actions clear-all"
-                        onClick={() => {
-                          setClearUnitId(selectedUnitId);
-                          setShowClearConfirm(true);
-                        }}
+                        className="rental-actions more"
+                        onClick={() =>
+                          setShowMoreFor(
+                            showMoreFor === "rental-actions"
+                              ? null
+                              : "rental-actions",
+                          )
+                        }
                       >
-                        Clear All
+                        More ▾
                       </button>
 
-                       {/* More button with dropdown */}
-    <div className="action-more">
-      <button
-        type="button"
-        className="rental-actions more"
-        onClick={() =>
-          setShowMoreFor(
-            showMoreFor === "rental-actions" ? null : "rental-actions"
-          )
-        }
-      >
-        More ▾
-      </button>
+                      {showMoreFor === "rental-actions" && (
+                        <div className="more-dropdown">
+                          {(() => {
+                            const unitForm = formData[selectedUnitId] || {};
+                            const selectedUnit =
+                              unitData.find((u) => u.id === selectedUnitId) ||
+                              null;
+                            if (!selectedUnit) return null;
 
-      {showMoreFor === "rental-actions" && (
-        <div className="more-dropdown">
-          {(() => {
-            const unitForm = formData[selectedUnitId] || {};;
-            const selectedUnit = unitData.find((u) => u.id === selectedUnitId) || null;
-            if (!selectedUnit) return null;
+                            const duration = getRentalDuration(unitForm);
+                            const rentalDays =
+                              unitForm.startDate === unitForm.endDate &&
+                              duration?.diffHours < 24
+                                ? 0
+                                : duration?.diffDays || 0;
+                            const billedDays = duration?.isFlatRateSameDay
+                              ? 1
+                              : rentalDays;
+                            const discountedRate = getDiscountedRate(
+                              selectedUnit,
+                              rentalDays,
+                            );
+                            const drivingPrice = getDrivingPrice(
+                              selectedUnit,
+                              unitForm.drivingOption,
+                            );
+                            const pickupPrice = getPickupPrice(
+                              selectedUnit,
+                              unitForm.pickupOption,
+                            );
+                            const extraHourCharge =
+                              duration?.isFlatRateSameDay ||
+                              !duration?.extraHours
+                                ? 0
+                                : duration.extraHours * selectedUnit.extension;
+                            const total =
+                              billedDays * discountedRate +
+                              billedDays * drivingPrice +
+                              pickupPrice +
+                              extraHourCharge;
 
-            const duration = getRentalDuration(unitForm);
-            const rentalDays = unitForm.startDate === unitForm.endDate && duration?.diffHours < 24 ? 0 : duration?.diffDays || 0;
-            const billedDays = duration?.isFlatRateSameDay ? 1 : rentalDays;
-            const discountedRate = getDiscountedRate(selectedUnit, rentalDays);
-            const drivingPrice = getDrivingPrice(selectedUnit, unitForm.drivingOption);
-            const pickupPrice = getPickupPrice(selectedUnit, unitForm.pickupOption);
-            const extraHourCharge = duration?.isFlatRateSameDay || !duration?.extraHours ? 0 : duration.extraHours * selectedUnit.extension;
-            const total = billedDays * discountedRate + billedDays * drivingPrice + pickupPrice + extraHourCharge;
+                            const enrichedBooking = {
+                              ...unitForm,
+                              carName: selectedUnit.name,
+                              plateNo: selectedUnit.plateNo,
+                              totalPrice: total,
+                              discountedRate,
+                              extraHourCharge,
+                              extension: selectedUnit.extension,
+                              billedDays,
+                              drivingPrice,
+                              pickupPrice,
+                              drivingOption:
+                                unitForm.drivingOption || "Self-Drive",
+                              pickupOption: unitForm.pickupOption || "Pickup",
+                              paymentEntries: localPaymentEntries || [],
+                              rentalDuration: {
+                                days: rentalDays,
+                                extraHours: duration?.extraHours || 0,
+                                isFlatRateSameDay:
+                                  duration?.isFlatRateSameDay || false,
+                                actualSeconds: duration?.actualSeconds || 0,
+                              },
+                            };
 
-            const enrichedBooking = {
-              ...unitForm,
-              carName: selectedUnit.name,
-              plateNo: selectedUnit.plateNo,
-              totalPrice: total,
-              discountedRate,
-              extraHourCharge,
-              extension: selectedUnit.extension,
-              billedDays,
-              drivingPrice,
-              pickupPrice,
-              drivingOption: unitForm.drivingOption || "Self-Drive",
-              pickupOption: unitForm.pickupOption || "Pickup", 
-              paymentEntries: localPaymentEntries || [],
-              rentalDuration: {
-                days: rentalDays,
-                extraHours: duration?.extraHours || 0,
-                isFlatRateSameDay: duration?.isFlatRateSameDay || false,
-                actualSeconds: duration?.actualSeconds || 0,
-              },
-            };
+                            // Check if ALL required fields are filled
+                            const requiredFields = [
+                              "firstName",
+                              "surname",
+                              "email",
+                              "contact",
+                              "address",
+                              "startDate",
+                              "startTime",
+                              "endDate",
+                              "endTime",
+                              "location",
+                              "purpose",
+                            ];
 
+                            const hasAnyData = requiredFields.every(
+                              (field) => unitForm[field],
+                            );
 
-            // Check if ALL required fields are filled
-const requiredFields = [
-  'firstName', 'surname', 'email', 'contact', 'address',
-  'startDate', 'startTime', 'endDate', 'endTime', 'location', 'purpose'
-];
+                            return (
+                              <>
+                                <button
+                                  type="button"
+                                  className="rental-actions print-contract"
+                                  disabled={!hasAnyData}
+                                  onClick={() =>
+                                    generateFilledContract(enrichedBooking)
+                                  }
+                                >
+                                  Print Contract
+                                </button>
 
-const hasAnyData = requiredFields.every(field => unitForm[field]);
+                                <button
+                                  type="button"
+                                  className="rental-actions dl-invoice"
+                                  disabled={!hasAnyData}
+                                  onClick={() => {
+                                    generateInvoicePDF(enrichedBooking);
+                                    setShowMoreFor(null);
+                                  }}
+                                >
+                                  Download Invoice
+                                </button>
 
-
-
-
-            return (
-              <>
-                <button
-                  type="button"
-                  className="rental-actions print-contract"
-                  disabled={!hasAnyData}
-                  onClick={() => generateFilledContract(enrichedBooking)}
-                >
-                  Print Contract
-                </button>
-
-                <button
-                  type="button"
-                  className="rental-actions dl-invoice"
-                  disabled={!hasAnyData}
-                  onClick={() => {
-                    generateInvoicePDF(enrichedBooking);
-                    setShowMoreFor(null);
-                  }}
-                >
-                  Download Invoice
-                </button>
-
-                <button
-                  type="button"
-                  className="rental-actions dl-quotation"
-                  disabled={!hasAnyData}
-                  onClick={() => {
-                    generateQuotationPDF(enrichedBooking);
-                    setShowMoreFor(null);
-                  }}
-                >
-                  Download Quotation
-                </button>
-              </>
-            );
-          })()}
-        </div>
-      )}
-
-    </div>
-
+                                <button
+                                  type="button"
+                                  className="rental-actions dl-quotation"
+                                  disabled={!hasAnyData}
+                                  onClick={() => {
+                                    generateQuotationPDF(enrichedBooking);
+                                    setShowMoreFor(null);
+                                  }}
+                                >
+                                  Download Quotation
+                                </button>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                )}
               </form>
             </div>
           )}
@@ -10117,32 +9952,28 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
             <div className="ongoing-units-header-wrapper">
               <h2 className="ongoing-units-header">BALANCE DUE</h2>
 
-
               <div className="filter-dropdown">
-                <button className="filter-button" onClick={() => setShowBalanceFilterMenu(!showBalanceFilterMenu)}>
+                <button
+                  className="filter-button"
+                  onClick={() =>
+                    setShowBalanceFilterMenu(!showBalanceFilterMenu)
+                  }
+                >
                   {balanceFilter === "ALL"
                     ? "All"
                     : balanceFilter === "ZERO"
                       ? "Pending"
                       : "Unpaid"}{" "}
                   ▾
-                  {pendingCount > 0 && <span className="filter-request-badge">{pendingCount}</span>}
+                  {pendingCount > 0 && (
+                    <span className="filter-request-badge">{pendingCount}</span>
+                  )}
                 </button>
 
-
-
-
-              {/*
-              <div className="filter-dropdown hoverable-dropdown">
-                <button className="filter-button">
-                  {balanceFilter === "ALL"
-                    ? "All"
-                    : balanceFilter === "ZERO"
-                      ? "Pending"
-                      : "Unpaid"}{" "}
-                  ▾
-                </button>
-                 <div className="filter-menu">
+                <div
+                  className="filter-menu"
+                  style={{ display: showBalanceFilterMenu ? "block" : "none" }}
+                >
                   {["ALL", "ZERO", "NONZERO"].map((type) => (
                     <div
                       key={type}
@@ -10156,43 +9987,30 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                         : type === "ZERO"
                           ? "Pending"
                           : "Unpaid"}
+                      {type === "ALL" && pendingCount + unpaidCount > 0 && (
+                        <span
+                          className={`filter-request-badge menu-badge all-badge`}
+                        >
+                          {pendingCount + unpaidCount}
+                        </span>
+                      )}
+                      {type === "ZERO" && pendingCount > 0 && (
+                        <span
+                          className={`filter-request-badge menu-badge pending-badge`}
+                        >
+                          {pendingCount}
+                        </span>
+                      )}
+                      {type === "NONZERO" && unpaidCount > 0 && (
+                        <span
+                          className={`filter-request-badge menu-badge unpaid-badge`}
+                        >
+                          {unpaidCount}
+                        </span>
+                      )}
                     </div>
                   ))}
-                </div> */}
-<div className="filter-menu" style={{ display: showBalanceFilterMenu ? "block" : "none" }}>
-
-  {["ALL", "ZERO", "NONZERO"].map((type) => (
-    <div
-      key={type}
-      className={`filter-option ${
-        balanceFilter === type ? "selected" : ""
-      }`}
-      onClick={() => setBalanceFilter(type)}
-    >
-      {type === "ALL"
-        ? "All"
-        : type === "ZERO"
-          ? "Pending"
-          : "Unpaid"}
-      {type === "ALL" && (pendingCount + unpaidCount) > 0 && (
-        <span className={`filter-request-badge menu-badge all-badge`}>
-          {pendingCount + unpaidCount}
-        </span>
-      )}
-      {type === "ZERO" && pendingCount > 0 && (
-        <span className={`filter-request-badge menu-badge pending-badge`}>
-          {pendingCount}
-        </span>
-      )}
-      {type === "NONZERO" && unpaidCount > 0 && (
-        <span className={`filter-request-badge menu-badge unpaid-badge`}>
-          {unpaidCount}
-        </span>
-      )}
-    </div>
-  ))}
-</div>
-
+                </div>
               </div>
             </div>
             <div className="balance-due-cards">
@@ -10368,7 +10186,7 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                           Call
                         </button>
 
-<button
+                        <button
                           className="action-button dl-invoice"
                           onClick={() => {
                             const start =
@@ -10433,7 +10251,6 @@ const hasAnyData = requiredFields.every(field => unitForm[field]);
                         >
                           Download Invoice
                         </button>
-
                       </div>
                     </div>
                   </div>

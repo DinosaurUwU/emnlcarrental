@@ -18,7 +18,7 @@
 .footer-section {
   flex: 1;
   margin-bottom: 20px;
-  padding: 0 20px; /* Added padding for better spacing */
+  padding: 0 20px;
 }
 
 .footer-section-about {
@@ -30,7 +30,7 @@
 }
 
 .footer-logo {
-  max-width: 250px; /* Adjust the size as needed */
+  max-width: 250px;
   margin-top: 30px;
   color: var(--accent-txt);
 }
@@ -95,9 +95,6 @@
   text-decoration: none;
 }
 
-
-
-
 .social-icons {
   display: flex;
   gap: 10px;
@@ -129,14 +126,8 @@
 }
 
 .social-icon:hover .social-svg {
-  color: #1877F2;
+  color: #1877f2;
 }
-
-
-
-
-
-
 
 .footer-bottom {
   text-align: center;

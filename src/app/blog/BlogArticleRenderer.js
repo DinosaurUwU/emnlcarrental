@@ -37,9 +37,13 @@ const renderInlineFormatting = (text = "", keyBase = "inline") => {
         </a>,
       );
     } else if (match[4]) {
-      nodes.push(<strong key={`${keyBase}_bold_${segmentIndex}`}>{match[4]}</strong>);
+      nodes.push(
+        <strong key={`${keyBase}_bold_${segmentIndex}`}>{match[4]}</strong>,
+      );
     } else if (match[5]) {
-      nodes.push(<u key={`${keyBase}_underline_${segmentIndex}`}>{match[5]}</u>);
+      nodes.push(
+        <u key={`${keyBase}_underline_${segmentIndex}`}>{match[5]}</u>,
+      );
     } else if (match[6]) {
       nodes.push(<em key={`${keyBase}_italic_${segmentIndex}`}>{match[6]}</em>);
     }
@@ -106,8 +110,7 @@ export const sanitizeRichHtml = (value = "") => {
 
     if (tagName === "A") {
       const href = node.getAttribute("href") || "";
-      const safeHref =
-        /^(https?:|mailto:|tel:|\/)/i.test(href) ? href : "#";
+      const safeHref = /^(https?:|mailto:|tel:|\/)/i.test(href) ? href : "#";
 
       cleanNode.setAttribute("href", safeHref);
       cleanNode.setAttribute("target", "_blank");
@@ -189,101 +192,105 @@ const BlogArticleRenderer = ({ post, postImages = {}, className = "" }) => {
 
   return (
     <article className={`blog-detail-content ${className}`.trim()}>
-      {hasBlocks
-        ? post.contentBlocks.map((block, index) => {
-            if (block.type === "heading") {
-              return (
-                <h2
-                  key={block.id || `${post.id || "preview"}_heading_${index}`}
-                  className="blog-block-heading"
-                  style={{ textAlign: "left"}}
-                >
-                  <RichTextContent value={block.text} inline />
-                </h2>
-              );
-            }
+      {hasBlocks ? (
+        post.contentBlocks.map((block, index) => {
+          if (block.type === "heading") {
+            return (
+              <h2
+                key={block.id || `${post.id || "preview"}_heading_${index}`}
+                className="blog-block-heading"
+                style={{ textAlign: "left" }}
+              >
+                <RichTextContent value={block.text} inline />
+              </h2>
+            );
+          }
 
-            if (block.type === "image") {
-              const image = postImages[block.imageId];
+          if (block.type === "image") {
+            const image = postImages[block.imageId];
 
-              if (!image?.base64) {
-                return null;
-              }
-
-              return (
-                <figure
-                  key={block.id || `${post.id || "preview"}_image_${index}`}
-                  className="blog-block-image"
-                >
-                  <img
-                    src={image.base64}
-                    alt={image.altText || block.caption || post.title || "Blog image"}
-                  />
-                  {block.caption && (
-                    <figcaption>
-                      <RichTextContent value={block.caption} inline />
-                    </figcaption>
-                  )}
-                </figure>
-              );
-            }
-
-            if (block.type === "split") {
-              const image = postImages[block.imageId];
-              const splitPosition =
-                block.imagePosition === "right" ? "right" : "left";
-
-              return (
-                <section
-                  key={block.id || `${post.id || "preview"}_split_${index}`}
-                  className={`blog-block-split ${splitPosition}`}
-                >
-                  <div className="blog-block-split-media">
-                    {image?.base64 ? (
-                      <figure className="blog-block-split-figure">
-                        <img
-                          src={image.base64}
-                          alt={
-                            image.altText ||
-                            block.caption ||
-                            block.title ||
-                            post.title ||
-                            "Blog image"
-                          }
-                        />
-                        {block.caption && (
-                          <figcaption>
-                            <RichTextContent value={block.caption} inline />
-                          </figcaption>
-                        )}
-                      </figure>
-                    ) : (
-                      <div className="blog-block-split-placeholder">
-                        Image not available
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="blog-block-split-copy">
-                    {block.title && (
-                      <h2>
-                        <RichTextContent value={block.title} inline />
-                      </h2>
-                    )}
-                    <RichTextContent value={block.text} />
-                  </div>
-                </section>
-              );
+            if (!image?.base64) {
+              return null;
             }
 
             return (
-              <RichTextContent
-                key={block.id || `${post.id || "preview"}_paragraph_${index}`}
-                value={block.text}
-              />
+              <figure
+                key={block.id || `${post.id || "preview"}_image_${index}`}
+                className="blog-block-image"
+              >
+                <img
+                  src={image.base64}
+                  alt={
+                    image.altText || block.caption || post.title || "Blog image"
+                  }
+                />
+                {block.caption && (
+                  <figcaption>
+                    <RichTextContent value={block.caption} inline />
+                  </figcaption>
+                )}
+              </figure>
             );
-          })
-        : <RichTextContent value={post?.content} />}
+          }
+
+          if (block.type === "split") {
+            const image = postImages[block.imageId];
+            const splitPosition =
+              block.imagePosition === "right" ? "right" : "left";
+
+            return (
+              <section
+                key={block.id || `${post.id || "preview"}_split_${index}`}
+                className={`blog-block-split ${splitPosition}`}
+              >
+                <div className="blog-block-split-media">
+                  {image?.base64 ? (
+                    <figure className="blog-block-split-figure">
+                      <img
+                        src={image.base64}
+                        alt={
+                          image.altText ||
+                          block.caption ||
+                          block.title ||
+                          post.title ||
+                          "Blog image"
+                        }
+                      />
+                      {block.caption && (
+                        <figcaption>
+                          <RichTextContent value={block.caption} inline />
+                        </figcaption>
+                      )}
+                    </figure>
+                  ) : (
+                    <div className="blog-block-split-placeholder">
+                      Image not available
+                    </div>
+                  )}
+                </div>
+
+                <div className="blog-block-split-copy">
+                  {block.title && (
+                    <h2>
+                      <RichTextContent value={block.title} inline />
+                    </h2>
+                  )}
+                  <RichTextContent value={block.text} />
+                </div>
+              </section>
+            );
+          }
+
+          return (
+            <RichTextContent
+              key={block.id || `${post.id || "preview"}_paragraph_${index}`}
+              value={block.text}
+            />
+          );
+        })
+      ) : (
+        <RichTextContent value={post?.content} />
+      )}
     </article>
   );
 };

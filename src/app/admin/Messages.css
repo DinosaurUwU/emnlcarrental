@@ -408,18 +408,6 @@ body.modal-open {
 }
 
 /* Close Button */
-/* .admin-close-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  border-radius: 5px;
-  background-color: red;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: white;
-} */
-
 .admin-message-content .close-btn {
   background: transparent;
   border: none;

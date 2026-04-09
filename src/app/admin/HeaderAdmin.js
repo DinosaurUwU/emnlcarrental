@@ -13,12 +13,16 @@ import {
   FiMoon,
   FiMonitor,
   FiHome,
-  FiSettings,
   FiLogOut,
   FiX,
 } from "react-icons/fi";
 import { BiSearch, BiSearchAlt } from "react-icons/bi";
-import { MdSpaceDashboard, MdAnalytics, MdNotificationsActive, MdAdminPanelSettings } from "react-icons/md";
+import {
+  MdSpaceDashboard,
+  MdAnalytics,
+  MdNotificationsActive,
+  MdAdminPanelSettings,
+} from "react-icons/md";
 import { HiTableCells } from "react-icons/hi2";
 import { BsFillFilePostFill } from "react-icons/bs";
 
@@ -29,8 +33,6 @@ const Header = ({
   activeSubSections,
   activeSection,
 }) => {
-  const [firestoreUsage, setFirestoreUsage] = useState(null);
-
   const [rentalDropdownOpen, setRentalDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -39,7 +41,6 @@ const Header = ({
   const [selectedAdmin, setSelectedAdmin] = useState(null);
 
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [showBookingDetailsOverlay, setShowBookingDetailsOverlay] =
     useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
@@ -47,7 +48,6 @@ const Header = ({
   const [editedAdminPhone, setEditedAdminPhone] = useState("");
 
   const [newAdminProfilePic, setNewAdminProfilePic] = useState(null);
-  const [adminProfilePicFile, setAdminProfilePicFile] = useState(null);
   const fileInputRef = useRef(null);
   const [isSavingAdminProfile, setIsSavingAdminProfile] = useState(false);
   const [showAdminProfileSavedSuccess, setShowAdminProfileSavedSuccess] =
@@ -154,7 +154,6 @@ const Header = ({
   });
 
   const [fetchedImages, setFetchedImages] = useState({});
-
   const [hoveredIcon, setHoveredIcon] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -170,7 +169,6 @@ const Header = ({
     logout,
     theme,
     updateTheme,
-    userTheme,
     setShowVerifyOverlay,
     sendVerificationEmail,
     adminAccounts,
@@ -193,7 +191,6 @@ const Header = ({
     completedBookingsAnalytics,
     fetchImageFromFirestore,
     updateAdminProfilePic,
-    resetAdminProfilePic,
     syncAdminInfoToAppSettings,
     resetAdminToAppSettingsOriginal,
     adminContactInfo,
@@ -236,7 +233,7 @@ const Header = ({
   const displayAdminName =
     adminContactInfo?.name || selectedAdmin?.name || "Admin";
 
-  // per your requirement: email should come from current logged-in admin (users collection)
+  // Current Logged-in Admin
   const displayAdminEmail = selectedAdmin?.email || "No email";
 
   const displayAdminPhone =
@@ -250,17 +247,13 @@ const Header = ({
   const importFileInputRef = useRef(null);
 
   const [pendingTheme, setPendingTheme] = useState(theme);
-
   const [showTogglePaidDialog, setShowTogglePaidDialog] = useState(false);
   const [isTogglingPaid, setIsTogglingPaid] = useState(false);
   const [showToggledPaidSuccess, setShowToggledPaidSuccess] = useState(false);
   const [hideToggledPaidAnimation, setHideToggledPaidAnimation] =
     useState(false);
 
-  const profilePic = user?.profilePic || "/assets/account.svg";
-
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const searchInputRef = useRef(null);
@@ -283,8 +276,6 @@ const Header = ({
   const [hideSavedAnimation, setHideSavedAnimation] = useState(false);
 
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("ALL");
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [isBlockingUser, setIsBlockingUser] = useState(false);
   const [showBlockedSuccess, setShowBlockedSuccess] = useState(false);
   const [hideBlockAnimation, setHideBlockAnimation] = useState(false);
@@ -293,7 +284,6 @@ const Header = ({
   const [hideUnblockAnimation, setHideUnblockAnimation] = useState(false);
 
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
 
   const [collapsed, setCollapsed] = useState(false);
@@ -303,7 +293,6 @@ const Header = ({
   const [isOverlay, setIsOverlay] = useState(window.innerWidth <= 1024);
 
   const isSidebarCollapsed = collapsed && !isOverlay;
-
   const usersForDownload = [...(adminAccounts || []), ...(userAccounts || [])]
     .filter(
       (account, index, arr) =>
@@ -573,19 +562,6 @@ const Header = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [onCollapseChange]);
 
-  const handleEditUnit = (unit) => {
-    setEditingUnit(unit.id);
-    setEditFormData({
-      name: unit.name,
-      price: unit.price,
-      extension: unit.extension,
-      plateNo: unit.plateNo,
-      driverRate: unit.driverRate,
-      deliveryFee: unit.deliveryFee,
-    });
-    setShowEditConfirmDialog(true);
-  };
-
   const handleConfirmEdit = () => {
     setShowEditConfirmDialog(false);
   };
@@ -594,29 +570,6 @@ const Header = ({
     setEditingUnit(null);
     setEditFormData({});
     setShowEditConfirmDialog(false);
-  };
-
-  const handleSaveEdit = async () => {
-    try {
-      setIsSavingUnit(true);
-
-      await updateUnitData(editingUnit, editFormData);
-
-      setIsSavingUnit(false);
-      setEditingUnit(null);
-      setEditFormData({});
-
-      setShowSavedSuccess(true);
-      setHideSavedAnimation(false);
-
-      setTimeout(() => {
-        setHideSavedAnimation(true);
-        setTimeout(() => setShowSavedSuccess(false), 400);
-      }, 5000);
-    } catch (error) {
-      console.error("Error updating unit:", error);
-      setIsSavingUnit(false);
-    }
   };
 
   const handleSectionChange = (newSection) => {
@@ -862,17 +815,6 @@ const Header = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleMenuClick = () => {
-    setMenuOpen((prev) => {
-      const newVal = !prev;
-      if (newVal) {
-        setSearchExpanded(false);
-        setAccountDropdownOpen(false);
-      }
-      return newVal;
-    });
-  };
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -912,27 +854,6 @@ const Header = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, [menuOpen, accountDropdownOpen, searchExpanded]);
-
-  const handleSmoothScroll = (e, targetId) => {
-    e.preventDefault();
-    const target = document.getElementById(targetId);
-    const headerHeight = document.querySelector(
-      ".header-admin-container",
-    ).offsetHeight;
-
-    if (target) {
-      const targetPosition =
-        target.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = targetPosition - headerHeight - 70;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-
-    setMenuOpen(false);
-  };
 
   const handleReplaceAdminProfilePic = () => {
     fileInputRef.current.click();
@@ -1301,7 +1222,7 @@ const Header = ({
                     }}
                   >
                     <span className="sidebar-icon">
-                     <item.icon />
+                      <item.icon />
                     </span>
                     <span
                       className={`sidebar-text ${isSidebarCollapsed ? "is-hidden" : ""}`}
@@ -1984,23 +1905,6 @@ const Header = ({
       {showBookingDetailsOverlay && selectedBooking && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowBookingDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -2187,7 +2091,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Saving Admin Profile) */}
+      {/* Loading Overlay (Saving Admin Profile) */}
       {isSavingAdminProfile && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -2203,7 +2107,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Admin Profile Saved) */}
+      {/* Success Overlay (Admin Profile Saved) */}
       {showAdminProfileSavedSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -2226,7 +2130,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Resetting Admin Profile) */}
+      {/* Loading Overlay (Resetting Admin Profile) */}
       {isResettingAdminProfile && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -2242,7 +2146,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Backup Completed) */}
+      {/* Success Overlay (Backup Completed) */}
       {showBackupSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -2265,7 +2169,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Download Completed) */}
+      {/* Success Overlay (Download Completed) */}
       {showDownloadSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -2288,7 +2192,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Import Completed) */}
+      {/* Success Overlay (Import Completed) */}
       {showImportSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -2311,7 +2215,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Admin Profile Reset) */}
+      {/* Success Overlay (Admin Profile Reset) */}
       {showAdminProfileResetSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -2334,7 +2238,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Toggling Paid Status) */}
+      {/* Loading Overlay (Toggling Paid Status) */}
       {isTogglingPaid && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -2350,7 +2254,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Paid Status Toggled) */}
+      {/* Success Overlay (Paid Status Toggled) */}
       {showToggledPaidSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -3975,27 +3879,6 @@ const Header = ({
 
             {/* Close Button */}
 
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => {
-                setShowProfileOverlay(false);
-                setOverlayActiveSection("");
-                setContainerHeight(300);
-              }}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4209,7 +4092,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Saving Unit) */}
+      {/* Loading Overlay (Saving Unit) */}
       {isSavingUnit && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -4225,7 +4108,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Unit Saved) */}
+      {/* Success Overlay (Unit Saved) */}
       {showSavedSuccess && (
         <div
           className={`sent-ongoing-overlay ${hideSavedAnimation ? "hide" : ""}`}
@@ -4312,7 +4195,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Blocking User) */}
+      {/* Loading Overlay (Blocking User) */}
       {isBlockingUser && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -4328,7 +4211,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (User Blocked) */}
+      {/* Success Overlay (User Blocked) */}
       {showBlockedSuccess && (
         <div
           className={`date-warning-overlay ${hideBlockAnimation ? "hide" : ""}`}
@@ -4420,7 +4303,7 @@ const Header = ({
         </div>
       )}
 
-      {/* 🟢 Success Overlay (User Unblocked) */}
+      {/* Success Overlay (User Unblocked) */}
       {showUnblockedSuccess && (
         <div
           className={`sent-ongoing-overlay ${
@@ -4446,23 +4329,6 @@ const Header = ({
       {showSettingsOverlay && (
         <div className="admin-settings-overlay">
           <div className="admin-settings-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowSettingsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"

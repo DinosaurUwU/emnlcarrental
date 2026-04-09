@@ -209,7 +209,7 @@ const BookingPage = ({
       return;
     }
 
-    // Nrmalize car type to prevent accidental blanks or undefined
+    // Normalize car type to prevent accidental blanks or undefined
     const type = selectedCarType?.trim() || "ALL";
 
     // Show ALL units including hidden
@@ -518,7 +518,6 @@ const BookingPage = ({
       setPreviewImage("/assets/images/image1.png");
 
       setDiscardSavedData(false);
-
       setShowDiscardSavedData(true);
 
       setTimeout(() => setShowDiscardSavedData(false), 4000);
@@ -548,8 +547,6 @@ const BookingPage = ({
   // PREFILL
   useEffect(() => {
     if (prefillData) {
-      // console.log("📥 prefillData received:", JSON.stringify(prefillData, null, 2));
-
       // Check if this is guest session data - show dialog instead of auto-restoring
       if (prefillData.isFromGuestSession) {
         console.log("📝 Guest session data detected, showing load dialog...");
@@ -712,10 +709,6 @@ const BookingPage = ({
 
   const handleImageClick = () => {
     document.querySelector(`[data-pswp-index="1"]`)?.click();
-  };
-
-  const handleCloseImageModal = () => {
-    setIsImageModalOpen(false);
   };
 
   const [showBookingConfirmOverlay, setShowBookingConfirmOverlay] =
@@ -1122,7 +1115,6 @@ const BookingPage = ({
       imageId: selectedUnit?.imageId || "N/A",
       plateNo: selectedUnit?.plateNo || "N/A",
       carType: selectedUnit?.carType || "N/A",
-
       carName: selectedUnit?.name || "",
 
       drivingOption: driveType,
@@ -1146,7 +1138,6 @@ const BookingPage = ({
       contact: formData.contactNo,
       email: formData.email,
       occupation: formData.occupation,
-
       address: formData.address,
 
       driverLicense:
@@ -1369,7 +1360,6 @@ const BookingPage = ({
     setUploadedID(null);
     setTotalPrice(0);
     setPreviewImage("/assets/images/image1.png");
-
     setHasChanges(false);
 
     setFormData({
@@ -1395,7 +1385,6 @@ const BookingPage = ({
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
       setSelectedCarId("");
-
       setSelectedCarType("ALL");
       setDriveType("Self-Drive");
       setDropOffType("Pickup");
@@ -1408,7 +1397,6 @@ const BookingPage = ({
       setUploadedID(null);
       setTotalPrice(0);
       setPreviewImage("/assets/images/image1.png");
-
       setHasChanges(false);
 
       setFormData({
@@ -1566,7 +1554,7 @@ const BookingPage = ({
         </div>
       )}
 
-      {/* 🟢 Loading Overlay */}
+      {/* Loading Overlay */}
       {loadSavedData && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -1582,7 +1570,7 @@ const BookingPage = ({
         </div>
       )}
 
-      {/* 🟡 Success Overlay for Discard */}
+      {/* Success Overlay for Discard */}
       {showDiscardSavedData && (
         <div className={`date-warning-overlay ${hideAnimation ? "hide" : ""}`}>
           <button
@@ -1601,7 +1589,7 @@ const BookingPage = ({
         </div>
       )}
 
-      {/* 🔴 Loading Overlay for Discard */}
+      {/* Loading Overlay for Discard */}
       {discardSavedData && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -1646,13 +1634,13 @@ const BookingPage = ({
       {showConfirmOverlay && (
         <div className="overlay-revert">
           <div className="confirm-modal">
-<button
-  className="close-btn"
-  type="button"
-  onClick={() => setShowConfirmOverlay(false)}
->
-  <FiX className="close-icon" />
-</button>
+            <button
+              className="close-btn"
+              type="button"
+              onClick={() => setShowConfirmOverlay(false)}
+            >
+              <FiX className="close-icon" />
+            </button>
 
             <h3>Unsaved Changes</h3>
             <p>What would you like to do?</p>
@@ -1762,30 +1750,13 @@ const BookingPage = ({
       {showBookingConfirmOverlay && (
         <div className="booking-confirm-overlay">
           <div className="booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowBookingConfirmOverlay(false)}
             >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-            <button
-  className="close-btn"
-  type="button"
-onClick={() => setShowBookingConfirmOverlay(false)}
->
-  <FiX className="close-icon" />
-</button>
+              <FiX className="close-icon" />
+            </button>
 
             <h3 className="confirm-header">CONFIRM CHANGES?</h3>
             <p className="confirm-text">
@@ -2026,181 +1997,170 @@ onClick={() => setShowBookingConfirmOverlay(false)}
         style={containerStyle}
         onSubmit={handleSubmit}
       >
-        {/* <button
+        <button
           className="close-btn"
           type="button"
           onClick={handleCloseOverlay}
         >
-          <img
-            src="/assets/close_0.png"
-            alt="Close"
-            className="close-icon close-icon-0"
-          />
-          <img
-            src="/assets/close_1.png"
-            alt="Close"
-            className="close-icon close-icon-1"
-          />
-        </button> */}
+          <FiX className="close-icon" />
+        </button>
 
-       <button
-  className="close-btn"
-  type="button"
-  onClick={handleCloseOverlay}
->
-  <FiX className="close-icon" />
-</button>
+        {(() => {
+          const actualFormData = {
+            ...(editingBookingData || {}),
+            ...formData,
+          };
 
+          console.log("formData check:", {
+            firstName: actualFormData?.firstName,
+            surname: actualFormData?.surname,
+            email: actualFormData?.email,
+            contactNo: actualFormData?.contactNo,
+            address: actualFormData?.address,
+            location: actualFormData?.location,
+            purpose: actualFormData?.purpose,
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            driveType,
+            dropOffType,
+          });
 
+          const selectedUnit =
+            allUnitData.find((unit) => unit.id === selectedCarId) ||
+            unitData.find((unit) => unit.id === selectedCarId) ||
+            (actualFormData?.carId
+              ? allUnitData.find((unit) => unit.id === actualFormData.carId) ||
+                unitData.find((unit) => unit.id === actualFormData.carId)
+              : null) ||
+            (actualFormData?.carName
+              ? allUnitData.find(
+                  (unit) => unit.name === actualFormData.carName,
+                ) ||
+                unitData.find((unit) => unit.name === actualFormData.carName)
+              : null);
 
+          const hasSelectedUnit = Boolean(selectedUnit);
+          const hasCustomerInfo =
+            actualFormData?.firstName &&
+            actualFormData?.middleName &&
+            actualFormData?.surname &&
+            actualFormData?.occupation &&
+            actualFormData?.address &&
+            actualFormData?.email;
+          const hasDates = startDate && endDate;
+          const hasTimes = startTime && endTime;
+          const hasLocation =
+            actualFormData?.location && actualFormData?.purpose;
+          const hasAnyData =
+            hasSelectedUnit &&
+            hasCustomerInfo &&
+            hasDates &&
+            hasTimes &&
+            hasLocation;
 
+          console.log("hasAnyData:", hasAnyData);
 
+          const start =
+            startDate && startTime
+              ? new Date(`${startDate}T${startTime}`)
+              : null;
+          const end =
+            endDate && endTime ? new Date(`${endDate}T${endTime}`) : null;
+          const totalHours =
+            start && end
+              ? (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+              : 0;
+          const totalDurationInSeconds =
+            start && end
+              ? Math.floor((end.getTime() - start.getTime()) / 1000)
+              : 0;
 
-{(() => {
-  const actualFormData = {
-    ...(editingBookingData || {}),
-    ...formData,
-  };
+          const isFlatRateSameDay =
+            start && end && startDate === endDate && totalHours < 24;
 
-  console.log("formData check:", {
-    firstName: actualFormData?.firstName,
-    surname: actualFormData?.surname,
-    email: actualFormData?.email,
-    contactNo: actualFormData?.contactNo,
-    address: actualFormData?.address,
-    location: actualFormData?.location,
-    purpose: actualFormData?.purpose,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    driveType,
-    dropOffType,
-  });
+          const rentalDays =
+            start && end && !isFlatRateSameDay
+              ? Math.floor(totalHours / 24)
+              : 0;
+          const extraHours =
+            start && end && !isFlatRateSameDay
+              ? Math.round(totalHours % 24)
+              : 0;
 
-const selectedUnit =
-    allUnitData.find((unit) => unit.id === selectedCarId) ||
-    unitData.find((unit) => unit.id === selectedCarId) ||
-    (actualFormData?.carId
-      ? allUnitData.find((unit) => unit.id === actualFormData.carId) ||
-        unitData.find((unit) => unit.id === actualFormData.carId)
-      : null) ||
-    (actualFormData?.carName
-      ? allUnitData.find((unit) => unit.name === actualFormData.carName) ||
-        unitData.find((unit) => unit.name === actualFormData.carName)
-      : null);
+          const discountedRate = selectedUnit
+            ? getDiscountedRate(selectedUnit, rentalDays || 1)
+            : 0;
 
-  const hasSelectedUnit = Boolean(selectedUnit);
-  const hasCustomerInfo =
-    actualFormData?.firstName &&
-     actualFormData?.middleName &&
-    actualFormData?.surname &&
-        actualFormData?.occupation &&
-    actualFormData?.address &&
-    actualFormData?.email;
-  const hasDates = startDate && endDate;
-  const hasTimes = startTime && endTime;
-  const hasLocation = actualFormData?.location && actualFormData?.purpose;
-  const hasAnyData =
-    hasSelectedUnit && hasCustomerInfo && hasDates && hasTimes && hasLocation;
+          const billedDays = isFlatRateSameDay
+            ? 1
+            : rentalDays + (extraHours >= 24 ? 1 : 0);
 
-  console.log("hasAnyData:", hasAnyData);
+          const drivingPrice =
+            driveType === "With Driver" ? selectedUnit?.driverRate || 0 : 0;
+          const pickupPrice =
+            dropOffType === "Drop-off" ? selectedUnit?.deliveryFee || 0 : 0;
+          const extraHourCharge =
+            isFlatRateSameDay || !selectedUnit
+              ? 0
+              : extraHours * (selectedUnit.extension || 0);
 
-  const start = startDate && startTime ? new Date(`${startDate}T${startTime}`) : null;
-  const end = endDate && endTime ? new Date(`${endDate}T${endTime}`) : null;
-  const totalHours =
-    start && end ? (end.getTime() - start.getTime()) / (1000 * 60 * 60) : 0;
-  const totalDurationInSeconds =
-    start && end ? Math.floor((end.getTime() - start.getTime()) / 1000) : 0;
+          const baseRentalCharge = isFlatRateSameDay
+            ? discountedRate
+            : rentalDays * discountedRate;
 
-  const isFlatRateSameDay =
-    start &&
-    end &&
-    startDate === endDate &&
-    totalHours < 24;
+          const drivingCharge = drivingPrice * (rentalDays || 1);
+          const computedTotal =
+            baseRentalCharge + drivingCharge + pickupPrice + extraHourCharge;
 
-  const rentalDays =
-    start && end && !isFlatRateSameDay ? Math.floor(totalHours / 24) : 0;
-  const extraHours =
-    start && end && !isFlatRateSameDay ? Math.round(totalHours % 24) : 0;
+          const mappedData = {
+            ...actualFormData,
+            imageId: selectedUnit?.imageId || actualFormData?.imageId || "N/A",
+            plateNo: selectedUnit?.plateNo || actualFormData?.plateNo || "N/A",
+            carType: selectedUnit?.carType || actualFormData?.carType || "N/A",
+            carName: selectedUnit?.name || actualFormData?.carName || "",
+            extension:
+              selectedUnit?.extension || actualFormData?.extension || 0,
+            contact: actualFormData?.contactNo || actualFormData?.contact,
+            drivingOption: driveType,
+            pickupOption: dropOffType,
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            billedDays,
+            discountedRate,
+            drivingPrice,
+            pickupPrice,
+            extraHourCharge,
+            totalPrice: computedTotal,
+            rentalDuration: {
+              days: rentalDays,
+              extraHour: extraHours,
+              extraHours,
+              isFlatRateSameDay,
+              actualSeconds: totalDurationInSeconds,
+            },
+          };
 
-  const discountedRate = selectedUnit
-    ? getDiscountedRate(selectedUnit, rentalDays || 1)
-    : 0;
-
-  const billedDays = isFlatRateSameDay
-    ? 1
-    : rentalDays + (extraHours >= 24 ? 1 : 0);
-
-  const drivingPrice =
-    driveType === "With Driver" ? selectedUnit?.driverRate || 0 : 0;
-  const pickupPrice =
-    dropOffType === "Drop-off" ? selectedUnit?.deliveryFee || 0 : 0;
-  const extraHourCharge =
-    isFlatRateSameDay || !selectedUnit
-      ? 0
-      : extraHours * (selectedUnit.extension || 0);
-
-  const baseRentalCharge = isFlatRateSameDay
-    ? discountedRate
-    : rentalDays * discountedRate;
-
-  const drivingCharge = drivingPrice * (rentalDays || 1);
-  const computedTotal =
-    baseRentalCharge + drivingCharge + pickupPrice + extraHourCharge;
-
-  const mappedData = {
-    ...actualFormData,
-    imageId: selectedUnit?.imageId || actualFormData?.imageId || "N/A",
-    plateNo: selectedUnit?.plateNo || actualFormData?.plateNo || "N/A",
-    carType: selectedUnit?.carType || actualFormData?.carType || "N/A",
-    carName: selectedUnit?.name || actualFormData?.carName || "",
-    extension: selectedUnit?.extension || actualFormData?.extension || 0,
-    contact: actualFormData?.contactNo || actualFormData?.contact,
-    drivingOption: driveType,
-    pickupOption: dropOffType,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    billedDays,
-    discountedRate,
-    drivingPrice,
-    pickupPrice,
-    extraHourCharge,
-    totalPrice: computedTotal,
-    rentalDuration: {
-      days: rentalDays,
-      extraHour: extraHours,
-      extraHours,
-      isFlatRateSameDay,
-      actualSeconds: totalDurationInSeconds,
-    },
-  };
-  
-  return (
-    <button
-      className="download-quotation-btn"
-      type="button"
-      title="Download Quotation"
-      onClick={() => {
-        console.log("Button clicked, hasAnyData:", hasAnyData);
-        if (hasAnyData) {
-          generateQuotationPDF(mappedData);
-        }
-      }}
-      disabled={!hasAnyData}
-    >
-      <TbFileDownload />
-    </button>
-  );
-})()}
-
-
-
-
-
-
+          return (
+            <button
+              className="download-quotation-btn"
+              type="button"
+              title="Download Quotation"
+              onClick={() => {
+                console.log("Button clicked, hasAnyData:", hasAnyData);
+                if (hasAnyData) {
+                  generateQuotationPDF(mappedData);
+                }
+              }}
+              disabled={!hasAnyData}
+            >
+              <TbFileDownload />
+            </button>
+          );
+        })()}
 
         <h2
           style={{
@@ -2238,428 +2198,406 @@ const selectedUnit =
             onAnimationEnd={() => setImageAnimation("")}
           />
         </div>
-<div className="booking-section">
+        <div className="booking-section">
+          <div className="booking-columns">
+            <div className="booking-column left">
+              <div className="fixed-header">FILL-UP FORM</div>
+              <div className="fill-up-form">
+                <div className="form-row car-selection-row">
+                  <div>
+                    <label className="pickacar">Car Type:</label>
+                    <select
+                      value={selectedCarType}
+                      onChange={(e) => setSelectedCarType(e.target.value)}
+                      disabled={lockedReservedRequest}
+                    >
+                      <option value="ALL">ALL</option>
+                      <option value="SEDAN">SEDAN</option>
+                      <option value="SUV">SUV</option>
+                      <option value="MPV">MPV</option>
+                      <option value="VAN">VAN</option>
+                      <option value="PICKUP">PICKUP</option>
+                    </select>
+                  </div>
 
+                  <div>
+                    <label className="pickacar">
+                      Pick a Car:{" "}
+                      {isReservedUnitSelected && (
+                        <span className="reserved-unit-inline-badge">
+                          Reservation
+                        </span>
+                      )}
+                    </label>
 
+                    <select
+                      value={selectedCarId}
+                      onChange={(e) => {
+                        const carId = e.target.value;
+                        setSelectedCarId(carId);
+                        setSkipImageUpdate(true);
+                        setHasChanges(true);
+                        setImageAnimation("fade-out");
 
+                        const selectedUnit = allUnitData.find(
+                          (u) => u.id === carId,
+                        );
 
-        
+                        if (selectedUnit?.imageId) {
+                          fetchImageFromFirestore(selectedUnit.imageId)
+                            .then(({ base64 }) => {
+                              setTimeout(() => {
+                                setPreviewImage(
+                                  base64 || "/assets/images/image1.png",
+                                );
+                                setImageAnimation("fade-slide-in");
+                              }, 200);
+                            })
+                            .catch(() => {
+                              setTimeout(() => {
+                                setPreviewImage("/assets/images/image1.png");
+                                setImageAnimation("fade-slide-in");
+                              }, 200);
+                            });
+                        } else {
+                          setTimeout(() => {
+                            setPreviewImage("/assets/images/image1.png");
+                            setImageAnimation("fade-slide-in");
+                          }, 200);
+                        }
+                      }}
+                      required
+                      disabled={lockedReservedRequest}
+                    >
+                      <option value="" disabled hidden>
+                        Pick a Car
+                      </option>
 
-        {/* <div className="booking-content">
-          <div className="booking-column"> */}
-      <div className="booking-columns">
-          <div className="booking-column left">     
-            {/* <div className="fill-up-form">
-              <h3 className="fixed-header">FILL-UP FORM</h3> */}
-
-                <div className="fixed-header">FILL-UP FORM</div>
-  <div className="fill-up-form">
-
-
-              <div className="form-row car-selection-row">
-                <div>
-                  <label className="pickacar">Car Type:</label>
-                  <select
-                    value={selectedCarType}
-                    onChange={(e) => setSelectedCarType(e.target.value)}
-                    disabled={lockedReservedRequest}
-                  >
-                    <option value="ALL">ALL</option>
-                    <option value="SEDAN">SEDAN</option>
-                    <option value="SUV">SUV</option>
-                    <option value="MPV">MPV</option>
-                    <option value="VAN">VAN</option>
-                    <option value="PICKUP">PICKUP</option>
-                  </select>
+                      {filteredUnits.map((unit) => (
+                        <option
+                          key={unit.id}
+                          value={unit.id}
+                          className={unit.hidden ? "hidden-unit" : ""}
+                        >
+                          {unit.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="pickacar">
-                    Pick a Car:{" "}
-                    {isReservedUnitSelected && (
-                      <span className="reserved-unit-inline-badge">
-                        Reservation
-                      </span>
-                    )}
-                  </label>
+                <div className="drive-type-form-row">
+                  <div>
+                    <label>Driving Option:</label>
+                    <select
+                      value={driveType}
+                      onChange={(e) => setDriveType(e.target.value)}
+                      required
+                    >
+                      <option value="Self-Drive">Self-Drive</option>
+                      <option value="With Driver">With Driver</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Pickup / Drop-off:</label>
+                    <select
+                      value={dropOffType}
+                      onChange={(e) => setDropOffType(e.target.value)}
+                      required
+                    >
+                      <option value="Pickup">Pickup</option>
+                      <option value="Drop-off">Drop-off</option>
+                    </select>
+                  </div>
+                </div>
+
+                {dropOffType === "Drop-off" && (
+                  <div className="location-input">
+                    <label>Drop-off Location:</label>
+                    <input
+                      type="text"
+                      name="dropoffLocation"
+                      placeholder="Enter Drop-off Location"
+                      value={formData.dropoffLocation}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="date-form-row">
+                  <div>
+                    <label>Start Date:</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={handleStartDateChange}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label>Start Time:</label>
+                    <input
+                      type="time"
+                      value={startTime}
+                      onChange={handleStartTimeChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="date-form-row">
+                  <div>
+                    <label>End Date:</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={handleEndDateChange}
+                      className={errorMessage ? "id-error-input" : ""}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label>End Time:</label>
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={handleEndTimeChange}
+                      style={{
+                        borderColor: isDurationInvalid ? "#dc3545" : undefined,
+                      }}
+                      ref={endTimeRef}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="location-input">
+                  <label>Travel Location:</label>
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="purpose-input">
+                  <label>Purpose:</label>
+                  <input
+                    type="text"
+                    name="purpose"
+                    placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
+                    value={formData.purpose}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <label>Upload Driver's License:</label>
+                <input
+                  type="file"
+                  id="uploadID"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className={`file-input ${fileError ? "error-border" : ""}`}
+                />
+
+                {fileError && (
+                  <div className="id-error-message">
+                    Driver's License is required!
+                  </div>
+                )}
+
+                {uploadedPreviewSrc && (
+                  <div className="image-preview">
+                    <img
+                      src={uploadedPreviewSrc}
+                      alt="Uploaded ID"
+                      onClick={handleImageClick}
+                      className="preview-thumbnail"
+                    />
+                  </div>
+                )}
+
+                <label htmlFor="uploadID" className="file-label">
+                  {uploadedID
+                    ? "Change Driver's License"
+                    : "Upload Driver's License"}
+                </label>
+
+                <label className="form-label">Personal Information</label>
+                <div className="form-row">
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">First Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder="First Name"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">
+                      Middle Name (N/A if none)
+                    </label>
+                    <input
+                      type="text"
+                      name="middleName"
+                      placeholder="Middle Name (N/A if none)"
+                      value={formData.middleName}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">Surname</label>
+                    <input
+                      type="text"
+                      name="surname"
+                      placeholder="Surname"
+                      value={formData.surname}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">Occupation</label>
+                    <input
+                      type="text"
+                      name="occupation"
+                      placeholder="Occupation"
+                      value={formData.occupation}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">
+                      Current Address
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Current Address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <label className="form-label">Contacts</label>
+                <div className="form-row">
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">
+                      Contact No.
+                    </label>
+                    <input
+                      type="text"
+                      name="contactNo"
+                      placeholder="Contact No."
+                      value={formData.contactNo}
+                      onChange={(e) => {
+                        const formattedNumber = e.target.value.replace(
+                          /[^0-9-]/g,
+                          "",
+                        );
+                        setFormData((prev) => ({
+                          ...prev,
+                          contactNo: formattedNumber,
+                        }));
+                        setHasChanges(true);
+                      }}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="first-name-field">
+                    <label className="first-name-inner-label">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email Address"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="first-name-input"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="message-section">
+                  <h4 className="message-label">Referral Source (Optional)</h4>
 
                   <select
-                    value={selectedCarId}
-                    onChange={(e) => {
-                      const carId = e.target.value;
-                      setSelectedCarId(carId);
-                      setSkipImageUpdate(true);
-                      setHasChanges(true);
-                      setImageAnimation("fade-out");
-
-                      const selectedUnit = allUnitData.find(
-                        (u) => u.id === carId,
-                      );
-
-                      if (selectedUnit?.imageId) {
-                        fetchImageFromFirestore(selectedUnit.imageId)
-                          .then(({ base64 }) => {
-                            setTimeout(() => {
-                              setPreviewImage(
-                                base64 || "/assets/images/image1.png",
-                              );
-                              setImageAnimation("fade-slide-in");
-                            }, 200);
-                          })
-                          .catch(() => {
-                            setTimeout(() => {
-                              setPreviewImage("/assets/images/image1.png");
-                              setImageAnimation("fade-slide-in");
-                            }, 200);
-                          });
-                      } else {
-                        setTimeout(() => {
-                          setPreviewImage("/assets/images/image1.png");
-                          setImageAnimation("fade-slide-in");
-                        }, 200);
-                      }
-                    }}
-                    required
-                    disabled={lockedReservedRequest}
+                    name="referralSource"
+                    className="referral-info"
+                    value={formData.referralSource || "Walk-in"}
+                    onChange={handleInputChange}
                   >
-                    <option value="" disabled hidden>
-                      Pick a Car
-                    </option>
-
-                    {filteredUnits.map((unit) => (
-                      <option
-                        key={unit.id}
-                        value={unit.id}
-                        className={unit.hidden ? "hidden-unit" : ""}
-                      >
-                        {unit.name}
+                    {referralSources.map((source) => (
+                      <option key={source} value={source}>
+                        {source}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div className="drive-type-form-row">
-                <div>
-                  <label>Driving Option:</label>
-                  <select
-                    value={driveType}
-                    onChange={(e) => setDriveType(e.target.value)}
-                    required
-                  >
-                    <option value="Self-Drive">Self-Drive</option>
-                    <option value="With Driver">With Driver</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Pickup / Drop-off:</label>
-                  <select
-                    value={dropOffType}
-                    onChange={(e) => setDropOffType(e.target.value)}
-                    required
-                  >
-                    <option value="Pickup">Pickup</option>
-                    <option value="Drop-off">Drop-off</option>
-                  </select>
-                </div>
-              </div>
-
-              {dropOffType === "Drop-off" && (
-                <div className="location-input">
-                  <label>Drop-off Location:</label>
-                  <input
-                    type="text"
-                    name="dropoffLocation"
-                    placeholder="Enter Drop-off Location"
-                    value={formData.dropoffLocation}
+                <div className="message-input">
+                  <label>Additional Message:</label>
+                  <textarea
+                    name="additionalMessage"
+                    placeholder="Enter any additional message..."
+                    value={formData.additionalMessage}
                     onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="date-form-row">
-                <div>
-                  <label>Start Date:</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={handleStartDateChange}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label>Start Time:</label>
-                  <input
-                    type="time"
-                    value={startTime}
-                    onChange={handleStartTimeChange}
-                    required
-                  />
+                    rows="3"
+                  ></textarea>
                 </div>
               </div>
+            </div>
 
-              <div className="date-form-row">
-                <div>
-                  <label>End Date:</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={handleEndDateChange}
-                    className={errorMessage ? "id-error-input" : ""}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label>End Time:</label>
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={handleEndTimeChange}
-                    style={{
-                      borderColor: isDurationInvalid ? "#dc3545" : undefined,
-                    }}
-                    ref={endTimeRef}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="location-input">
-                <label>Travel Location:</label>
-                <input
-                  type="text"
-                  name="location"
-                  placeholder="e.g., Ormoc to Tacloban | Ormoc to Baybay to Maasin, etc."
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="purpose-input">
-                <label>Purpose:</label>
-                <input
-                  type="text"
-                  name="purpose"
-                  placeholder="e.g., Business Trip, Family Vacation, Wedding, etc."
-                  value={formData.purpose}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <label>Upload Driver's License:</label>
-              <input
-                type="file"
-                id="uploadID"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className={`file-input ${fileError ? "error-border" : ""}`}
-              />
-
-              {fileError && (
-                <div className="id-error-message">
-                  Driver's License is required!
-                </div>
-              )}
-
-              {uploadedPreviewSrc && (
-                <div className="image-preview">
-                  <img
-                    src={uploadedPreviewSrc}
-                    alt="Uploaded ID"
-                    onClick={handleImageClick}
-                    className="preview-thumbnail"
-                  />
-                </div>
-              )}
-
-              <label htmlFor="uploadID" className="file-label">
-                {uploadedID
-                  ? "Change Driver's License"
-                  : "Upload Driver's License"}
-              </label>
-
-              <label className="form-label">Personal Information</label>
-              <div className="form-row">
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">First Name</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="First Name"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">
-                    Middle Name (N/A if none)
-                  </label>
-                  <input
-                    type="text"
-                    name="middleName"
-                    placeholder="Middle Name (N/A if none)"
-                    value={formData.middleName}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">Surname</label>
-                  <input
-                    type="text"
-                    name="surname"
-                    placeholder="Surname"
-                    value={formData.surname}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">Occupation</label>
-                  <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Occupation"
-                    value={formData.occupation}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">
-                    Current Address
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Current Address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-              </div>
-
-              <label className="form-label">Contacts</label>
-              <div className="form-row">
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">Contact No.</label>
-                  <input
-                    type="text"
-                    name="contactNo"
-                    placeholder="Contact No."
-                    value={formData.contactNo}
-                    onChange={(e) => {
-                      const formattedNumber = e.target.value.replace(
-                        /[^0-9-]/g,
-                        "",
-                      );
-                      setFormData((prev) => ({
-                        ...prev,
-                        contactNo: formattedNumber,
-                      }));
-                      setHasChanges(true);
-                    }}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-
-                <div className="first-name-field">
-                  <label className="first-name-inner-label">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="first-name-input"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="message-section">
-                <h4 className="message-label">Referral Source (Optional)</h4>
-
-                <select
-                  name="referralSource"
-                  className="referral-info"
-                  value={formData.referralSource || "Walk-in"}
-                  onChange={handleInputChange}
-                >
-                  {referralSources.map((source) => (
-                    <option key={source} value={source}>
-                      {source}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="message-input">
-                <label>Additional Message:</label>
-                <textarea
-                  name="additionalMessage"
-                  placeholder="Enter any additional message..."
-                  value={formData.additionalMessage}
-                  onChange={handleInputChange}
-                  rows="3"
-                ></textarea>
+            <div className="booking-column right">
+              <div className="booking-column">
+                {/* <QuotationSummary /> */}
+                {renderQuotationSummary()}
               </div>
             </div>
           </div>
 
-          <div className="booking-column right">
-            <div className="booking-column">
-              {/* <QuotationSummary /> */}
-              {renderQuotationSummary()}
-            </div>
+          <div className="booking-buttons">
+            <button className="confirm-btn" type="submit">
+              Confirm Booking
+            </button>
+
+            <button
+              type="button"
+              className="clear-btn"
+              onClick={() => setShowClearFormOverlay(true)}
+            >
+              Clear All
+            </button>
           </div>
-      </div>
-
-
- <div className="booking-buttons">
-
-        <button className="confirm-btn" type="submit">
-          Confirm Booking
-        </button>
-
-        <button
-          type="button"
-          className="clear-btn"
-          onClick={() => setShowClearFormOverlay(true)}
-        >
-          Clear All
-        </button>
-
-</div>
-
-</div>
-
-
-
-
-
+        </div>
       </form>
-
-
 
       <div ref={galleryRef} style={{ display: "none" }}>
         <a

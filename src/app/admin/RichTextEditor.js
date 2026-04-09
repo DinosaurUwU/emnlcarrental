@@ -284,7 +284,11 @@ export default function RichTextEditor({
     }
 
     const range = selection.getRangeAt(0);
-    const startTag = getClosestFormatNode(range.startContainer, tagName, editor);
+    const startTag = getClosestFormatNode(
+      range.startContainer,
+      tagName,
+      editor,
+    );
     const endTag = getClosestFormatNode(range.endContainer, tagName, editor);
 
     if (startTag && endTag && startTag === endTag) {
@@ -335,7 +339,9 @@ export default function RichTextEditor({
     if (!url) return;
 
     const range = selection.getRangeAt(0);
-    const safeUrl = /^(https?:|mailto:|tel:|\/)/i.test(url) ? url : `https://${url}`;
+    const safeUrl = /^(https?:|mailto:|tel:|\/)/i.test(url)
+      ? url
+      : `https://${url}`;
     const link = document.createElement("a");
     link.setAttribute("href", safeUrl);
     link.setAttribute("target", "_blank");
@@ -465,7 +471,10 @@ export default function RichTextEditor({
         onMouseUp={captureSelection}
         onKeyUp={captureSelection}
         onFocus={captureSelection}
-        style={{ minHeight: typeof minHeight === "number" ? `${minHeight}px` : minHeight }}
+        style={{
+          minHeight:
+            typeof minHeight === "number" ? `${minHeight}px` : minHeight,
+        }}
       />
     </div>
   );

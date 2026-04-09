@@ -29,9 +29,7 @@ const Messages = () => {
   } = useUser();
 
   const [selectedNotification, setSelectedNotification] = useState(null);
-
   const [activeTab, setActiveTab] = useState("notifications");
-
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
 
@@ -132,7 +130,7 @@ const Messages = () => {
   const currentVisibleConversationMessageCount =
     visibleConversationMessageCounts[selectedConversationId] || 10;
 
-useEffect(() => {
+  useEffect(() => {
     setSelectedThreadMessages([]);
     setPendingConversationMessages([]);
 
@@ -229,7 +227,7 @@ useEffect(() => {
     setSelectedNotification(null);
   };
 
-const openConversation = (threadId) => {
+  const openConversation = (threadId) => {
     setSelectedThreadMessages([]);
     setPendingConversationMessages([]);
     setSelectedConversationId(threadId);
@@ -1017,8 +1015,7 @@ const openConversation = (threadId) => {
                       </div>
                     </div>
 
-                    
-<div
+                    <div
                       className="conversation-chat-body"
                       ref={conversationChatBodyRef}
                     >
@@ -1069,12 +1066,6 @@ const openConversation = (threadId) => {
                                 </div>
                               )}
 
-                              {/* <div
-                                className="conversation-bubble-text"
-                                dangerouslySetInnerHTML={{
-                                  __html: htmlContent,
-                                }}
-                              /> */}
                               <div
                                 className="conversation-bubble-text"
                                 dangerouslySetInnerHTML={{
@@ -1130,10 +1121,6 @@ const openConversation = (threadId) => {
         {selectedNotification && (
           <div className="admin-message-overlay fade-in">
             <div className="admin-message-content">
-              {/* <button className="admin-close-btn" onClick={closeNotification}>
-                ×
-              </button> */}
-
               <button
                 className="close-btn"
                 type="button"

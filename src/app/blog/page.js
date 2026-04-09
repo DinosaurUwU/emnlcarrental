@@ -141,7 +141,9 @@ export default function BlogPage() {
                 </div>
                 <h2>{post.title || "Untitled Post"}</h2>
                 <RichTextContent
-                  value={post.excerpt || "Read the full article for more details."}
+                  value={
+                    post.excerpt || "Read the full article for more details."
+                  }
                   className="blog-list-card-excerpt"
                 />
               </div>
