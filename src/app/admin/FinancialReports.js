@@ -2357,7 +2357,7 @@ const FinancialReports = () => {
                     const monthRows = { ...newGrid[selectedMonthIndex] };
 
                     // For Row_0 to Row_4: only clear data, keep the row
-                    // For Row_5+: actually delete the row entirely
+                    // For Row_5+: delete the row entirely
                     selectedRows.forEach((r) => {
                       // Remove month prefix if present (e.g., "1-Row_0" -> "Row_0")
                       const actualRowKey = r.includes("-")
@@ -2545,23 +2545,6 @@ const FinancialReports = () => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
