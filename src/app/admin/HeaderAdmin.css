@@ -1030,6 +1030,7 @@
   text-decoration: none;
   transition: background 0.3s ease;
   cursor: pointer;
+  gap: 30px;
 }
 
 .sidebar-nav-item:hover {
@@ -1057,13 +1058,23 @@
 }
 
 .sidebar-icon {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   margin: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.sidebar-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #ff9100;
+}
+
+.sidebar-nav-item.active .sidebar-icon svg {
+  color: #ffd900;
 }
 
 .sidebar-icon img {

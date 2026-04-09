@@ -1,9 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-
 import "./AdminDashboard.css";
 import HeaderAdmin from "./HeaderAdmin";
-
 import RentalActivitySection from "./RentalActivitySection";
 import AnalyticsSection from "./AnalyticsSection";
 import FinancialReports from "./FinancialReports";
@@ -14,12 +12,9 @@ import AdminSettings from "./AdminSettings";
 import { useUser } from "../lib/UserContext";
 
 const AdminDashboard = () => {
-
   const { fetchAdminUid } = useUser();
-
   const [activeSection, setActiveSection] = useState("rental-activity");
   const [collapsed, setCollapsed] = useState(false);
-
   const [activeSubSections, setActiveSubSections] = useState({
     "rental-activity": "overview",
     analytics: "overview",

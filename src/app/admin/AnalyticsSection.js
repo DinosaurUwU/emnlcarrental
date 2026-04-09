@@ -56,7 +56,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     imageUpdateTrigger,
     imageCache,
     activeBookings,
-    generateCalendarEventsWithVacant,
   } = useUser();
   const [analyticsData, setAnalyticsData] = useState({});
   const calendarRef = useRef();
@@ -68,7 +67,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [scrollCarType, setScrollCarType] = useState("ALL");
   const [scrollTimeRange, setScrollTimeRange] = useState("month");
 
-  const [summaryMetric, setSummaryMetric] = useState("profit");
   const [summaryCarType, setSummaryCarType] = useState("ALL");
   const [summaryTimeRange, setSummaryTimeRange] = useState("month");
 
@@ -78,9 +76,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
   const [selectedUnitBookings, setSelectedUnitBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
-
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
 
   const licenseGalleryRef = useRef(null);
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
@@ -540,117 +535,69 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     generatePerDayCalendarEvents,
   ]);
 
-  // //OVERLAY STOP BACKGROUND CLICK AND SCROLL
-  // useEffect(() => {
-  //   const handleClickOrScroll = (e) => {
-  //     if (
-  //       !showUnitDetailsOverlay &&
-  //       !showDetailsOverlay &&
-  //       !showCalendarEventsOverlay
-  //     ) {
-  //       setShowSettings(false);
-  //     }
-  //   };
-
-  //   const preventTouch = (e) => {
-  //     if (
-  //       showUnitDetailsOverlay ||
-  //       showDetailsOverlay ||
-  //       showCalendarEventsOverlay
-  //     ) {
-  //       e.preventDefault();
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOrScroll);
-  //   document.addEventListener("scroll", handleClickOrScroll);
-  //   document.addEventListener("touchmove", preventTouch, { passive: false });
-
-  //   if (
-  //     showUnitDetailsOverlay ||
-  //     showDetailsOverlay ||
-  //     showCalendarEventsOverlay
-  //   ) {
-  //     scrollYRef.current = window.scrollY;
-  //     document.body.classList.add("modal-open");
-  //     document.body.style.top = `-${scrollYRef.current}px`;
-  //   } else {
-  //     document.body.classList.remove("modal-open");
-  //     document.body.style.top = "";
-  //     window.scrollTo(0, scrollYRef.current);
-  //   }
-
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOrScroll);
-  //     document.removeEventListener("scroll", handleClickOrScroll);
-  //     document.removeEventListener("touchmove", preventTouch);
-  //     document.body.classList.remove("modal-open");
-  //     document.body.style.top = "";
-  //   };
-  // }, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
 
 
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
-useEffect(() => {
-  const handleClickOrScroll = (e) => {
-    if (
-      !showUnitDetailsOverlay &&
-      !showDetailsOverlay &&
-      !showCalendarEventsOverlay
-    ) {
-      setShowSettings(false);
+  useEffect(() => {
+    const handleClickOrScroll = (e) => {
+      if (
+        !showUnitDetailsOverlay &&
+        !showDetailsOverlay &&
+        !showCalendarEventsOverlay
+      ) {
+        setShowSettings(false);
+      }
+    };
+
+    const preventTouch = (e) => {
+      if (
+        showUnitDetailsOverlay ||
+        showDetailsOverlay ||
+        showCalendarEventsOverlay
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOrScroll);
+    document.addEventListener("scroll", handleClickOrScroll);
+    document.addEventListener("touchmove", preventTouch, { passive: false });
+
+    // Check if ANY overlay is currently open
+    const anyOverlayOpen =
+      showUnitDetailsOverlay || showDetailsOverlay || showCalendarEventsOverlay;
+
+    if (anyOverlayOpen) {
+      // Only save scroll position if not already saved
+      if (!scrollYRef.current || scrollYRef.current === 0) {
+        scrollYRef.current = window.scrollY;
+      }
+      document.body.classList.add("modal-open");
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.top = `-${scrollYRef.current}px`;
+    } else {
+      // Only restore if we previously saved a scroll position
+      if (scrollYRef.current > 0) {
+        document.body.classList.remove("modal-open");
+        document.body.style.position = "";
+        document.body.style.width = "";
+        document.body.style.top = "";
+        window.scrollTo(0, scrollYRef.current);
+        scrollYRef.current = 0; // Reset for next time
+      }
     }
-  };
 
-  const preventTouch = (e) => {
-    if (
-      showUnitDetailsOverlay ||
-      showDetailsOverlay ||
-      showCalendarEventsOverlay
-    ) {
-      e.preventDefault();
-    }
-  };
-
-  document.addEventListener("mousedown", handleClickOrScroll);
-  document.addEventListener("scroll", handleClickOrScroll);
-  document.addEventListener("touchmove", preventTouch, { passive: false });
-
-  // Check if ANY overlay is currently open
-  const anyOverlayOpen = showUnitDetailsOverlay || showDetailsOverlay || showCalendarEventsOverlay;
-
-  if (anyOverlayOpen) {
-    // Only save scroll position if not already saved
-    if (!scrollYRef.current || scrollYRef.current === 0) {
-      scrollYRef.current = window.scrollY;
-    }
-    document.body.classList.add("modal-open");
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.top = `-${scrollYRef.current}px`;
-  } else {
-    // Only restore if we previously saved a scroll position
-    if (scrollYRef.current > 0) {
+    return () => {
+      document.removeEventListener("mousedown", handleClickOrScroll);
+      document.removeEventListener("scroll", handleClickOrScroll);
+      document.removeEventListener("touchmove", preventTouch);
       document.body.classList.remove("modal-open");
       document.body.style.position = "";
       document.body.style.width = "";
       document.body.style.top = "";
-      window.scrollTo(0, scrollYRef.current);
-      scrollYRef.current = 0; // Reset for next time
-    }
-  }
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOrScroll);
-    document.removeEventListener("scroll", handleClickOrScroll);
-    document.removeEventListener("touchmove", preventTouch);
-    document.body.classList.remove("modal-open");
-    document.body.style.position = "";
-    document.body.style.width = "";
-    document.body.style.top = "";
-  };
-}, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
-
+    };
+  }, [showUnitDetailsOverlay, showDetailsOverlay, showCalendarEventsOverlay]);
 
   // PRELOAD UNITS TABLE IMAGES
   useEffect(() => {
@@ -1155,21 +1102,20 @@ useEffect(() => {
   ]);
 
   // Calculate summary totals from scrollableData
-const summaryData = useMemo(() => {
-  if (!scrollableData || scrollableData.length === 0) {
-    return { revenue: 0, expenses: 0, profit: 0 };
-  }
-  
-  return scrollableData.reduce(
-    (acc, car) => ({
-      revenue: acc.revenue + (car.revenue || 0),
-      expenses: acc.expenses + (car.expenses || 0),
-      profit: acc.profit + (car.profit || 0),
-    }),
-    { revenue: 0, expenses: 0, profit: 0 }
-  );
-}, [scrollableData]);
+  const summaryData = useMemo(() => {
+    if (!scrollableData || scrollableData.length === 0) {
+      return { revenue: 0, expenses: 0, profit: 0 };
+    }
 
+    return scrollableData.reduce(
+      (acc, car) => ({
+        revenue: acc.revenue + (car.revenue || 0),
+        expenses: acc.expenses + (car.expenses || 0),
+        profit: acc.profit + (car.profit || 0),
+      }),
+      { revenue: 0, expenses: 0, profit: 0 },
+    );
+  }, [scrollableData]);
 
   const affiliationSummaryData = useMemo(() => {
     const totalRevenue = affiliationPartnersData.partners.reduce(
@@ -2264,8 +2210,9 @@ const summaryData = useMemo(() => {
       } = chart;
       ctx.save();
 
-          const styles = getComputedStyle(document.documentElement);
-    const accentColor = styles.getPropertyValue('--accent-txt').trim() || "#28a745";
+      const styles = getComputedStyle(document.documentElement);
+      const accentColor =
+        styles.getPropertyValue("--accent-txt").trim() || "#28a745";
 
       const text = getCenterText(summaryTimeRange);
 
@@ -2297,14 +2244,13 @@ const summaryData = useMemo(() => {
           position: "bottom",
           labels: {
             boxWidth: 14,
-            padding: 10,       
-            
-
+            padding: 10,
 
             generateLabels: (chart) => {
-const textColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--txt-comp').trim() || '#333';
-
+              const textColor =
+                getComputedStyle(document.documentElement)
+                  .getPropertyValue("--txt-comp")
+                  .trim() || "#333";
 
               if (pieChartCategory === "referral") {
                 return chart.data.labels.map((label, i) => {
@@ -2497,10 +2443,13 @@ const textColor = getComputedStyle(document.documentElement)
   );
 
   const getTxtCompColor = () => {
-  if (typeof document === 'undefined') return '#555';
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue('--txt-comp').trim() || '#555';
-};
+    if (typeof document === "undefined") return "#555";
+    return (
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--txt-comp")
+        .trim() || "#555"
+    );
+  };
 
   const lineChartOptions = {
     responsive: true,
@@ -2514,64 +2463,67 @@ const textColor = getComputedStyle(document.documentElement)
       },
     },
     plugins: {
-legend: {
-  display: true,
-  position: "bottom",
-  labels: { 
-    boxWidth: 14,
-    padding: 10,
-    color: () => getComputedStyle(document.documentElement)
-      .getPropertyValue('--txt-comp').trim() || '#333',
-    generateLabels: (chart) => {
-      const textColor = getComputedStyle(document.documentElement)
-        .getPropertyValue('--txt-comp').trim() || '#333';
+      legend: {
+        display: true,
+        position: "bottom",
+        labels: {
+          boxWidth: 14,
+          padding: 10,
+          color: () =>
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--txt-comp")
+              .trim() || "#333",
+          generateLabels: (chart) => {
+            const textColor =
+              getComputedStyle(document.documentElement)
+                .getPropertyValue("--txt-comp")
+                .trim() || "#333";
 
-      return chart.data.datasets.map((dataset, i) => {
-        let fillStyle, strokeStyle;
-        if (dataset.label === "Profit") {
-          fillStyle = "rgba(40, 167, 69, 0.2)";
-          strokeStyle = "#28a745";
-        } else if (dataset.label === "Revenue") {
-          fillStyle = "rgba(255, 193, 7, 0.2)";
-          strokeStyle = "#ffc107";
-        } else if (dataset.label === "Expenses") {
-          fillStyle = "rgba(220, 53, 69, 0.2)";
-          strokeStyle = "#dc3545";
-        } else if (dataset.label === "Bookings") {
-          fillStyle = "rgba(13, 110, 253, 0.2)";
-          strokeStyle = "#0d6efd";
-        } else if (dataset.label === "Unpaid Bookings") {
-          fillStyle = "rgba(234, 88, 12, 0.2)";
-          strokeStyle = "#ea580c";
-        } else if (dataset.label === "Due Balances") {
+            return chart.data.datasets.map((dataset, i) => {
+              let fillStyle, strokeStyle;
+              if (dataset.label === "Profit") {
+                fillStyle = "rgba(40, 167, 69, 0.2)";
+                strokeStyle = "#28a745";
+              } else if (dataset.label === "Revenue") {
+                fillStyle = "rgba(255, 193, 7, 0.2)";
+                strokeStyle = "#ffc107";
+              } else if (dataset.label === "Expenses") {
                 fillStyle = "rgba(220, 53, 69, 0.2)";
                 strokeStyle = "#dc3545";
+              } else if (dataset.label === "Bookings") {
+                fillStyle = "rgba(13, 110, 253, 0.2)";
+                strokeStyle = "#0d6efd";
+              } else if (dataset.label === "Unpaid Bookings") {
+                fillStyle = "rgba(234, 88, 12, 0.2)";
+                strokeStyle = "#ea580c";
+              } else if (dataset.label === "Due Balances") {
+                fillStyle = "rgba(220, 53, 69, 0.2)";
+                strokeStyle = "#dc3545";
+              } else {
+                fillStyle = "#ccc";
+                strokeStyle = "#000";
               }
-        
-        else {
-          fillStyle = "#ccc";
-          strokeStyle = "#000";
-        }
-        return {
-          text: dataset.label,
-          fontColor: textColor,
-          fillStyle,
-          strokeStyle,
-          lineWidth: 2,
-          hidden: chart.getDatasetMeta(i).hidden,
-          index: i,
-        };
-      });
-    },
-  },
-  onClick: (e, legendItem, legend) => {
-    const index = legendItem.index;
-    const chart = legend.chart;
-    const meta = chart.getDatasetMeta(index);
-    meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-    chart.update();
-  },
-},
+              return {
+                text: dataset.label,
+                fontColor: textColor,
+                fillStyle,
+                strokeStyle,
+                lineWidth: 2,
+                hidden: chart.getDatasetMeta(i).hidden,
+                index: i,
+              };
+            });
+          },
+        },
+        onClick: (e, legendItem, legend) => {
+          const index = legendItem.index;
+          const chart = legend.chart;
+          const meta = chart.getDatasetMeta(index);
+          meta.hidden =
+            meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+          chart.update();
+        },
+      },
 
       tooltip: {
         mode: "nearest",
@@ -2654,16 +2606,20 @@ legend: {
       },
     },
 
-    
     scales: {
-      x: { grid: { display: false, }, ticks: { color: getTxtCompColor } },
+      x: { grid: { display: false }, ticks: { color: getTxtCompColor } },
       y: {
         beginAtZero: true,
         grid: {
-      color: () => getComputedStyle(document.documentElement)
-        .getPropertyValue('--txt-comp').trim() || '#eee',
-    },
-        ticks: { color: getTxtCompColor, callback: (value) => formatPeso(value) },
+          color: () =>
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--txt-comp")
+              .trim() || "#eee",
+        },
+        ticks: {
+          color: getTxtCompColor,
+          callback: (value) => formatPeso(value),
+        },
       },
     },
     elements: {
@@ -2694,8 +2650,10 @@ legend: {
           padding: 10,
           color: "#333",
           generateLabels: (chart) => {
-             const textColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--txt-comp').trim() || '#333';
+            const textColor =
+              getComputedStyle(document.documentElement)
+                .getPropertyValue("--txt-comp")
+                .trim() || "#333";
 
             return chart.data.datasets.map((dataset, i) => {
               let fillStyle, strokeStyle;
@@ -2723,7 +2681,7 @@ legend: {
               }
               return {
                 text: dataset.label,
-                fontColor: textColor, 
+                fontColor: textColor,
                 fillStyle,
                 strokeStyle,
                 lineWidth: 2,
@@ -2828,10 +2786,15 @@ legend: {
       y: {
         beginAtZero: true,
         grid: {
-      color: () => getComputedStyle(document.documentElement)
-        .getPropertyValue('--txt-comp').trim() || '#eee',
-    },
-        ticks: { color: getTxtCompColor, callback: (value) => formatPeso(value) },
+          color: () =>
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--txt-comp")
+              .trim() || "#eee",
+        },
+        ticks: {
+          color: getTxtCompColor,
+          callback: (value) => formatPeso(value),
+        },
       },
     },
     elements: {
@@ -2980,9 +2943,7 @@ legend: {
             </div>
             {summaryTimeRange === "custom" && (
               <>
-                <span
-                  style={{ fontSize: "50px", color: "var(--accent-txt)" }}
-                >
+                <span style={{ fontSize: "50px", color: "var(--accent-txt)" }}>
                   |
                 </span>
                 <div style={{ display: "flex", gap: "10px" }}>
@@ -4045,13 +4006,13 @@ legend: {
               <p>{selectedUnitBookings[0]?.plateNo}</p>
             </div>
 
-                            <input
-                  type="text"
-                  placeholder="Search renter name, location, or dates..."
-                  value={unitSearchQuery}
-                  onChange={(e) => setUnitSearchQuery(e.target.value)}
-                  className="details-search-input"
-                />
+            <input
+              type="text"
+              placeholder="Search renter name, location, or dates..."
+              value={unitSearchQuery}
+              onChange={(e) => setUnitSearchQuery(e.target.value)}
+              className="details-search-input"
+            />
 
             <div className="unit-table-container">
               <div
@@ -4060,9 +4021,7 @@ legend: {
                   justifyContent: "flex-end",
                   marginBottom: "10px",
                 }}
-              >
-
-              </div>
+              ></div>
               <table
                 className={`unit-details-table ${
                   unitSortKey ? `sorted-${unitSortKey}` : ""
@@ -4318,7 +4277,7 @@ legend: {
               />
             </button> */}
 
-                        <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
@@ -4331,7 +4290,7 @@ legend: {
               Detailed information about this rental.
             </p>
 
-                                    <div className="confirm-flag-row">
+            <div className="confirm-flag-row">
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -4593,7 +4552,7 @@ legend: {
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-<span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -4605,8 +4564,8 @@ legend: {
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -4616,17 +4575,18 @@ legend: {
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -4888,7 +4848,7 @@ legend: {
               />
             </button> */}
 
-                                    <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowCalendarEventsOverlay(false)}
@@ -4901,7 +4861,7 @@ legend: {
               Detailed information about this rental.
             </p>
 
-                        <div className="confirm-flag-row">
+            <div className="confirm-flag-row">
               {typeof selectedCalendarBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedCalendarBooking.status.toLowerCase()}`}
@@ -5175,7 +5135,7 @@ legend: {
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-<span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedCalendarBooking.rentalDuration
@@ -5189,9 +5149,9 @@ legend: {
                                 )
                               : (selectedCalendarBooking.rentalDuration
                                   ?.extraHours ??
-                                  selectedCalendarBooking.rentalDuration
-                                    ?.extraHour ??
-                                  0);
+                                selectedCalendarBooking.rentalDuration
+                                  ?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedCalendarBooking.extraHourCharge ??

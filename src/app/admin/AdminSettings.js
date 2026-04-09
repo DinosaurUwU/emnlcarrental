@@ -5,7 +5,13 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import "./AdminSettings.css";
 import { useUser } from "../lib/UserContext";
-import { MdClose, MdEdit, MdDelete, MdPerson, MdDirectionsWalk } from "react-icons/md";
+import {
+  MdClose,
+  MdEdit,
+  MdDelete,
+  MdPerson,
+  MdDirectionsWalk,
+} from "react-icons/md";
 import { FiX } from "react-icons/fi";
 
 const AdminSettings = ({ subSection = "overview" }) => {
@@ -72,7 +78,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [showUnitTypeDropdown, setShowUnitTypeDropdown] = useState(false);
 
   const unitTypeDropdownRef = useRef(null);
-
   const fileInputRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedUnit, setEditedUnit] = useState(null);
@@ -82,7 +87,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
   const [showEditConfirmDialog, setShowEditConfirmDialog] = useState(false);
 
   const [selectedMopPop, setSelectedMopPop] = useState("MOP");
-
   const [selectedMopType, setSelectedMopType] = useState("");
   const [oldMopType, setOldMopType] = useState("");
   const [showEditMOPConfirmDialog, setShowEditMOPConfirmDialog] =
@@ -133,8 +137,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
 
   const [showDetailsOverlay, setShowDetailsOverlay] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
 
   const licenseGalleryRef = useRef(null);
   const [photoSwipePreviewItem, setPhotoSwipePreviewItem] = useState(null);
@@ -2464,15 +2466,20 @@ const AdminSettings = ({ subSection = "overview" }) => {
                         style={{ cursor: "pointer" }}
                       >
                         <td>
-<span style={{ marginRight: "5px", color: "var(--accent-txt)" }}>
-  {client.isRegistered 
-    ? <MdPerson className="client-icon" /> 
-    : <MdDirectionsWalk className="client-icon" />
-  }
-</span>
+                          <span
+                            style={{
+                              marginRight: "5px",
+                              color: "var(--accent-txt)",
+                            }}
+                          >
+                            {client.isRegistered ? (
+                              <MdPerson className="client-icon" />
+                            ) : (
+                              <MdDirectionsWalk className="client-icon" />
+                            )}
+                          </span>
 
-
-{client.name}
+                          {client.name}
                         </td>
                         <td>{client.contact || "N/A"}</td>
                         <td>{client.email}</td>
@@ -3009,30 +3016,10 @@ const AdminSettings = ({ subSection = "overview" }) => {
         (selectedUnit || isAddingUnit) && (
           <div className="unit-details-overlay">
             <div className="unit-details-content">
-              {/* <button
-                className="close-btn"
-                type="button"
-                onClick={() => {
-                  setShowUnitDetailsOverlay(false);
-                  setIsAddingUnit(false);
-                }}
-              >
-                <img
-                  src="/assets/close_0.png"
-                  alt="Close"
-                  className="close-icon close-icon-0"
-                />
-                <img
-                  src="/assets/close_1.png"
-                  alt="Close"
-                  className="close-icon close-icon-1"
-                />
-              </button> */}
-
               <button
                 className="close-btn"
                 type="button"
-                                onClick={() => {
+                onClick={() => {
                   setShowUnitDetailsOverlay(false);
                   setIsAddingUnit(false);
                 }}
@@ -3164,20 +3151,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
                               // Existing image: Show with replace/delete buttons (only in edit mode) and overlay for broken images
                               return (
                                 <div key={index} className="gallery-item">
-                                  {/* <img
-                                    src={img.base64}
-                                    alt={`Gallery ${index}`}
-                                    className="unit-gallery-image"
-                                    key={img.updatedAt}
-                                    onError={(e) => {
-                                      // Hide the broken image and show the overlay with plus sign
-                                      e.target.style.display = "none";
-                                      const overlay =
-                                        e.target.nextElementSibling;
-                                      if (overlay)
-                                        overlay.style.display = "flex";
-                                    }}
-                                  /> */}
                                   <img
                                     src={img.base64}
                                     alt={`Gallery ${index}`}
@@ -4114,7 +4087,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Saving Unit) */}
+      {/* Loading Overlay (Saving Unit) */}
       {isSavingUnit && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -4130,7 +4103,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Unit Saved) */}
+      {/* Success Overlay (Unit Saved) */}
       {showSavedSuccess && (
         <div
           className={`sent-ongoing-overlay ${hideSavedAnimation ? "hide" : ""}`}
@@ -4247,7 +4220,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Saving MOP) */}
+      {/* Loading Overlay (Saving MOP) */}
       {isSavingMOP && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -4695,30 +4668,13 @@ const AdminSettings = ({ subSection = "overview" }) => {
       {showClientDetailsOverlay && selectedClient && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowClientDetailsOverlay(false)}
             >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                          <button
-                className="close-btn"
-                type="button"
-                onClick={() => setShowClientDetailsOverlay(false)}
-              >
-                <FiX className="close-icon" />
-              </button>
+              <FiX className="close-icon" />
+            </button>
 
             <h3 className="client-details-title">Client Details</h3>
 
@@ -5002,38 +4958,20 @@ const AdminSettings = ({ subSection = "overview" }) => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
+            <button
               className="close-btn"
               type="button"
               onClick={() => setShowDetailsOverlay(false)}
             >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
-                                      <button
-                className="close-btn"
-                type="button"
-                onClick={() => setShowDetailsOverlay(false)}
-              >
-                <FiX className="close-icon" />
-              </button>
+              <FiX className="close-icon" />
+            </button>
 
             <h3 className="confirm-header">RENTAL DETAILS</h3>
             <p className="confirm-text">
               Detailed information about this rental.
             </p>
 
-
-                        <div className="confirm-flag-row">
+            <div className="confirm-flag-row">
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -5298,7 +5236,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
                       <strong className="summary-label">
                         Rental Duration:
                       </strong>
-<span className="summary-value">
+                      <span className="summary-value">
                         {(() => {
                           const actualSeconds =
                             selectedBooking.rentalDuration?.actualSeconds || 0;
@@ -5310,8 +5248,8 @@ const AdminSettings = ({ subSection = "overview" }) => {
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -5321,17 +5259,18 @@ const AdminSettings = ({ subSection = "overview" }) => {
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -5358,8 +5297,6 @@ const AdminSettings = ({ subSection = "overview" }) => {
                           );
                         })()}
                       </span>
-
-
                     </li>
 
                     {(() => {
@@ -5633,7 +5570,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* 🔴 Loading Overlay (Saving Content) */}
+      {/* Loading Overlay (Saving Content) */}
       {isSavingContent && (
         <div className="submitting-overlay">
           <div className="loading-container">
@@ -5649,7 +5586,7 @@ const AdminSettings = ({ subSection = "overview" }) => {
         </div>
       )}
 
-      {/* 🟢 Success Overlay (Content Saved) */}
+      {/* Success Overlay (Content Saved) */}
       {showContentSavedSuccess && (
         <div
           className={`sent-ongoing-overlay ${

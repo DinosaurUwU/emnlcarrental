@@ -845,7 +845,7 @@ Call them now to check if they want to extend. If no response, call them when re
           console.warn("⚠️ Failed to sync emailVerified:", err.message);
         }
 
-        // 🟢 First-time user
+        // First-time user
         if (!userDocSnap.exists()) {
           const [firstName, surname] = (authUser.displayName || "").split(" ");
 
@@ -1023,7 +1023,7 @@ Call them now to check if they want to extend. If no response, call them when re
             }
           })();
 
-          // 🟢 Existing user
+          // Existing user
         } else {
           const data = userDocSnap.data();
 
@@ -2225,20 +2225,20 @@ Call them now to check if they want to extend. If no response, call them when re
       const extraRatePerHour = unitData.extension;
       let additionalCharge = 0;
 
-      // 🟢 Hours logic (unchanged for now)
+      // Hours logic (unchanged for now)
       if (addedHours > 0 && addedHours <= 5) {
         additionalCharge = addedHours * extraRatePerHour;
       }
-      // 🟢 Exceeding 5 hours = 1 day rate
+      // Exceeding 5 hours = 1 day rate
       else if (addedHours > 5 && addedHours < 24) {
         additionalCharge = unitData.price;
       }
-      // 🟢 Exact days extension
+      // Exact days extension
       else if (addedHours % 24 === 0 && addedHours < 24 * 30) {
         const addedDays = addedHours / 24;
         additionalCharge = unitData.price * addedDays;
       }
-      // 🟢 Months (30 days each)
+      // Months (30 days each)
       else if (addedHours % (24 * 30) === 0) {
         const addedMonths = addedHours / (24 * 30);
         additionalCharge = unitData.price * 30 * addedMonths;

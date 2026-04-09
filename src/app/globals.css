@@ -136,7 +136,7 @@ body {
 
 .error-container {
   width: 380px;
-  padding: 35px;
+  padding: 10px !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -157,7 +157,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 20px !important;
   color: #dc3545;
 }
 
@@ -166,13 +166,13 @@ body {
   font-size: 20px;
   font-weight: 700;
   color: #dc3545;
-  margin: 0 0 12px 0;
+  margin: 0 0 12px 0 !important;
 }
 
 .error-container p {
   font-size: 14px;
   color: #555;
-  margin: 0 0 24px 0;
+  margin: 0 0 24px 0 !important;
   line-height: 1.5;
 }
 
@@ -183,7 +183,7 @@ body {
   background-color: #fff;
   color: #074609;
   border-radius: 10px;
-  padding: 12px 24px;
+  padding: 12px 24px !important;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
