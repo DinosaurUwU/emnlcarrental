@@ -40,7 +40,7 @@
     opacity 0.5s ease-out;
 }
 
-/* Impact animation */
+/* Show animation */
 .cta-word.show {
   opacity: 1;
   transform: scale(1.1) translateY(0) rotate(0);

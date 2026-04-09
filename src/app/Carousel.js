@@ -2,15 +2,8 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "./lib/UserContext";
-import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
-
 import "./Carousel.css";
-
-// const importAll = (r) => r.keys().map(r);
-// const images = importAll(
-//   require.context("../../public/assets/images/carousel_js", false, /\.(png|jpe?g|svg)$/),
-// );
 
 const importAll = (r) => r.keys().map(r);
 const normalizeImageSrc = (img) => {
@@ -64,28 +57,12 @@ const textContent = [
 
 function Carousel() {
   const { fetchImageFromFirestore, imageCache, imageUpdateTrigger } = useUser();
-    const isValidImageSrc = (src) =>
+  const isValidImageSrc = (src) =>
     typeof src === "string" &&
     src.trim() !== "" &&
-    (src.startsWith("data:image/") || src.startsWith("http") || src.startsWith("/"));
-  // const [carouselImages, setCarouselImages] = useState([]);
-
-  // Derive images synchronously from cache (instant)
-  // Uses module-level `images` as fallback (already loaded at import time)
-  // const carouselImages = useMemo(() => {
-  //   const numImages = 5;
-  //   const cachedImages = [];
-    
-  //   for (let i = 0; i < numImages; i++) {
-  //     const imageId = `LandingPage_${i}`;
-  //     if (imageCache[imageId]) {
-  //       cachedImages.push(imageCache[imageId].base64);
-  //     }
-  //   }
-    
-  //   // Use cached images if available, otherwise use module-level fallback (instant)
-  //   return cachedImages.length > 0 ? cachedImages : images.slice(0, numImages);
-  // }, [imageCache]);
+    (src.startsWith("data:image/") ||
+      src.startsWith("http") ||
+      src.startsWith("/"));
 
   const carouselImages = useMemo(() => {
     const numImages = 5;
@@ -104,7 +81,7 @@ function Carousel() {
         : ["/assets/images/default.png"];
   }, [imageCache]);
 
-   const [carouselImageSizes, setCarouselImageSizes] = useState({});
+  const [carouselImageSizes, setCarouselImageSizes] = useState({});
 
   useEffect(() => {
     if (!carouselImages.length) return;
@@ -144,14 +121,10 @@ function Carousel() {
     };
   }, [carouselImages]);
 
-
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const router = useRouter();
-
-  const lastTriggerRef = useRef(imageUpdateTrigger);
-
   const carouselGalleryRef = useRef(null);
 
   useEffect(() => {
@@ -166,150 +139,51 @@ function Carousel() {
     })();
   }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
-  // useEffect(() => {
-  //   const fetchCarouselImages = async () => {
-  //     const fetchedImages = [];
-  //     const numImages = 5;
+  useEffect(() => {
+    if (carouselImages.length === 0) return;
+    if (!carouselGalleryRef.current) return;
 
-  //     for (let i = 0; i < numImages; i++) {
-  //       const imageId = `LandingPage_${i}`;
-  //       // const result = await fetchImageFromFirestore(imageId);
-  //       const result = await fetchImageFromFirestore(imageId, true);
+    let mounted = true;
+    let idleId = null;
+    let lightbox = null;
 
-  //       if (result) {
-  //         fetchedImages.push(result.base64); // Already a full data URL
-  //       } else {
-  //         // Fallback to local images
-  //         const localImages = importAll(
-  //           require.context(
-  //             "../../public/assets/images/carousel_js",
-  //             false,
-  //             /\.(png|jpe?g|svg)$/,
-  //           ),
-  //         );
-  //         fetchedImages.push(localImages[i] || "/assets/images/default.png"); // Empty string or placeholder if no local image
-  //       }
-  //     }
-  //     setCarouselImages(fetchedImages);
-  //   };
+    const init = async () => {
+      const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+        import("photoswipe/lightbox"),
+        import("photoswipe/style.css"),
+      ]);
 
-  //   fetchCarouselImages();
-  // }, [fetchImageFromFirestore]);
+      if (!mounted || !carouselGalleryRef.current) return;
 
- // Load images from cache (instant) or fetch if not available
+      lightbox = new PhotoSwipeLightbox({
+        gallery: carouselGalleryRef.current,
+        children: "a",
+        pswpModule: () => import("photoswipe"),
+        showHideAnimationType: "fade",
+        paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+        maxWidth: window.innerWidth * 0.8,
+        maxHeight: window.innerHeight * 0.8,
+        preloaderDelay: 0,
+      });
 
- 
+      lightbox.init();
+    };
 
-
-  //  useEffect(() => {
-  //   const loadCarouselImages = async () => {
-  //     const numImages = 5;
-  //     const loadedImages = [];
-
-  //     for (let i = 0; i < numImages; i++) {
-  //       const imageId = `LandingPage_${i}`;
-        
-  //       // Check React cache first (instant)
-  //       if (imageCache[imageId]) {
-  //         loadedImages.push(imageCache[imageId].base64);
-  //       } else {
-  //         // Fallback to fetch
-  //         const result = await fetchImageFromFirestore(imageId, true);
-  //         if (result) {
-  //           loadedImages.push(result.base64);
-  //         } else {
-  //           const localImages = importAll(
-  //             require.context(
-  //               "../../public/assets/images/carousel_js",
-  //               false,
-  //               /\.(png|jpe?g|svg)$/,
-  //             ),
-  //           );
-  //           loadedImages.push(localImages[i] || "/assets/images/default.png");
-  //         }
-  //       }
-  //     }
-  //     setCarouselImages(loadedImages);
-  //     lastTriggerRef.current = imageUpdateTrigger;
-  //   };
-
-  //   loadCarouselImages();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [imageUpdateTrigger]); // Only re-run when imageUpdateTrigger changes
-
-useEffect(() => {
-  if (carouselImages.length === 0) return;
-  if (!carouselGalleryRef.current) return;
-
-  let mounted = true;
-  let idleId = null;
-  let lightbox = null;
-
-  const init = async () => {
-    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
-      import("photoswipe/lightbox"),
-      import("photoswipe/style.css"),
-    ]);
-
-    if (!mounted || !carouselGalleryRef.current) return;
-
-    // lightbox = new PhotoSwipeLightbox({
-    //   gallery: carouselGalleryRef.current,
-    //   children: "a",
-    //   pswpModule: () => import("photoswipe"),
-    //   showHideAnimationType: "fade",
-    //   paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-    //   maxWidth: window.innerWidth * 0.8,
-    //   maxHeight: window.innerHeight * 0.8,
-    // });
-        lightbox = new PhotoSwipeLightbox({
-      gallery: carouselGalleryRef.current,
-      children: "a",
-      pswpModule: () => import("photoswipe"),
-      showHideAnimationType: "fade",
-      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-      maxWidth: window.innerWidth * 0.8,
-      maxHeight: window.innerHeight * 0.8,
-      preloaderDelay: 0,
-    });
-
-
-    lightbox.init();
-  };
-
-  if ("requestIdleCallback" in window) {
-    idleId = window.requestIdleCallback(init, { timeout: 1200 });
-  } else {
-    idleId = setTimeout(init, 0);
-  }
-
-  return () => {
-    mounted = false;
-    if (typeof idleId === "number") clearTimeout(idleId);
-    if ("cancelIdleCallback" in window && typeof idleId !== "number") {
-      window.cancelIdleCallback(idleId);
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(init, { timeout: 1200 });
+    } else {
+      idleId = setTimeout(init, 0);
     }
-    lightbox?.destroy();
-  };
-}, [carouselImages]);
 
-
-  // useEffect(() => {
-  //   if (carouselImages.length === 0) return; // Wait for images to load
-
-  //   const carouselLightbox = new PhotoSwipeLightbox({
-  //     gallery: carouselGalleryRef.current,
-  //     children: "a",
-  //     pswpModule: () => import("photoswipe"),
-  //     showHideAnimationType: "fade",
-  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-  //     maxWidth: window.innerWidth * 0.8,
-  //     maxHeight: window.innerHeight * 0.8,
-  //   });
-
-  //   carouselLightbox.init();
-  //   return () => carouselLightbox.destroy();
-  // }, [carouselImages]);
+    return () => {
+      mounted = false;
+      if (typeof idleId === "number") clearTimeout(idleId);
+      if ("cancelIdleCallback" in window && typeof idleId !== "number") {
+        window.cancelIdleCallback(idleId);
+      }
+      lightbox?.destroy();
+    };
+  }, [carouselImages]);
 
   useEffect(() => {
     if (isPaused || carouselImages.length === 0) return;
@@ -332,11 +206,6 @@ useEffect(() => {
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 6000);
   };
-
-  // // Only render if images are loaded
-  // if (carouselImages.length === 0) {
-  //   return <div>Loading carousel...</div>;
-  // }
 
   return (
     <div className="landing-carousel-container">
@@ -384,37 +253,23 @@ useEffect(() => {
         ))}
 
         {carouselImages.map((img, index) => (
-        //   <img
-        //     key={index}
-        //     src={img}
-        //     alt={`Slide ${index + 1}`}
-        //     className={`carousel-image 
-        // ${index === currentSlide ? "active" : ""} 
-        // ${index === prevSlide && index !== currentSlide ? "previous" : ""}`}
-        //     onClick={() => {
-        //       const currentIndex = carouselImages.indexOf(img);
-        //       document
-        //         .querySelector(`[data-pswp-index="${currentIndex}"]`)
-        //         ?.click();
-        //     }}
-        //   />
-
-            <img
-              key={index}
-              src={img}
-              alt={`Slide ${index + 1}`}
-              loading={index === currentSlide ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={index === currentSlide ? "high" : "auto"}
-              className={`carousel-image 
+          <img
+            key={index}
+            src={img}
+            alt={`Slide ${index + 1}`}
+            loading={index === currentSlide ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={index === currentSlide ? "high" : "auto"}
+            className={`carousel-image 
                 ${index === currentSlide ? "active" : ""} 
                 ${index === prevSlide && index !== currentSlide ? "previous" : ""}`}
-              onClick={() => {
-                const currentIndex = carouselImages.indexOf(img);
-                document.querySelector(`[data-pswp-index="${currentIndex}"]`)?.click();
-              }}
-            />
-
+            onClick={() => {
+              const currentIndex = carouselImages.indexOf(img);
+              document
+                .querySelector(`[data-pswp-index="${currentIndex}"]`)
+                ?.click();
+            }}
+          />
         ))}
       </div>
 
@@ -453,15 +308,11 @@ useEffect(() => {
           <a
             key={index}
             href={src}
-            // data-pswp-width={2873} // Recommended image WIDTH
-            // data-pswp-height={1690} // Recommended image HEIGHT
             data-pswp-width={carouselImageSizes[src]?.width || 1200}
             data-pswp-height={carouselImageSizes[src]?.height || 800}
             data-pswp-index={index}
           >
-            {/* <img src={src} alt="" /> */}
             <span aria-hidden="true" />
-
           </a>
         ))}
       </div>
