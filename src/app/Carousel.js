@@ -156,7 +156,7 @@ function Carousel() {
       if (!mounted || !carouselGalleryRef.current) return;
 
       lightbox = new PhotoSwipeLightbox({
-        gallery: carouselGalleryRef.current,
+        gallery: "#carousel-gallery",
         children: "a",
         pswpModule: () => import("photoswipe"),
         showHideAnimationType: "fade",
@@ -303,7 +303,8 @@ function Carousel() {
         ))}
       </div>
 
-      <div ref={carouselGalleryRef} style={{ display: "none" }}>
+      {/* <div ref={carouselGalleryRef} style={{ display: "none" }}> */}
+              <div id="carousel-gallery" ref={carouselGalleryRef} style={{ display: "none" }}>
         {carouselImages.map((src, index) => (
           <a
             key={index}

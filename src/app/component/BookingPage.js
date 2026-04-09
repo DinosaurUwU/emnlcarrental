@@ -275,8 +275,10 @@ const BookingPage = ({
   const galleryRef = useRef(null);
 
   useEffect(() => {
+    if (!galleryRef.current) return;
+
     const lightbox = new PhotoSwipeLightbox({
-      gallery: galleryRef.current,
+      gallery: "#booking-page-gallery",
       children: "a",
       pswpModule: () => import("photoswipe"),
       showHideAnimationType: "fade",
@@ -2599,7 +2601,8 @@ const BookingPage = ({
         </div>
       </form>
 
-      <div ref={galleryRef} style={{ display: "none" }}>
+      {/* <div ref={galleryRef} style={{ display: "none" }}> */}
+            <div id="booking-page-gallery" ref={galleryRef} style={{ display: "none" }}>
         <a
           href={previewImage}
           data-pswp-width={previewImageSize.width}

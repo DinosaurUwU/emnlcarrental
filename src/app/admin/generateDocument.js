@@ -137,7 +137,10 @@ const prepareDocumentData = (bookingData, documentType) => {
 
   const extension = bookingData.extension ?? 0;
   const rawExtraHoursCharge = bookingData.extraHourCharge ?? 0;
-  const baseRentalAmount = (bookingData.discountedRate ?? 0) * rentalDays;
+  // const baseRentalAmount = (bookingData.discountedRate ?? 0) * rentalDays;
+  const baseRentalAmount = isFlatRateSameDay
+    ? (bookingData.discountedRate ?? 0)
+    : (bookingData.discountedRate ?? 0) * rentalDays;
   const drivingTotalAmount = (bookingData.drivingPrice ?? 0) * rentalDays;
   const pickupTotalAmount = bookingData.pickupPrice ?? 0;
 
@@ -185,8 +188,16 @@ const prepareDocumentData = (bookingData, documentType) => {
   const extraHrWord = extraHours === 1 ? "hr" : "hrs";
   const dayWord = rentalDays === 1 ? "Day" : "Days";
 
-  const rentalDurationDisplay =
-    extraHours > 0
+  // const rentalDurationDisplay =
+  //   extraHours > 0
+  //     ? `(${rentalDays} Day / ${baseHours} hrs)\n(+${extraHours} ${extraHrWord} | ${peso(extraHoursCharge)})`
+  //     : `(${rentalDays} Day / ${baseHours} hrs)`;
+
+  const rentalDurationDisplay = isFlatRateSameDay
+    ? extraHours > 0
+      ? `(1 Day / for ${extraHours} hr only)\n(Flat rate applies for same-day rental)`
+      : `(1 Day / for up to 1 hr only)\n(Flat rate applies for same-day rental)`
+    : extraHours > 0
       ? `(${rentalDays} Day / ${baseHours} hrs)\n(+${extraHours} ${extraHrWord} | ${peso(extraHoursCharge)})`
       : `(${rentalDays} Day / ${baseHours} hrs)`;
 
@@ -276,10 +287,15 @@ const prepareDocumentData = (bookingData, documentType) => {
     balanceDue,
     paymentEntries,
     isFlatRateSameDay,
+    // unitItem: bookingData.carName
+    //   ? `${bookingData.carName.toUpperCase()} (${peso(
+    //       bookingData.discountedRate || 0,
+    //     )} x ${rentalDays} ${dayWord})`
+    //   : "",
     unitItem: bookingData.carName
-      ? `${bookingData.carName.toUpperCase()} (${peso(
-          bookingData.discountedRate || 0,
-        )} x ${rentalDays} ${dayWord})`
+      ? isFlatRateSameDay
+        ? `${bookingData.carName.toUpperCase()} (${peso(bookingData.discountedRate || 0)} Flat Rate)`
+        : `${bookingData.carName.toUpperCase()} (${peso(bookingData.discountedRate || 0)} x ${rentalDays} ${dayWord})`
       : "",
     unitPrice: baseRentalAmount,
     drivingItem:
@@ -289,7 +305,12 @@ const prepareDocumentData = (bookingData, documentType) => {
     drivingTotal: drivingPrice * rentalDays,
     pickupItem: bookingData.pickupOption || "",
     pickupTotal: pickupPrice,
-    extraHourItem: extraHours > 0 ? `+${extraHours} ${extraHrWord}` : "0",
+    // extraHourItem: extraHours > 0 ? `+${extraHours} ${extraHrWord}` : "0",
+        extraHourItem: isFlatRateSameDay 
+      ? "(1 Day / for 1 hr only)\n(Flat rate applies for same-day rental)" 
+      : extraHours > 0 
+        ? `+${extraHours} ${extraHrWord}` 
+        : "0",
     rentalDurationDisplay,
   };
 };
@@ -360,7 +381,6 @@ const generateDocument = async (bookingData, documentType) => {
     head: [["BOOKING DETAILS", "VALUE"]],
     body: [
       ["Car", data.carName],
-      ["Plate No", data.plateNo],
       [
         "Rental Period",
         formatRentalPeriod(
