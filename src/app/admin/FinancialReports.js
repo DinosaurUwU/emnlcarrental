@@ -21,13 +21,11 @@ import { createPortal } from "react-dom";
 
 const FinancialReports = () => {
   const {
-    unitData,
     allUnitData,
     paymentEntries,
     autoFillTrigger,
     cancelTrigger,
     setCancelTrigger,
-    triggerAutoFill,
     removePaymentEntry,
 
     hasServerChange,
@@ -72,9 +70,7 @@ const FinancialReports = () => {
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(currentMonth);
 
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
-
   const [isTabLoading, setIsTabLoading] = useState(false);
-
   const currentTabRef = useRef(activeTab);
 
   // Local Storage Keys
@@ -2569,7 +2565,7 @@ const FinancialReports = () => {
             <button
               className="close-btn"
               type="button"
-             onClick={() => setShowDetailsOverlay(false)}
+              onClick={() => setShowDetailsOverlay(false)}
             >
               <FiX className="close-icon" />
             </button>
@@ -2579,7 +2575,7 @@ const FinancialReports = () => {
               Detailed information about this rental.
             </p>
 
-                        <div className="confirm-flag-row">
+            <div className="confirm-flag-row">
               {typeof selectedBooking?.status === "string" && (
                 <div
                   className={`confirm-status-flag status-${selectedBooking.status.toLowerCase()}`}
@@ -2853,8 +2849,8 @@ const FinancialReports = () => {
                                     selectedBooking.billedDays * 24,
                                 )
                               : (selectedBooking.rentalDuration?.extraHours ??
-                                  selectedBooking.rentalDuration?.extraHour ??
-                                  0);
+                                selectedBooking.rentalDuration?.extraHour ??
+                                0);
 
                           const displayExtraHourCharge =
                             selectedBooking.extraHourCharge ??
@@ -2864,17 +2860,18 @@ const FinancialReports = () => {
                           return (
                             <>
                               ({selectedBooking.billedDays} Day /{" "}
-                              {selectedBooking.rentalDuration.isFlatRateSameDay ? (
+                              {selectedBooking.rentalDuration
+                                .isFlatRateSameDay ? (
                                 <>
                                   for{" "}
                                   <span style={{ color: "#dc3545" }}>
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     )}
                                     {Math.floor(
-                                      selectedBooking.rentalDuration.actualSeconds /
-                                        3600,
+                                      selectedBooking.rentalDuration
+                                        .actualSeconds / 3600,
                                     ) === 1
                                       ? "hr"
                                       : "hrs"}
@@ -3918,13 +3915,19 @@ const FinancialReports = () => {
                               const originalIndex = item.originalIndex;
 
                               return (
-<div
-  key={`${monthIndex}-${item.key}`}
-  className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
-  data-autofill={row[5]?._isAutoFill === true ? "true" : "false"}
-  style={{
-    cursor: row[5]?._isAutoFill ? "pointer" : "default",
-  }}
+                                <div
+                                  key={`${monthIndex}-${item.key}`}
+                                  className={`grid-row ${selectedRows.includes(`${monthIndex}-${item.key}`) ? "selected" : ""}`}
+                                  data-autofill={
+                                    row[5]?._isAutoFill === true
+                                      ? "true"
+                                      : "false"
+                                  }
+                                  style={{
+                                    cursor: row[5]?._isAutoFill
+                                      ? "pointer"
+                                      : "default",
+                                  }}
                                   onClick={() => {
                                     if (row[5]?._isAutoFill) {
                                       // Find in activeBookings (array)
@@ -3952,7 +3955,8 @@ const FinancialReports = () => {
                                               ][key];
                                             if (dateData.bookings) {
                                               booking = dateData.bookings.find(
-                                                (b) => b.id === row[5]?._bookingId,
+                                                (b) =>
+                                                  b.id === row[5]?._bookingId,
                                               );
                                               if (booking) {
                                                 break;
@@ -4002,7 +4006,8 @@ const FinancialReports = () => {
                                   {Array.isArray(row) ? (
                                     row.slice(0, 5).map((cell, colIndex) => {
                                       // 0 = UNIT, 1 = AMOUNT, 2 = MOP, 3 = POP, 4 = DATE
-                                     const isAutoFill = row[5]?._isAutoFill === true;
+                                      const isAutoFill =
+                                        row[5]?._isAutoFill === true;
 
                                       // UNIT column (dropdown from unitData)
                                       if (colIndex === 0) {

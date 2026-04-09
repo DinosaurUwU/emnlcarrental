@@ -535,8 +535,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     generatePerDayCalendarEvents,
   ]);
 
-
-
   //OVERLAY STOP BACKGROUND CLICK AND SCROLL
   useEffect(() => {
     const handleClickOrScroll = (e) => {
@@ -701,23 +699,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
     return `${mm}/${dd}/${yyyy}`;
   };
 
-  const handleShowDetailsOverlay = (booking) => {
-    setSelectedBooking(booking);
-    setShowDetailsOverlay(true);
-  };
-
-  const backgroundPlugin = {
-    id: "custom_canvas_background_color",
-    beforeDraw: (chart) => {
-      const ctx = chart.canvas.getContext("2d");
-      ctx.save();
-      ctx.globalCompositeOperation = "destination-over";
-      ctx.fillStyle = "#c8e6c9";
-      ctx.fillRect(0, 0, chart.width, chart.height);
-      ctx.restore();
-    },
-  };
-
   const getTimeKey = (range) => {
     switch (range) {
       case "yesterday":
@@ -731,24 +712,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       default:
         return new Date().toISOString().slice(0, 7);
     }
-  };
-
-  const getEmptyMessage = (carType, timeRange) => {
-    if (carType === "ALL") return "No data available for this period.";
-
-    const carTypeLabel = carType.toUpperCase();
-
-    const timeMap = {
-      today: "Today",
-      yesterday: "Yesterday",
-      week: "This Week",
-      month: "This Month",
-      year: "This Year",
-    };
-
-    return `No ${carTypeLabel} units rented ${
-      timeMap[timeRange] || "for this period"
-    }`;
   };
 
   const timeKey = getTimeKey(timeRange);
@@ -3976,23 +3939,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       {showUnitDetailsOverlay && selectedUnitId !== null && (
         <div className="unit-details-overlay">
           <div className="unit-details-content">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowUnitDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4260,23 +4206,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       {showDetailsOverlay && selectedBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowDetailsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4831,23 +4760,6 @@ const AnalyticsSection = ({ subSection = "overview" }) => {
       {showCalendarEventsOverlay && selectedCalendarBooking && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowCalendarEventsOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"

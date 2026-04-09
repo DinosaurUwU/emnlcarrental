@@ -148,7 +148,7 @@
 
 .g1-item-ml button:hover {
   background-color: #ffb347 !important;
-    box-shadow: 0 0 10px #ffb347;
+  box-shadow: 0 0 10px #ffb347;
   color: white;
 }
 
@@ -206,7 +206,7 @@
 
 .g1-item-sm button:hover {
   background-color: #008ffc !important;
-  box-shadow: 0 0 10px #008ffc;;
+  box-shadow: 0 0 10px #008ffc;
   color: white;
 }
 
@@ -536,7 +536,7 @@
 }
 
 .grid-container {
-    background-color: rgba(var(--gradient-base), 0.8);
+  background-color: rgba(var(--gradient-base), 0.8);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -563,14 +563,14 @@
   gap: 5px;
   position: sticky;
   top: 0;
-    background-color: rgba(var(--gradient-base), 0.25);
+  background-color: rgba(var(--gradient-base), 0.25);
   padding: 10px;
   border-bottom: 2px solid #28a745;
   z-index: 10;
   min-width: 1220px;
 }
 
-.grid-header-cell.row-number-header{
+.grid-header-cell.row-number-header {
   color: var(--txt-comp);
   background-color: var(--page-bg);
   border: 1px solid #ccc;
@@ -604,7 +604,6 @@
 }
 
 .grid-row {
-  
   display: grid;
   grid-template-columns: 50px repeat(5, 1fr); /* Row # + 5 columns */
   gap: 5px;
@@ -638,7 +637,6 @@
 .grid-row[data-autofill="true"]:hover .grid-cell {
   background-color: rgba(7, 106, 9, 0.1);
 }
-
 
 .row-number-header {
   text-align: center;

@@ -13,7 +13,9 @@ import {
   FiUpload,
 } from "react-icons/fi";
 import { useUser } from "../lib/UserContext";
-import BlogArticleRenderer, { RichTextContent } from "../blog/BlogArticleRenderer";
+import BlogArticleRenderer, {
+  RichTextContent,
+} from "../blog/BlogArticleRenderer";
 import RichTextEditor from "./RichTextEditor";
 import "./BlogPosts.css";
 
@@ -123,8 +125,7 @@ const rentalGuidesPost = {
     },
     {
       ...createBlock("paragraph"),
-      text:
-        "A smoother rental experience usually begins before the message is sent. If you already know your travel date, pickup time, drop-off plan, number of passengers, and how much luggage you are bringing, it becomes much easier to choose the right unit and get a clear response quickly. Many booking delays happen because the trip details are still incomplete, so preparing the essentials early saves time for both the customer and the rental team.",
+      text: "A smoother rental experience usually begins before the message is sent. If you already know your travel date, pickup time, drop-off plan, number of passengers, and how much luggage you are bringing, it becomes much easier to choose the right unit and get a clear response quickly. Many booking delays happen because the trip details are still incomplete, so preparing the essentials early saves time for both the customer and the rental team.",
     },
     {
       ...createBlock("image"),
@@ -134,8 +135,7 @@ const rentalGuidesPost = {
     {
       ...createBlock("split"),
       title: "Bring The Right Documents And Contact Details",
-      text:
-        "A booking becomes easier to confirm when the basic requirements are already prepared. A valid driver's license, a working mobile number, and accurate contact details should be ready before finalizing the request. If someone else is driving, that should be clarified early as well. Complete information reduces back-and-forth and helps confirm availability, identity, and trip details without unnecessary delay.",
+      text: "A booking becomes easier to confirm when the basic requirements are already prepared. A valid driver's license, a working mobile number, and accurate contact details should be ready before finalizing the request. If someone else is driving, that should be clarified early as well. Complete information reduces back-and-forth and helps confirm availability, identity, and trip details without unnecessary delay.",
       caption:
         "Use an image here that suggests identity, preparation, or pre-trip confirmation.",
       imagePosition: "right",
@@ -143,8 +143,7 @@ const rentalGuidesPost = {
     {
       ...createBlock("split"),
       title: "Choose The Vehicle Based On The Trip, Not Only The Price",
-      text:
-        "The most affordable option is not always the most practical one. A compact unit may work well for solo trips or short city travel, but families, longer drives, or passengers with extra bags may need more room. Before booking, think about comfort, seating, luggage space, and how long the group will stay on the road. Choosing the right vehicle from the beginning usually prevents avoidable stress once the trip is already underway.",
+      text: "The most affordable option is not always the most practical one. A compact unit may work well for solo trips or short city travel, but families, longer drives, or passengers with extra bags may need more room. Before booking, think about comfort, seating, luggage space, and how long the group will stay on the road. Choosing the right vehicle from the beginning usually prevents avoidable stress once the trip is already underway.",
       caption:
         "Add an image of a vehicle interior, luggage space, or passenger-ready setup here.",
       imagePosition: "left",
@@ -155,8 +154,7 @@ const rentalGuidesPost = {
     },
     {
       ...createBlock("paragraph"),
-      text:
-        "Even when a unit is available, a booking can still become confusing if the pickup and return details are vague. Confirm the date, time, location, and expected duration as early as possible. This matters even more for travelers arriving through terminals, ports, or airport connections where timing can affect the schedule. Clear pickup and return details make the whole booking process easier to organize and easier to honor on the actual day.",
+      text: "Even when a unit is available, a booking can still become confusing if the pickup and return details are vague. Confirm the date, time, location, and expected duration as early as possible. This matters even more for travelers arriving through terminals, ports, or airport connections where timing can affect the schedule. Clear pickup and return details make the whole booking process easier to organize and easier to honor on the actual day.",
     },
     {
       ...createBlock("image"),
@@ -169,8 +167,7 @@ const rentalGuidesPost = {
     },
     {
       ...createBlock("paragraph"),
-      text:
-        "If the trip falls on a weekend, holiday, school break, or an important family or business date, booking early gives you a better chance of getting the unit that actually fits your needs. Waiting too long can reduce your options and force you to settle for a vehicle that does not match the trip as well. Early booking is one of the simplest ways to keep the process smoother and more predictable.",
+      text: "If the trip falls on a weekend, holiday, school break, or an important family or business date, booking early gives you a better chance of getting the unit that actually fits your needs. Waiting too long can reduce your options and force you to settle for a vehicle that does not match the trip as well. Early booking is one of the simplest ways to keep the process smoother and more predictable.",
     },
     {
       ...createBlock("image"),
@@ -202,7 +199,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
   const [isUploadingBlockImageId, setIsUploadingBlockImageId] = useState("");
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isDeletingImageId, setIsDeletingImageId] = useState("");
-  const [isCreatingRentalGuidesPost, setIsCreatingRentalGuidesPost] = useState(false);
+  const [isCreatingRentalGuidesPost, setIsCreatingRentalGuidesPost] =
+    useState(false);
   const [isTogglingHidden, setIsTogglingHidden] = useState(false);
   const [activeEditorView, setActiveEditorView] = useState("editor");
   const coverInputRef = useRef(null);
@@ -213,7 +211,10 @@ const BlogPosts = ({ subSection = "overview" }) => {
     return blogPosts.find((post) => post.id === selectedPostId) || null;
   }, [blogPosts, selectedPostId]);
 
-  const autoSlug = useMemo(() => buildSlugFromTitle(draft.title), [draft.title]);
+  const autoSlug = useMemo(
+    () => buildSlugFromTitle(draft.title),
+    [draft.title],
+  );
   const autoSeoTitle = useMemo(() => {
     const safeTitle = String(draft.title || "").trim() || "Untitled Post";
     return `${safeTitle} | EMNL Car Rental`;
@@ -222,10 +223,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
     const safeTitle = String(draft.title || "").trim() || "Untitled Post";
     const plainExcerpt = stripRichTextToPlainText(draft.excerpt);
 
-    return (
-      plainExcerpt ||
-      `Read ${safeTitle} from EMNL Car Rental.`
-    );
+    return plainExcerpt || `Read ${safeTitle} from EMNL Car Rental.`;
   }, [draft.excerpt, draft.title]);
 
   const normalizedDraftForSave = useMemo(
@@ -245,7 +243,9 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
   const postImageLabelMap = useMemo(
     () =>
-      new Map(postImages.map((image, index) => [image.id, `Image ${index + 1}`])),
+      new Map(
+        postImages.map((image, index) => [image.id, `Image ${index + 1}`]),
+      ),
     [postImages],
   );
 
@@ -259,7 +259,13 @@ const BlogPosts = ({ subSection = "overview" }) => {
       publishedAt: selectedPost?.publishedAt || selectedPost?.updatedAt || null,
       updatedAt: selectedPost?.updatedAt || null,
     }),
-    [draft.excerpt, draft.id, draft.title, normalizedDraftForSave, selectedPost],
+    [
+      draft.excerpt,
+      draft.id,
+      draft.title,
+      normalizedDraftForSave,
+      selectedPost,
+    ],
   );
 
   const draftChecklist = useMemo(() => {
@@ -313,8 +319,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
   const applyDraftChange = (updater) => {
     setDraft((prev) => {
-      const next =
-        typeof updater === "function" ? updater(prev) : updater;
+      const next = typeof updater === "function" ? updater(prev) : updater;
       return JSON.parse(JSON.stringify(next));
     });
   };
@@ -353,7 +358,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
       cancelled = true;
     };
   }, [draft.id, draft.coverImageId]);
-
 
   if (subSection !== "overview") {
     return null;
@@ -405,17 +409,22 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
   const removeBlock = (blockId) => {
     applyDraftChange((prev) => {
-      const nextBlocks = prev.contentBlocks.filter((block) => block.id !== blockId);
+      const nextBlocks = prev.contentBlocks.filter(
+        (block) => block.id !== blockId,
+      );
       return {
         ...prev,
-        contentBlocks: nextBlocks.length > 0 ? nextBlocks : [createBlock("paragraph")],
+        contentBlocks:
+          nextBlocks.length > 0 ? nextBlocks : [createBlock("paragraph")],
       };
     });
   };
 
   const moveBlock = (blockId, direction) => {
     applyDraftChange((prev) => {
-      const index = prev.contentBlocks.findIndex((block) => block.id === blockId);
+      const index = prev.contentBlocks.findIndex(
+        (block) => block.id === blockId,
+      );
       if (index < 0) return prev;
 
       const targetIndex = direction === "up" ? index - 1 : index + 1;
@@ -521,7 +530,9 @@ const BlogPosts = ({ subSection = "overview" }) => {
       });
 
       showActionOverlay({
-        message: nextHidden ? "Post hidden from public view." : "Post is public again.",
+        message: nextHidden
+          ? "Post hidden from public view."
+          : "Post is public again.",
         type: "success",
       });
     } finally {
@@ -594,16 +605,22 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       if (!postResult?.success) {
         showActionOverlay({
-          message: postResult?.error || "Save the draft before uploading images.",
+          message:
+            postResult?.error || "Save the draft before uploading images.",
           type: "warning",
         });
         return;
       }
 
-      const uploadResult = await uploadBlogPostImage(postResult.postId, file, "", {
-        role: "cover",
-        altText: draft.title || "Blog cover image",
-      });
+      const uploadResult = await uploadBlogPostImage(
+        postResult.postId,
+        file,
+        "",
+        {
+          role: "cover",
+          altText: draft.title || "Blog cover image",
+        },
+      );
 
       if (!uploadResult?.success) {
         showActionOverlay({
@@ -622,16 +639,14 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       if (!saveResult?.success) {
         showActionOverlay({
-          message: saveResult?.error || "Cover image uploaded but post update failed.",
+          message:
+            saveResult?.error || "Cover image uploaded but post update failed.",
           type: "warning",
         });
         return;
       }
 
-      if (
-        draft.coverImageId &&
-        draft.coverImageId !== uploadResult.imageId
-      ) {
+      if (draft.coverImageId && draft.coverImageId !== uploadResult.imageId) {
         await deleteBlogPostImage(postResult.postId, draft.coverImageId);
       }
 
@@ -667,7 +682,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       if (!postResult?.success) {
         showActionOverlay({
-          message: postResult?.error || "Save the draft before uploading images.",
+          message:
+            postResult?.error || "Save the draft before uploading images.",
           type: "warning",
         });
         return;
@@ -685,7 +701,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
       const failedUpload = results.find((result) => !result?.success);
       if (failedUpload) {
         showActionOverlay({
-          message: failedUpload?.error || "One or more images failed to upload.",
+          message:
+            failedUpload?.error || "One or more images failed to upload.",
           type: "warning",
         });
       }
@@ -752,16 +769,22 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
       if (!postResult?.success) {
         showActionOverlay({
-          message: postResult?.error || "Save the draft before uploading images.",
+          message:
+            postResult?.error || "Save the draft before uploading images.",
           type: "warning",
         });
         return;
       }
 
-      const uploadResult = await uploadBlogPostImage(postResult.postId, file, "", {
-        role: "inline",
-        altText: draft.title || "Blog image",
-      });
+      const uploadResult = await uploadBlogPostImage(
+        postResult.postId,
+        file,
+        "",
+        {
+          role: "inline",
+          altText: draft.title || "Blog image",
+        },
+      );
 
       if (!uploadResult?.success) {
         showActionOverlay({
@@ -794,7 +817,6 @@ const BlogPosts = ({ subSection = "overview" }) => {
       setIsUploadingBlockImageId("");
     }
   };
-
 
   const handleCreateRentalGuidesPost = async () => {
     setIsCreatingRentalGuidesPost(true);
@@ -847,9 +869,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
                   disabled={isCreatingRentalGuidesPost}
                 >
                   <span>
-                    {isCreatingRentalGuidesPost
-                      ? "Creating..."
-                      : "Sample Blog"}
+                    {isCreatingRentalGuidesPost ? "Creating..." : "Sample Blog"}
                   </span>
                 </button>
                 <button
@@ -865,7 +885,9 @@ const BlogPosts = ({ subSection = "overview" }) => {
             {blogPosts.length === 0 ? (
               <div className="blog-posts-empty-state">
                 <p>No blog posts yet.</p>
-                <span>Create your first draft from the editor on the right.</span>
+                <span>
+                  Create your first draft from the editor on the right.
+                </span>
               </div>
             ) : (
               <div className="blog-posts-list">
@@ -882,8 +904,8 @@ const BlogPosts = ({ subSection = "overview" }) => {
                       {post.title || "Untitled Post"}
                     </span>
                     <span className="blog-posts-list-meta">
-                      {getAdminPostStatusLabel(post)} |{" "}
-                      Updated {formatFirestoreDate(post.updatedAt)}
+                      {getAdminPostStatusLabel(post)} | Updated{" "}
+                      {formatFirestoreDate(post.updatedAt)}
                     </span>
                   </button>
                 ))}
@@ -1029,430 +1051,452 @@ const BlogPosts = ({ subSection = "overview" }) => {
           </div>
 
           {activeEditorView === "editor" ? (
-          <div className="blog-posts-panel">
-            <div className="blog-posts-panel-header">
-              <h3>Post Editor</h3>
-              <div
-                className={`blog-posts-status-pill ${
-                  draft.published ? (draft.hidden ? "hidden" : "published") : "draft"
-                }`}
-              >
-                {draft.published ? (draft.hidden ? "Hidden" : "Published") : "Draft"}
-              </div>
-            </div>
-
-            <div className="blog-posts-form-grid">
-              <label className="blog-posts-field">
-                <span>Post Title</span>
-                <input
-                  type="text"
-                  value={draft.title}
-                  onChange={(e) => updateDraftField("title", e.target.value)}
-                  placeholder="How to Rent a Car in Leyte"
-                />
-              </label>
-
-              <label className="blog-posts-field">
-                <span>Slug</span>
-                <input
-                  type="text"
-                  value={autoSlug}
-                  readOnly
-                  placeholder="Generated from the title"
-                />
-                <small className="blog-posts-field-note">
-                  Generated automatically from the post title.
-                </small>
-              </label>
-
-              <div className="blog-posts-field blog-posts-field-full">
-                <span>Excerpt</span>
-                <RichTextEditor
-                  value={draft.excerpt}
-                  onChange={(nextValue) => updateDraftField("excerpt", nextValue)}
-                  placeholder="Short preview text for the landing page and blog list."
-                  minHeight={150}
-                />
+            <div className="blog-posts-panel">
+              <div className="blog-posts-panel-header">
+                <h3>Post Editor</h3>
+                <div
+                  className={`blog-posts-status-pill ${
+                    draft.published
+                      ? draft.hidden
+                        ? "hidden"
+                        : "published"
+                      : "draft"
+                  }`}
+                >
+                  {draft.published
+                    ? draft.hidden
+                      ? "Hidden"
+                      : "Published"
+                    : "Draft"}
+                </div>
               </div>
 
-              <label className="blog-posts-field">
-                <span>SEO Title</span>
-                <input
-                  type="text"
-                  value={autoSeoTitle}
-                  readOnly
-                  placeholder="Generated automatically"
-                />
-                <small className="blog-posts-field-note">
-                  Generated automatically from the title.
-                </small>
-              </label>
+              <div className="blog-posts-form-grid">
+                <label className="blog-posts-field">
+                  <span>Post Title</span>
+                  <input
+                    type="text"
+                    value={draft.title}
+                    onChange={(e) => updateDraftField("title", e.target.value)}
+                    placeholder="How to Rent a Car in Leyte"
+                  />
+                </label>
 
-              <label className="blog-posts-field">
-                <span>SEO Description</span>
-                <textarea
-                  rows="4"
-                  value={autoSeoDescription}
-                  readOnly
-                  placeholder="Generated automatically"
-                />
-                <small className="blog-posts-field-note">
-                  Generated automatically from the excerpt.
-                </small>
-              </label>
-            </div>
+                <label className="blog-posts-field">
+                  <span>Slug</span>
+                  <input
+                    type="text"
+                    value={autoSlug}
+                    readOnly
+                    placeholder="Generated from the title"
+                  />
+                  <small className="blog-posts-field-note">
+                    Generated automatically from the post title.
+                  </small>
+                </label>
 
-            <div className="blog-posts-cover-panel">
-              <div className="blog-posts-cover-header">
-                <h4>Cover Image</h4>
-                <div className="blog-posts-cover-header-actions">
+                <div className="blog-posts-field blog-posts-field-full">
+                  <span>Excerpt</span>
+                  <RichTextEditor
+                    value={draft.excerpt}
+                    onChange={(nextValue) =>
+                      updateDraftField("excerpt", nextValue)
+                    }
+                    placeholder="Short preview text for the landing page and blog list."
+                    minHeight={150}
+                  />
+                </div>
+
+                <label className="blog-posts-field">
+                  <span>SEO Title</span>
+                  <input
+                    type="text"
+                    value={autoSeoTitle}
+                    readOnly
+                    placeholder="Generated automatically"
+                  />
+                  <small className="blog-posts-field-note">
+                    Generated automatically from the title.
+                  </small>
+                </label>
+
+                <label className="blog-posts-field">
+                  <span>SEO Description</span>
+                  <textarea
+                    rows="4"
+                    value={autoSeoDescription}
+                    readOnly
+                    placeholder="Generated automatically"
+                  />
+                  <small className="blog-posts-field-note">
+                    Generated automatically from the excerpt.
+                  </small>
+                </label>
+              </div>
+
+              <div className="blog-posts-cover-panel">
+                <div className="blog-posts-cover-header">
+                  <h4>Cover Image</h4>
+                  <div className="blog-posts-cover-header-actions">
+                    <button
+                      type="button"
+                      className="blog-posts-secondary-btn blog-posts-btn-violet"
+                      onClick={() => coverInputRef.current?.click()}
+                      disabled={isUploadingCover}
+                    >
+                      <FiUpload />
+                      <span>
+                        {isUploadingCover ? "Uploading..." : "Upload Cover"}
+                      </span>
+                    </button>
+                  </div>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    hidden
+                  />
+                </div>
+
+                {coverImagePreview ? (
+                  <div className="blog-posts-cover-preview">
+                    <img src={coverImagePreview} alt="Blog cover preview" />
+                  </div>
+                ) : (
+                  <div className="blog-posts-cover-placeholder">
+                    No cover image uploaded yet.
+                  </div>
+                )}
+              </div>
+
+              <div className="blog-posts-blocks-panel">
+                <div className="blog-posts-cover-header">
+                  <h4>Content Blocks</h4>
+                  <div className="blog-posts-block-actions">
+                    <button
+                      type="button"
+                      className="blog-posts-secondary-btn blog-posts-btn-orange"
+                      onClick={() => addBlock("heading")}
+                    >
+                      <FiType />
+                      <span>Add Heading</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-posts-secondary-btn blog-posts-btn-blue"
+                      onClick={() => addBlock("paragraph")}
+                    >
+                      <FiType />
+                      <span>Add Paragraph</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-posts-secondary-btn blog-posts-btn-neon"
+                      onClick={() => addBlock("image")}
+                    >
+                      <FiImage />
+                      <span>Add Image</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-posts-secondary-btn blog-posts-btn-violet"
+                      onClick={() => addBlock("split")}
+                    >
+                      <FiType />
+                      <span>Add Split Section</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="blog-posts-block-list">
+                  {draft.contentBlocks.map((block, index) => (
+                    <div
+                      key={block.id}
+                      className={`blog-posts-block-card blog-posts-block-card-${block.type}`}
+                    >
+                      <div className="blog-posts-block-toolbar">
+                        <span className="blog-posts-block-label">
+                          {block.type.toUpperCase()} #{index + 1}
+                        </span>
+
+                        <div className="blog-posts-block-toolbar-actions">
+                          <button
+                            type="button"
+                            className="blog-posts-icon-btn"
+                            onClick={() => moveBlock(block.id, "up")}
+                            disabled={index === 0}
+                            title="Move block up"
+                          >
+                            <FiArrowUp />
+                          </button>
+                          <button
+                            type="button"
+                            className="blog-posts-icon-btn"
+                            onClick={() => moveBlock(block.id, "down")}
+                            disabled={index === draft.contentBlocks.length - 1}
+                            title="Move block down"
+                          >
+                            <FiArrowDown />
+                          </button>
+                          <button
+                            type="button"
+                            className="blog-posts-icon-btn delete"
+                            onClick={() => removeBlock(block.id)}
+                            title="Remove block"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </div>
+
+                      {block.type === "image" || block.type === "split" ? (
+                        <>
+                          <div className="blog-posts-block-image-shell">
+                            <input
+                              ref={(node) => {
+                                if (node) {
+                                  blockImageInputRefs.current[block.id] = node;
+                                } else {
+                                  delete blockImageInputRefs.current[block.id];
+                                }
+                              }}
+                              type="file"
+                              accept="image/*"
+                              hidden
+                              onChange={(event) =>
+                                handleBlockImageUpload(block.id, event)
+                              }
+                            />
+
+                            <div className="blog-posts-block-image-preview">
+                              {postImagesById[block.imageId]?.base64 ? (
+                                <img
+                                  src={postImagesById[block.imageId].base64}
+                                  alt={
+                                    postImagesById[block.imageId].altText ||
+                                    postImageLabelMap.get(block.imageId) ||
+                                    "Blog image"
+                                  }
+                                />
+                              ) : (
+                                <div className="blog-posts-block-image-placeholder">
+                                  <FiImage />
+                                  <span>Upload an image for this block</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="blog-posts-block-image-meta">
+                              <span className="blog-posts-block-image-name">
+                                {block.imageId
+                                  ? postImageLabelMap.get(block.imageId) ||
+                                    "Saved image"
+                                  : block.type === "split"
+                                    ? "No split image selected"
+                                    : "No image selected"}
+                              </span>
+                              <button
+                                type="button"
+                                className="blog-posts-secondary-btn blog-posts-btn-violet blog-posts-inline-btn"
+                                onClick={() =>
+                                  blockImageInputRefs.current[block.id]?.click()
+                                }
+                                disabled={isUploadingBlockImageId === block.id}
+                              >
+                                <FiUpload />
+                                <span>
+                                  {isUploadingBlockImageId === block.id
+                                    ? "Uploading..."
+                                    : block.imageId
+                                      ? "Replace Image"
+                                      : "Upload Image"}
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <label className="blog-posts-field">
+                            <span>
+                              {block.type === "split"
+                                ? "Split Image"
+                                : "Reuse Saved Image"}
+                            </span>
+                            <select
+                              value={block.imageId}
+                              onChange={(e) =>
+                                updateBlock(block.id, {
+                                  imageId: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="">Select an uploaded image</option>
+                              {postImages.map((image) => (
+                                <option key={image.id} value={image.id}>
+                                  {postImageLabelMap.get(image.id) || image.id}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          {block.type === "split" && (
+                            <>
+                              <div className="blog-posts-field">
+                                <span>Section Title</span>
+                                <RichTextEditor
+                                  value={block.title}
+                                  onChange={(nextValue) =>
+                                    updateBlockField(
+                                      block.id,
+                                      "title",
+                                      nextValue,
+                                    )
+                                  }
+                                  placeholder="Write a split-section heading"
+                                  minHeight={64}
+                                  singleLine
+                                />
+                              </div>
+
+                              <label className="blog-posts-field">
+                                <span>Layout</span>
+                                <div className="blog-posts-split-toggle">
+                                  <button
+                                    type="button"
+                                    className={`blog-posts-split-toggle-btn ${
+                                      block.imagePosition !== "right"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      updateBlock(block.id, {
+                                        imagePosition: "left",
+                                      })
+                                    }
+                                  >
+                                    Image Left
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`blog-posts-split-toggle-btn ${
+                                      block.imagePosition === "right"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      updateBlock(block.id, {
+                                        imagePosition: "right",
+                                      })
+                                    }
+                                  >
+                                    Image Right
+                                  </button>
+                                </div>
+                              </label>
+
+                              <div className="blog-posts-field">
+                                <span>Paragraph</span>
+                                <RichTextEditor
+                                  value={block.text}
+                                  onChange={(nextValue) =>
+                                    updateBlockField(
+                                      block.id,
+                                      "text",
+                                      nextValue,
+                                    )
+                                  }
+                                  placeholder="Write the text for this split section"
+                                  minHeight={180}
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          <div className="blog-posts-field">
+                            <span>Caption</span>
+                            <RichTextEditor
+                              value={block.caption}
+                              onChange={(nextValue) =>
+                                updateBlockField(block.id, "caption", nextValue)
+                              }
+                              placeholder="Optional image caption"
+                              minHeight={64}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="blog-posts-field">
+                          <span>
+                            {block.type === "heading" ? "Heading" : "Paragraph"}
+                          </span>
+                          <RichTextEditor
+                            value={block.text}
+                            onChange={(nextValue) =>
+                              updateBlockField(block.id, "text", nextValue)
+                            }
+                            placeholder={
+                              block.type === "heading"
+                                ? "Write a section heading"
+                                : "Write a paragraph"
+                            }
+                            minHeight={block.type === "heading" ? 84 : 220}
+                            singleLine={block.type === "heading"}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="blog-posts-actions">
+                {draft.id && (
                   <button
                     type="button"
-                    className="blog-posts-secondary-btn blog-posts-btn-violet"
-                    onClick={() => coverInputRef.current?.click()}
-                    disabled={isUploadingCover}
+                    className="blog-posts-danger-btn"
+                    onClick={handleDelete}
+                    disabled={isDeletingPost}
                   >
-                    <FiUpload />
-                    <span>
-                      {isUploadingCover ? "Uploading..." : "Upload Cover"}
-                    </span>
+                    {isDeletingPost ? "Deleting..." : "Delete Post"}
                   </button>
-                </div>
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                  hidden
-                />
-              </div>
+                )}
 
-              {coverImagePreview ? (
-                <div className="blog-posts-cover-preview">
-                  <img src={coverImagePreview} alt="Blog cover preview" />
-                </div>
-              ) : (
-                <div className="blog-posts-cover-placeholder">
-                  No cover image uploaded yet.
-                </div>
-              )}
-            </div>
-
-            <div className="blog-posts-blocks-panel">
-              <div className="blog-posts-cover-header">
-                <h4>Content Blocks</h4>
-                <div className="blog-posts-block-actions">
+                <button
+                  type="button"
+                  className="blog-posts-secondary-btn"
+                  onClick={() => handleSave(false)}
+                  disabled={isSavingDraft}
+                >
+                  {isSavingDraft ? "Saving..." : "Save Draft"}
+                </button>
+                {draft.published && (
                   <button
                     type="button"
                     className="blog-posts-secondary-btn blog-posts-btn-orange"
-                    onClick={() => addBlock("heading")}
+                    onClick={handleToggleHidden}
+                    disabled={isTogglingHidden || isSavingDraft}
                   >
-                    <FiType />
-                    <span>Add Heading</span>
+                    {isTogglingHidden
+                      ? "Updating Visibility..."
+                      : draft.hidden
+                        ? "Show Publicly"
+                        : "Hide For Now"}
                   </button>
-                  <button
-                    type="button"
-                    className="blog-posts-secondary-btn blog-posts-btn-blue"
-                    onClick={() => addBlock("paragraph")}
-                  >
-                    <FiType />
-                    <span>Add Paragraph</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="blog-posts-secondary-btn blog-posts-btn-neon"
-                    onClick={() => addBlock("image")}
-                  >
-                    <FiImage />
-                    <span>Add Image</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="blog-posts-secondary-btn blog-posts-btn-violet"
-                    onClick={() => addBlock("split")}
-                  >
-                    <FiType />
-                    <span>Add Split Section</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="blog-posts-block-list">
-                {draft.contentBlocks.map((block, index) => (
-                  <div
-                    key={block.id}
-                    className={`blog-posts-block-card blog-posts-block-card-${block.type}`}
-                  >
-                    <div className="blog-posts-block-toolbar">
-                      <span className="blog-posts-block-label">
-                        {block.type.toUpperCase()} #{index + 1}
-                      </span>
-
-                      <div className="blog-posts-block-toolbar-actions">
-                        <button
-                          type="button"
-                          className="blog-posts-icon-btn"
-                          onClick={() => moveBlock(block.id, "up")}
-                          disabled={index === 0}
-                          title="Move block up"
-                        >
-                          <FiArrowUp />
-                        </button>
-                        <button
-                          type="button"
-                          className="blog-posts-icon-btn"
-                          onClick={() => moveBlock(block.id, "down")}
-                          disabled={index === draft.contentBlocks.length - 1}
-                          title="Move block down"
-                        >
-                          <FiArrowDown />
-                        </button>
-                        <button
-                          type="button"
-                          className="blog-posts-icon-btn delete"
-                          onClick={() => removeBlock(block.id)}
-                          title="Remove block"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </div>
-
-                    {block.type === "image" || block.type === "split" ? (
-                      <>
-                        <div className="blog-posts-block-image-shell">
-                          <input
-                            ref={(node) => {
-                              if (node) {
-                                blockImageInputRefs.current[block.id] = node;
-                              } else {
-                                delete blockImageInputRefs.current[block.id];
-                              }
-                            }}
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={(event) =>
-                              handleBlockImageUpload(block.id, event)
-                            }
-                          />
-
-                          <div className="blog-posts-block-image-preview">
-                            {postImagesById[block.imageId]?.base64 ? (
-                              <img
-                                src={postImagesById[block.imageId].base64}
-                                alt={
-                                  postImagesById[block.imageId].altText ||
-                                  postImageLabelMap.get(block.imageId) ||
-                                  "Blog image"
-                                }
-                              />
-                            ) : (
-                              <div className="blog-posts-block-image-placeholder">
-                                <FiImage />
-                                <span>Upload an image for this block</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="blog-posts-block-image-meta">
-                            <span className="blog-posts-block-image-name">
-                              {block.imageId
-                                ? postImageLabelMap.get(block.imageId) ||
-                                  "Saved image"
-                                : block.type === "split"
-                                  ? "No split image selected"
-                                  : "No image selected"}
-                            </span>
-                            <button
-                              type="button"
-                              className="blog-posts-secondary-btn blog-posts-btn-violet blog-posts-inline-btn"
-                              onClick={() =>
-                                blockImageInputRefs.current[block.id]?.click()
-                              }
-                              disabled={isUploadingBlockImageId === block.id}
-                            >
-                              <FiUpload />
-                              <span>
-                                {isUploadingBlockImageId === block.id
-                                  ? "Uploading..."
-                                  : block.imageId
-                                    ? "Replace Image"
-                                    : "Upload Image"}
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-
-                        <label className="blog-posts-field">
-                          <span>
-                            {block.type === "split"
-                              ? "Split Image"
-                              : "Reuse Saved Image"}
-                          </span>
-                          <select
-                            value={block.imageId}
-                            onChange={(e) =>
-                              updateBlock(block.id, { imageId: e.target.value })
-                            }
-                          >
-                            <option value="">Select an uploaded image</option>
-                            {postImages.map((image) => (
-                              <option key={image.id} value={image.id}>
-                                {postImageLabelMap.get(image.id) || image.id}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-
-                        {block.type === "split" && (
-                          <>
-                            <div className="blog-posts-field">
-                              <span>Section Title</span>
-                              <RichTextEditor
-                                value={block.title}
-                                onChange={(nextValue) =>
-                                  updateBlockField(block.id, "title", nextValue)
-                                }
-                                placeholder="Write a split-section heading"
-                                minHeight={64}
-                                singleLine
-                              />
-                            </div>
-
-                            <label className="blog-posts-field">
-                              <span>Layout</span>
-                              <div className="blog-posts-split-toggle">
-                                <button
-                                  type="button"
-                                  className={`blog-posts-split-toggle-btn ${
-                                    block.imagePosition !== "right"
-                                      ? "active"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    updateBlock(block.id, {
-                                      imagePosition: "left",
-                                    })
-                                  }
-                                >
-                                  Image Left
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`blog-posts-split-toggle-btn ${
-                                    block.imagePosition === "right"
-                                      ? "active"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    updateBlock(block.id, {
-                                      imagePosition: "right",
-                                    })
-                                  }
-                                >
-                                  Image Right
-                                </button>
-                              </div>
-                            </label>
-
-                            <div className="blog-posts-field">
-                              <span>Paragraph</span>
-                              <RichTextEditor
-                                value={block.text}
-                                onChange={(nextValue) =>
-                                  updateBlockField(block.id, "text", nextValue)
-                                }
-                                placeholder="Write the text for this split section"
-                                minHeight={180}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        <div className="blog-posts-field">
-                          <span>Caption</span>
-                          <RichTextEditor
-                            value={block.caption}
-                            onChange={(nextValue) =>
-                              updateBlockField(block.id, "caption", nextValue)
-                            }
-                            placeholder="Optional image caption"
-                            minHeight={64}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="blog-posts-field">
-                        <span>{block.type === "heading" ? "Heading" : "Paragraph"}</span>
-                        <RichTextEditor
-                          value={block.text}
-                          onChange={(nextValue) =>
-                            updateBlockField(block.id, "text", nextValue)
-                          }
-                          placeholder={
-                            block.type === "heading"
-                              ? "Write a section heading"
-                              : "Write a paragraph"
-                          }
-                          minHeight={block.type === "heading" ? 84 : 220}
-                          singleLine={block.type === "heading"}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="blog-posts-actions">
-              {draft.id && (
+                )}
                 <button
                   type="button"
-                  className="blog-posts-danger-btn"
-                  onClick={handleDelete}
-                  disabled={isDeletingPost}
+                  className="blog-posts-primary-btn"
+                  onClick={() => handleSave(true)}
+                  disabled={isSavingDraft}
                 >
-                  {isDeletingPost ? "Deleting..." : "Delete Post"}
+                  {isSavingDraft
+                    ? "Saving..."
+                    : draft.published
+                      ? "Update Published"
+                      : "Publish"}
                 </button>
-              )}
-
-              <button
-                type="button"
-                className="blog-posts-secondary-btn"
-                onClick={() => handleSave(false)}
-                disabled={isSavingDraft}
-              >
-                {isSavingDraft ? "Saving..." : "Save Draft"}
-              </button>
-              {draft.published && (
-                <button
-                  type="button"
-                  className="blog-posts-secondary-btn blog-posts-btn-orange"
-                  onClick={handleToggleHidden}
-                  disabled={isTogglingHidden || isSavingDraft}
-                >
-                  {isTogglingHidden
-                    ? "Updating Visibility..."
-                    : draft.hidden
-                      ? "Show Publicly"
-                      : "Hide For Now"}
-                </button>
-              )}
-              <button
-                type="button"
-                className="blog-posts-primary-btn"
-                onClick={() => handleSave(true)}
-                disabled={isSavingDraft}
-              >
-                {isSavingDraft
-                  ? "Saving..."
-                  : draft.published
-                    ? "Update Published"
-                    : "Publish"}
-              </button>
+              </div>
             </div>
-          </div>
           ) : (
             <div className="blog-posts-panel blog-posts-preview-panel">
               <div className="blog-posts-panel-header">
@@ -1464,9 +1508,7 @@ const BlogPosts = ({ subSection = "overview" }) => {
 
               <div className="blog-posts-preview-shell">
                 <div className="blog-detail-header blog-posts-preview-header">
-                  <span className="blog-detail-date">
-                    Preview Mode
-                  </span>
+                  <span className="blog-detail-date">Preview Mode</span>
                   <h1>{previewPost.title}</h1>
                   {previewPost.excerpt && (
                     <RichTextContent
@@ -1508,14 +1550,18 @@ const BlogPosts = ({ subSection = "overview" }) => {
                 <strong>Post ID:</strong> {draft.id || "Not created yet"}
               </div>
               <div className="blog-posts-roadmap-item">
-                <strong>Slug:</strong> {draft.slug || "Will be generated on save"}
+                <strong>Slug:</strong>{" "}
+                {draft.slug || "Will be generated on save"}
               </div>
               <div className="blog-posts-roadmap-item">
                 <strong>Blocks:</strong> {draft.contentBlocks.length}
               </div>
               <div className="blog-posts-roadmap-item">
                 <strong>Image Storage:</strong> Each post now stores images in{" "}
-                <code>blogPosts/{"{postId}"}/images/{"{imageId}"}</code>.
+                <code>
+                  blogPosts/{"{postId}"}/images/{"{imageId}"}
+                </code>
+                .
               </div>
             </div>
           </div>
