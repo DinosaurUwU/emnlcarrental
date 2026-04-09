@@ -27,20 +27,11 @@ import "./component/Footer.css";
 
 function LandingPage() {
   const { openBooking } = useBooking();
-
-const hiddenButtonRef = useRef(null);
-const router = useRouter();
-
-    const {
-
-      user,
-
-    } = useUser();
+  const { user } = useUser();
 
   const carouselRef = useRef(null);
   const specialOffersRef = useRef(null);
   const [showButtons, setShowButtons] = useState(false);
-
   const customerTestimonialsRef = useRef(null);
 
   // Refs for the images
@@ -56,70 +47,59 @@ const router = useRouter();
   const [showReady, setShowReady] = useState(false);
   const [showToHitThe, setShowToHitThe] = useState(false);
   const [showRoad, setShowRoad] = useState(false);
-
   const [showImages, setShowImages] = useState(false);
 
-  const [scrollProgress, setScrollProgress] = useState(0);
+  useEffect(() => {
+    const checkPendingBookingAndOpenOverlay = async () => {
+      if (!user?.uid || !openBooking) return;
 
+      const pendingData = localStorage.getItem(
+        `pendingBookingData_${user.uid}`,
+      );
 
-  
-useEffect(() => {
-  const checkPendingBookingAndOpenOverlay = async () => {
-    if (!user?.uid || !openBooking) return;
+      if (pendingData) {
+        try {
+          const data = JSON.parse(pendingData);
+          localStorage.removeItem(`pendingBookingData_${user.uid}`);
 
-    const pendingData = localStorage.getItem(`pendingBookingData_${user.uid}`);
-    
-    if (pendingData) {
-      try {
-        const data = JSON.parse(pendingData);
-        localStorage.removeItem(`pendingBookingData_${user.uid}`);
-        
-        // Build prefill data from saved booking
-        const prefillData = {
-          firstName: data.formData?.firstName || "",
-          middleName: data.formData?.middleName || "",
-          surname: data.formData?.surname || "",
-          email: data.formData?.email || "",
-          contact: data.formData?.contactNo || "",
-          location: data.formData?.location || "",
-          occupation: data.formData?.occupation || "",
-          address: data.formData?.address || "",
-          dropoffLocation: data.formData?.dropoffLocation || "",
-          purpose: data.formData?.purpose || "",
-          referralSource: data.formData?.referralSource || "",
-          carType: data.selectedCarType || "ALL",
-          carId: data.selectedCarId || "",
-          drivingOption: data.driveType || "Self-Drive",
-          pickupOption: data.dropOffType || "Pickup",
-          startDate: data.startDate || "",
-          startTime: data.startTime || "",
-          endDate: data.endDate || "",
-          endTime: data.endTime || "",
-          driverLicense: data.uploadedID || null,
-          isFromGuestSession: true,
-        };
-        
-        openBooking(null, prefillData);
-      } catch (error) {
-        console.error("Error parsing pending booking data:", error);
+          // Build prefill data from saved booking
+          const prefillData = {
+            firstName: data.formData?.firstName || "",
+            middleName: data.formData?.middleName || "",
+            surname: data.formData?.surname || "",
+            email: data.formData?.email || "",
+            contact: data.formData?.contactNo || "",
+            location: data.formData?.location || "",
+            occupation: data.formData?.occupation || "",
+            address: data.formData?.address || "",
+            dropoffLocation: data.formData?.dropoffLocation || "",
+            purpose: data.formData?.purpose || "",
+            referralSource: data.formData?.referralSource || "",
+            carType: data.selectedCarType || "ALL",
+            carId: data.selectedCarId || "",
+            drivingOption: data.driveType || "Self-Drive",
+            pickupOption: data.dropOffType || "Pickup",
+            startDate: data.startDate || "",
+            startTime: data.startTime || "",
+            endDate: data.endDate || "",
+            endTime: data.endTime || "",
+            driverLicense: data.uploadedID || null,
+            isFromGuestSession: true,
+          };
+
+          openBooking(null, prefillData);
+        } catch (error) {
+          console.error("Error parsing pending booking data:", error);
+        }
       }
-    }
-  };
+    };
 
-  const timer = setTimeout(() => {
-    checkPendingBookingAndOpenOverlay();
-  }, 500);
+    const timer = setTimeout(() => {
+      checkPendingBookingAndOpenOverlay();
+    }, 500);
 
-  return () => clearTimeout(timer);
-}, [user, openBooking]);
-
-
-
-
-
-
-
-
+    return () => clearTimeout(timer);
+  }, [user, openBooking]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -249,7 +229,6 @@ useEffect(() => {
 
   return (
     <div className="LandingPage">
-
       <Header openBooking={openBooking} />
 
       <div ref={carouselRef} className="carousel-container">

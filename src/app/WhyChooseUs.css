@@ -37,7 +37,6 @@
   top: 0;
   width: 90%;
   height: 70%;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,7 +125,6 @@
     color-mix(in srgb, var(--accent-txt) 60%, transparent) 80%,
     transparent 100%
   );
-
   mask-image: linear-gradient(
     to top,
     rgba(0, 0, 0, 1) 0%,

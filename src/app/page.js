@@ -5,8 +5,6 @@ import LandingPage from "./LandingPage";
 import BookingPage from "./component/BookingPage";
 import { MdClose } from "react-icons/md";
 
-
-
 function Home() {
   const {
     user,
@@ -17,7 +15,7 @@ function Home() {
   } = useUser();
 
   const [showHomeError, setShowHomeError] = useState(false);
-const [homeErrorMessage, setHomeErrorMessage] = useState("");
+  const [homeErrorMessage, setHomeErrorMessage] = useState("");
 
   const [verifyTargetEmail, setVerifyTargetEmail] = useState("");
   const [showVerifyInstructions, setShowVerifyInstructions] = useState(false);
@@ -105,11 +103,10 @@ const [homeErrorMessage, setHomeErrorMessage] = useState("");
 
   const closeBooking = () => setIsBookingOpen(false);
 
-  
-const closeHomeError = () => {
-  setShowHomeError(false);
-  setHomeErrorMessage("");
-};
+  const closeHomeError = () => {
+    setShowHomeError(false);
+    setHomeErrorMessage("");
+  };
 
   return (
     <>
@@ -288,10 +285,10 @@ const closeHomeError = () => {
                     setVerifyTargetEmail(res.email);
                     setShowVerifyInstructions(true);
                   } else {
-
-setHomeErrorMessage("Failed to send verification email. Please try again.");
-setShowHomeError(true);
-
+                    setHomeErrorMessage(
+                      "Failed to send verification email. Please try again.",
+                    );
+                    setShowHomeError(true);
                   }
                 }}
               >
@@ -308,7 +305,7 @@ setShowHomeError(true);
         </div>
       )}
 
-            {/* ================= Home Error Overlay ================= */}
+      {/* ================= Home Error Overlay ================= */}
       {showHomeError && (
         <div className="error-overlay" onClick={closeHomeError}>
           <div className="error-container" onClick={(e) => e.stopPropagation()}>
@@ -323,7 +320,6 @@ setShowHomeError(true);
           </div>
         </div>
       )}
-
 
       {showVerifyInstructions && (
         <div className="admin-booking-confirm-overlay">
