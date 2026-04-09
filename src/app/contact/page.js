@@ -217,10 +217,8 @@ const defaultCountry = countries.find((c) => c.code === "ph") || countries[0];
 function Contact({ openBooking }) {
   const {
     user,
-    setUser,
     sendMessage,
     sendGuestContactMessage,
-    showActionOverlay,
     fetchAdminUid,
     fetchImageFromFirestore,
     imageCache,
@@ -255,11 +253,6 @@ function Contact({ openBooking }) {
   const [adminContact, setAdminContact] = useState(null);
 
   const imageRef = useRef(null);
-
-  // const [contactImageSrc, setContactImageSrc] = useState(
-  //   "/assets/images/contact.png",
-  // );
-
   const contactFallback = "/assets/images/contact.png";
 
   const contactCachedSrc = useMemo(
@@ -319,16 +312,6 @@ function Contact({ openBooking }) {
     };
   }, [fetchImageFromFirestore, imageUpdateTrigger]);
 
-  // useEffect(() => {
-  //   const fetchContactImage = async () => {
-  //     const result = await fetchImageFromFirestore("ContactPage_0");
-  //     if (result) {
-  //       setContactImageSrc(result.base64);
-  //     }
-  //   };
-  //   fetchContactImage();
-  // }, [fetchImageFromFirestore]);
-
   useEffect(() => {
     const handleScroll = () => {
       if (imageRef.current) {
@@ -358,20 +341,13 @@ function Contact({ openBooking }) {
   //AUTOFILL
   useEffect(() => {
     if (user) {
-      // Autofill first name
       setFirstName(user.firstName || user.originalName?.split(" ")[0] || "");
       setMiddleName(user.middleName || "");
-
-      // Autofill last name
       setLastName(
         user.surname || user.originalName?.split(" ").slice(1).join(" ") || "",
       );
       setMiddleName(user.middleName || "");
-
-      // Autofill email
       setEmail(user.email || user.originalEmail || "");
-
-      // Autofill phone
       setPhone(user.phone || user.originalPhone || "");
     }
   }, [user]);
@@ -392,7 +368,7 @@ function Contact({ openBooking }) {
   }, []);
 
   //SUBMIT
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!adminUid || isSendingContactMessage) {
@@ -588,7 +564,7 @@ const handleSubmit = async (e) => {
               />
             </div>
 
-<label htmlFor="message" className="contact-message-label">
+            <label htmlFor="message" className="contact-message-label">
               <span>Message</span>
               {isSendingContactMessage && (
                 <span className="contact-message-spinner" />

@@ -163,7 +163,7 @@
 
 .contact-message-label span {
   display: inline-flex;
-    margin-right: 5px;
+  margin-right: 5px;
   align-items: center;
 }
 
@@ -278,8 +278,6 @@
   box-shadow: 0 0 10px #ff9100;
   color: #ffffff;
 }
-
-
 
 .contactPage-container .flag-dropdown {
   display: flex;

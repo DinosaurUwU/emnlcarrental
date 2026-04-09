@@ -1,15 +1,15 @@
 .blog-preview-section {
-
   background-color: var(--page-bg);
-  /* background:
-    radial-gradient(circle at top left, rgba(40, 167, 69, 0.14), transparent 30%),
-    linear-gradient(180deg, rgba(7, 70, 9, 0.04), rgba(40, 167, 69, 0.02)); */
 }
 
 .blog-preview-bg {
-    padding: 4rem 2rem;
+  padding: 4rem 2rem;
   background:
-    radial-gradient(circle at top left, rgba(40, 167, 69, 0.18), transparent 32%),
+    radial-gradient(
+      circle at top left,
+      rgba(40, 167, 69, 0.18),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgba(7, 70, 9, 0.08), rgba(40, 167, 69, 0.04));
 }
 
@@ -84,7 +84,9 @@
   text-decoration: none;
   background-color: var(--page-bg);
   box-shadow: 0 18px 40px rgba(var(--shadow-base), 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .blog-preview-card:hover {
@@ -96,8 +98,11 @@
   position: relative;
   height: 230px;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(7, 70, 9, 0.92), rgba(40, 167, 69, 0.65));
+  background: linear-gradient(
+    135deg,
+    rgba(7, 70, 9, 0.92),
+    rgba(40, 167, 69, 0.65)
+  );
 }
 
 .blog-preview-card-image {
@@ -201,7 +206,11 @@
   justify-content: space-between;
   gap: 1.5rem;
   background:
-    radial-gradient(circle at top right, rgba(255, 193, 7, 0.16), transparent 32%),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 193, 7, 0.16),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgba(7, 70, 9, 0.92), rgba(40, 167, 69, 0.82));
   box-shadow: 0 18px 40px rgba(var(--shadow-base), 0.14);
 }

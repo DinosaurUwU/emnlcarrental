@@ -839,7 +839,6 @@
   flex-shrink: 0;
 }
 
-
 /* Ensure the button is always aligned at the bottom */
 .car-card .view-details {
   font-weight: bold;
@@ -929,7 +928,6 @@
   right: 0;
   flex: 1;
   object-fit: cover;
-  /* height: 70%;                 */
   height: 70%;
   width: 70%;
   position: absolute;
@@ -1266,7 +1264,6 @@
   margin-right: 5px;
 }
 
-
 body.no-scroll {
   overflow: hidden;
 }
@@ -1340,8 +1337,6 @@ body.no-scroll {
     padding: 40px 0px 0px 0px;
     order: 0;
   }
-
-
 
   .overlay-details {
     z-index: 1;

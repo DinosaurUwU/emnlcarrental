@@ -1,25 +1,3 @@
-/* .info-page {
-  background-color: #ffffff;
-  color: #333;
-  padding-top: 8rem;
-  line-height: 1.6;
-}
-
-.info-title {
-  position: relative;
-  z-index: 1;
-  will-change: transform;
-  width: 100%;
-  height: 40vh;
-  overflow: hidden;
-}
-
-.info-title .login-logo {
-  width: 50%;
-  height: auto;
-  object-fit: contain;
-} */
-
 .info-page {
   background-color: var(--page-bg);
   color: #333;
@@ -46,9 +24,6 @@
   max-width: 400px;
 }
 
-
-
-
 .info-page .section-title {
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
@@ -68,7 +43,7 @@
 /* Help Center */
 .help-center {
   padding: 20px !important;
-    background-color: #333;
+  background-color: #333;
 
   position: relative;
   z-index: 2;
@@ -126,7 +101,7 @@
 
 .help-search button:hover {
   background-color: #28a745;
-    box-shadow: 0 0 10px #28a745;
+  box-shadow: 0 0 10px #28a745;
 }
 
 .help-search-container {
@@ -160,7 +135,6 @@
   background-color: var(--accent-txt);
   border-radius: 5px;
 }
-
 
 /* Results list */
 .help-results {
@@ -213,7 +187,6 @@
   gap: 20px;
   margin-top: 30px;
 }
-
 
 .help-card {
   background-color: var(--page-bg);
@@ -272,7 +245,6 @@
 .help-contact a {
   color: var(--accent-txt);
   text-decoration: none;
-
 }
 
 .help-contact a:hover {
@@ -722,9 +694,9 @@
   position: relative;
   padding-left: 1rem;
   margin-left: 2.5rem;
-    font-size: 14px !important;
+  font-size: 14px !important;
   line-height: 2;
-    color: var(--txt-comp);
+  color: var(--txt-comp);
 }
 
 /* Custom bullet marker */

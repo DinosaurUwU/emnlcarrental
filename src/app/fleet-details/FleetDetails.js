@@ -16,10 +16,9 @@ import {
   MdPeople,
   MdSettings,
   MdLocalGasStation,
-   MdFeaturedPlayList, 
+  MdFeaturedPlayList,
 } from "react-icons/md";
 import { BsFillLuggageFill } from "react-icons/bs";
-
 
 import "photoswipe/style.css";
 import Header from "../component/Header";
@@ -543,16 +542,15 @@ const FleetDetails = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-const specificationIcons = {
-  Type: <MdOutlineDirectionsCar />,
-  Color: <MdPalette />,
-  Capacity: <MdPeople />,
-  Transmission: <MdSettings />,
-  Fuel: <MdLocalGasStation />,
-  Trunk: <BsFillLuggageFill />,
-  Features: < MdFeaturedPlayList />,
-};
-
+  const specificationIcons = {
+    Type: <MdOutlineDirectionsCar />,
+    Color: <MdPalette />,
+    Capacity: <MdPeople />,
+    Transmission: <MdSettings />,
+    Fuel: <MdLocalGasStation />,
+    Trunk: <BsFillLuggageFill />,
+    Features: <MdFeaturedPlayList />,
+  };
 
   const scrollToSection = (sectionRef) => {
     if (!sectionRef?.current) return;
@@ -684,8 +682,6 @@ const specificationIcons = {
   return (
     <div className="fleet-details">
       <Header openBooking={openBooking} />
-
-
 
       <div className="navbar-overlay">
         <div className={`floating-nav ${navOpen ? "open" : ""}`}>
@@ -896,34 +892,33 @@ const specificationIcons = {
                     </div>
                     <div className="car-specs-grid">
                       <div className="car-spec-item">
-                        <span style={{ color: "var(--accent-txt)"}}>
-  {specificationIcons["Fuel"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Fuel"]}
+                        </span>
                         <span style={{ textTransform: "capitalize" }}>
                           {car.details?.specifications?.Fuel || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Capacity"]}
-</span>
+                          {specificationIcons["Capacity"]}
+                        </span>
                         <span>
-                          {car.details?.specifications?.Capacity || "-"}{" "}
-                          Capacity
+                          {car.details?.specifications?.Capacity || "-"} Seaters
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Transmission"]}
-</span>
+                          {specificationIcons["Transmission"]}
+                        </span>
                         <span>
                           {car.details?.specifications?.Transmission || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Color"]}
-</span>
+                          {specificationIcons["Color"]}
+                        </span>
                         <span>{car.details?.specifications?.Color || "-"}</span>
                       </div>
                     </div>
@@ -1012,34 +1007,33 @@ const specificationIcons = {
                     </div>
                     <div className="car-specs-grid">
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Fuel"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Fuel"]}
+                        </span>
                         <span style={{ textTransform: "capitalize" }}>
                           {car.details?.specifications?.Fuel || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Capacity"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Capacity"]}
+                        </span>
                         <span>
-                          {car.details?.specifications?.Capacity || "-"}{" "}
-                          Capacity
+                          {car.details?.specifications?.Capacity || "-"} Seaters
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Transmission"]}
-</span>
+                          {specificationIcons["Transmission"]}
+                        </span>
                         <span>
                           {car.details?.specifications?.Transmission || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Color"]}
-</span>
+                          {specificationIcons["Color"]}
+                        </span>
                         <span>{car.details?.specifications?.Color || "-"}</span>
                       </div>
                     </div>
@@ -1129,33 +1123,32 @@ const specificationIcons = {
                     <div className="car-specs-grid">
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Fuel"]}
-</span>
+                          {specificationIcons["Fuel"]}
+                        </span>
                         <span style={{ textTransform: "capitalize" }}>
                           {car.details?.specifications?.Fuel || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Capacity"]}
-</span>
+                          {specificationIcons["Capacity"]}
+                        </span>
                         <span>
-                          {car.details?.specifications?.Capacity || "-"}{" "}
-                          Capacity
+                          {car.details?.specifications?.Capacity || "-"} Seaters
                         </span>
                       </div>
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Transmission"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Transmission"]}
+                        </span>
                         <span>
                           {car.details?.specifications?.Transmission || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Color"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Color"]}
+                        </span>
                         <span>{car.details?.specifications?.Color || "-"}</span>
                       </div>
                     </div>
@@ -1244,34 +1237,33 @@ const specificationIcons = {
                     </div>
                     <div className="car-specs-grid">
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Fuel"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Fuel"]}
+                        </span>
                         <span style={{ textTransform: "capitalize" }}>
                           {car.details?.specifications?.Fuel || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Capacity"]}
-</span>
+                          {specificationIcons["Capacity"]}
+                        </span>
                         <span>
-                          {car.details?.specifications?.Capacity || "-"}{" "}
-                          Capacity
+                          {car.details?.specifications?.Capacity || "-"} Seaters
                         </span>
                       </div>
                       <div className="car-spec-item">
-                     <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Transmission"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Transmission"]}
+                        </span>
                         <span>
                           {car.details?.specifications?.Transmission || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Color"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Color"]}
+                        </span>
                         <span>{car.details?.specifications?.Color || "-"}</span>
                       </div>
                     </div>
@@ -1361,34 +1353,33 @@ const specificationIcons = {
                     </div>
                     <div className="car-specs-grid">
                       <div className="car-spec-item">
-                       <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Fuel"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Fuel"]}
+                        </span>
                         <span style={{ textTransform: "capitalize" }}>
                           {car.details?.specifications?.Fuel || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
-                    <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Capacity"]}
-</span>
+                        <span style={{ color: "var(--accent-txt)" }}>
+                          {specificationIcons["Capacity"]}
+                        </span>
                         <span>
-                          {car.details?.specifications?.Capacity || "-"}{" "}
-                          Capacity
+                          {car.details?.specifications?.Capacity || "-"} Seaters
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Transmission"]}
-</span>
+                          {specificationIcons["Transmission"]}
+                        </span>
                         <span>
                           {car.details?.specifications?.Transmission || "-"}
                         </span>
                       </div>
                       <div className="car-spec-item">
                         <span style={{ color: "var(--accent-txt)" }}>
-  {specificationIcons["Color"]}
-</span>
+                          {specificationIcons["Color"]}
+                        </span>
                         <span>{car.details?.specifications?.Color || "-"}</span>
                       </div>
                     </div>
@@ -1412,14 +1403,13 @@ const specificationIcons = {
           {/* Car-card overlay */}
           <div className="overlay" style={overlayStyle}>
             <div className="overlay-content">
-
-            <button
-  className="close-overlay"
-  type="button"
-onClick={closeOverlay}
->
-  <FiX className="close-icon" />
-</button>
+              <button
+                className="close-overlay"
+                type="button"
+                onClick={closeOverlay}
+              >
+                <FiX className="close-icon" />
+              </button>
 
               {/* Gradient container for details */}
               <div className="overlay-details">
@@ -1480,17 +1470,23 @@ onClick={closeOverlay}
                         return (
                           <li key={index}>
                             {icon && (
-  <span className="specification-icon" style={{ color: "var(--accent-txt)" }}>
-    {icon}
-  </span>
-)}
+                              <span
+                                className="specification-icon"
+                                style={{ color: "var(--accent-txt)" }}
+                              >
+                                {icon}
+                              </span>
+                            )}
                             <span style={{ textAlign: "left" }}>
                               {isBulletField && Array.isArray(displayValue) ? (
                                 <>
                                   {key}:
                                   <div className="bullet-list">
                                     {displayValue.map((item, i) => (
-                                      <div key={i} className="fleet-bullet-item">
+                                      <div
+                                        key={i}
+                                        className="fleet-bullet-item"
+                                      >
                                         • {item}
                                       </div>
                                     ))}

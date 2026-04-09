@@ -27,8 +27,7 @@ const Profile = ({ openBooking }) => {
     notificationMessages,
     loadMoreNotifications,
     hasMoreNotifications,
-    loadMoreUserMessages,
-    hasMoreUserMessages,
+
     subscribeToConversationMessages,
     hasMoreConversationMessages,
     markMessageAsRead,
@@ -45,7 +44,6 @@ const Profile = ({ openBooking }) => {
     compressAndConvertFileToBase64,
 
     markUserRentalAsCompleted,
-
     linkAccount,
     unlinkAccount,
 
@@ -212,10 +210,6 @@ const Profile = ({ openBooking }) => {
     useState(false);
   const [emailPasswordInput, setEmailPasswordInput] = useState("");
 
-  // const providerIds = (user?.providerData || []).map((p) => p.providerId);
-  // const hasGoogle = providerIds.includes("google.com");
-  // const hasEmail = providerIds.includes("password");
-
   const providerIds = (auth.currentUser?.providerData || []).map(
     (p) => p.providerId,
   );
@@ -253,71 +247,10 @@ const Profile = ({ openBooking }) => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   let mounted = true;
-
-  //   const loadAdminMeta = async () => {
-  //     const admin = await fetchAdminUid();
-  //     if (!mounted || !admin) return;
-
-  //     setAdminMeta({
-  //       uid: admin.uid || "",
-  //       name: admin.name || "",
-  //       email: admin.email || "",
-  //       contact: admin.contact || "",
-  //       profilePic: admin.profilePic || "/assets/profile.png",
-  //     });
-  //   };
-
-  //   loadAdminMeta();
-
-  //   return () => {
-  //     mounted = false;
-  //   };
-  // }, [fetchAdminUid]);
-
   const hideTimerRef = useRef(null);
   const removeTimerRef = useRef(null);
 
   const [fetchedImages, setFetchedImages] = useState({});
-
-  // useEffect(() => {
-  //   if (!unitData || unitData.length === 0) return;
-
-  //   const fetchProfileImages = async () => {
-  //     const promises = unitData.map(async (unit) => {
-  //       if (!unit.imageId) return null;
-
-  //       try {
-  //         const { base64, updatedAt } = await fetchImageFromFirestore(
-  //           unit.imageId,
-  //         );
-
-  //         return { [unit.imageId]: { base64, updatedAt } };
-  //       } catch {
-  //         return {
-  //           [unit.imageId]: {
-  //             base64: "/assets/images/default.png",
-  //             updatedAt: Date.now(),
-  //           },
-  //         };
-  //       }
-  //     });
-
-  //     const results = await Promise.all(promises);
-
-  //     const merged = results
-  //       .filter(Boolean)
-  //       .reduce((acc, cur) => ({ ...acc, ...cur }), {});
-
-  //     setFetchedImages((prev) => ({
-  //       ...prev,
-  //       ...merged,
-  //     }));
-  //   };
-
-  //   fetchProfileImages();
-  // }, [unitData, imageUpdateTrigger]);
 
   useEffect(() => {
     if (
@@ -410,7 +343,7 @@ const Profile = ({ openBooking }) => {
       const providerIds = (auth.currentUser?.providerData || []).map(
         (p) => p.providerId,
       );
-      console.log("Full providerIds array:", providerIds); // Add this for debugging
+      console.log("Full providerIds array:", providerIds);
 
       const hasGoogle = providerIds.includes("google.com");
       const hasPassword = providerIds.includes("password");
@@ -548,7 +481,6 @@ const Profile = ({ openBooking }) => {
         }
       }
     } catch (err) {
-      // setProcessingBooking({ isProcessing: false, message: "" });
       hideProcessingOverlay();
       showActionOverlay({
         message: `Operation failed: ${err?.message || "Unknown"}`,
@@ -557,14 +489,10 @@ const Profile = ({ openBooking }) => {
     }
   };
 
-  // Handler to toggle Email/Password provider (example; pass email/password as needed)
+  // Handler to toggle Email/Password provider
   const handleToggleEmail = async (email = null, password = null) => {
     try {
       if (hasEmail) {
-        // setProcessingBooking({ isProcessing: true, message: "Unlinking Email..." });
-        // const res = await unlinkAccount("password");
-        // setProcessingBooking({ isProcessing: false, message: "" });
-
         showProcessingOverlay("Unlinking Email...", "warning");
         const res = await unlinkAccount("password");
         hideProcessingOverlay();
@@ -581,10 +509,6 @@ const Profile = ({ openBooking }) => {
           });
         }
       } else {
-        // setProcessingBooking({ isProcessing: true, message: "Linking Email..." });
-        // const res = await linkAccount("password", email, password);
-        // setProcessingBooking({ isProcessing: false, message: "" });
-
         showProcessingOverlay("Linking Email...", "success");
         const res = await linkAccount("password", email, password);
         hideProcessingOverlay();
@@ -602,7 +526,6 @@ const Profile = ({ openBooking }) => {
         }
       }
     } catch (err) {
-      // setProcessingBooking({ isProcessing: false, message: "" });
       hideProcessingOverlay();
       showActionOverlay({
         message: `Operation failed: ${err?.message || "Unknown"}`,
@@ -790,11 +713,6 @@ const Profile = ({ openBooking }) => {
     });
   };
 
-  const closeModal = () => {
-    setIsImageModalOpen(false);
-    setModalImage(null);
-  };
-
   const formatTime = (totalSeconds) => {
     const d = Math.floor(totalSeconds / 86400);
     const h = Math.floor((totalSeconds % 86400) / 3600);
@@ -918,7 +836,7 @@ const Profile = ({ openBooking }) => {
       try {
         const compressedBase64 = await compressAndConvertFileToBase64(file);
 
-        // ✅ Only update temporary preview — do NOT update Firestore yet
+        // Only update temporary preview — do NOT update Firestore yet
         setTempProfilePic(compressedBase64);
       } catch (error) {
         console.error("❌ Error compressing image:", error);
@@ -956,16 +874,16 @@ const Profile = ({ openBooking }) => {
 
     setShowEditProfileOverlay(false);
 
-    // 🔹 Clear existing timers
+    // Clear existing timers
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     if (removeTimerRef.current) clearTimeout(removeTimerRef.current);
 
-    // 🔹 Reset animation state right away
+    // Reset animation state right away
     setHideCancelAnimation(false);
     setShowSaveProfileChanges(false); // force re-render
     void setShowSaveProfileChanges(true); // reopen fresh
 
-    // 🔹 Start timers
+    // Start timers
     hideTimerRef.current = setTimeout(() => {
       setHideCancelAnimation(true);
       removeTimerRef.current = setTimeout(
@@ -1575,10 +1493,6 @@ const Profile = ({ openBooking }) => {
                       }
                       alt="Driver's License"
                       className="admin-confirm-id-preview"
-                      // onClick={() => {
-                      //   setModalImage(selectedBooking.driverLicense);
-                      //   setIsImageModalOpen(true);
-                      // }}
                       onClick={() => {
                         const licenseSrc =
                           typeof selectedBooking.driverLicense === "string"
@@ -2016,7 +1930,7 @@ const Profile = ({ openBooking }) => {
               <button
                 className="confirm-btn revert"
                 onClick={() => {
-                   const deleteType = messageToDelete?._source || "inbox";
+                  const deleteType = messageToDelete?._source || "inbox";
                   deleteMessage(messageToDelete, deleteType);
                   handleMessagesDeleted(1);
                   setShowDeleteOverlay(false);
@@ -2135,23 +2049,6 @@ const Profile = ({ openBooking }) => {
           {showEditProfileOverlay && (
             <div className="admin-booking-confirm-overlay">
               <div className="admin-booking-confirm-container">
-                {/* <button
-                  className="close-btn"
-                  type="button"
-                  onClick={() => setShowEditProfileOverlay(false)}
-                >
-                  <img
-                    src="/assets/close_0.png"
-                    alt="Close"
-                    className="close-icon close-icon-0"
-                  />
-                  <img
-                    src="/assets/close_1.png"
-                    alt="Close"
-                    className="close-icon close-icon-1"
-                  />
-                </button> */}
-
                 <button
                   className="close-btn"
                   type="button"
@@ -2282,7 +2179,7 @@ const Profile = ({ openBooking }) => {
                       type="email"
                       placeholder="Email Address"
                       value={editedProfile.email}
-                      readOnly // ✅ Prevent user from editing
+                      readOnly // Prevent user from editing
                       style={{
                         backgroundColor: "#f5f5f5",
                         cursor: "not-allowed",
@@ -2360,12 +2257,6 @@ const Profile = ({ openBooking }) => {
                         : "Verify Account"}
                     </p>
 
-                    {/* <p
-                      className="settings-item"
-                      onClick={() => setShowLinkAccountOverlay(true)}
-                    >
-                      Link Account
-                    </p> */}
                     <p
                       className="settings-item"
                       onClick={() => setShowRevertConfirm(true)}
@@ -2414,13 +2305,11 @@ const Profile = ({ openBooking }) => {
                       }`
                     : user?.name || "N/A"}
 
-                  {/* ✅ Verification Icon */}
+                  {/* Verification Icon */}
                   <img
                     src={
                       auth.currentUser?.emailVerified
-                        ? // ? require("../assets/verified.png")
-                          // : require("../assets/unverified.png")
-                          "../assets/verified.png"
+                        ? "../assets/verified.png"
                         : "../assets/unverified.png"
                     }
                     alt={
@@ -2861,9 +2750,6 @@ const Profile = ({ openBooking }) => {
                               >
                                 <div
                                   className="profile-chat-text"
-                                  // dangerouslySetInnerHTML={{
-                                  //   __html: msg.content || "",
-                                  // }}
                                   dangerouslySetInnerHTML={{
                                     __html: sanitizeRichHtml(msg.content || ""),
                                   }}
@@ -2944,17 +2830,6 @@ const Profile = ({ openBooking }) => {
                         ? "Active"
                         : rental.status;
 
-                    // const isActive = rental.status === "Active";
-                    // // const hasStarted = isActive && now >= startTimestamp;
-                    // // const currentTimeLeftInSeconds = isActive
-                    // //   ? Math.floor((endTimestamp - now) / 1000)
-                    // //   : rental.totalDurationInSeconds;
-
-                    // const hasStarted = now >= startTimestamp;
-                    // const currentTimeLeftInSeconds = hasStarted
-                    //   ? Math.max(Math.floor((endTimestamp - now) / 1000), 0)
-                    //   : rental.totalDurationInSeconds;
-
                     return (
                       <div key={rental.id} className="ongoing-unit-card">
                         <div className="ongoing-unit-gradient-overlay">
@@ -2972,19 +2847,7 @@ const Profile = ({ openBooking }) => {
                             </div>
                             <div className="info-block">
                               <span className="label">Time Left:</span>
-                              {/* <span className="value">
-                                {isActive
-                                  ? hasStarted
-                                    ? formatTime(currentTimeLeftInSeconds)
-                                    : `Starts on ${
-                                        isToday(startTimestamp)
-                                          ? `Today at ${formatHourMinute(
-                                              startTimestamp
-                                            )}`
-                                          : formatDateTime(startTimestamp)
-                                      }`
-                                  : "Pending Approval"}
-                              </span> */}
+
                               <span className="value">
                                 {hasStarted
                                   ? formatTime(currentTimeLeftInSeconds)
@@ -3036,17 +2899,6 @@ const Profile = ({ openBooking }) => {
                               ? fetchedImages[imageId]
                               : null;
 
-                            /* {(() => {
-                            const unit = unitData.find(
-                              (u) => u.plateNo === rental.plateNo,
-                            );
-                            const imageId =
-                              rental.imageId ||
-                              unit?.imageId ||
-                              `${rental.plateNo}_main`;
-
-                            const image = fetchedImages[imageId]; */
-
                             return (
                               <img
                                 src={
@@ -3059,13 +2911,7 @@ const Profile = ({ openBooking }) => {
                             );
                           })()}
                         </div>
-                        {/* 
-                        <div className="profile-status-row">
-                          <span
-                            className={`ongoing-unit-status-badge ${rental.status?.toLowerCase()}`}
-                          >
-                            {rental.status}
-                          </span> */}
+
                         <div className="profile-status-row">
                           <span
                             className={`ongoing-unit-status-badge ${String(displayStatus || "").toLowerCase()}`}
@@ -3114,30 +2960,6 @@ const Profile = ({ openBooking }) => {
                             {formatTime(currentTimeLeftInSeconds)}
                           </span>
 
-                          {/* {!isActive && (
-                            <div className="ongoing-unit-action-buttons">
-                              <button
-                                className="action-button finish"
-                                onClick={() => {
-                                  setBookingToEdit(rental);
-                                  setShowEditBookingConfirm(true);
-                                  console.log("Edit request:", rental);
-                                }}
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                className="action-button reserve"
-                                onClick={() => {
-                                  setBookingToCancel(rental);
-                                  setShowCancelBookingConfirm(true);
-                                }}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          )} */}
                           {!isLockedRental && (
                             <div className="ongoing-unit-action-buttons">
                               <button
@@ -3197,7 +3019,7 @@ const Profile = ({ openBooking }) => {
                               setShowCancelBookingConfirm(false);
                               hideProcessingOverlay();
 
-                              // ✅ Show cancel success overlay
+                              // Show cancel success overlay
                               setHideCancelAnimation(false);
                               setShowCancelBookingRequest(true);
                               setTimeout(() => {
@@ -3310,7 +3132,7 @@ const Profile = ({ openBooking }) => {
                               setShowDeleteBooking(false);
                               hideProcessingOverlay();
 
-                              // ✅ Show deleted success overlay
+                              // Show deleted success overlay
                               setHideCancelAnimation(false);
                               setShowDeletedBookingRequest(true);
                               setTimeout(() => {
@@ -3412,9 +3234,7 @@ const Profile = ({ openBooking }) => {
                                     rental.status === "Rejected"
                                       ? "#dc3545"
                                       : "",
-                                  // backgroundColor: rental.status === "Rejected" ? "#f8d7da" : "",
-                                  // borderRadius: "5px",
-                                  // padding: "5px",
+
                                   scrollbarWidth: "none",
                                   msOverflowStyle: "none",
                                 }}
@@ -3475,16 +3295,6 @@ const Profile = ({ openBooking }) => {
                             const image = imageId
                               ? fetchedImages[imageId]
                               : null;
-                            /* {(() => {
-                            const unit = unitData.find(
-                              (u) => u.plateNo === rental.plateNo,
-                            );
-                            const imageId =
-                              rental.imageId ||
-                              unit?.imageId ||
-                              `${rental.plateNo}_main`;
-
-                            const image = fetchedImages[imageId]; */
 
                             return (
                               <img
@@ -3555,7 +3365,6 @@ const Profile = ({ openBooking }) => {
                                   <button
                                     className="action-button finish"
                                     onClick={() => {
-                                      // setBookingToEdit(rental);
                                       setBookingToEdit({
                                         ...rental,
                                         isResubmitting: true,
@@ -3582,7 +3391,6 @@ const Profile = ({ openBooking }) => {
                                   <button
                                     className="action-button finish"
                                     onClick={() => {
-                                      // setBookingToEdit(rental);
                                       setBookingToEdit({
                                         ...rental,
                                         isResubmitting: false,
@@ -3961,10 +3769,6 @@ const Profile = ({ openBooking }) => {
                           }
                           alt="Driver's License"
                           className="admin-confirm-id-preview"
-                          // onClick={() => {
-                          //   setModalImage(selectedHistoryRental.driverLicense);
-                          //   setIsImageModalOpen(true);
-                          // }}
                           onClick={() => {
                             const licenseSrc =
                               typeof selectedHistoryRental.driverLicense ===
@@ -4344,10 +4148,6 @@ const Profile = ({ openBooking }) => {
           className={`user-message-overlay ${isClosing ? "hidden" : "active"}`}
         >
           <div className="message-overlay-content">
-            {/* <button className="close-btn" onClick={closeMessageOverlay}>
-              ×
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4379,8 +4179,9 @@ const Profile = ({ openBooking }) => {
 
             <div
               className="full-message"
-              // dangerouslySetInnerHTML={{ __html: selectedMessage.content }}
-              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(selectedMessage.content) }}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeRichHtml(selectedMessage.content),
+              }}
             ></div>
 
             <div className="overlay-actions">
@@ -4491,23 +4292,6 @@ const Profile = ({ openBooking }) => {
       {showLinkAccountOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowLinkAccountOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4522,8 +4306,6 @@ const Profile = ({ openBooking }) => {
             </p>
 
             <div className="admin-confirm-details">
-              {/* Google Account */}
-
               {/* Google Account */}
               <div className="provider-container">
                 <div className="provider-info">
@@ -4577,27 +4359,6 @@ const Profile = ({ openBooking }) => {
       {showEmailPasswordOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => {
-                setShowEmailPasswordOverlay(false);
-                setEmailPasswordInput("");
-                setShowPassword(false); // reset on close
-              }}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -4642,12 +4403,6 @@ const Profile = ({ openBooking }) => {
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-hidden="true"
                 >
-                  {/* {showPassword ? (
-                    <HideIcon width={20} height={20} />
-                  ) : (
-                    <UnhideIcon width={20} height={20} />
-                  )} */}
-
                   {showPassword ? (
                     <img
                       src="/assets/hide.svg"
@@ -4694,23 +4449,6 @@ const Profile = ({ openBooking }) => {
       {showUnlinkBlockedOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowUnlinkBlockedOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"

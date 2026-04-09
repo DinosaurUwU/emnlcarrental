@@ -3,14 +3,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   FiHome,
   FiTruck,
-  FiCalendar,
   FiInfo,
   FiPhone,
   FiUser,
   FiBell,
   FiLogOut,
-  FiMenu,
-  FiX,
 } from "react-icons/fi";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -39,68 +36,57 @@ function Header() {
   const { user, logout, theme } = useUser();
   const router = useRouter();
 
-  const go = (path) => {
-    router.prefetch(path);
-    router.push(path);
-  };
-
   useEffect(() => {
     router.prefetch("/");
     router.prefetch("/fleet-details");
   }, [router]);
 
   const profilePic = user?.profilePic || "/assets/profile.png";
-
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
   const [userTheme, setUserTheme] = useState("system");
   const [themeReady, setThemeReady] = useState(false);
 
-
-
-const toggleUserTheme = (newTheme) => {
-  setUserTheme(newTheme);
-  localStorage.setItem("userTheme", newTheme);
-   window.dispatchEvent(new Event("themeChanged"));
-};
-
-// Add this useEffect in Header.js
-useEffect(() => {
-  const handleStorageChange = (e) => {
-    if (e.key === "userTheme") {
-      setUserTheme(e.newValue || "system");
-    }
+  const toggleUserTheme = (newTheme) => {
+    setUserTheme(newTheme);
+    localStorage.setItem("userTheme", newTheme);
+    window.dispatchEvent(new Event("themeChanged"));
   };
-  
-  window.addEventListener("storage", handleStorageChange);
-  return () => window.removeEventListener("storage", handleStorageChange);
-}, []);
 
+  // Add this useEffect in Header.js
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "userTheme") {
+        setUserTheme(e.newValue || "system");
+      }
+    };
 
-useEffect(() => {
-  const savedTheme = localStorage.getItem("userTheme");
-  if (savedTheme) {
-    setUserTheme(savedTheme);
-  }
-  setThemeReady(true);
-}, []);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
-useEffect(() => {
-  const root = document.documentElement;
-  
-  // Apply user's dark/light preference
-  if (userTheme === "system") {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
-  } else {
-    root.setAttribute("data-color-mode", userTheme);
-  }
-}, [userTheme]);
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("userTheme");
+    if (savedTheme) {
+      setUserTheme(savedTheme);
+    }
+    setThemeReady(true);
+  }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
 
-
-
+    // Apply user's dark/light preference
+    if (userTheme === "system") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      root.setAttribute("data-color-mode", prefersDark ? "dark" : "light");
+    } else {
+      root.setAttribute("data-color-mode", userTheme);
+    }
+  }, [userTheme]);
 
   const [showSettings, setShowSettings] = useState(false);
   //SCROLL RELATED
@@ -144,28 +130,27 @@ useEffect(() => {
   }, [showMessengerConfirm]);
 
   // Close account overlay on scroll
-useEffect(() => {
-  const handleScroll = () => {
+  useEffect(() => {
+    const handleScroll = () => {
+      if (accountOpen) {
+        setAccountOpen(false);
+      }
+
+      if (searchOpen) {
+        setSearchOpen(false);
+      }
+    };
+
     if (accountOpen) {
-      setAccountOpen(false);
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
     }
 
     if (searchOpen) {
-      setSearchOpen(false);
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
     }
-  };
-
-  if (accountOpen) {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }
-  
-  if (searchOpen) {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }
-}, [accountOpen, searchOpen]);
-
+  }, [accountOpen, searchOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -175,9 +160,6 @@ useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-
-
 
   const searchInputRef = useRef(null);
 
@@ -238,15 +220,6 @@ useEffect(() => {
     }
   }, [searchOpen]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/auth/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   useEffect(() => {
     // Line 166
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -297,56 +270,49 @@ useEffect(() => {
     setSearchOpen(false);
   };
 
-  // const getLogoForTheme = () => {
-  // // Get user's dark/light preference
-  // const isDark = userTheme === "dark" || 
-  //   (userTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  // const darkSuffix = isDark ? "-dark" : "";
-
   const getLogoForTheme = () => {
-  // Get user's dark/light preference - safely check for window
-  let isDark = userTheme === "dark";
-  if (themeReady && typeof window !== 'undefined' && userTheme === "system") {
-    isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  const darkSuffix = isDark ? "-dark" : "";
-  
-  switch (theme) {
-    case "november":
-      return (
-        <img
-          src={`/assets/november-logo${darkSuffix}.png`}
-          alt="EMNL Logo"
-          className="Header__logo"
-        />
-      );
-    case "december":
-      return (
-        <img
-          src={`/assets/december-logo${darkSuffix}.png`}
-          alt="EMNL Logo"
-          className="Header__logo"
-        />
-      );
-    case "clover":
-      return (
-        <img
-          src={`/assets/clover-logo${darkSuffix}.png`}
-          alt="EMNL Logo"
-          className="Header__logo"
-        />
-      );
-    default:
-      return (
-        <img
-          src={`/assets/logo${darkSuffix}.png`}
-          alt="EMNL Logo"
-          className="Header__logo"
-        />
-      );
-  }
-};
+    // Get user's dark/light preference - safely check for window
+    let isDark = userTheme === "dark";
+    if (themeReady && typeof window !== "undefined" && userTheme === "system") {
+      isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    const darkSuffix = isDark ? "-dark" : "";
 
+    switch (theme) {
+      case "november":
+        return (
+          <img
+            src={`/assets/november-logo${darkSuffix}.png`}
+            alt="EMNL Logo"
+            className="Header__logo"
+          />
+        );
+      case "december":
+        return (
+          <img
+            src={`/assets/december-logo${darkSuffix}.png`}
+            alt="EMNL Logo"
+            className="Header__logo"
+          />
+        );
+      case "clover":
+        return (
+          <img
+            src={`/assets/clover-logo${darkSuffix}.png`}
+            alt="EMNL Logo"
+            className="Header__logo"
+          />
+        );
+      default:
+        return (
+          <img
+            src={`/assets/logo${darkSuffix}.png`}
+            alt="EMNL Logo"
+            className="Header__logo"
+          />
+        );
+    }
+  };
 
   return (
     <div className={`Header ${menuOpen ? "open" : ""}`}>
@@ -386,7 +352,6 @@ useEffect(() => {
       )}
 
       {/* Overlay Account Dropdown */}
-
       <div
         className={`OverlayAccount ${accountOpen ? "show-account" : ""}`}
         onClick={() => setAccountOpen(false)}
@@ -395,33 +360,6 @@ useEffect(() => {
           className="OverlayAccount__container"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* <ul className="OverlayAccount__nav">
-            <li>
-              <Link href="/account" onClick={() => setAccountOpen(false)}>
-                Account
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/account" onClick={() => setAccountOpen(false)}>
-                Notifications
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/auth/login"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAccountOpen(false);
-                  setShowLogoutOverlay(true);
-                }}
-              >
-                Log out
-              </Link>
-            </li>
-          </ul> */}
-
           <ul className="OverlayAccount__nav">
             <li>
               <Link href="/account" onClick={() => setAccountOpen(false)}>
@@ -441,27 +379,26 @@ useEffect(() => {
               </Link>
             </li>
 
-<div className="user-theme-toggle">
-  <button 
-    className={themeReady && userTheme === "light" ? "active" : ""} 
-    onClick={() => toggleUserTheme("light")}
-  >
-    <FiSun />
-  </button>
-  <button 
-    className={themeReady && userTheme === "system" ? "active" : ""} 
-    onClick={() => toggleUserTheme("system")}
-  >
-    <FiMonitor />
-  </button>
-  <button 
-    className={themeReady && userTheme === "dark" ? "active" : ""} 
-    onClick={() => toggleUserTheme("dark")}
-  >
-    <FiMoon />
-  </button>
-</div>
-
+            <div className="user-theme-toggle">
+              <button
+                className={themeReady && userTheme === "light" ? "active" : ""}
+                onClick={() => toggleUserTheme("light")}
+              >
+                <FiSun />
+              </button>
+              <button
+                className={themeReady && userTheme === "system" ? "active" : ""}
+                onClick={() => toggleUserTheme("system")}
+              >
+                <FiMonitor />
+              </button>
+              <button
+                className={themeReady && userTheme === "dark" ? "active" : ""}
+                onClick={() => toggleUserTheme("dark")}
+              >
+                <FiMoon />
+              </button>
+            </div>
 
             <li>
               <Link
@@ -471,10 +408,14 @@ useEffect(() => {
                   setAccountOpen(false);
                   setShowLogoutOverlay(true);
                 }}
-                style={{ color:"#dc3545"}}
+                style={{ color: "#dc3545" }}
               >
                 <FiLogOut
-                  style={{ marginRight: "10px", verticalAlign: "middle", color:"#dc3545"}}
+                  style={{
+                    marginRight: "10px",
+                    verticalAlign: "middle",
+                    color: "#dc3545",
+                  }}
                 />
                 Log out
               </Link>
@@ -494,29 +435,7 @@ useEffect(() => {
 
         <div className="Header__center">
           <ul className="Header__nav">
-            {/* <li>
-              <button
-                type="button"
-                className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}
-                onMouseDown={() => go("/")}
-              >
-                <FiHome className="nav-icon" style={{ marginRight: "5px" }} />
-                Home
-              </button>
-            </li>
-
             <li>
-              <button
-                type="button"
-                className={`Header__nav-link ${pathname.startsWith("/fleet-details") ? "active" : ""}`}
-                onMouseDown={() => go("/fleet-details")}
-              >
-                <FiTruck className="nav-icon" style={{ marginRight: "5px" }} />
-                Fleet
-              </button>
-            </li> */}
-
-                        <li>
               <Link
                 href="/"
                 className={`Header__nav-link ${pathname === "/" ? "active" : ""}`}

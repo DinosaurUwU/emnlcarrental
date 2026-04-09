@@ -2,7 +2,6 @@
 // src/user/InfoPage.js
 import React, { useState, useEffect, useRef } from "react";
 import { sanitizeRichHtml } from "../blog/BlogArticleRenderer";
-import { usePathname } from "next/navigation";
 import { useUser } from "../lib/UserContext";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -21,11 +20,7 @@ import {
 let infoTitleRef = null;
 
 const InfoPage = ({ openBooking }) => {
-  const pathname = usePathname();
-
   const [openFAQ, setOpenFAQ] = useState(null);
-  const [offsetY, setOffsetY] = useState(0);
-
   const pageRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -1251,12 +1246,6 @@ const InfoPage = ({ openBooking }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // useEffect(() => {
-  //   const handleScroll = () => setOffsetY(window.scrollY * 0.5);
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
-
   const faqs = [
     {
       question: "What personal information do you collect?",
@@ -1570,10 +1559,6 @@ const InfoPage = ({ openBooking }) => {
     <div className="info-page" ref={pageRef}>
       <Header openBooking={openBooking} />
 
-      {/* <div className="info-title" ref={(el) => (infoTitleRef = el)}>
-        <img src="/assets/dark-logo.png" alt="Logo" className="login-logo" />
-      </div> */}
-
       <div className="info-title" ref={(el) => (infoTitleRef = el)}>
         <img
           src={isDark ? "/assets/logo-dark.png" : "/assets/dark-logo.png"}
@@ -1626,8 +1611,9 @@ const InfoPage = ({ openBooking }) => {
                         <div className="result-title">{r.title}</div>
                         <div
                           className="result-snippet"
-                          // dangerouslySetInnerHTML={{ __html: r.snippet }}
-                          dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(r.snippet) }}
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeRichHtml(r.snippet),
+                          }}
                         />
                       </button>
                     ))}
@@ -2416,23 +2402,6 @@ const InfoPage = ({ openBooking }) => {
       {showHistoryOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowHistoryOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
@@ -2546,23 +2515,6 @@ const InfoPage = ({ openBooking }) => {
       {showTermsHistoryOverlay && (
         <div className="admin-booking-confirm-overlay">
           <div className="admin-booking-confirm-container">
-            {/* <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowTermsHistoryOverlay(false)}
-            >
-              <img
-                src="/assets/close_0.png"
-                alt="Close"
-                className="close-icon close-icon-0"
-              />
-              <img
-                src="/assets/close_1.png"
-                alt="Close"
-                className="close-icon close-icon-1"
-              />
-            </button> */}
-
             <button
               className="close-btn"
               type="button"
