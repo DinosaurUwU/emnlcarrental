@@ -91,6 +91,25 @@ export default function RichTextEditor({
     [className, singleLine],
   );
 
+  // useEffect(() => {
+  //   const editor = editorRef.current;
+  //   if (!editor) return;
+
+  //   const normalizedIncoming = normalizeEditorHtml(value);
+  //   const normalizedCurrent = normalizeEditorHtml(editor.innerHTML);
+
+  //   if (normalizedIncoming !== normalizedCurrent) {
+  //     editor.innerHTML = normalizedIncoming;
+  //   }
+
+  //   if (useGroupedHistory && normalizedIncoming !== currentValueRef.current) {
+  //     currentValueRef.current = normalizedIncoming;
+  //     historyRef.current = [normalizedIncoming];
+  //     futureRef.current = [];
+  //     lastInputAtRef.current = 0;
+  //   }
+  // }, [useGroupedHistory, value]);
+
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -98,7 +117,10 @@ export default function RichTextEditor({
     const normalizedIncoming = normalizeEditorHtml(value);
     const normalizedCurrent = normalizeEditorHtml(editor.innerHTML);
 
-    if (normalizedIncoming !== normalizedCurrent) {
+    // If incoming is empty, explicitly clear the editor to ensure placeholder shows
+    if (normalizedIncoming === "") {
+      editor.innerHTML = "";
+    } else if (normalizedIncoming !== normalizedCurrent) {
       editor.innerHTML = normalizedIncoming;
     }
 

@@ -242,7 +242,7 @@
   margin: 0 0 1.3rem 0;
   font-size: 1.02rem;
   line-height: 1.9;
-  color: var(--txt-comp);
+  color: var(--supporting-txt);
 }
 
 .blog-detail-content a,

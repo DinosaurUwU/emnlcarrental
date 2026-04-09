@@ -903,9 +903,19 @@ const BlogPosts = ({ subSection = "overview" }) => {
                     <span className="blog-posts-list-title">
                       {post.title || "Untitled Post"}
                     </span>
-                    <span className="blog-posts-list-meta">
-                      {getAdminPostStatusLabel(post)} | Updated{" "}
-                      {formatFirestoreDate(post.updatedAt)}
+                      <span className="blog-posts-list-meta">
+                      <span className="blog-posts-list-status">
+                        {getAdminPostStatusLabel(post)}
+                      </span>
+                      {post.updatedAt && post.createdAt && 
+                       post.updatedAt.toMillis?.() !== post.createdAt.toMillis?.() && (
+                        <span className="blog-posts-list-updated">
+                          Updated {formatFirestoreDate(post.updatedAt)}
+                        </span>
+                      )}
+                      <span className="blog-posts-list-created">
+                        Created {formatFirestoreDate(post.createdAt)}
+                      </span>
                     </span>
                   </button>
                 ))}
