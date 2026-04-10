@@ -698,6 +698,7 @@ function Header() {
                     />
                   </g>
 
+
                   <g clipRule="nonzero" clipPath="url(#7a14a02d0a)">
                     <g clipRule="nonzero" clipPath="url(#81ddddeac4)">
                       <g transform="matrix(1,0,0,1,32,108)">
