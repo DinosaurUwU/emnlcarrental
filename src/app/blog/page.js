@@ -99,8 +99,8 @@ export default function BlogPage() {
           <span className="blog-hero-kicker">EMNL Articles</span>
           <h1>Travel Tips, Rental Guides, and Local Insights</h1>
           <p>
-            Browse practical articles designed to help customers plan their trip
-            and choose the right rental vehicle.
+            Discover useful tips and guides to make your trip planning easier
+            and choose the right vehicle.
           </p>
         </div>
       </section>

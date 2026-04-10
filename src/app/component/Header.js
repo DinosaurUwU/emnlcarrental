@@ -166,62 +166,20 @@ function Header() {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // const routes = [
-  //   { path: "/", label: "Home", keywords: "vios toyota rent" },
-  //   {
-  //     path: "/fleet-details",
-  //     label: "Fleet",
-  //     keywords: "vios innova hilux suv van",
-  //   },
-  //   { path: "/about", label: "About", keywords: "about us emnl info" },
-  //   {
-  //     path: "/contact",
-  //     label: "Contact",
-  //     keywords: "contact message call booking",
-  //   },
-  //   {
-  //     path: "/account",
-  //     label: "Account",
-  //     keywords: "account settings user messages",
-  //   },
-  //   { path: "/admin", label: "Account", keywords: "admin" },
-  // ];
-
-  // const generateSearchIndex = () => {
-  //   const index = [];
-
-  //   routes.forEach(({ path, label, keywords }) => {
-  //     keywords.split(" ").forEach((keyword) => {
-  //       index.push({
-  //         keyword: keyword.toLowerCase(),
-  //         label: `${
-  //           keyword.charAt(0).toUpperCase() + keyword.slice(1)
-  //         } → ${label}`,
-  //         path,
-  //       });
-  //     });
-  //   });
-
-  //   return index;
-  // };
-
-  // const searchIndex = generateSearchIndex();
-
   const routes = [
     { path: "/", label: "Home", keywords: "home landing" },
-    { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles" },
+    { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles booking" },
     { path: "/about", label: "About", keywords: "about us info company" },
     {
       path: "/contact",
       label: "Contact",
-      keywords: "contact message call booking",
+      keywords: "contact message call email",
     },
     {
       path: "/account",
       label: "Account",
-      keywords: "account settings user messages",
+      keywords: "account settings user messages notifications active bookings profile",
     },
-    { path: "/admin", label: "Admin", keywords: "admin dashboard" },
   ];
 
   // Generate search index from routes
@@ -257,12 +215,12 @@ function Header() {
       const brand = unit.brand || "";
       const carType = unit.carType || "";
       const capacity = specs.Capacity ? parseInt(specs.Capacity) : 0;
-      
+
       // Helper to add search entries (with deduplication)
-const addSearchEntry = (keyword, label, path) => {
-  const key = `${keyword}|${label}`; // Unique per keyword+label combo
-  if (keyword && keyword.length > 0 && !seenKeywords.has(key)) {
-    seenKeywords.add(key);
+      const addSearchEntry = (keyword, label, path) => {
+        const key = `${keyword}|${label}`; // Unique per keyword+label combo
+        if (keyword && keyword.length > 0 && !seenKeywords.has(key)) {
+          seenKeywords.add(key);
           unitSearchData.push({
             keyword: keyword.toLowerCase().trim(),
             label,
@@ -273,45 +231,84 @@ const addSearchEntry = (keyword, label, path) => {
 
       // 1. Full unit name
       if (name) {
-        addSearchEntry(name.toLowerCase(), `${name} → Fleet`, "/fleet-details");
-        
+        addSearchEntry(
+          name.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
+
         // Split name into words for partial matching
-        name.toLowerCase().split(" ").forEach((word) => {
-          if (word.length > 1) {
-            addSearchEntry(word, `${name} → Fleet`, "/fleet-details");
-          }
-        });
+        name
+          .toLowerCase()
+          .split(" ")
+          .forEach((word) => {
+            if (word.length > 1) {
+              addSearchEntry(
+                word,
+                `${name} → Fleet`,
+                `/fleet-details?category=${carType.toLowerCase()}`,
+              );
+            }
+          });
       }
 
       // 2. Brand
       if (brand) {
-        addSearchEntry(brand.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          brand.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
 
       // 3. Car type / category
       if (carType) {
-        addSearchEntry(carType.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          carType.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
 
       // 4. Fuel type (e.g., "diesel", "gasoline")
       if (specs.Fuel) {
-        addSearchEntry(specs.Fuel.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          specs.Fuel.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
 
       // 5. Transmission (e.g., "automatic", "manual")
       if (specs.Transmission) {
-        addSearchEntry(specs.Transmission.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          specs.Transmission.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
 
       // 6. Seating capacity - EXACT MATCH ONLY
       if (capacity > 0) {
-        addSearchEntry(String(capacity), `${name} → Fleet`, "/fleet-details");
-        addSearchEntry(`${capacity} seaters`, `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          String(capacity),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
+        addSearchEntry(
+          `${capacity} seaters`,
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
 
       // 7. Color
       if (specs.Color) {
-        addSearchEntry(specs.Color.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(
+          specs.Color.toLowerCase(),
+          `${name} → Fleet`,
+          `/fleet-details?category=${carType.toLowerCase()}`,
+        );
       }
     });
 
@@ -861,22 +858,41 @@ const addSearchEntry = (keyword, label, path) => {
                         w === "seaters" || w === "seater" || /^\d+$/.test(w),
                     );
 
-if (isSeatersSearch) {
-  // Only process Fleet entries for seaters search
-  if (!entry.label.includes("Fleet")) return false;
-  
-  const numMatch = query.match(/\d+/);
-  if (numMatch) {
-    const searchCapacity = parseInt(numMatch[0]);
-    const unitName = entry.label.split(" → ")[0];
-    const unitData = fleetDetailsUnits?.find((u) => u.name === unitName);
-    const unitCapacity = unitData?.details?.specifications?.Capacity
-      ? parseInt(unitData.details.specifications.Capacity)
-      : 999;
-    return unitCapacity === searchCapacity;
-  }
-  return false;
-}
+                    if (isSeatersSearch) {
+                      if (!entry.label.includes("Fleet")) return false;
+
+                      const numMatch = query.match(/\d+/);
+                      if (numMatch) {
+                        const searchCapacity = parseInt(numMatch[0]);
+                        const unitName = entry.label.split(" → ")[0];
+                        const unitData = fleetDetailsUnits?.find(
+                          (u) => u.name === unitName,
+                        );
+                        const unitCapacity = unitData?.details?.specifications
+                          ?.Capacity
+                          ? parseInt(unitData.details.specifications.Capacity)
+                          : 0;
+
+                        // Tier-based logic based on search number
+                        if (searchCapacity <= 5) {
+                          return unitCapacity === 5;
+                        } else if (
+                          searchCapacity === 6 ||
+                          searchCapacity === 7
+                        ) {
+                          // 6-7: show 7 AND 8 seaters (include Innova in range)
+                          return unitCapacity === 7 || unitCapacity === 8;
+                        } else if (searchCapacity === 8) {
+                          // 8: show only 8 seaters (exact match)
+                          return unitCapacity === 8;
+                        } else if (searchCapacity <= 14) {
+                          return unitCapacity === 15;
+                        } else {
+                          return unitCapacity >= 15;
+                        }
+                      }
+                      return false;
+                    }
 
                     // Default: check if any word matches
                     return queryWords.some((word) =>
@@ -884,14 +900,14 @@ if (isSeatersSearch) {
                     );
                   });
                   const uniqueResults = [];
-const seenLabels = new Set();
-matches.forEach((m) => {
-  if (!seenLabels.has(m.label)) {
-    seenLabels.add(m.label);
-    uniqueResults.push(m);
-  }
-});
-setSearchResults(value ? uniqueResults : []);
+                  const seenLabels = new Set();
+                  matches.forEach((m) => {
+                    if (!seenLabels.has(m.label)) {
+                      seenLabels.add(m.label);
+                      uniqueResults.push(m);
+                    }
+                  });
+                  setSearchResults(value ? uniqueResults : []);
                 }}
               />
             </div>
@@ -905,10 +921,7 @@ setSearchResults(value ? uniqueResults : []);
             {searchResults.map((result, index) => (
               <li key={index}>
                 <Link
-                  href={{
-                    pathname: result.path,
-                    search: `?q=${searchText}`,
-                  }}
+                  href={result.path}
                   onClick={() => {
                     setSearchText("");
                     setSearchOpen(false);

@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { useUser } from "../lib/UserContext";
 import { useBooking } from "../component/BookingProvider";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { FiMenu, FiX } from "react-icons/fi";
 import {
   MdOutlineDirectionsCar,
@@ -60,6 +60,8 @@ const FleetDetails = () => {
   } = useUser();
 
   const { category } = useParams();
+  const searchParams = useSearchParams();
+const targetCategory = searchParams.get("category");
   const sedanRef = useRef(null);
   const suvRef = useRef(null);
   const mpvRef = useRef(null);
@@ -573,6 +575,25 @@ const FleetDetails = () => {
     else if (category === "van") scrollToSection(vanRef);
     else if (category === "pickup") scrollToSection(pickupRef);
   }, [category]);
+
+  useEffect(() => {
+  // Handle category from URL params (e.g., ?category=suv)
+  if (category === "sedan") scrollToSection(sedanRef);
+  else if (category === "suv") scrollToSection(suvRef);
+  else if (category === "mpv") scrollToSection(mpvRef);
+  else if (category === "van") scrollToSection(vanRef);
+  else if (category === "pickup") scrollToSection(pickupRef);
+  
+  // Also handle targetCategory from search (e.g., ?category=suv from Header search)
+  if (targetCategory) {
+    const cat = targetCategory.toLowerCase();
+    if (cat === "sedan") scrollToSection(sedanRef);
+    else if (cat === "suv") scrollToSection(suvRef);
+    else if (cat === "mpv") scrollToSection(mpvRef);
+    else if (cat === "van") scrollToSection(vanRef);
+    else if (cat === "pickup") scrollToSection(pickupRef);
+  }
+}, [category, targetCategory]);
 
   useLayoutEffect(() => {
     const updateNavbarTop = () => {
