@@ -861,29 +861,21 @@ const addSearchEntry = (keyword, label, path) => {
                         w === "seaters" || w === "seater" || /^\d+$/.test(w),
                     );
 
-                    if (isSeatersSearch) {
+if (isSeatersSearch) {
+  // Only process Fleet entries for seaters search
+  if (!entry.label.includes("Fleet")) return false;
+  
   const numMatch = query.match(/\d+/);
   if (numMatch) {
     const searchCapacity = parseInt(numMatch[0]);
-    
-    // FIRST: Filter to only Fleet entries
-    const fleetEntries = searchIndex.filter(
-      (e) => e.label.includes("Fleet"),
-    );
-    
-    // THEN: Check capacity
-    return fleetEntries.some((e) => {
-      const unitName = e.label.split(" → ")[0];
-      const unitData = fleetDetailsUnits?.find(
-        (u) => u.name === unitName,
-      );
-      const unitCapacity = unitData?.details?.specifications
-        ?.Capacity
-        ? parseInt(unitData.details.specifications.Capacity)
-        : 999;
-      return unitCapacity <= searchCapacity;
-    });
+    const unitName = entry.label.split(" → ")[0];
+    const unitData = fleetDetailsUnits?.find((u) => u.name === unitName);
+    const unitCapacity = unitData?.details?.specifications?.Capacity
+      ? parseInt(unitData.details.specifications.Capacity)
+      : 999;
+    return unitCapacity === searchCapacity;
   }
+  return false;
 }
 
                     // Default: check if any word matches
