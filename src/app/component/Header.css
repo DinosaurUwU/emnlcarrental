@@ -531,6 +531,8 @@
 }
 
 .SearchDropdown {
+  overflow-y: auto;
+  max-height: 200px;
   position: fixed;
   top: 150px;
   left: 50%;
@@ -544,6 +546,15 @@
   box-shadow: 0px 2px 8px 0px rgba(var(--shadow-base), 0.2);
 }
 
+.SearchDropdown::-webkit-scrollbar {
+  width: 5px;
+}
+
+.SearchDropdown::-webkit-scrollbar-thumb {
+  background: var(--accent-txt);
+  border-radius: 5px;
+}
+
 /* Remove bullet points and spacing */
 .SearchDropdown ul {
   list-style: none !important;
@@ -552,19 +563,22 @@
 }
 
 .SearchDropdown li a {
+    padding: 10px 12px;
   color: var(--page-bg);
   text-decoration: none;
   display: block;
+  box-sizing: border-box;
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .SearchDropdown li a:hover {
   color: var(--accent-txt);
+  background-color: rgba(40, 167, 69, 0.15);
 }
 
 .SearchDropdown li {
-  padding: 10px 12px;
-  margin: 5px 0px 5px 0px;
+
   cursor: pointer;
   color: var(--page-bg) !important;
   text-decoration: none !important;

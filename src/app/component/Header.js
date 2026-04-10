@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { db } from "../lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
 import {
   FiHome,
   FiTruck,
@@ -35,7 +33,7 @@ function Header() {
   const headerMainRef = useRef(null);
   const pathname = usePathname();
 
-  const { user, logout, theme } = useUser();
+  const { user, logout, theme, fleetDetailsUnits } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -209,7 +207,7 @@ function Header() {
 
   // const searchIndex = generateSearchIndex();
 
-    const routes = [
+  const routes = [
     { path: "/", label: "Home", keywords: "home landing" },
     { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles" },
     { path: "/about", label: "About", keywords: "about us info company" },
@@ -218,86 +216,98 @@ function Header() {
     { path: "/admin", label: "Admin", keywords: "admin dashboard" },
   ];
 
-  // Dynamic search index built from Firestore units
-  const [searchIndex, setSearchIndex] = useState([]);
-  const [unitsLoaded, setUnitsLoaded] = useState(false);
+  // Generate search index from routes
+  const generateRouteIndex = () => {
+    const index = [];
+    routes.forEach(({ path, label, keywords }) => {
+      keywords.split(" ").forEach((keyword) => {
+        index.push({
+          keyword: keyword.toLowerCase(),
+          label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
+          path,
+        });
+      });
+    });
+    return index;
+  };
 
+  const [searchIndex, setSearchIndex] = useState(generateRouteIndex());
+
+
+  // Build search index from fleetDetailsUnits when available
   useEffect(() => {
-    const fetchUnitsForSearch = async () => {
-      try {
-        const unitsSnapshot = await getDocs(collection(db, "units"));
-        const unitKeywords = [];
+    if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
+
+    const unitSearchData = [];
+
+    fleetDetailsUnits.forEach((unit) => {
+      // Skip hidden or unavailable units
+      if (unit.hidden || unit.availability === "Unavailable") return;
+
+      const specs = unit.details?.specifications || {};
+      const name = unit.name || "";
+      const brand = unit.brand || "";
+      const carType = unit.carType || "";
+      
+      // Helper to add search entries
+      const addSearchEntry = (keyword, label, path) => {
+        if (keyword && keyword.length > 0) {
+          unitSearchData.push({
+            keyword: keyword.toLowerCase().trim(),
+            label,
+            path,
+          });
+        }
+      };
+
+      // 1. Full unit name
+      if (name) {
+        addSearchEntry(name.toLowerCase(), `${name} → Fleet`, "/fleet-details");
         
-        unitsSnapshot.forEach((doc) => {
-          const unit = doc.data();
-          if (unit.name) {
-            // Add full name
-            unitKeywords.push({
-              keyword: unit.name.toLowerCase(),
-              label: `${unit.name} → Fleet`,
-              path: "/fleet-details",
-            });
-            // Add individual words from name for partial matching
-            unit.name.toLowerCase().split(" ").forEach((word) => {
-              if (word.length > 2) {
-                unitKeywords.push({
-                  keyword: word,
-                  label: `${unit.name} → Fleet`,
-                  path: "/fleet-details",
-                });
-              }
-            });
-          }
-          if (unit.category) {
-            unitKeywords.push({
-              keyword: unit.category.toLowerCase(),
-              label: `${unit.category} → Fleet`,
-              path: "/fleet-details",
-            });
-          }
-          if (unit.brand) {
-            unitKeywords.push({
-              keyword: unit.brand.toLowerCase(),
-              label: `${unit.brand} → Fleet`,
-              path: "/fleet-details",
-            });
+        // Split name into words for partial matching
+        name.toLowerCase().split(" ").forEach((word) => {
+          if (word.length > 1) {
+            addSearchEntry(word, `${name} → Fleet`, "/fleet-details");
           }
         });
-
-        // Combine routes with units
-        const routeKeywords = [];
-        routes.forEach(({ path, label, keywords }) => {
-          keywords.split(" ").forEach((keyword) => {
-            routeKeywords.push({
-              keyword: keyword.toLowerCase(),
-              label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
-              path,
-            });
-          });
-        });
-
-        setSearchIndex([...routeKeywords, ...unitKeywords]);
-        setUnitsLoaded(true);
-      } catch (error) {
-        console.error("Error fetching units for search:", error);
-        // Fallback to basic routes if Firestore fails
-        const routeKeywords = [];
-        routes.forEach(({ path, label, keywords }) => {
-          keywords.split(" ").forEach((keyword) => {
-            routeKeywords.push({
-              keyword: keyword.toLowerCase(),
-              label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
-              path,
-            });
-          });
-        });
-        setSearchIndex(routeKeywords);
-        setUnitsLoaded(true);
       }
-    };
 
-    fetchUnitsForSearch();
-  }, []);
+      // 2. Brand
+      if (brand) {
+        addSearchEntry(brand.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+      }
+
+      // 3. Car type / category
+      if (carType) {
+        addSearchEntry(carType.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+      }
+
+      // 4. Fuel type (e.g., "diesel", "gasoline")
+      if (specs.Fuel) {
+        addSearchEntry(specs.Fuel.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+      }
+
+      // 5. Transmission (e.g., "automatic", "manual")
+      if (specs.Transmission) {
+        addSearchEntry(specs.Transmission.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+      }
+
+      // 6. Seating capacity (e.g., "5", "7", or "5 seaters", "7 seaters")
+      if (specs.Capacity) {
+        addSearchEntry(String(specs.Capacity), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(`${specs.Capacity} seaters`, `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(`${specs.Capacity}seater`, `${name} → Fleet`, "/fleet-details");
+      }
+
+      // 7. Color
+      if (specs.Color) {
+        addSearchEntry(specs.Color.toLowerCase(), `${name} → Fleet`, "/fleet-details");
+      }
+    });
+
+    const routeIndex = generateRouteIndex();
+    setSearchIndex([...routeIndex, ...unitSearchData]);
+  }, [fleetDetailsUnits]);
 
   const highlightMatch = (text, query) => {
     if (!query) return text;
@@ -829,9 +839,12 @@ function Header() {
                   // const matches = searchIndex.filter((entry) =>
                   //   entry.keyword.includes(value.toLowerCase()),
                   // );
-                  const matches = searchIndex.filter((entry) =>
-                    entry.keyword.includes(value.toLowerCase()),
-                  );
+                                    const matches = searchIndex.filter((entry) => {
+                    const query = value.toLowerCase();
+                    // Check if any word in the query matches the keyword
+                    const queryWords = query.split(" ").filter(w => w.length > 0);
+                    return queryWords.some(word => entry.keyword.includes(word));
+                  });
                   setSearchResults(value ? matches : []);
                 }}
               />
