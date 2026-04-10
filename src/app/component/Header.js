@@ -211,8 +211,16 @@ function Header() {
     { path: "/", label: "Home", keywords: "home landing" },
     { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles" },
     { path: "/about", label: "About", keywords: "about us info company" },
-    { path: "/contact", label: "Contact", keywords: "contact message call booking" },
-    { path: "/account", label: "Account", keywords: "account settings user messages" },
+    {
+      path: "/contact",
+      label: "Contact",
+      keywords: "contact message call booking",
+    },
+    {
+      path: "/account",
+      label: "Account",
+      keywords: "account settings user messages",
+    },
     { path: "/admin", label: "Admin", keywords: "admin dashboard" },
   ];
 
@@ -233,25 +241,28 @@ function Header() {
 
   const [searchIndex, setSearchIndex] = useState(generateRouteIndex());
 
-
   // Build search index from fleetDetailsUnits when available
   useEffect(() => {
     if (!fleetDetailsUnits || fleetDetailsUnits.length === 0) return;
 
     const unitSearchData = [];
+    const seenKeywords = new Set(); // Deduplication by label
 
     fleetDetailsUnits.forEach((unit) => {
-      // Skip hidden or unavailable units
-      if (unit.hidden || unit.availability === "Unavailable") return;
+      // Include ALL units including unavailable ones
+      // if (unit.hidden || unit.availability === "Unavailable") return;
 
       const specs = unit.details?.specifications || {};
       const name = unit.name || "";
       const brand = unit.brand || "";
       const carType = unit.carType || "";
+      const capacity = specs.Capacity ? parseInt(specs.Capacity) : 0;
       
-      // Helper to add search entries
-      const addSearchEntry = (keyword, label, path) => {
-        if (keyword && keyword.length > 0) {
+      // Helper to add search entries (with deduplication)
+const addSearchEntry = (keyword, label, path) => {
+  const key = `${keyword}|${label}`; // Unique per keyword+label combo
+  if (keyword && keyword.length > 0 && !seenKeywords.has(key)) {
+    seenKeywords.add(key);
           unitSearchData.push({
             keyword: keyword.toLowerCase().trim(),
             label,
@@ -292,11 +303,10 @@ function Header() {
         addSearchEntry(specs.Transmission.toLowerCase(), `${name} → Fleet`, "/fleet-details");
       }
 
-      // 6. Seating capacity (e.g., "5", "7", or "5 seaters", "7 seaters")
-      if (specs.Capacity) {
-        addSearchEntry(String(specs.Capacity), `${name} → Fleet`, "/fleet-details");
-        addSearchEntry(`${specs.Capacity} seaters`, `${name} → Fleet`, "/fleet-details");
-        addSearchEntry(`${specs.Capacity}seater`, `${name} → Fleet`, "/fleet-details");
+      // 6. Seating capacity - EXACT MATCH ONLY
+      if (capacity > 0) {
+        addSearchEntry(String(capacity), `${name} → Fleet`, "/fleet-details");
+        addSearchEntry(`${capacity} seaters`, `${name} → Fleet`, "/fleet-details");
       }
 
       // 7. Color
@@ -698,7 +708,6 @@ function Header() {
                     />
                   </g>
 
-
                   <g clipRule="nonzero" clipPath="url(#7a14a02d0a)">
                     <g clipRule="nonzero" clipPath="url(#81ddddeac4)">
                       <g transform="matrix(1,0,0,1,32,108)">
@@ -840,13 +849,57 @@ function Header() {
                   // const matches = searchIndex.filter((entry) =>
                   //   entry.keyword.includes(value.toLowerCase()),
                   // );
-                                    const matches = searchIndex.filter((entry) => {
+                  const matches = searchIndex.filter((entry) => {
                     const query = value.toLowerCase();
-                    // Check if any word in the query matches the keyword
-                    const queryWords = query.split(" ").filter(w => w.length > 0);
-                    return queryWords.some(word => entry.keyword.includes(word));
+                    const queryWords = query
+                      .split(" ")
+                      .filter((w) => w.length > 0);
+
+                    // Special handling for seaters search
+                    const isSeatersSearch = queryWords.some(
+                      (w) =>
+                        w === "seaters" || w === "seater" || /^\d+$/.test(w),
+                    );
+
+                    if (isSeatersSearch) {
+  const numMatch = query.match(/\d+/);
+  if (numMatch) {
+    const searchCapacity = parseInt(numMatch[0]);
+    
+    // FIRST: Filter to only Fleet entries
+    const fleetEntries = searchIndex.filter(
+      (e) => e.label.includes("Fleet"),
+    );
+    
+    // THEN: Check capacity
+    return fleetEntries.some((e) => {
+      const unitName = e.label.split(" → ")[0];
+      const unitData = fleetDetailsUnits?.find(
+        (u) => u.name === unitName,
+      );
+      const unitCapacity = unitData?.details?.specifications
+        ?.Capacity
+        ? parseInt(unitData.details.specifications.Capacity)
+        : 999;
+      return unitCapacity <= searchCapacity;
+    });
+  }
+}
+
+                    // Default: check if any word matches
+                    return queryWords.some((word) =>
+                      entry.keyword.includes(word),
+                    );
                   });
-                  setSearchResults(value ? matches : []);
+                  const uniqueResults = [];
+const seenLabels = new Set();
+matches.forEach((m) => {
+  if (!seenLabels.has(m.label)) {
+    seenLabels.add(m.label);
+    uniqueResults.push(m);
+  }
+});
+setSearchResults(value ? uniqueResults : []);
                 }}
               />
             </div>
