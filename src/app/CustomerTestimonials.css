@@ -75,7 +75,7 @@
   overflow: hidden;
   border-radius: 50%;
   margin: -50px auto 10px auto;
-  border: 5px solid var(--accent-txt);
+  border: 5px solid #074609;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.5s ease;
 }

@@ -166,21 +166,40 @@ function Header() {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  const routes = [
-    { path: "/", label: "Home", keywords: "home landing" },
-    { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles booking" },
-    { path: "/about", label: "About", keywords: "about us info company" },
-    {
-      path: "/contact",
-      label: "Contact",
-      keywords: "contact message call email",
-    },
-    {
-      path: "/account",
-      label: "Account",
-      keywords: "account settings user messages notifications active bookings profile",
-    },
-  ];
+const routes = [
+  { path: "/", label: "Home", keywords: "home landing" },
+  {
+    path: "/fleet-details",
+    label: "Fleet",
+    keywords: "fleet cars vehicles booking",
+  },
+  {
+    path: "/blog",
+    label: "Blog",
+    keywords: "blog articles news updates posts",
+  },
+  {
+    path: "/info",
+    label: "Info",
+    keywords: "info information guides faqs help privacy policy terms conditions support account",
+  },
+  {
+    path: "/about",
+    label: "About",
+    keywords: "about us mission vision company",
+  },
+  {
+    path: "/contact",
+    label: "Contact",
+    keywords: "contact message call email",
+  },
+  {
+    path: "/account",
+    label: "Account",
+    keywords:
+      "account settings user messages notifications active bookings profile active rentals booking requests",
+  },
+];
 
   // Generate search index from routes
   const generateRouteIndex = () => {
