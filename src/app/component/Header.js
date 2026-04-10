@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { db } from "../lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import {
   FiHome,
   FiTruck,
@@ -166,50 +168,139 @@ function Header() {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  const routes = [
-    { path: "/", label: "Home", keywords: "vios toyota rent" },
-    {
-      path: "/fleet-details",
-      label: "Fleet",
-      keywords: "vios innova hilux suv van",
-    },
-    { path: "/about", label: "About", keywords: "about us emnl info" },
-    {
-      path: "/contact",
-      label: "Contact",
-      keywords: "contact message call booking",
-    },
-    {
-      path: "/account",
-      label: "Account",
-      keywords: "account settings user messages",
-    },
-    { path: "/admin", label: "Account", keywords: "admin" },
+  // const routes = [
+  //   { path: "/", label: "Home", keywords: "vios toyota rent" },
+  //   {
+  //     path: "/fleet-details",
+  //     label: "Fleet",
+  //     keywords: "vios innova hilux suv van",
+  //   },
+  //   { path: "/about", label: "About", keywords: "about us emnl info" },
+  //   {
+  //     path: "/contact",
+  //     label: "Contact",
+  //     keywords: "contact message call booking",
+  //   },
+  //   {
+  //     path: "/account",
+  //     label: "Account",
+  //     keywords: "account settings user messages",
+  //   },
+  //   { path: "/admin", label: "Account", keywords: "admin" },
+  // ];
+
+  // const generateSearchIndex = () => {
+  //   const index = [];
+
+  //   routes.forEach(({ path, label, keywords }) => {
+  //     keywords.split(" ").forEach((keyword) => {
+  //       index.push({
+  //         keyword: keyword.toLowerCase(),
+  //         label: `${
+  //           keyword.charAt(0).toUpperCase() + keyword.slice(1)
+  //         } → ${label}`,
+  //         path,
+  //       });
+  //     });
+  //   });
+
+  //   return index;
+  // };
+
+  // const searchIndex = generateSearchIndex();
+
+    const routes = [
+    { path: "/", label: "Home", keywords: "home landing" },
+    { path: "/fleet-details", label: "Fleet", keywords: "fleet cars vehicles" },
+    { path: "/about", label: "About", keywords: "about us info company" },
+    { path: "/contact", label: "Contact", keywords: "contact message call booking" },
+    { path: "/account", label: "Account", keywords: "account settings user messages" },
+    { path: "/admin", label: "Admin", keywords: "admin dashboard" },
   ];
 
-  const generateSearchIndex = () => {
-    const index = [];
+  // Dynamic search index built from Firestore units
+  const [searchIndex, setSearchIndex] = useState([]);
+  const [unitsLoaded, setUnitsLoaded] = useState(false);
 
-    routes.forEach(({ path, label, keywords }) => {
-      keywords.split(" ").forEach((keyword) => {
-        index.push({
-          keyword: keyword.toLowerCase(),
-          label: `${
-            keyword.charAt(0).toUpperCase() + keyword.slice(1)
-          } → ${label}`,
-          path,
+  useEffect(() => {
+    const fetchUnitsForSearch = async () => {
+      try {
+        const unitsSnapshot = await getDocs(collection(db, "units"));
+        const unitKeywords = [];
+        
+        unitsSnapshot.forEach((doc) => {
+          const unit = doc.data();
+          if (unit.name) {
+            // Add full name
+            unitKeywords.push({
+              keyword: unit.name.toLowerCase(),
+              label: `${unit.name} → Fleet`,
+              path: "/fleet-details",
+            });
+            // Add individual words from name for partial matching
+            unit.name.toLowerCase().split(" ").forEach((word) => {
+              if (word.length > 2) {
+                unitKeywords.push({
+                  keyword: word,
+                  label: `${unit.name} → Fleet`,
+                  path: "/fleet-details",
+                });
+              }
+            });
+          }
+          if (unit.category) {
+            unitKeywords.push({
+              keyword: unit.category.toLowerCase(),
+              label: `${unit.category} → Fleet`,
+              path: "/fleet-details",
+            });
+          }
+          if (unit.brand) {
+            unitKeywords.push({
+              keyword: unit.brand.toLowerCase(),
+              label: `${unit.brand} → Fleet`,
+              path: "/fleet-details",
+            });
+          }
         });
-      });
-    });
 
-    return index;
-  };
+        // Combine routes with units
+        const routeKeywords = [];
+        routes.forEach(({ path, label, keywords }) => {
+          keywords.split(" ").forEach((keyword) => {
+            routeKeywords.push({
+              keyword: keyword.toLowerCase(),
+              label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
+              path,
+            });
+          });
+        });
 
-  const searchIndex = generateSearchIndex();
+        setSearchIndex([...routeKeywords, ...unitKeywords]);
+        setUnitsLoaded(true);
+      } catch (error) {
+        console.error("Error fetching units for search:", error);
+        // Fallback to basic routes if Firestore fails
+        const routeKeywords = [];
+        routes.forEach(({ path, label, keywords }) => {
+          keywords.split(" ").forEach((keyword) => {
+            routeKeywords.push({
+              keyword: keyword.toLowerCase(),
+              label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
+              path,
+            });
+          });
+        });
+        setSearchIndex(routeKeywords);
+        setUnitsLoaded(true);
+      }
+    };
+
+    fetchUnitsForSearch();
+  }, []);
 
   const highlightMatch = (text, query) => {
     if (!query) return text;
-
     const regex = new RegExp(`(${query})`, "gi");
     return text.replace(regex, "<span class='highlight'>$1</span>");
   };
@@ -735,6 +826,9 @@ function Header() {
                   const value = e.target.value;
                   setSearchText(value);
 
+                  // const matches = searchIndex.filter((entry) =>
+                  //   entry.keyword.includes(value.toLowerCase()),
+                  // );
                   const matches = searchIndex.filter((entry) =>
                     entry.keyword.includes(value.toLowerCase()),
                   );

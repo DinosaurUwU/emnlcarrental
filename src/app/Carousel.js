@@ -169,7 +169,7 @@ function Carousel() {
     //   lightbox.init();
     // };
 
-        const init = async () => {
+    const init = async () => {
       const [{ default: PhotoSwipeLightbox }] = await Promise.all([
         import("photoswipe/lightbox"),
         import("photoswipe/style.css"),
@@ -178,7 +178,7 @@ function Carousel() {
       if (!mounted || !carouselGalleryRef.current) return;
 
       // Destroy any existing PhotoSwipe instances first
-      document.querySelectorAll(".pswp").forEach(el => el.remove());
+      document.querySelectorAll(".pswp").forEach((el) => el.remove());
 
       lightbox = new PhotoSwipeLightbox({
         gallery: carouselGalleryRef.current,
@@ -291,7 +291,7 @@ function Carousel() {
             onClick={() => {
               const currentIndex = carouselImages.indexOf(img);
               document
-                .querySelector(`[data-pswp-index="${currentIndex}"]`)
+                .querySelector(`[data-pswp-index="carousel-${currentIndex}"]`)
                 ?.click();
             }}
           />
@@ -335,7 +335,7 @@ function Carousel() {
             href={src}
             data-pswp-width={carouselImageSizes[src]?.width || 1200}
             data-pswp-height={carouselImageSizes[src]?.height || 800}
-            data-pswp-index={index}
+            data-pswp-index={`carousel-${index}`}
           >
             <span aria-hidden="true" />
           </a>

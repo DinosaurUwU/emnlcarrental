@@ -274,62 +274,26 @@ const BookingPage = ({
 
   const galleryRef = useRef(null);
 
-  // useEffect(() => {
-  //   const lightbox = new PhotoSwipeLightbox({
-  //     gallery: galleryRef.current,
-  //     children: "a",
-  //     pswpModule: () => import("photoswipe"),
-  //     showHideAnimationType: "fade",
-  //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-  //     maxWidth: window.innerWidth * 0.8,
-  //     maxHeight: window.innerHeight * 0.8,
-  //     preloaderDelay: 0,
-  //     initialZoomLevel: "fit",
-  //     secondaryZoomLevel: 2.5,
-  //     maxZoomLevel: 4,
-  //     wheelToZoom: true,
-  //     pinchToClose: false,
-  //     clickToCloseNonZoomable: false,
-  //   });
+  useEffect(() => {
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: galleryRef.current,
+      children: "a",
+      pswpModule: () => import("photoswipe"),
+      showHideAnimationType: "fade",
+      paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+      maxWidth: window.innerWidth * 0.8,
+      maxHeight: window.innerHeight * 0.8,
+      preloaderDelay: 0,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2.5,
+      maxZoomLevel: 4,
+      wheelToZoom: true,
+      pinchToClose: false,
+      clickToCloseNonZoomable: false,
+    });
 
-  //   lightbox.init();
-  //   return () => lightbox.destroy();
-  // }, []);
-
-
-    useEffect(() => {
-    if (!galleryRef.current) return;
-    if (typeof window === "undefined") return;
-
-    const initLightbox = async () => {
-      const PhotoSwipeLightbox = (await import("photoswipe/lightbox")).default;
-      
-      // Destroy any existing PhotoSwipe instances first
-      document.querySelectorAll(".pswp").forEach(el => el.remove());
-      
-      const lightbox = new PhotoSwipeLightbox({
-        gallery: galleryRef.current,
-        children: "a",
-        pswpModule: () => import("photoswipe"),
-        showHideAnimationType: "fade",
-        paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
-        maxWidth: window.innerWidth * 0.8,
-        maxHeight: window.innerHeight * 0.8,
-        preloaderDelay: 0,
-        initialZoomLevel: "fit",
-        secondaryZoomLevel: 2.5,
-        maxZoomLevel: 4,
-        wheelToZoom: true,
-        pinchToClose: false,
-        clickToCloseNonZoomable: false,
-      });
-
-      lightbox.init();
-      return () => lightbox.destroy();
-    };
-
-    const timeout = setTimeout(initLightbox, 0);
-    return () => clearTimeout(timeout);
+    lightbox.init();
+    return () => lightbox.destroy();
   }, []);
 
   const uploadedPreviewSrc = useMemo(() => {
