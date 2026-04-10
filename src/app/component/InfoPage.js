@@ -41,7 +41,7 @@ const InfoPage = ({ openBooking }) => {
   const [termsLastUpdated, setTermsLastUpdated] = useState(null);
 
   const [showHistoryOverlay, setShowHistoryOverlay] = useState(false);
-
+  const [activeTab, setActiveTab] = useState("faqs"); // 'faqs', 'bookings', or 'account'
   const [isEditingPrivacy, setIsEditingPrivacy] = useState(false);
 
   const [privacyContent, setPrivacyContent] = useState([
@@ -364,7 +364,6 @@ const InfoPage = ({ openBooking }) => {
       ],
     },
   ]);
-
   const [draftContent, setDraftContent] = useState(null);
 
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
@@ -1382,9 +1381,19 @@ const InfoPage = ({ openBooking }) => {
       const timer = setTimeout(() => {
         if (window.location.hash) {
           const targetId = window.location.hash.replace("#", "");
+
+          // Switch to the appropriate tab based on hash
+          if (
+            targetId === "faqs" ||
+            targetId === "bookings" ||
+            targetId === "account"
+          ) {
+            setActiveTab(targetId);
+          }
+
           const element = document.getElementById(targetId);
           if (element) {
-            const offset = 120; // space from the top in px
+            const offset = 120;
             const elementPosition =
               element.getBoundingClientRect().top + window.scrollY;
             window.scrollTo({
@@ -1400,10 +1409,8 @@ const InfoPage = ({ openBooking }) => {
       return () => clearTimeout(timer);
     };
 
-    // Run on mount
     handleScroll();
 
-    // Listen for hash changes
     const handleHashChange = () => handleScroll();
     window.addEventListener("hashchange", handleHashChange);
 
@@ -1629,7 +1636,15 @@ const InfoPage = ({ openBooking }) => {
 
         {/* Categories */}
         <div className="help-categories">
-          <a href="#faqs" className="help-card">
+          <a
+            href="#faqs"
+            className="help-card"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab("faqs");
+              window.scrollTo({ top: 1100, behavior: "smooth" });
+            }}
+          >
             <div className="icon">
               <FaQuestion size={24} color="#FF9100" />
             </div>
@@ -1637,7 +1652,15 @@ const InfoPage = ({ openBooking }) => {
             <p>Quick answers to common rental questions.</p>
           </a>
 
-          <a href="#bookings" className="help-card">
+          <a
+            href="#bookings"
+            className="help-card"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab("bookings");
+              window.scrollTo({ top: 1100, behavior: "smooth" });
+            }}
+          >
             <div className="icon">
               <FaCar size={24} color="#FF9100" />
             </div>
@@ -1645,7 +1668,15 @@ const InfoPage = ({ openBooking }) => {
             <p>How to reserve, modify, or cancel your car rental.</p>
           </a>
 
-          <a href="#account" className="help-card">
+          <a
+            href="#account"
+            className="help-card"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab("account");
+              window.scrollTo({ top: 1100, behavior: "smooth" });
+            }}
+          >
             <div className="icon">
               <FaUser size={24} color="#FF9100" />
             </div>
@@ -1719,96 +1750,130 @@ const InfoPage = ({ openBooking }) => {
         </div>
       </section>
 
+      {/* Tab Navigation */}
+      <div className="faq-tabs">
+        <button
+          className={`faq-tab ${activeTab === "faqs" ? "active" : ""}`}
+          onClick={() => setActiveTab("faqs")}
+        >
+          FAQs
+        </button>
+        <button
+          className={`faq-tab ${activeTab === "bookings" ? "active" : ""}`}
+          onClick={() => setActiveTab("bookings")}
+        >
+          Bookings
+        </button>
+        <button
+          className={`faq-tab ${activeTab === "account" ? "active" : ""}`}
+          onClick={() => setActiveTab("account")}
+        >
+          Account
+        </button>
+      </div>
+
       {/* FAQs */}
-      <section id="faqs">
-        <h2 className="section-title">FAQs</h2>
-        <div className="faq-list">
-          {faqs.map((faq, index) => (
-            <div key={index} className="faq-item">
-              <button
-                className={`faq-question ${openFAQ === "faq-" + index ? "active" : ""}`}
-                onClick={() =>
-                  setOpenFAQ(openFAQ === "faq-" + index ? null : "faq-" + index)
-                }
-              >
-                <span>{faq.question}</span>
-                <span
-                  className={`faq-icon ${openFAQ === "faq-" + index ? "rotate" : ""}`}
+      {activeTab === "faqs" && (
+        <section id="faqs">
+          <h2 className="section-title">FAQs</h2>
+          <div className="faq-list">
+            {faqs.map((faq, index) => (
+              <div key={index} className="faq-item">
+                <button
+                  className={`faq-question ${openFAQ === "faq-" + index ? "active" : ""}`}
+                  onClick={() =>
+                    setOpenFAQ(
+                      openFAQ === "faq-" + index ? null : "faq-" + index,
+                    )
+                  }
                 >
-                  ▼
-                </span>
-              </button>
-              <div
-                className={`faq-answer ${openFAQ === "faq-" + index ? "show" : ""}`}
-              >
-                <p className="infopage-p">{faq.answer}</p>
+                  <span>{faq.question}</span>
+                  <span
+                    className={`faq-icon ${openFAQ === "faq-" + index ? "rotate" : ""}`}
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div
+                  className={`faq-answer ${openFAQ === "faq-" + index ? "show" : ""}`}
+                >
+                  <p className="infopage-p">{faq.answer}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Bookings */}
-      <section id="bookings">
-        <h2 className="section-title">Bookings</h2>
-        <div className="faq-list">
-          {bookingsFAQs.map((faq, index) => (
-            <div key={index} className="faq-item">
-              <button
-                className={`faq-question ${openFAQ === "booking-" + index ? "active" : ""}`}
-                onClick={() =>
-                  setOpenFAQ(
-                    openFAQ === "booking-" + index ? null : "booking-" + index,
-                  )
-                }
-              >
-                <span>{faq.question}</span>
-                <span
-                  className={`faq-icon ${openFAQ === "booking-" + index ? "rotate" : ""}`}
+      {activeTab === "bookings" && (
+        <section id="bookings">
+          <h2 className="section-title">Bookings</h2>
+          <div className="faq-list">
+            {bookingsFAQs.map((faq, index) => (
+              <div key={index} className="faq-item">
+                <button
+                  className={`faq-question ${openFAQ === "booking-" + index ? "active" : ""}`}
+                  onClick={() =>
+                    setOpenFAQ(
+                      openFAQ === "booking-" + index
+                        ? null
+                        : "booking-" + index,
+                    )
+                  }
                 >
-                  ▼
-                </span>
-              </button>
-              <div
-                className={`faq-answer ${openFAQ === "booking-" + index ? "show" : ""}`}
-              >
-                <p className="infopage-p">{faq.answer}</p>
+                  <span>{faq.question}</span>
+                  <span
+                    className={`faq-icon ${openFAQ === "booking-" + index ? "rotate" : ""}`}
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div
+                  className={`faq-answer ${openFAQ === "booking-" + index ? "show" : ""}`}
+                >
+                  <p className="infopage-p">{faq.answer}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Account Support */}
-      <section id="account">
-        <h2 className="section-title">Account Support</h2>
-        <div className="faq-list">
-          {accountFAQs.map((faq, index) => (
-            <div key={index} className="faq-item">
-              <button
-                className={`faq-question ${openFAQ === "account-" + index ? "active" : ""}`}
-                onClick={() =>
-                  setOpenFAQ(
-                    openFAQ === "account-" + index ? null : "account-" + index,
-                  )
-                }
-              >
-                <span>{faq.question}</span>
-                <span
-                  className={`faq-icon ${openFAQ === "account-" + index ? "rotate" : ""}`}
+      {activeTab === "account" && (
+        <section id="account">
+          <h2 className="section-title">Account Support</h2>
+          <div className="faq-list">
+            {accountFAQs.map((faq, index) => (
+              <div key={index} className="faq-item">
+                <button
+                  className={`faq-question ${openFAQ === "account-" + index ? "active" : ""}`}
+                  onClick={() =>
+                    setOpenFAQ(
+                      openFAQ === "account-" + index
+                        ? null
+                        : "account-" + index,
+                    )
+                  }
                 >
-                  ▼
-                </span>
-              </button>
-              <div
-                className={`faq-answer ${openFAQ === "account-" + index ? "show" : ""}`}
-              >
-                <p className="infopage-p">{faq.answer}</p>
+                  <span>{faq.question}</span>
+                  <span
+                    className={`faq-icon ${openFAQ === "account-" + index ? "rotate" : ""}`}
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div
+                  className={`faq-answer ${openFAQ === "account-" + index ? "show" : ""}`}
+                >
+                  <p className="infopage-p">{faq.answer}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Privacy Policy */}
       <section id="privacy-policy">
