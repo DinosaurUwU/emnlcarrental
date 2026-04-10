@@ -147,7 +147,29 @@ function Carousel() {
     let idleId = null;
     let lightbox = null;
 
-    const init = async () => {
+    // const init = async () => {
+    //   const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+    //     import("photoswipe/lightbox"),
+    //     import("photoswipe/style.css"),
+    //   ]);
+
+    //   if (!mounted || !carouselGalleryRef.current) return;
+
+    //   lightbox = new PhotoSwipeLightbox({
+    //     gallery: carouselGalleryRef.current,
+    //     children: "a",
+    //     pswpModule: () => import("photoswipe"),
+    //     showHideAnimationType: "fade",
+    //     paddingFn: () => ({ top: 50, bottom: 50, left: 20, right: 20 }),
+    //     maxWidth: window.innerWidth * 0.8,
+    //     maxHeight: window.innerHeight * 0.8,
+    //     preloaderDelay: 0,
+    //   });
+
+    //   lightbox.init();
+    // };
+
+        const init = async () => {
       const [{ default: PhotoSwipeLightbox }] = await Promise.all([
         import("photoswipe/lightbox"),
         import("photoswipe/style.css"),
@@ -155,8 +177,11 @@ function Carousel() {
 
       if (!mounted || !carouselGalleryRef.current) return;
 
+      // Destroy any existing PhotoSwipe instances first
+      document.querySelectorAll(".pswp").forEach(el => el.remove());
+
       lightbox = new PhotoSwipeLightbox({
-        gallery: "#carousel-gallery",
+        gallery: carouselGalleryRef.current,
         children: "a",
         pswpModule: () => import("photoswipe"),
         showHideAnimationType: "fade",
@@ -303,8 +328,7 @@ function Carousel() {
         ))}
       </div>
 
-      {/* <div ref={carouselGalleryRef} style={{ display: "none" }}> */}
-              <div id="carousel-gallery" ref={carouselGalleryRef} style={{ display: "none" }}>
+      <div ref={carouselGalleryRef} style={{ display: "none" }}>
         {carouselImages.map((src, index) => (
           <a
             key={index}
