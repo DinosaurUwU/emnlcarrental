@@ -1383,33 +1383,91 @@ const InfoPage = ({ openBooking }) => {
     }));
   }, [faqs, bookingsFAQs, accountFAQs]);
 
+  // // Separate search index for Privacy Policy & Terms & Conditions
+  // const policySearchIndex = useMemo(() => {
+  //   const privacyItems = [];
+  //   (privacyContent || []).forEach((section, idx) => {
+  //     if (!section.title) return;
+  //     // Add each section as one searchable item
+  //     privacyItems.push({
+  //       id: `privacy-section-${idx}`,
+  //       title: section.title,
+  //       text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
+  //       category: "privacy",
+  //     });
+  //   });
+
+  //   const termsItems = [];
+  //   (termsContent || []).forEach((section, idx) => {
+  //     if (!section.title) return;
+  //     termsItems.push({
+  //       id: `terms-section-${idx}`,
+  //       title: section.title,
+  //       text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
+  //       category: "terms",
+  //     });
+  //   });
+
+  //   return [...privacyItems, ...termsItems];
+  // }, [privacyContent, termsContent]);
+
+
+
+
   // Separate search index for Privacy Policy & Terms & Conditions
-  const policySearchIndex = useMemo(() => {
-    const privacyItems = [];
-    (privacyContent || []).forEach((section, idx) => {
-      if (!section.title) return;
-      // Add each section as one searchable item
+const policySearchIndex = useMemo(() => {
+  const privacyItems = [];
+  (privacyContent || []).forEach((section, sectionIdx) => {
+    if (!section.title) return;
+    
+    // Add section title + body as one entry
+    privacyItems.push({
+      id: `privacy-section-${sectionIdx}`,
+      title: section.title,
+      text: section.body || "",
+      category: "privacy",
+    });
+    
+    // Add EACH bullet as separate searchable entry
+    (section.items || []).forEach((item, itemIdx) => {
+      if (!item?.text) return;
       privacyItems.push({
-        id: `privacy-section-${idx}`,
-        title: section.title,
-        text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
+        id: `privacy-${sectionIdx}-${itemIdx}`,
+        title: item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
+        text: item.text,
         category: "privacy",
       });
     });
+  });
 
-    const termsItems = [];
-    (termsContent || []).forEach((section, idx) => {
-      if (!section.title) return;
+  const termsItems = [];
+  (termsContent || []).forEach((section, sectionIdx) => {
+    if (!section.title) return;
+    
+    // Add section title + body as one entry
+    termsItems.push({
+      id: `terms-section-${sectionIdx}`,
+      title: section.title,
+      text: section.body || "",
+      category: "terms",
+    });
+    
+    // Add EACH bullet as separate searchable entry
+    (section.items || []).forEach((item, itemIdx) => {
+      if (!item?.text) return;
       termsItems.push({
-        id: `terms-section-${idx}`,
-        title: section.title,
-        text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
+        id: `terms-${sectionIdx}-${itemIdx}`,
+        title: item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
+        text: item.text,
         category: "terms",
       });
     });
+  });
 
-    return [...privacyItems, ...termsItems];
-  }, [privacyContent, termsContent]);
+  return [...privacyItems, ...termsItems];
+}, [privacyContent, termsContent]);
+
+
 
   // Search results for Privacy Policy & Terms
   const policyResults =
