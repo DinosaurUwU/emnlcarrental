@@ -1368,20 +1368,70 @@ const InfoPage = ({ openBooking }) => {
     },
   ];
 
-  const faqSearchIndex = useMemo(() => {
-    const allItems = [
-      ...faqs.map((f, i) => ({ ...f, category: "faqs", index: i })),
-      ...bookingsFAQs.map((f, i) => ({ ...f, category: "bookings", index: i })),
-      ...accountFAQs.map((f, i) => ({ ...f, category: "account", index: i })),
-    ];
+const faqSearchIndex = useMemo(() => {
+  // FAQ items
+  const faqItems = [
+    ...faqs.map((f, i) => ({ ...f, category: "faqs", index: i })),
+    ...bookingsFAQs.map((f, i) => ({ ...f, category: "bookings", index: i })),
+    ...accountFAQs.map((f, i) => ({ ...f, category: "account", index: i })),
+  ];
 
-    return allItems.map((item) => ({
-      id: `${item.category}-${item.index}`,
-      title: item.question,
-      text: item.answer,
-      category: item.category,
-    }));
-  }, [faqs, bookingsFAQs, accountFAQs]);
+  // Privacy Policy items - each section + bullet items
+  const privacyItems = [];
+  (privacyContent || []).forEach((section, sectionIdx) => {
+    // Add section title and body
+    privacyItems.push({
+      id: `privacy-${sectionIdx}`,
+      title: section.title,
+      text: `${section.body} ${(section.items || []).map(i => i.text).join(" ")}`,
+      category: "privacy",
+    });
+    // Add each bullet item as separate searchable entry
+    (section.items || []).forEach((item, itemIdx) => {
+      privacyItems.push({
+        id: `privacy-${sectionIdx}-${itemIdx}`,
+        title: item.text.substring(0, 60) + "...",
+        text: item.text,
+        category: "privacy",
+      });
+    });
+  });
+
+  // Terms & Conditions items - each section + bullet items
+  const termsItems = [];
+  (termsContent || []).forEach((section, sectionIdx) => {
+    // Add section title and body
+    termsItems.push({
+      id: `terms-${sectionIdx}`,
+      title: section.title,
+      text: `${section.body} ${(section.items || []).map(i => i.text).join(" ")}`,
+      category: "terms",
+    });
+    // Add each bullet item as separate searchable entry
+    (section.items || []).forEach((item, itemIdx) => {
+      termsItems.push({
+        id: `terms-${sectionIdx}-${itemIdx}`,
+        title: item.text.substring(0, 60) + "...",
+        text: item.text,
+        category: "terms",
+      });
+    });
+  });
+
+  // Combine all items
+  const allItems = [
+    ...faqItems.map(item => ({ ...item, id: `${item.category}-${item.index}` })),
+    ...privacyItems,
+    ...termsItems,
+  ];
+
+  return allItems.map((item) => ({
+    id: item.id,
+    title: item.title,
+    text: item.text,
+    category: item.category,
+  }));
+}, [faqs, bookingsFAQs, accountFAQs, privacyContent, termsContent]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1476,12 +1526,74 @@ const InfoPage = ({ openBooking }) => {
     }
   };
 
+// const handleResultClick = (id, query) => {
+//   // Extract category from id (e.g., "bookings-0" -> "bookings")
+//   const category = id.split("-")[0];
+//   const faqIndex = id.split("-")[1];
+  
+//   // Map category to the correct openFAQ prefix
+//   let openFaqPrefix;
+//   if (category === "bookings") {
+//     openFaqPrefix = "booking";
+//   } else if (category === "account") {
+//     openFaqPrefix = "account";
+//   } else {
+//     openFaqPrefix = "faq";
+//   }
+  
+//   // First, switch to the correct tab (without any scrolling/highlighting yet)
+//   setActiveTab(category);
+  
+//   // After tab switches and FAQ expands, then scroll and highlight
+//   setTimeout(() => {
+//     // Expand the specific FAQ item first
+//     setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
+    
+//     // Wait a bit more for the accordion to open, then highlight
+//     setTimeout(() => {
+//       // Scroll to the section
+//       scrollToIdWithOffset(category);
+      
+//       // Highlight the searched term
+//       highlightInSection(category, query);
+//     }, 200);
+    
+//     setShowResults(false);
+//     setSearchTerm("");
+//   }, 150);
+// };
+
+
+
 const handleResultClick = (id, query) => {
-  // Extract category from id (e.g., "bookings-0" -> "bookings")
   const category = id.split("-")[0];
   const faqIndex = id.split("-")[1];
-  
-  // Map category to the correct openFAQ prefix
+
+  // Handle privacy policy
+  if (category === "privacy") {
+    setActiveTab("privacy");
+    setTimeout(() => {
+      scrollToIdWithOffset("privacy-policy");
+      highlightInSection("privacy-policy", query);
+      setShowResults(false);
+      setSearchTerm("");
+    }, 150);
+    return;
+  }
+
+  // Handle terms & conditions
+  if (category === "terms") {
+    setActiveTab("terms");
+    setTimeout(() => {
+      scrollToIdWithOffset("terms-conditions");
+      highlightInSection("terms-conditions", query);
+      setShowResults(false);
+      setSearchTerm("");
+    }, 150);
+    return;
+  }
+
+  // Existing FAQ logic...
   let openFaqPrefix;
   if (category === "bookings") {
     openFaqPrefix = "booking";
@@ -1490,24 +1602,17 @@ const handleResultClick = (id, query) => {
   } else {
     openFaqPrefix = "faq";
   }
-  
-  // First, switch to the correct tab (without any scrolling/highlighting yet)
+
   setActiveTab(category);
-  
-  // After tab switches and FAQ expands, then scroll and highlight
+
   setTimeout(() => {
-    // Expand the specific FAQ item first
     setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
-    
-    // Wait a bit more for the accordion to open, then highlight
+
     setTimeout(() => {
-      // Scroll to the section
       scrollToIdWithOffset(category);
-      
-      // Highlight the searched term
       highlightInSection(category, query);
     }, 200);
-    
+
     setShowResults(false);
     setSearchTerm("");
   }, 150);
