@@ -1419,12 +1419,19 @@ const InfoPage = ({ openBooking }) => {
             const query = searchTerm.toLowerCase().trim();
             const queryWords = query.split(" ").filter((w) => w.length > 0);
 
-            const inTitle = queryWords.some((word) =>
-              (item.title || "").toLowerCase().includes(word),
-            );
-            const inText = queryWords.some((word) =>
-              (item.text || "").toLowerCase().includes(word),
-            );
+            // const inTitle = queryWords.some((word) =>
+            //   (item.title || "").toLowerCase().includes(word),
+            // );
+            // const inText = queryWords.some((word) =>
+            //   (item.text || "").toLowerCase().includes(word),
+            // );
+
+            const inTitle = queryWords.every(word =>
+  (item.title || "").toLowerCase().includes(word)
+);
+const inText = queryWords.every(word =>
+  (item.text || "").toLowerCase().includes(word)
+);
 
             if (!inTitle && !inText) return null;
 
