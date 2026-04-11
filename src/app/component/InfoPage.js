@@ -1368,70 +1368,107 @@ const InfoPage = ({ openBooking }) => {
     },
   ];
 
-const faqSearchIndex = useMemo(() => {
-  // FAQ items
-  const faqItems = [
-    ...faqs.map((f, i) => ({ ...f, category: "faqs", index: i })),
-    ...bookingsFAQs.map((f, i) => ({ ...f, category: "bookings", index: i })),
-    ...accountFAQs.map((f, i) => ({ ...f, category: "account", index: i })),
-  ];
+  const faqSearchIndex = useMemo(() => {
+    const allItems = [
+      ...faqs.map((f, i) => ({ ...f, category: "faqs", index: i })),
+      ...bookingsFAQs.map((f, i) => ({ ...f, category: "bookings", index: i })),
+      ...accountFAQs.map((f, i) => ({ ...f, category: "account", index: i })),
+    ];
 
-  // Privacy Policy items - each section + bullet items
-  const privacyItems = [];
-  (privacyContent || []).forEach((section, sectionIdx) => {
-    // Add section title and body
-    privacyItems.push({
-      id: `privacy-${sectionIdx}`,
-      title: section.title,
-      text: `${section.body} ${(section.items || []).map(i => i.text).join(" ")}`,
-      category: "privacy",
-    });
-    // Add each bullet item as separate searchable entry
-    (section.items || []).forEach((item, itemIdx) => {
+    return allItems.map((item) => ({
+      id: `${item.category}-${item.index}`,
+      title: item.question,
+      text: item.answer,
+      category: item.category,
+    }));
+  }, [faqs, bookingsFAQs, accountFAQs]);
+
+  // Separate search index for Privacy Policy & Terms & Conditions
+  const policySearchIndex = useMemo(() => {
+    const privacyItems = [];
+    (privacyContent || []).forEach((section, idx) => {
+      if (!section.title) return;
+      // Add each section as one searchable item
       privacyItems.push({
-        id: `privacy-${sectionIdx}-${itemIdx}`,
-        title: item.text.substring(0, 60) + "...",
-        text: item.text,
+        id: `privacy-section-${idx}`,
+        title: section.title,
+        text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
         category: "privacy",
       });
     });
-  });
 
-  // Terms & Conditions items - each section + bullet items
-  const termsItems = [];
-  (termsContent || []).forEach((section, sectionIdx) => {
-    // Add section title and body
-    termsItems.push({
-      id: `terms-${sectionIdx}`,
-      title: section.title,
-      text: `${section.body} ${(section.items || []).map(i => i.text).join(" ")}`,
-      category: "terms",
-    });
-    // Add each bullet item as separate searchable entry
-    (section.items || []).forEach((item, itemIdx) => {
+    const termsItems = [];
+    (termsContent || []).forEach((section, idx) => {
+      if (!section.title) return;
       termsItems.push({
-        id: `terms-${sectionIdx}-${itemIdx}`,
-        title: item.text.substring(0, 60) + "...",
-        text: item.text,
+        id: `terms-section-${idx}`,
+        title: section.title,
+        text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
         category: "terms",
       });
     });
-  });
 
-  // Combine all items
-  const allItems = [
-    ...faqItems.map(item => ({ ...item, id: `${item.category}-${item.index}` })),
-    ...privacyItems,
-    ...termsItems,
-  ];
+    return [...privacyItems, ...termsItems];
+  }, [privacyContent, termsContent]);
 
-  return allItems.map((item) => ({
-    id: item.id,
-    title: item.title,
-    text: item.text,
-    category: item.category,
-  }));
-}, [faqs, bookingsFAQs, accountFAQs, privacyContent, termsContent]);
+  // Search results for Privacy Policy & Terms
+  const policyResults =
+    searchTerm.trim().length > 0
+      ? policySearchIndex
+          .map((item) => {
+            const query = searchTerm.toLowerCase().trim();
+            const queryWords = query.split(" ").filter((w) => w.length > 0);
+
+            const inTitle = queryWords.some((word) =>
+              (item.title || "").toLowerCase().includes(word),
+            );
+            const inText = queryWords.some((word) =>
+              (item.text || "").toLowerCase().includes(word),
+            );
+
+            if (!inTitle && !inText) return null;
+
+            // Highlight snippet
+            let snippet = "";
+            const allText = (item.title || "") + " " + (item.text || "");
+            const lowerAllText = allText.toLowerCase();
+
+            let firstMatchPos = -1;
+            let firstMatchWord = "";
+            for (const word of queryWords) {
+              const pos = lowerAllText.indexOf(word);
+              if (pos !== -1 && (firstMatchPos === -1 || pos < firstMatchPos)) {
+                firstMatchPos = pos;
+                firstMatchWord = word;
+              }
+            }
+
+            if (firstMatchPos !== -1) {
+              const start = Math.max(0, firstMatchPos - 40);
+              const end = Math.min(
+                allText.length,
+                firstMatchPos + firstMatchWord.length + 40,
+              );
+              snippet =
+                allText.slice(start, firstMatchPos) +
+                "<mark class='search-highlight'>" +
+                allText.slice(
+                  firstMatchPos,
+                  firstMatchPos + firstMatchWord.length,
+                ) +
+                "</mark>" +
+                allText.slice(firstMatchPos + firstMatchWord.length, end);
+            }
+
+            return {
+              id: item.id,
+              title: item.title,
+              snippet: snippet,
+              category: item.category,
+            };
+          })
+          .filter(Boolean)
+      : [];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1526,97 +1563,66 @@ const faqSearchIndex = useMemo(() => {
     }
   };
 
-// const handleResultClick = (id, query) => {
-//   // Extract category from id (e.g., "bookings-0" -> "bookings")
-//   const category = id.split("-")[0];
-//   const faqIndex = id.split("-")[1];
-  
-//   // Map category to the correct openFAQ prefix
-//   let openFaqPrefix;
-//   if (category === "bookings") {
-//     openFaqPrefix = "booking";
-//   } else if (category === "account") {
-//     openFaqPrefix = "account";
-//   } else {
-//     openFaqPrefix = "faq";
-//   }
-  
-//   // First, switch to the correct tab (without any scrolling/highlighting yet)
-//   setActiveTab(category);
-  
-//   // After tab switches and FAQ expands, then scroll and highlight
-//   setTimeout(() => {
-//     // Expand the specific FAQ item first
-//     setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
-    
-//     // Wait a bit more for the accordion to open, then highlight
-//     setTimeout(() => {
-//       // Scroll to the section
-//       scrollToIdWithOffset(category);
-      
-//       // Highlight the searched term
-//       highlightInSection(category, query);
-//     }, 200);
-    
-//     setShowResults(false);
-//     setSearchTerm("");
-//   }, 150);
-// };
+  const handleResultClick = (id, query) => {
+    // Extract category from id (e.g., "bookings-0" -> "bookings")
+    const category = id.split("-")[0];
+    const faqIndex = id.split("-")[1];
 
+    // Handle Privacy Policy
+    if (category === "privacy") {
+      setActiveTab("privacy");
+      setTimeout(() => {
+        scrollToIdWithOffset("privacy-policy");
+        highlightInSection("privacy-policy", query);
+        setShowResults(false);
+        setSearchTerm("");
+      }, 150);
+      return;
+    }
 
+    // Handle Terms & Conditions
+    if (category === "terms") {
+      setActiveTab("terms");
+      setTimeout(() => {
+        scrollToIdWithOffset("terms-conditions");
+        highlightInSection("terms-conditions", query);
+        setShowResults(false);
+        setSearchTerm("");
+      }, 150);
+      return;
+    }
 
-const handleResultClick = (id, query) => {
-  const category = id.split("-")[0];
-  const faqIndex = id.split("-")[1];
+    // Map category to the correct openFAQ prefix
+    let openFaqPrefix;
+    if (category === "bookings") {
+      openFaqPrefix = "booking";
+    } else if (category === "account") {
+      openFaqPrefix = "account";
+    } else {
+      openFaqPrefix = "faq";
+    }
 
-  // Handle privacy policy
-  if (category === "privacy") {
-    setActiveTab("privacy");
+    // First, switch to the correct tab (without any scrolling/highlighting yet)
+    setActiveTab(category);
+
+    // After tab switches and FAQ expands, then scroll and highlight
     setTimeout(() => {
-      scrollToIdWithOffset("privacy-policy");
-      highlightInSection("privacy-policy", query);
+      // Expand the specific FAQ item first
+      setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
+
+      // Wait a bit more for the accordion to open, then highlight
+      setTimeout(() => {
+        // Scroll to the section
+        scrollToIdWithOffset(category);
+
+        // Highlight the searched term
+        highlightInSection(category, query);
+      }, 200);
+
       setShowResults(false);
       setSearchTerm("");
     }, 150);
-    return;
-  }
-
-  // Handle terms & conditions
-  if (category === "terms") {
-    setActiveTab("terms");
-    setTimeout(() => {
-      scrollToIdWithOffset("terms-conditions");
-      highlightInSection("terms-conditions", query);
-      setShowResults(false);
-      setSearchTerm("");
-    }, 150);
-    return;
-  }
-
-  // Existing FAQ logic...
-  let openFaqPrefix;
-  if (category === "bookings") {
-    openFaqPrefix = "booking";
-  } else if (category === "account") {
-    openFaqPrefix = "account";
-  } else {
-    openFaqPrefix = "faq";
-  }
-
-  setActiveTab(category);
-
-  setTimeout(() => {
-    setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
-
-    setTimeout(() => {
-      scrollToIdWithOffset(category);
-      highlightInSection(category, query);
-    }, 200);
-
-    setShowResults(false);
-    setSearchTerm("");
-  }, 150);
-};
+  };
 
   useEffect(() => {
     if (!pageRef.current) return;
@@ -1742,6 +1748,8 @@ const handleResultClick = (id, query) => {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [userTheme]);
 
+  const allResults = [...results, ...policyResults];
+
   return (
     <div className="info-page" ref={pageRef}>
       <Header openBooking={openBooking} />
@@ -1787,17 +1795,26 @@ const handleResultClick = (id, query) => {
               {/* Results overlay */}
               {searchTerm.trim() !== "" &&
                 showResults &&
-                (results.length > 0 ? (
+                (allResults.length > 0 ? (
                   <div className="help-results-overlay">
-                    {results.map((r) => (
+                    {allResults.map((r) => (
                       <button
                         key={r.id}
                         className="result-item"
                         onClick={() => handleResultClick(r.id, searchTerm)}
                       >
                         <div className="result-title">
-  {r.category === "bookings" ? "Bookings" : r.category === "account" ? "Account" : "FAQs"}: {r.title}
-</div>
+                          {r.category === "privacy"
+                            ? "Privacy Policy"
+                            : r.category === "terms"
+                              ? "Terms & Conditions"
+                              : r.category === "bookings"
+                                ? "Bookings"
+                                : r.category === "account"
+                                  ? "Account"
+                                  : "FAQs"}
+                          : {r.title}
+                        </div>
                         <div
                           className="result-snippet"
                           dangerouslySetInnerHTML={{

@@ -80,6 +80,7 @@ export const sanitizeRichHtml = (value = "") => {
     "EM",
     "I",
     "LI",
+    "MARK",
     "OL",
     "P",
     "STRONG",
