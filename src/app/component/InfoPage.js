@@ -910,7 +910,7 @@ const InfoPage = ({ openBooking }) => {
   }, []);
 
   // At the top of InfoPage.js, after imports
-  const LAUNCH_DATE = new Date("2026-02-15"); // Change to your actual launch date
+  const LAUNCH_DATE = new Date("2026-04-15"); // Change to your actual launch date
 
   // Add useEffect to fetch data on mount
   useEffect(() => {
@@ -1383,146 +1383,95 @@ const InfoPage = ({ openBooking }) => {
     }));
   }, [faqs, bookingsFAQs, accountFAQs]);
 
-  // // Separate search index for Privacy Policy & Terms & Conditions
-  // const policySearchIndex = useMemo(() => {
-  //   const privacyItems = [];
-  //   (privacyContent || []).forEach((section, idx) => {
-  //     if (!section.title) return;
-  //     // Add each section as one searchable item
-  //     privacyItems.push({
-  //       id: `privacy-section-${idx}`,
-  //       title: section.title,
-  //       text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
-  //       category: "privacy",
-  //     });
-  //   });
-
-  //   const termsItems = [];
-  //   (termsContent || []).forEach((section, idx) => {
-  //     if (!section.title) return;
-  //     termsItems.push({
-  //       id: `terms-section-${idx}`,
-  //       title: section.title,
-  //       text: `${section.body || ""} ${(section.items || []).map((i) => i.text || "").join(" ")}`,
-  //       category: "terms",
-  //     });
-  //   });
-
-  //   return [...privacyItems, ...termsItems];
-  // }, [privacyContent, termsContent]);
-
-
-
-
   // Separate search index for Privacy Policy & Terms & Conditions
-const policySearchIndex = useMemo(() => {
-  const privacyItems = [];
-  (privacyContent || []).forEach((section, sectionIdx) => {
-    if (!section.title) return;
-    
-    // Add section title + body as one entry
-    privacyItems.push({
-      id: `privacy-section-${sectionIdx}`,
-      title: section.title,
-      text: section.body || "",
-      category: "privacy",
-    });
-    
-    // Add EACH bullet as separate searchable entry
-    (section.items || []).forEach((item, itemIdx) => {
-      if (!item?.text) return;
+  const policySearchIndex = useMemo(() => {
+    const privacyItems = [];
+    (privacyContent || []).forEach((section, sectionIdx) => {
+      if (!section.title) return;
+
+      // Add section title + body as one entry
       privacyItems.push({
-        id: `privacy-${sectionIdx}-${itemIdx}`,
-        title: item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
-        text: item.text,
+        id: `privacy-section-${sectionIdx}`,
+        title: section.title,
+        text: section.body || "",
         category: "privacy",
       });
-    });
-  });
 
-  const termsItems = [];
-  (termsContent || []).forEach((section, sectionIdx) => {
-    if (!section.title) return;
-    
-    // Add section title + body as one entry
-    termsItems.push({
-      id: `terms-section-${sectionIdx}`,
-      title: section.title,
-      text: section.body || "",
-      category: "terms",
-    });
-    
-    // Add EACH bullet as separate searchable entry
-    (section.items || []).forEach((item, itemIdx) => {
-      if (!item?.text) return;
-      termsItems.push({
-        id: `terms-${sectionIdx}-${itemIdx}`,
-        title: item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
-        text: item.text,
-        category: "terms",
+      // Add EACH bullet as separate searchable entry
+      (section.items || []).forEach((item, itemIdx) => {
+        if (!item?.text) return;
+        privacyItems.push({
+          id: `privacy-${sectionIdx}-${itemIdx}`,
+          title:
+            item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
+          text: item.text,
+          category: "privacy",
+        });
       });
     });
-  });
 
-  return [...privacyItems, ...termsItems];
-}, [privacyContent, termsContent]);
+    const termsItems = [];
+    (termsContent || []).forEach((section, sectionIdx) => {
+      if (!section.title) return;
 
+      // Add section title + body as one entry
+      termsItems.push({
+        id: `terms-section-${sectionIdx}`,
+        title: section.title,
+        text: section.body || "",
+        category: "terms",
+      });
 
+      // Add EACH bullet as separate searchable entry
+      (section.items || []).forEach((item, itemIdx) => {
+        if (!item?.text) return;
+        termsItems.push({
+          id: `terms-${sectionIdx}-${itemIdx}`,
+          title:
+            item.text.substring(0, 80) + (item.text.length > 80 ? "..." : ""),
+          text: item.text,
+          category: "terms",
+        });
+      });
+    });
 
-  // Search results for Privacy Policy & Terms
+    return [...privacyItems, ...termsItems];
+  }, [privacyContent, termsContent]);
+
   const policyResults =
     searchTerm.trim().length > 0
       ? policySearchIndex
           .map((item) => {
             const query = searchTerm.toLowerCase().trim();
-            const queryWords = query.split(" ").filter((w) => w.length > 0);
 
-            // const inTitle = queryWords.some((word) =>
-            //   (item.title || "").toLowerCase().includes(word),
-            // );
-            // const inText = queryWords.some((word) =>
-            //   (item.text || "").toLowerCase().includes(word),
-            // );
-
-            const inTitle = queryWords.every(word =>
-  (item.title || "").toLowerCase().includes(word)
-);
-const inText = queryWords.every(word =>
-  (item.text || "").toLowerCase().includes(word)
-);
+            // Use EXACT match like FAQs
+            const inTitle = (item.title || "").toLowerCase().includes(query);
+            const inText = (item.text || "").toLowerCase().includes(query);
 
             if (!inTitle && !inText) return null;
 
-            // Highlight snippet
+            // Create highlighted snippet - highlight FULL query like FAQs do
             let snippet = "";
-            const allText = (item.title || "") + " " + (item.text || "");
-            const lowerAllText = allText.toLowerCase();
-
-            let firstMatchPos = -1;
-            let firstMatchWord = "";
-            for (const word of queryWords) {
-              const pos = lowerAllText.indexOf(word);
-              if (pos !== -1 && (firstMatchPos === -1 || pos < firstMatchPos)) {
-                firstMatchPos = pos;
-                firstMatchWord = word;
-              }
-            }
-
-            if (firstMatchPos !== -1) {
-              const start = Math.max(0, firstMatchPos - 40);
-              const end = Math.min(
-                allText.length,
-                firstMatchPos + firstMatchWord.length + 40,
-              );
+            if (inTitle) {
+              const pos = item.title.toLowerCase().indexOf(query);
+              const start = Math.max(0, pos - 40);
+              const end = Math.min(item.title.length, pos + query.length + 40);
               snippet =
-                allText.slice(start, firstMatchPos) +
+                item.title.slice(start, pos) +
                 "<mark class='search-highlight'>" +
-                allText.slice(
-                  firstMatchPos,
-                  firstMatchPos + firstMatchWord.length,
-                ) +
+                item.title.slice(pos, pos + query.length) +
                 "</mark>" +
-                allText.slice(firstMatchPos + firstMatchWord.length, end);
+                item.title.slice(pos + query.length, end);
+            } else {
+              const pos = item.text.toLowerCase().indexOf(query);
+              const start = Math.max(0, pos - 40);
+              const end = Math.min(item.text.length, pos + query.length + 40);
+              snippet =
+                item.text.slice(start, pos) +
+                "<mark class='search-highlight'>" +
+                item.text.slice(pos, pos + query.length) +
+                "</mark>" +
+                item.text.slice(pos + query.length, end);
             }
 
             return {
@@ -1534,7 +1483,6 @@ const inText = queryWords.every(word =>
           })
           .filter(Boolean)
       : [];
-
   useEffect(() => {
     const handleScroll = () => {
       const timer = setTimeout(() => {
