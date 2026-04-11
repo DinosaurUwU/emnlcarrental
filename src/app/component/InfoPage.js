@@ -23,7 +23,7 @@ const InfoPage = ({ openBooking }) => {
   const [openFAQ, setOpenFAQ] = useState(null);
   const pageRef = useRef(null);
   const inputRef = useRef(null);
-
+  const [isDark, setIsDark] = useState(false);
   // Search states
   const [searchTerm, setSearchTerm] = useState("");
   const [searchIndex, setSearchIndex] = useState([]); // [{id, title, text}]
@@ -898,7 +898,6 @@ const InfoPage = ({ openBooking }) => {
   const [showTermsCancelConfirm, setShowTermsCancelConfirm] = useState(false);
 
   const [showMessengerConfirm, setShowMessengerConfirm] = useState(false);
-
   const [userTheme, setUserTheme] = useState("system");
 
   useEffect(() => {
@@ -1115,13 +1114,6 @@ const InfoPage = ({ openBooking }) => {
     pushToDraftHistory(JSON.parse(JSON.stringify(draftContent)));
     const updated = [...draftContent];
     updated[sectionIdx].body = value;
-    setDraftContent(updated);
-  };
-
-  const handleDraftBulletChange = (sectionIdx, bulletIdx, value) => {
-    pushToDraftHistory(JSON.parse(JSON.stringify(draftContent)));
-    const updated = [...draftContent];
-    updated[sectionIdx].bullets[bulletIdx] = value;
     setDraftContent(updated);
   };
 
@@ -1557,10 +1549,24 @@ const InfoPage = ({ openBooking }) => {
     }
   }, [userTheme]);
 
-  const isDark =
-    userTheme === "dark" ||
-    (userTheme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const dark =
+        userTheme === "dark" ||
+        (userTheme === "system" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDark(dark);
+    };
+
+    checkDarkMode();
+
+    // Listen for changes
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => checkDarkMode();
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [userTheme]);
 
   return (
     <div className="info-page" ref={pageRef}>
