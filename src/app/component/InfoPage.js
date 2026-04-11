@@ -1,6 +1,6 @@
 "use client";
 // src/user/InfoPage.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { sanitizeRichHtml } from "../blog/BlogArticleRenderer";
 import { useUser } from "../lib/UserContext";
 import Header from "./Header";
@@ -1368,6 +1368,21 @@ const InfoPage = ({ openBooking }) => {
     },
   ];
 
+  const faqSearchIndex = useMemo(() => {
+    const allItems = [
+      ...faqs.map((f, i) => ({ ...f, category: "faqs", index: i })),
+      ...bookingsFAQs.map((f, i) => ({ ...f, category: "bookings", index: i })),
+      ...accountFAQs.map((f, i) => ({ ...f, category: "account", index: i })),
+    ];
+
+    return allItems.map((item) => ({
+      id: `${item.category}-${item.index}`,
+      title: item.question,
+      text: item.answer,
+      category: item.category,
+    }));
+  }, [faqs, bookingsFAQs, accountFAQs]);
+
   useEffect(() => {
     const handleScroll = () => {
       const timer = setTimeout(() => {
@@ -1461,11 +1476,42 @@ const InfoPage = ({ openBooking }) => {
     }
   };
 
-  const handleResultClick = (id, query) => {
-    scrollToIdWithOffset(id);
-    highlightInSection(id, query);
+const handleResultClick = (id, query) => {
+  // Extract category from id (e.g., "bookings-0" -> "bookings")
+  const category = id.split("-")[0];
+  const faqIndex = id.split("-")[1];
+  
+  // Map category to the correct openFAQ prefix
+  let openFaqPrefix;
+  if (category === "bookings") {
+    openFaqPrefix = "booking";
+  } else if (category === "account") {
+    openFaqPrefix = "account";
+  } else {
+    openFaqPrefix = "faq";
+  }
+  
+  // First, switch to the correct tab (without any scrolling/highlighting yet)
+  setActiveTab(category);
+  
+  // After tab switches and FAQ expands, then scroll and highlight
+  setTimeout(() => {
+    // Expand the specific FAQ item first
+    setOpenFAQ(`${openFaqPrefix}-${faqIndex}`);
+    
+    // Wait a bit more for the accordion to open, then highlight
+    setTimeout(() => {
+      // Scroll to the section
+      scrollToIdWithOffset(category);
+      
+      // Highlight the searched term
+      highlightInSection(category, query);
+    }, 200);
+    
     setShowResults(false);
-  };
+    setSearchTerm("");
+  }, 150);
+};
 
   useEffect(() => {
     if (!pageRef.current) return;
@@ -1486,21 +1532,44 @@ const InfoPage = ({ openBooking }) => {
 
   const results =
     searchTerm.trim().length > 0
-      ? searchIndex
+      ? faqSearchIndex
           .map((item) => {
-            const lc = item.text.toLowerCase();
-            const q = searchTerm.toLowerCase();
-            const pos = lc.indexOf(q);
-            if (pos === -1) return null;
-            const start = Math.max(0, pos - 60);
-            const end = Math.min(item.text.length, pos + q.length + 60);
-            const before = item.text.slice(start, pos);
-            const match = item.text.slice(pos, pos + q.length);
-            const after = item.text.slice(pos + q.length, end);
+            const query = searchTerm.toLowerCase().trim();
+            // Search in both title AND text
+            const inTitle = item.title.toLowerCase().includes(query);
+            const inText = item.text.toLowerCase().includes(query);
+
+            if (!inTitle && !inText) return null;
+
+            // Create highlighted snippet
+            let snippet = "";
+            if (inTitle) {
+              const pos = item.title.toLowerCase().indexOf(query);
+              const start = Math.max(0, pos - 40);
+              const end = Math.min(item.title.length, pos + query.length + 40);
+              snippet =
+                item.title.slice(start, pos) +
+                "<mark class='search-highlight'>" +
+                item.title.slice(pos, pos + query.length) +
+                "</mark>" +
+                item.title.slice(pos + query.length, end);
+            } else {
+              const pos = item.text.toLowerCase().indexOf(query);
+              const start = Math.max(0, pos - 40);
+              const end = Math.min(item.text.length, pos + query.length + 40);
+              snippet =
+                item.text.slice(start, pos) +
+                "<mark class='search-highlight'>" +
+                item.text.slice(pos, pos + query.length) +
+                "</mark>" +
+                item.text.slice(pos + query.length, end);
+            }
+
             return {
               id: item.id,
               title: item.title,
-              snippet: `${before}<mark class="search-highlight">${match}</mark>${after}`,
+              snippet: snippet,
+              category: item.category,
             };
           })
           .filter(Boolean)
@@ -1621,7 +1690,9 @@ const InfoPage = ({ openBooking }) => {
                         className="result-item"
                         onClick={() => handleResultClick(r.id, searchTerm)}
                       >
-                        <div className="result-title">{r.title}</div>
+                        <div className="result-title">
+  {r.category === "bookings" ? "Bookings" : r.category === "account" ? "Account" : "FAQs"}: {r.title}
+</div>
                         <div
                           className="result-snippet"
                           dangerouslySetInnerHTML={{
