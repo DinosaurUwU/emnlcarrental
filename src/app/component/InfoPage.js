@@ -29,7 +29,6 @@ const InfoPage = ({ openBooking }) => {
   const [searchIndex, setSearchIndex] = useState([]); // [{id, title, text}]
   const [showResults, setShowResults] = useState(false);
 
-  
   const {
     user,
     savePrivacyPolicy,
