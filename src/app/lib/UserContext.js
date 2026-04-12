@@ -7006,6 +7006,7 @@ Please review this request in the admin panel and proceed with approval or rejec
     }
   };
 
+  // Helper to get cache key for blog post images
   const fetchBlogPostImages = async (postId) => {
     if (!postId) return [];
 
@@ -7017,19 +7018,71 @@ Please review this request in the admin panel and proceed with approval or rejec
         ),
       );
 
-      return imagesSnapshot.docs.map((imageDoc) => ({
+      const images = imagesSnapshot.docs.map((imageDoc) => ({
         id: imageDoc.id,
         ...imageDoc.data(),
       }));
+
+      // Pre-cache all images
+      for (const image of images) {
+        const cacheKey = getBlogImageCacheKey(postId, image.id);
+        if (!imageCache[cacheKey] && image.base64 && image.updatedAt) {
+          const result = { base64: image.base64, updatedAt: image.updatedAt };
+          setImageCache((prev) => ({ ...prev, [cacheKey]: result }));
+          await setCachedImage(cacheKey, result);
+        }
+      }
+
+      return images;
     } catch (error) {
       console.error("Error fetching blog post images:", error);
       return [];
     }
   };
 
+  const getBlogImageCacheKey = (postId, imageId) => `blog-${postId}-${imageId}`;
+
+  // Modified fetchBlogPostImage with caching
   const fetchBlogPostImage = async (postId, imageId) => {
     if (!postId || !imageId) return null;
 
+    const cacheKey = getBlogImageCacheKey(postId, imageId);
+
+    // Check React state cache first
+    if (imageCache[cacheKey]) {
+      return imageCache[cacheKey];
+    }
+
+    // Check IndexedDB cache
+    try {
+      const cachedData = await getCachedImage(cacheKey);
+
+      if (cachedData) {
+        // Validate with Firestore (check if image still exists)
+        const imageSnap = await getDoc(
+          doc(db, "blogPosts", postId, "images", imageId),
+        );
+
+        if (imageSnap.exists()) {
+          const serverUpdatedAt = imageSnap.data().updatedAt;
+
+          if (serverUpdatedAt === cachedData.updatedAt) {
+            setImageCache((prev) => ({
+              ...prev,
+              [cacheKey]: cachedData,
+            }));
+            console.log(
+              `✅ Blog image ${cacheKey} loaded from IndexedDB cache`,
+            );
+            return cachedData;
+          }
+        }
+      }
+    } catch (error) {
+      console.log("Blog image not in cache, fetching from Firestore");
+    }
+
+    // Fetch from Firestore
     try {
       const imageSnap = await getDoc(
         doc(db, "blogPosts", postId, "images", imageId),
@@ -7039,10 +7092,17 @@ Please review this request in the admin panel and proceed with approval or rejec
         return null;
       }
 
-      return {
-        id: imageSnap.id,
-        ...imageSnap.data(),
+      const data = imageSnap.data();
+      const result = {
+        base64: data.base64,
+        updatedAt: data.updatedAt,
       };
+
+      // Cache it
+      setImageCache((prev) => ({ ...prev, [cacheKey]: result }));
+      await setCachedImage(cacheKey, result);
+
+      return result;
     } catch (error) {
       console.error("Error fetching blog post image:", error);
       return null;
