@@ -3999,15 +3999,27 @@ const FinancialReports = () => {
                                             key={colIndex}
                                             value={cell}
                                             disabled={isAutoFill}
-                                            style={
-                                              isAutoFill
-                                                ? {
-                                                    opacity: 1,
-                                                    cursor: "not-allowed",
-                                                    pointerEvents: "none",
-                                                  }
-                                                : {}
-                                            }
+                                            style={{
+    ...(isAutoFill
+      ? {
+          opacity: 1,
+          cursor: "not-allowed",
+          pointerEvents: "none",
+        }
+      : {
+          width: "100%",
+          padding: "8px",
+          border: "1px solid #ddd",
+          borderRadius: "4px",
+          color: "#1a1a1a",
+          backgroundColor: "#f1f1f1",
+          fontSize: "0.9rem",
+          textAlign: "center",
+          appearance: "menulist",
+          WebkitAppearance: "menulist",
+          MozAppearance: "menulist",
+        }),
+  }}
                                             onChange={(e) =>
                                               handleCellChange(
                                                 monthIndex,

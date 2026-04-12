@@ -587,7 +587,7 @@ function Contact({ openBooking }) {
             </div>
 
             <a
-              href={`tel:${(adminContact || "").replace(/\s+/g, "") || "+639754778178"}`}
+              href={`tel:${"+639754778178" || (adminContact || "").replace(/\s+/g, "")}`}
               className="call-us-btn"
             >
               Call Us

@@ -761,7 +761,6 @@ const Messages = () => {
           </div>
         </div>
 
-
         <div className="message-list">
           {activeTab === "notifications" && (
             <div>
@@ -926,7 +925,15 @@ const Messages = () => {
                               </div>
 
                               <div className="thread-bottom-row">
-                                <div className="thread-preview">
+                                <div
+                                  className="thread-preview"
+                                  style={{
+                                    fontWeight:
+                                      thread.unreadCount > 0
+                                        ? "bold"
+                                        : "normal",
+                                  }}
+                                >
                                   {lastText || "No message"}
                                 </div>
                                 {thread.unreadCount > 0 && (
