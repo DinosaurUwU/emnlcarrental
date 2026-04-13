@@ -697,6 +697,9 @@ const FinancialReports = () => {
 
   // Trigger re-sort and auto-save when sort direction changes
   useEffect(() => {
+    // Skip for transaction tab - it has different data structure
+  if (activeTab === "transaction") return;
+  
     if (
       !autoSaveEnabled ||
       Object.keys(gridData).length === 0 ||
@@ -4069,15 +4072,39 @@ const FinancialReports = () => {
                                             }
                                             className="grid-cell"
                                             disabled={isAutoFill}
-                                            style={
-                                              isAutoFill
+                                            // style={
+                                            //   isAutoFill
+                                            //     ? {
+                                            //         opacity: 1,
+                                            //         cursor: "not-allowed",
+                                            //         pointerEvents: "none",
+                                            //       }
+                                            //     : {}
+                                            // }
+
+                                            style={{
+                                              ...(isAutoFill
                                                 ? {
                                                     opacity: 1,
                                                     cursor: "not-allowed",
                                                     pointerEvents: "none",
                                                   }
-                                                : {}
-                                            }
+                                                : {
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    border: "1px solid #ddd",
+                                                    borderRadius: "4px",
+                                                    color: "var(--txt-comp)",
+                                                    backgroundColor:
+                                                      "var(--page-bg)",
+                                                    fontSize: "0.9rem",
+                                                    textAlign: "center",
+                                                    appearance: "menulist",
+                                                    WebkitAppearance:
+                                                      "menulist",
+                                                    MozAppearance: "menulist",
+                                                  }),
+                                            }}
                                           >
                                             <option value="">Select MOP</option>
                                             {mopTypes.map((type) => (
@@ -4113,15 +4140,39 @@ const FinancialReports = () => {
                                             }
                                             className="grid-cell"
                                             disabled={isAutoFill}
-                                            style={
-                                              isAutoFill
+                                            // style={
+                                            //   isAutoFill
+                                            //     ? {
+                                            //         opacity: 1,
+                                            //         cursor: "not-allowed",
+                                            //         pointerEvents: "none",
+                                            //       }
+                                            //     : {}
+                                            // }
+
+                                            style={{
+                                              ...(isAutoFill
                                                 ? {
                                                     opacity: 1,
                                                     cursor: "not-allowed",
                                                     pointerEvents: "none",
                                                   }
-                                                : {}
-                                            }
+                                                : {
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    border: "1px solid #ddd",
+                                                    borderRadius: "4px",
+                                                    color: "var(--txt-comp)",
+                                                    backgroundColor:
+                                                      "var(--page-bg)",
+                                                    fontSize: "0.9rem",
+                                                    textAlign: "center",
+                                                    appearance: "menulist",
+                                                    WebkitAppearance:
+                                                      "menulist",
+                                                    MozAppearance: "menulist",
+                                                  }),
+                                            }}
                                           >
                                             <option value="">{`Select ${label}`}</option>
                                             {options.map((opt) => (
@@ -4412,6 +4463,7 @@ const FinancialReports = () => {
                   <th>Amount</th>
                   <th>Unit</th>
                   <th>Description</th>
+                  <th>Source</th>
                 </tr>
               </thead>
 
@@ -4461,6 +4513,9 @@ const FinancialReports = () => {
                               (tx.data._isAutoFill
                                 ? ` (${tx.data[0] || "Unknown"})`
                                 : ""),
+                          source: tx.data[5]?._isAutoFill
+                            ? "Autofill"
+                            : "Manual",
                         });
                       });
                     } else {
@@ -4483,6 +4538,9 @@ const FinancialReports = () => {
                                     ? ` (${row[0] || "Unknown"})`
                                     : ""),
                               amount: row[1] || "",
+                              source: row[5]?._isAutoFill
+                                ? "Autofill"
+                                : "Manual",
                             });
                           }
                         });
@@ -4504,6 +4562,9 @@ const FinancialReports = () => {
                               (tx.data._isAutoFill
                                 ? ` (${tx.data[0] || "Unknown"})`
                                 : ""),
+                          source: tx.data[5]?._isAutoFill
+                            ? "Autofill"
+                            : "Manual",
                         });
                       });
                     } else {
@@ -4526,6 +4587,9 @@ const FinancialReports = () => {
                                     ? ` (${row[0] || "Unknown"})`
                                     : ""),
                               amount: row[1] || "",
+                              source: row[5]?._isAutoFill
+                                ? "Autofill"
+                                : "Manual",
                             });
                           }
                         });
@@ -4635,6 +4699,7 @@ const FinancialReports = () => {
                         <td>{txn.amount || "No Amount"}</td>
                         <td>{txn.unit || "-"}</td>
                         <td>{txn.description || "No Description"}</td>
+                        <td>{txn.source || "No Source"}</td>
                       </tr>
                     ));
                   })()

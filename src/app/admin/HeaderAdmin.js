@@ -810,11 +810,6 @@ const Header = ({
       keywords: "settings configuration preferences admin",
     },
     {
-      path: "users",
-      label: "Users → Admin",
-      keywords: "users customers clients accounts manage admin",
-    },
-    {
       path: "blog-posts",
       label: "Blog Posts → Admin",
       keywords: "blog posts articles manage admin",
