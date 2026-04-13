@@ -167,7 +167,7 @@ function Header() {
   const [searchResults, setSearchResults] = useState([]);
 
 const routes = [
-  { path: "/", label: "Home", keywords: "home landing" },
+  { path: "/", label: "Home", keywords: "home landing car rental" },
   {
     path: "/fleet-details",
     label: "Fleet",

@@ -187,6 +187,7 @@ const Header = ({
     userToProcess,
     setUserToProcess,
     unitData,
+    fleetDetailsUnits,
     updateUnitData,
     completedBookingsAnalytics,
     fetchImageFromFirestore,
@@ -747,39 +748,162 @@ const Header = ({
 
   // SEARCH FUNCTION
   const routes = [
-    { path: "/", label: "Home", keywords: "vios toyota rent" },
+    // Main app pages
+    { path: "/", label: "Home", keywords: "home landing car rental" },
     {
       path: "/fleet-details",
       label: "Fleet",
-      keywords: "vios innova hilux suv van",
+      keywords: "fleet cars vehicles booking",
     },
-    { path: "/about", label: "About", keywords: "about us emnl info" },
+    {
+      path: "/blog",
+      label: "Blog",
+      keywords: "blog articles news updates posts",
+    },
+    {
+      path: "/info",
+      label: "Info",
+      keywords:
+        "info information guides faqs help privacy policy terms conditions support account",
+    },
+    {
+      path: "/about",
+      label: "About",
+      keywords: "about us mission vision company",
+    },
     {
       path: "/contact",
       label: "Contact",
-      keywords: "contact message call booking",
+      keywords: "contact message call email",
     },
     {
       path: "/account",
       label: "Account",
-      keywords: "account settings user messages",
+      keywords:
+        "account settings user messages notifications active bookings profile active rentals booking requests",
     },
-    { path: "/admin", label: "Account", keywords: "admin" },
+    // Admin pages
+    {
+      path: "rental-activity",
+      label: "Rental Activity → Admin",
+      keywords:
+        "dashboard rentals bookings reservations active past ongoing admin",
+    },
+    {
+      path: "analytics",
+      label: "Analytics → Admin",
+      keywords: "analytics charts statistics graphs data insights admin",
+    },
+    {
+      path: "messages",
+      label: "Messages → Admin",
+      keywords: "messages notifications inbox conversations chats admin",
+    },
+    {
+      path: "financial-reports",
+      label: "Financial Reports → Admin",
+      keywords: "financial reports income revenue sales earnings admin",
+    },
+    {
+      path: "settings",
+      label: "Settings → Admin",
+      keywords: "settings configuration preferences admin",
+    },
+    {
+      path: "users",
+      label: "Users → Admin",
+      keywords: "users customers clients accounts manage admin",
+    },
+    {
+      path: "blog-posts",
+      label: "Blog Posts → Admin",
+      keywords: "blog posts articles manage admin",
+    },
   ];
 
   const generateSearchIndex = () => {
     const index = [];
+
+    // First, add routes
     routes.forEach(({ path, label, keywords }) => {
       keywords.split(" ").forEach((keyword) => {
         index.push({
           keyword: keyword.toLowerCase(),
-          label: `${
-            keyword.charAt(0).toUpperCase() + keyword.slice(1)
-          } → ${label}`,
+          label: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} → ${label}`,
           path,
         });
       });
     });
+
+    // Add fleet units to search index
+    if (fleetDetailsUnits && fleetDetailsUnits.length > 0) {
+      fleetDetailsUnits.forEach((unit) => {
+        const name = unit.name || "";
+        const brand = unit.brand || "";
+        const carType = unit.carType || "";
+        const specs = unit.details?.specifications || {};
+        const capacity = specs.Capacity || "";
+
+        // Full name
+        if (name) {
+          index.push({
+            keyword: name.toLowerCase(),
+            label: `${name} → Fleet`,
+            path: `/fleet-details?category=${carType.toLowerCase()}`,
+          });
+          // Split into words
+          name
+            .toLowerCase()
+            .split(" ")
+            .forEach((word) => {
+              if (word.length > 1) {
+                index.push({
+                  keyword: word,
+                  label: `${name} → Fleet`,
+                  path: `/fleet-details?category=${carType.toLowerCase()}`,
+                });
+              }
+            });
+        }
+
+        // Brand
+        if (brand) {
+          index.push({
+            keyword: brand.toLowerCase(),
+            label: `${name} → Fleet`,
+            path: `/fleet-details?category=${carType.toLowerCase()}`,
+          });
+        }
+
+        // Car type
+        if (carType) {
+          index.push({
+            keyword: carType.toLowerCase(),
+            label: `${name} → Fleet`,
+            path: `/fleet-details?category=${carType.toLowerCase()}`,
+          });
+        }
+
+        // Fuel type
+        if (specs.Fuel) {
+          index.push({
+            keyword: specs.Fuel.toLowerCase(),
+            label: `${name} → Fleet`,
+            path: `/fleet-details?category=${carType.toLowerCase()}`,
+          });
+        }
+
+        // Capacity
+        if (capacity) {
+          index.push({
+            keyword: capacity.toString(),
+            label: `${name} → Fleet`,
+            path: `/fleet-details?category=${carType.toLowerCase()}`,
+          });
+        }
+      });
+    }
+
     return index;
   };
 
@@ -1434,10 +1558,68 @@ const Header = ({
                   const value = e.target.value;
                   setSearchText(value);
 
-                  const matches = searchIndex.filter((entry) =>
-                    entry.keyword.includes(value.toLowerCase()),
-                  );
-                  setSearchResults(value ? matches : []);
+                  const matches = searchIndex.filter((entry) => {
+                    const query = value.toLowerCase();
+                    const queryWords = query
+                      .split(" ")
+                      .filter((w) => w.length > 0);
+
+                    // Special handling for seaters search
+                    const isSeatersSearch = queryWords.some(
+                      (w) =>
+                        w === "seaters" || w === "seater" || /^\d+$/.test(w),
+                    );
+
+                    if (isSeatersSearch) {
+                      if (!entry.label.includes("Fleet")) return false;
+
+                      const numMatch = query.match(/\d+/);
+                      if (numMatch) {
+                        const searchCapacity = parseInt(numMatch[0]);
+                        const unitName = entry.label.split(" → ")[0];
+                        const unitData = fleetDetailsUnits?.find(
+                          (u) => u.name === unitName,
+                        );
+                        const unitCapacity = unitData?.details?.specifications
+                          ?.Capacity
+                          ? parseInt(unitData.details.specifications.Capacity)
+                          : 0;
+
+                        if (searchCapacity <= 5) {
+                          return unitCapacity === 5;
+                        } else if (
+                          searchCapacity === 6 ||
+                          searchCapacity === 7
+                        ) {
+                          return unitCapacity === 7 || unitCapacity === 8;
+                        } else if (searchCapacity === 8) {
+                          return unitCapacity === 8;
+                        } else if (searchCapacity <= 14) {
+                          return unitCapacity === 15;
+                        } else {
+                          return unitCapacity >= 15;
+                        }
+                      }
+                      return false;
+                    }
+
+                    // Default: check if any word matches
+                    return queryWords.some((word) =>
+                      entry.keyword.includes(word),
+                    );
+                  });
+
+                  // Remove duplicates
+                  const uniqueResults = [];
+                  const seenLabels = new Set();
+                  matches.forEach((m) => {
+                    if (!seenLabels.has(m.label)) {
+                      seenLabels.add(m.label);
+                      uniqueResults.push(m);
+                    }
+                  });
+
+                  setSearchResults(value ? uniqueResults : []);
                 }}
               />
               {searchExpanded && searchResults.length > 0 && (
@@ -1446,12 +1628,19 @@ const Header = ({
                     {searchResults.map((result, index) => (
                       <li key={index}>
                         <a
-                          href={result.path}
-                          onClick={() => {
+                          href={result.path.startsWith("/") ? result.path : "#"}
+                          onClick={(e) => {
+                            e.preventDefault();
                             setSearchText("");
                             setSearchExpanded(false);
                             setSearchResults([]);
-                            router.push(result.path);
+
+                            // Check if it's an admin section (no "/" prefix = internal section)
+                            if (!result.path.startsWith("/")) {
+                              onNavClick(result.path);
+                            } else {
+                              router.push(result.path);
+                            }
                           }}
                           dangerouslySetInnerHTML={{
                             __html: highlightMatch(result.label, searchText),
