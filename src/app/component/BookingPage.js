@@ -2048,6 +2048,7 @@ const BookingPage = ({
             actualFormData?.surname &&
             actualFormData?.occupation &&
             actualFormData?.address &&
+            actualFormData?.contactNo &&
             actualFormData?.email;
           const hasDates = startDate && endDate;
           const hasTimes = startTime && endTime;

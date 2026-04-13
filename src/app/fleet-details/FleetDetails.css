@@ -1270,7 +1270,7 @@ body.no-scroll {
 
 /* Default state */
 .pswp__button--arrow--next {
-  background-color: url("/assets/nxt-btn.png") no-repeat center center !important;
+  background: url("/assets/nxt-btn.png") no-repeat center center !important;
   background-size: contain !important;
   background-color: #f1f1f1 !important;
   border: 2px solid rgba(255, 0, 0, 1) !important;

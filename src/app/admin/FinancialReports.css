@@ -681,11 +681,15 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   color: #1a1a1a;
-  background-color: #f1f1f1;
+  background-color: var(--page-bg);
   font-size: 0.9rem;
   text-align: center;
 }
 
+.grid-cell select option {
+  background-color: #f1f1f1;
+  color: #1a1a1a;
+}
 
 .grid-cell::-webkit-scrollbar {
   width: 5px;
