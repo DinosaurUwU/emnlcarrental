@@ -695,7 +695,6 @@ const FinancialReports = () => {
     }
   }, [currentYear, activeTab]);
 
-  
   // Trigger re-sort and auto-save when sort direction changes
   useEffect(() => {
     // Skip for transaction tab - it has different data structure
